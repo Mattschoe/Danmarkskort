@@ -87,9 +87,6 @@ public class View {
         //Listeners tilføjes, der redrawer Canvas'et når vinduet skifter størrelse
         scene.widthProperty().addListener(_ -> drawMap(parser));
         scene.heightProperty().addListener(_ -> drawMap(parser));
-
-        //Canvas'et tegnes
-        //updateCanvas(canvas);
     }
 
     /**

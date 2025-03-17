@@ -73,6 +73,7 @@ public class Controller {
     @FXML protected void standardInputButton() throws IOException {
         view = new View(view.getStage(), "mapOverlay.fxml");
         model = new Model(standardMapFile.getPath(), canvas);
+        assert model.getParser() != null;
     }
 
     /** Metode køres når man zoomer på Canvas'et */
