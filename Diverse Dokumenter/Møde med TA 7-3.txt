@@ -1,0 +1,15 @@
+Møde efter TA:
+- Individuel logbog eller fælles?
+
+- Hvornår lægger vi hvert krav (Kig ind i Algo forelæsninger)
+- Midtvejspræsentationer, dato:
+- Intended learning outcomes er det som bliver graded på eksamen
+- Algoritmer er absolut vigtigst i projektet
+- Skriv rapport undervejs (Teknisk rapport (se BPAK)). Tag overskrifter fra kursustitel, vis hvordan vi kom frem til løsningen. Brug evt. profiler til at vise optimering. Time og space complexity er god til rapport
+- Tag description: https://wiki.openstreetmap.org/wiki/Map_features
+- Lav release på GitHub før TA møder hvis vi have feedback. Release en gang om ugen
+- OBS de kigger på dependencies (Undgå sorterings dependencies)
+
+
+To do i dag:
+- Snak algo

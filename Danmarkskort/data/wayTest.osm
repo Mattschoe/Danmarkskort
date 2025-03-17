@@ -1,0 +1,9 @@
+<node id="6503281" visible="true" version="5" changeset="35171399" timestamp="2015-11-08T15:22:09Z" user="Spectrokid" uid="19775" lat="55.6751620" lon="12.5865559"/>
+<node id="3824652464" visible="true" version="1" changeset="35171399" timestamp="2015-11-08T15:22:08Z" user="Spectrokid" uid="19775" lat="55.6751196" lon="12.5866160"/>
+<node id="6503282" visible="true" version="6" changeset="35171399" timestamp="2015-11-08T15:22:09Z" user="Spectrokid" uid="19775" lat="55.6742820" lon="12.5879811"/>
+
+<way id="1694109" visible="true" version="16" changeset="40565173" timestamp="2016-07-08T10:35:54Z" user="Hjart" uid="207581">
+  <nd ref="6503281"/>
+  <nd ref="3824652464"/>
+  <nd ref="6503282"/>
+</way>

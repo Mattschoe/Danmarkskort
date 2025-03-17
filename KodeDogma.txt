@@ -1,0 +1,5 @@
+JavaDoc på enhver funktion og konstruktør
+Kommenter nestede loops og evt. "forvirrende kode"
+Enhver ny komponent skal udvikles i en branch og godkendes af mindst 1 anden før pull requesten bliver accepteret
+Test-suite til nyt komponent FØR en enkel linje kode bliver skrevet
+Vi skriver i JDK 23.0.1 fra Oracle

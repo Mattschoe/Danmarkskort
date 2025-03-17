@@ -1,0 +1,5 @@
+- Trie tree
+- Fokuserer på af at have en working demo på search-funktionen i stedet for bedste algoritme
+- Test på Bornholm først. Mål og track hvor lang tid det tager og compare med størrere
+- Hvordan bygger vi en graf? Edges og nodes skal bruges til Shortest path. De skal også bruge en source og en target Node
+- Koster oneway os faktuelt mere? Eller er det redundant og passer vores model til virkeligheden. Oneway skal nok rimelig meget genovervejes om det skal inkluderes. 
