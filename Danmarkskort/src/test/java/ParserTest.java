@@ -8,18 +8,18 @@ import org.junit.jupiter.api.Test;
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ParserTest {
     Parser parser;
     String filename;
     File testFile;
     String[] address;
-    Set<Node> nodes;
+    List<Node> nodes;
 
     @BeforeEach
     public void setUp() throws XMLStreamException, IOException, ClassNotFoundException {
@@ -58,13 +58,25 @@ class ParserTest {
         }
     }
 
+
+
     @Test
     public void kanUnzippeFil() throws XMLStreamException, IOException, ClassNotFoundException {
         parser.parseZIP("../Danmarkskort/data/Test1.zip");
+
         Parser parser2 = new Parser(testFile);
 
-        assertTrue(parser.getRoads().keySet() == parser2.getNodes().keySet() && parser.getRoads().keySet() == parser2.getRoads().keySet());
+        assertEquals(parser.getRoads().keySet(), parser2.getRoads().keySet());
+
     }
+
+
+
+
+
+
+
+
 
     // --------------------------------- Test af parsing ------------------------------------
 

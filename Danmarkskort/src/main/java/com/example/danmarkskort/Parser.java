@@ -7,6 +7,7 @@ import com.example.danmarkskort.MapObjects.Polygon;
 import javax.xml.stream.*;
 import java.io.*;
 import java.util.*;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 
@@ -32,7 +33,7 @@ public class Parser implements Serializable {
 
         String filename = getFileName();
         //Switch case with what filetype the file is and call the appropriate method:
-        if (filename.endsWith(".osm.zip")) {
+        if (filename.endsWith(".zip")) {
             parseZIP(filename);
         } else if (filename.endsWith(".osm")) {
             parseOSM(file);
@@ -47,11 +48,37 @@ public class Parser implements Serializable {
      * @throws IOException if the file isn't found
      */
     public void parseZIP(String filename) throws IOException, XMLStreamException {
-        ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(filename)); // new zipinputstream
-        if (zipInputStream.getNextEntry() != null) {
-            parseOSM(file);
+        File zipFile = new File(filename);
+        File extractedFile = null;
+
+        try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFile))) {
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                if (entry.getName().endsWith(".osm")) {
+                    extractedFile = new File(zipFile.getParent(), entry.getName());
+                    try (FileOutputStream fos = new FileOutputStream(extractedFile)) {
+                        byte[] buffer = new byte[1024];
+                        int len;
+                        while ((len = zipInputStream.read(buffer)) > 0) {
+                            fos.write(buffer, 0, len);
+                        }
+                        fos.flush(); // Ensure all data is written before closing
+                    }
+                    zipInputStream.closeEntry();
+                   // System.out.println("Extracted file path: " + extractedFile.getAbsolutePath());
+                    break;
+                }
+            }
         }
+
+        if (extractedFile == null) {
+            throw new FileNotFoundException("No .osm file found in the ZIP archive.");
+        }
+
+        parseOSM(extractedFile); // Now pass the correct extracted file
+
     }
+
 
     /**
      * Parses an .osm-file depending on the value of the start-tags encountered when the file is read line-by-line.
