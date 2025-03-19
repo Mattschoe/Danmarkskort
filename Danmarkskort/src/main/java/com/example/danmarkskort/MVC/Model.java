@@ -1,5 +1,6 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.AdressSearch.Search;
 import com.example.danmarkskort.Exceptions.ParserSavingException;
 import com.example.danmarkskort.MapObjects.Line;
 import com.example.danmarkskort.MapObjects.Node;
@@ -51,7 +52,9 @@ public class Model {
             }
         }
         assert parser != null;
-        System.out.println(ObjectStreamClass.lookup(Parser.class).getSerialVersionUID());
+
+        //TESTING
+        Search search = new Search(parser.getNodes());
     }
 
     /**
