@@ -211,7 +211,13 @@
 <node id="1859585498" visible="true" version="2" changeset="25640113" timestamp="2014-09-24T08:21:55Z" user="JeffH" uid="359193" lat="55.6789761" lon="12.5860954"/>
 <node id="3093671661" visible="true" version="1" changeset="25640113" timestamp="2014-09-24T08:21:54Z" user="JeffH" uid="359193" lat="55.6791881" lon="12.5859709"/>
 <node id="3093671660" visible="true" version="1" changeset="25640113" timestamp="2014-09-24T08:21:54Z" user="JeffH" uid="359193" lat="55.6791839" lon="12.5859419"/>
-<node id="309367166 " visible="true" version="4" changeset="25640113" timestamp="2014-09-24T08:21:55Z" user="JeffH" uid="359193" lat="55.6796495" lon="12.5863070"/>
+<node id="3093671664" visible="true" version="1" changeset="25640113" timestamp="2014-09-24T08:21:54Z" user="JeffH" uid="359193" lat="55.6793362" lon="12.5858598"/>
+<node id="3093671665" visible="true" version="1" changeset="25640113" timestamp="2014-09-24T08:21:54Z" user="JeffH" uid="359193" lat="55.6793419" lon="12.5858851"/>
+<node id="277497309" visible="true" version="4" changeset="25640113" timestamp="2014-09-24T08:21:55Z" user="JeffH" uid="359193" lat="55.6795510" lon="12.5857689"/>
+<node id="277497310" visible="true" version="4" changeset="25640113" timestamp="2014-09-24T08:21:55Z" user="JeffH" uid="359193" lat="55.6795721" lon="12.5858991"/>
+<node id="277497303" visible="true" version="4" changeset="25640113" timestamp="2014-09-24T08:21:55Z" user="JeffH" uid="359193" lat="55.6796378" lon="12.5858605"/>
+<node id="277497304" visible="true" version="4" changeset="25640113" timestamp="2014-09-24T08:21:55Z" user="JeffH" uid="359193" lat="55.6797127" lon="12.5862717"/>
+<node id="277497305" visible="true" version="4" changeset="25640113" timestamp="2014-09-24T08:21:55Z" user="JeffH" uid="359193" lat="55.6796495" lon="12.5863070"/>
 <node id="277497306" visible="true" version="4" changeset="25640113" timestamp="2014-09-24T08:21:55Z" user="JeffH" uid="359193" lat="55.6796706" lon="12.5864216"/>
 <node id="3093671666" visible="true" version="1" changeset="25640113" timestamp="2014-09-24T08:21:54Z" user="JeffH" uid="359193" lat="55.6794679" lon="12.5865415"/>
 <node id="3093671667" visible="true" version="1" changeset="25640113" timestamp="2014-09-24T08:21:54Z" user="JeffH" uid="359193" lat="55.6794716" lon="12.5865661"/>
@@ -245,4 +251,3 @@
 <node id="2819167793" visible="true" version="1" changeset="21962833" timestamp="2014-04-26T20:05:41Z" user="jhg21" uid="1744812" lat="55.6664388" lon="12.5867299"/>
 <node id="2819167794" visible="true" version="1" changeset="21962833" timestamp="2014-04-26T20:05:41Z" user="jhg21" uid="1744812" lat="55.6664119" lon="12.5868428"/>
 <node id="2819167795" visible="true" version="1" changeset="21962833" timestamp="2014-04-26T20:05:41Z" user="jhg21" uid="1744812" lat="55.6661648" lon="12.5865917"/>
-</osm>
