@@ -1,15 +1,18 @@
 package com.example.danmarkskort.MapObjects;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.List;
 
 public class Polygon implements Serializable {
     //region fields
-    private List<Node> nodes;
-    private Set<Line> lines;
-    private String type; //The type of polygon, fx: "Building", "Coastline", etc.
+    private final List<Node> nodes;
+    private double[] xPoints;
+    private double[] yPoints;
+    private int nSize;
+    private String type = ""; //The type of polygon, fx: "Building", "Coastline", etc.
     //endregion
 
     /**
@@ -19,40 +22,57 @@ public class Polygon implements Serializable {
     public Polygon(List<Node> nodes, String type) {
         assert nodes.size() != 1;
         this.nodes = nodes;
-        lines = new HashSet<>();
-        createLines();
+        if (type != null) this.type = type;
+        createArrays();
     }
 
-    /**
-     * Creates the lines between nodes (Used later for drawing)
-     */
-    private void createLines() {
-        //Tegner en linje fra den første node til den sidste i rækkefølge. Slutter af med at lave en linje mellem den sidste og første
-        Node startNode = nodes.getFirst();
-        for (int i = 1; i < nodes.size(); i++) {
-            lines.add(new Line(startNode, nodes.get(i)));
-            startNode = nodes.get(i);
+    public void createArrays() {
+        nodes.add(nodes.getFirst());
+        nSize = nodes.size();
+
+        xPoints = new double[nSize];
+        yPoints = new double[nSize];
+
+        for (int i = 0; i < nSize; i++) {
+            xPoints[i] = nodes.get(i).getX();
+            yPoints[i] = nodes.get(i).getY();
         }
-        lines.add(new Line(startNode, nodes.getLast()));
     }
 
-    /**
-     * Draws the polygon (Building) with the settings given in the {@code graphicsContext}
-     * @param graphicsContext the settings/format to tell the method how to draw
-     */
-    public void drawPolygon(GraphicsContext graphicsContext) {
-        for (Line line : lines) {
-            line.drawLine(graphicsContext);
-        }
+    public void drawPolygon(GraphicsContext gc) {
+        Color color = switch(type) {
+            case "building"  -> Color.DARKGRAY;
+          //case "tree_row"  -> Color.GREENYELLOW;
+          //case "tree"      -> Color.LIGHTGREEN;
+          //case "tee"       -> Color.DARKVIOLET;
+            case "water"     -> Color.CORNFLOWERBLUE;
+          //case "rock"      -> Color.BLACK;
+            case "heath"     -> Color.CHARTREUSE;
+          //case "natural"   -> Color.FUCHSIA;
+            case "coastline" -> Color.PERU;
+
+            case "forest"            -> Color.GREEN;
+            case "industrial"        -> Color.YELLOW;
+            case"residential"        -> Color.BURLYWOOD;
+            case "brownfield"        -> Color.SADDLEBROWN;
+            case "grass"             -> Color.GREENYELLOW;
+            case "landuse"           -> Color.DARKVIOLET;
+            case "allotments"        -> Color.HOTPINK;
+            case "recreation_ground" -> Color.LIGHTCORAL;
+            case "construction"      -> Color.TOMATO;
+            case "military"          -> Color.SPRINGGREEN;
+            case "basin"             -> Color.CYAN;
+            case "cemetery"          -> Color.CRIMSON;
+            default -> Color.rgb(0, 74, 127, 0.2);
+        };
+        gc.setStroke(color.darker().darker());
+        gc.setFill(color);
+        gc.strokePolygon(xPoints, yPoints, nSize);
+        gc.fillPolygon(xPoints, yPoints, nSize);
     }
 
     //region getters
-    public Set<Line> getLines() {
-        return lines;
-    }
     public List<Node> getNodes() { return nodes; }
-    public String getType() {
-        return type;
-    }
+    public String getType() { return type; }
     //endregion
 }

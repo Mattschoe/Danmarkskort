@@ -102,15 +102,15 @@ public class View {
 
         //Sets up the graphicsContext for drawing the map (Packs it in a box and sets stroke settings
         graphicsContext.setTransform(new Affine());
-        graphicsContext.setFill(Color.ANTIQUEWHITE);
+        graphicsContext.setFill(Color.POWDERBLUE);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(trans.determinant()));
-        graphicsContext.setStroke(Color.BLACK);
+        graphicsContext.setStroke(Color.WHITE.darker());
 
         //Draws map
-        drawRoad();
-        drawPolygon();
+        drawRoads();
+        drawPolygons();
 
         if (firstTimeDrawingMap) {
             System.out.println("Done drawing!");
@@ -140,7 +140,7 @@ public class View {
     /**
      * Draws all roads. Method is called in {@link #drawMap(Parser)}
      */
-    private void drawRoad() {
+    private void drawRoads() {
         Road road;
         for (long id : parser.getRoads().keySet()) {
             road = parser.getRoads().get(id);
@@ -151,7 +151,7 @@ public class View {
     /**
      * Draws all polygons (aka. buildings). Method is called in {@link #drawMap(Parser)}
      */
-    private void drawPolygon() {
+    private void drawPolygons() {
         Polygon polygon;
         for (long id : parser.getPolygons().keySet()) {
             polygon = parser.getPolygons().get(id);

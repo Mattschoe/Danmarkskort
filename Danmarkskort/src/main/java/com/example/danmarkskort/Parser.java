@@ -136,7 +136,7 @@ public class Parser implements Serializable {
     private Polygon parsePolygon(XMLStreamReader input, List<Node> nodesInPolygon) throws XMLStreamException {
         assert nodesInPolygon != null;
         String building = "";
-        String natural ="";
+        String natural = "";
         String island = "";
 
         while (input.hasNext()) {
@@ -150,20 +150,11 @@ public class Parser implements Serializable {
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
                 switch (key) {
                     case "building":
-                        building = value;
-                        return new Polygon(nodesInPolygon,building);
-
-                    case "natural":
-                       if(value.equals("water")){
-                           natural = value;
-                           return new Polygon(nodesInPolygon,natural);
-                       }
-                        break;
+                        return new Polygon(nodesInPolygon, "building");
+                    case "natural", "landuse":
+                        return new Polygon(nodesInPolygon, value);
                     case "place":
-                        if(value.equals("island")){
-                            island = value;
-                            return new Polygon(nodesInPolygon, island);
-                        }
+                        if(value.equals("island")) { return new Polygon(nodesInPolygon, value); }
                         break;
                 }
             }

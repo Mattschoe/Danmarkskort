@@ -77,14 +77,13 @@ public class Controller {
 
     /** Metode køres når man zoomer på Canvas'et */
     @FXML protected void onCanvasScroll(ScrollEvent e) {
-        System.out.println("Canvas scrolling!");
         double factor = e.getDeltaY();
         view.zoom(e.getX(), e.getY(), Math.pow(1.01, factor));
     }
 
     /** Metode køres når man slipper sit klik på Canvas'et */
-    @FXML protected void onCanvasClick() {
-        System.out.println("Canvas clicked!");
+    @FXML protected void onCanvasClick(MouseEvent e) {
+        System.out.println("Clicked at ("+ e.getX() +", "+ e.getY() +")!");
     }
 
     /** Metode køres idet man klikker ned på Canvas'et */
