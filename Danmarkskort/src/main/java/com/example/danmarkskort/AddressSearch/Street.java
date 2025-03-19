@@ -21,7 +21,7 @@ public class Street implements Comparable<Street> {
 
     @Override
     public int compareTo(Street otherStreet) {
-        return streetName.compareTo(otherStreet.streetName);
+        return otherStreet.getStreetName().compareTo(streetName);
     }
 
     //region getters and setters

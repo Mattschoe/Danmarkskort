@@ -1,13 +1,13 @@
 package com.example.danmarkskort.AddressSearch;
 
 public class MergeSort {
-    Comparable[] inputArray;
+    Street[] inputArray;
 
     /**
      * Sorts the given inputArray. To get the sorted array, see {@link #getSortedArray()}
      * @param inputArray the unsorted array that needs sorting
      */
-    public void sort(Comparable[] inputArray) {
+    public void sort(Street[] inputArray) {
         this.inputArray = inputArray;
         int inputLength = inputArray.length;
 
@@ -18,8 +18,8 @@ public class MergeSort {
 
         //Sorts recursively
         int mid = inputLength/2;
-        Comparable[] leftArray = new Comparable[mid];
-        Comparable[] rightArray = new Comparable[inputLength - mid];
+        Street[] leftArray = new Street[mid];
+        Street[] rightArray = new Street[inputLength - mid];
 
         for (int i = 0; i < mid; i++) {
             leftArray[i] = inputArray[i];
@@ -34,14 +34,14 @@ public class MergeSort {
         merge(inputArray, leftArray, rightArray);
     }
 
-    private void merge(Comparable[] inputArray, Comparable[] leftArray, Comparable[] rightArray) {
+    private void merge(Street[] inputArray, Street[] leftArray, Street[] rightArray) {
         int leftLength = leftArray.length;
         int rightLength = rightArray.length;
         int i = 0, j = 0, k = 0;
 
         //Loops through until we either run out of elements on the left or right array
         while (i < leftLength && j < rightLength) {
-            if (leftArray[i].compareTo(rightArray[j]) == 0) { //Equal to eachother
+            if (leftArray[i].compareTo(rightArray[j]) == 0) { //Equal to each other
                 inputArray[k] = leftArray[i];
                 i++;
             } else if (leftArray[i].compareTo(rightArray[j]) < 0) { //Right is bigger
@@ -65,9 +65,10 @@ public class MergeSort {
             j++;
             k++;
         }
+        System.out.println();
     }
 
-    public Comparable[] getSortedArray() {
+    public Street[] getSortedArray() {
         return inputArray;
     }
 }

@@ -10,6 +10,13 @@ public class Search {
     public Search(Map<Long, Node> unsortedNodes) {
         Set<String> streetNames = initializeAllStreetNames(unsortedNodes.values());
         streets = new Street[streetNames.size()];
+
+        int i = 0;
+        for (String street : streetNames) {
+            streets[i] = new Street(street);
+            i++;
+        }
+        sortAddresses();
     }
 
     /**
@@ -19,14 +26,12 @@ public class Search {
      */
     private Set<String> initializeAllStreetNames(Collection<Node> nodes) {
         Set<String> result = new HashSet<>();
-
         for (Node node : nodes) {
             try {
                 result.add(node.getAddress()[3]);
             } catch (NullPointerException e) { //Node doesn't have an address
 
             }
-
         }
         return result;
     }
@@ -35,8 +40,10 @@ public class Search {
         MergeSort mergeSort = new MergeSort();
         mergeSort.sort(streets);
 
-        Street[] sortedArray = (Street[]) mergeSort.getSortedArray();
-        for (int i = 0; i < streets.length; i++) {
+        Street[] sortedArray = mergeSort.getSortedArray();
+
+        //TESTING
+        for (int i = 0; i < sortedArray.length; i++) {
             System.out.println(sortedArray[i]);
         }
     }
@@ -47,5 +54,4 @@ public class Search {
     private void putNodeInStreets() {
 
     }
-
 }

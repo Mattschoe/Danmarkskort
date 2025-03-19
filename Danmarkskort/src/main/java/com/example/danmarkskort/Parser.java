@@ -66,7 +66,6 @@ public class Parser implements Serializable {
                        // fos.flush(); // Ensure all data is written before closing
                     }
                     zipInputStream.closeEntry();
-                   // System.out.println("Extracted file path: " + extractedFile.getAbsolutePath());
                     break;
                 }
             }
@@ -272,11 +271,6 @@ public class Parser implements Serializable {
         long id = Long.parseLong(input.getAttributeValue(null, "id"));
         double lat = Double.parseDouble(input.getAttributeValue(null, "lat"));
         double lon = Double.parseDouble(input.getAttributeValue(null, "lon"));
-
-        //TESTING
-        if (id == 340533737) {
-            System.out.println("Hej :)");
-        }
 
         int nextInput = input.next();
         //If simple node, saves it and returns
