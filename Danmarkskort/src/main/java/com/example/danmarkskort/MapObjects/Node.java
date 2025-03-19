@@ -4,9 +4,11 @@ import com.example.danmarkskort.Exceptions.InvalidAddressException;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class Node implements Serializable {
+    @Serial private static final long serialVersionUID = 1444149606229887777L;
     private double x, y;
     private String[] address;
 

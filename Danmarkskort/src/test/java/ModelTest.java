@@ -42,7 +42,7 @@ public class ModelTest {
     /**
      * Same as {@link #saveParserAsOBJ()} just doesnt delete the OBJ file again. Should be marked @Disabled as standard since it doesn't dele the file again
      */
-    // @Disabled
+    @Disabled
     @Test
     public void createOBJFile() {
         Model model = new Model("./data/small.osm", canvas);

@@ -12,6 +12,7 @@ import java.util.zip.ZipInputStream;
 
 public class Parser implements Serializable {
     //region fields
+    @Serial private static final long serialVersionUID = 8838055424703291984L;
     Map<Long, Node> id2Node; //map for storing a Node and the id used to refer to it
     Map<Long, Road> id2Road;
     Map<Long, Polygon> id2Polygon;
