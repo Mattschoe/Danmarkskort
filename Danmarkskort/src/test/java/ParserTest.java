@@ -23,7 +23,7 @@ class ParserTest {
 
     @BeforeEach
     public void setUp() throws XMLStreamException, IOException, ClassNotFoundException {
-        filename = "../Danmarkskort/data/Test1.osm";
+        filename = "../Danmarkskort/data/test1.2.osm";
         testFile = new File(filename);
         parser = new Parser(testFile);
     }
@@ -62,7 +62,7 @@ class ParserTest {
 
     @Test
     public void kanUnzippeFil() throws XMLStreamException, IOException, ClassNotFoundException {
-        parser.parseZIP("../Danmarkskort/data/Test1.zip");
+        parser.parseZIP("../Danmarkskort/data/test1.2.osm.zip");
 
         Parser parser2 = new Parser(testFile);
 

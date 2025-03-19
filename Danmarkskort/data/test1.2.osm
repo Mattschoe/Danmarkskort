@@ -22,4 +22,16 @@
  <tag k="osak:street_no" v="5000"/>
  <tag k="source" v="AWS Web API"/>
  </node>
+<node id="1520199040" visible="true" version="3" changeset="27728206" timestamp="2014-12-27T11:50:00Z" user="AWSbot" uid="2184056" lat="55.6801210" lon="12.5849000">
+  <tag k="addr:city" v="København K"/>
+  <tag k="addr:country" v="DK"/>
+  <tag k="addr:housenumber" v="21A"/>
+  <tag k="addr:postcode" v="1050"/>
+  <tag k="addr:street" v="Kongens Nytorv"/>
+  <tag k="osak:identifier" v="479CEBC1CF344B1585A9903D8704FB66"/>
+  <tag k="osak:municipality_no" v="101"/>
+  <tag k="osak:revision" v="2011-05-30T23:59:00"/>
+  <tag k="osak:street_no" v="3852"/>
+  <tag k="source" v="AWS Web API"/>
+ </node>
 </osm>
