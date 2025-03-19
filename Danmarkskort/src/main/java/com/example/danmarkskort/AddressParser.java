@@ -14,11 +14,35 @@ public class AddressParser {
         Matcher matcher = PATTERN.matcher(input);
 
         if (matcher.matches()) {
+            if (matcher.group("fulladdress") != null) {
+                address[0] = matcher.group("street");
+                address[1] = matcher.group("house");
+                address[2] = matcher.group("postcode");
+                address[3] = matcher.group("city");
+            } else if (matcher.group("roadNumberCity") != null) {
+                address[0] = matcher.group("street2");
+                address[1] = matcher.group("house2");
+                address[3] = matcher.group("city2");
+            } else if (matcher.group("roadHouseNo") != null) {
+                address[0] = matcher.group("street3");
+                address[1] = matcher.group("house3");
+            }
+            
             address[0] = matcher.group("street");
             address[1] = matcher.group("house");
             address[2] = matcher.group("postcode");
             address[3] = matcher.group("city");
         }
+
+
+        /*Parsing scenarier:
+        - Fuld addresse
+        - vej + husnummer + by
+        - vej + husnummer
+        - vej
+        - by
+        - postnummer
+        * */
 
     }
 
