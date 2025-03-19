@@ -9,7 +9,7 @@ public class Polygon implements Serializable {
     //region fields
     private List<Node> nodes;
     private Set<Line> lines;
-    private String type; //The type of polygon, fx: "Building", "Coastline", etc.
+    private String type= ""; //The type of polygon, fx: "Building", "Coastline", etc.
     //endregion
 
     /**
@@ -17,10 +17,14 @@ public class Polygon implements Serializable {
      * @param nodes the collection of nodes belonging to the Polygon
      */
     public Polygon(List<Node> nodes, String type) {
+
         assert nodes.size() != 1;
         this.nodes = nodes;
         lines = new HashSet<>();
         createLines();
+        if(type != null){
+            this.type=type;
+        }
     }
 
     /**
