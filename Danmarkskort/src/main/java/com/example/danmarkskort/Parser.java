@@ -7,6 +7,7 @@ import com.example.danmarkskort.MapObjects.Polygon;
 import javax.xml.stream.*;
 import java.io.*;
 import java.util.*;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 
@@ -33,7 +34,7 @@ public class Parser implements Serializable {
 
         String filename = getFileName();
         //Switch case with what filetype the file is and call the appropriate method:
-        if (filename.endsWith(".osm.zip")) {
+        if (filename.endsWith(".zip")) {
             parseZIP(filename);
         } else if (filename.endsWith(".osm")) {
             parseOSM(file);
@@ -48,10 +49,35 @@ public class Parser implements Serializable {
      * @throws IOException if the file isn't found
      */
     public void parseZIP(String filename) throws IOException, XMLStreamException {
-        ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(filename)); // new zipinputstream
-        if (zipInputStream.getNextEntry() != null) {
-            parseOSM(file);
+        File zipFile = new File(filename);
+        File extractedFile = null;
+
+        try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFile))) {
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                if (entry.getName().endsWith(".osm")) {
+                    extractedFile = new File(zipFile.getParent(), entry.getName());
+                    try (FileOutputStream fos = new FileOutputStream(extractedFile)) {
+                        byte[] buffer = new byte[1024];
+                        int len;
+                        while ((len = zipInputStream.read(buffer)) > 0) {
+                            fos.write(buffer, 0, len);
+                        }
+                       // fos.flush(); // Ensure all data is written before closing
+                    }
+                    zipInputStream.closeEntry();
+                   // System.out.println("Extracted file path: " + extractedFile.getAbsolutePath());
+                    break;
+                }
+            }
         }
+
+        if (extractedFile == null) {
+            throw new FileNotFoundException("No .osm file found in the ZIP archive.");
+        }
+
+        parseOSM(extractedFile); // Now pass the correct extracted file
+
     }
 
     /**
@@ -219,6 +245,10 @@ public class Parser implements Serializable {
 
                 //Value
                 if (value.equals("subway")) roadType = value;
+
+                if (key.equals("natural")){
+                    if (value.equals("coastline")) roadType = value;
+                }
             }
             nextInput = input.next(); //Moves on to the next "tag" element
         }
@@ -260,19 +290,14 @@ public class Parser implements Serializable {
                 String key = input.getAttributeValue(null, "k");
                 String value = input.getAttributeValue(null, "v");
                 if (key == null || value == null) continue;
-                switch (key) {
-                    case "addr:city":
-                        city = value;
-                        continue;
-                    case "addr:housenumber":
-                        houseNumber = value;
-                        continue;
-                    case "addr:postcode":
-                        postcode = Integer.parseInt(value);
-                        continue;
-                    case "addr:street":
-                        street = value;
-                        continue;
+                if (key.equals("addr:city")) {
+                    city = value;
+                } else if (key.equals("addr:houseNumber")) {
+                    houseNumber = value;
+                } else if (key.equals("addr:postcode")) {
+                    postcode = Integer.parseInt(value);
+                } else if (key.equals("addr:street")) {
+                    street = value;
                 }
                 nextInput = input.next();
             } else {
@@ -280,8 +305,8 @@ public class Parser implements Serializable {
             }
         }
 
-        //Creates a complex 'Node' unless it's not a full complex 'Node', then it just makes a simple one (Mayb change later)
-        if (city == null || houseNumber == null || postcode == 0 || street == null) {
+        //Creates a complex 'Node' unless it doesn't have any of the elements of a complex 'Node', then it just makes a simple one (Mayb change later)
+        if (city == null && houseNumber == null && postcode == 0 && street == null) {
             id2Node.put(id, new Node(lat, lon)); //Instantierer new node (node containing no child-elements)
         } else {
             id2Node.put(id, new Node(lat, lon, city, houseNumber, postcode, street));
@@ -296,14 +321,7 @@ public class Parser implements Serializable {
     public File getFile() {
         return file;
     }
-    public double[] getBounds() {
-        double[] bounds = new double[4];
-        bounds[0] = minlat;
-        bounds[1] = maxlat;
-        bounds[2] = minlon;
-        bounds[3] = maxlon;
-        return bounds;
-    }
+
     public Map<Long, Node> getNodes() {
         return id2Node;
     }

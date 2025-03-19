@@ -8,22 +8,22 @@ import org.junit.jupiter.api.Test;
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ParserTest {
     Parser parser;
     String filename;
     File testFile;
     String[] address;
-    Set<Node> nodes;
+    List<Node> nodes;
 
     @BeforeEach
     public void setUp() throws XMLStreamException, IOException, ClassNotFoundException {
-        filename = "../Danmarkskort/data/Test1.osm";
+        filename = "../Danmarkskort/data/test1.2.osm";
         testFile = new File(filename);
         parser = new Parser(testFile);
     }
@@ -58,13 +58,18 @@ class ParserTest {
         }
     }
 
+
+
     @Test
     public void kanUnzippeFil() throws XMLStreamException, IOException, ClassNotFoundException {
-        parser.parseZIP("../Danmarkskort/data/Test1.zip");
+        parser.parseZIP("../Danmarkskort/data/test1.2.osm.zip");
+
         Parser parser2 = new Parser(testFile);
 
-        assertTrue(parser.getRoads().keySet() == parser2.getNodes().keySet() && parser.getRoads().keySet() == parser2.getRoads().keySet());
+        assertEquals(parser.getRoads().keySet(), parser2.getRoads().keySet());
+
     }
+
 
     // --------------------------------- Test af parsing ------------------------------------
 
@@ -81,22 +86,9 @@ class ParserTest {
     }
 
     @Test
-    public void kanParseBounds() throws XMLStreamException, IOException {
-        //Kan aflæse maxlat, minlat, maxlon og minlon
-
-        parser.parseOSM(testFile);
-        double[] bounds = parser.getBounds();
-
-        if (bounds[0] == 55.6804000 && bounds[1] == 55.6631000 && bounds[2] == 12.6031000 && bounds[3] == 12.5730000) {
-            assertTrue(true);
-        }
-        fail();
-    }
-
-    @Test
     public void kanParseNodes() throws XMLStreamException, IOException {
         //Kan aflæse lan, lon id korrekt
-        parser.parseOSM(new File("data/test1.osm"));
+        parser.parseOSM(new File("data/test1.2.osm"));
         Map<Long, Node> Id2node = parser.getNodes();
         int numberOfCorrectNodes = 0;
 
