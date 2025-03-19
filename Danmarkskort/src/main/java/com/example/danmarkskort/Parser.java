@@ -80,7 +80,6 @@ public class Parser implements Serializable {
 
     }
 
-
     /**
      * Parses an .osm-file depending on the value of the start-tags encountered when the file is read line-by-line.
      * @param file the file to be parsed
@@ -291,19 +290,14 @@ public class Parser implements Serializable {
                 String key = input.getAttributeValue(null, "k");
                 String value = input.getAttributeValue(null, "v");
                 if (key == null || value == null) continue;
-                switch (key) {
-                    case "addr:city":
-                        city = value;
-                        continue;
-                    case "addr:housenumber":
-                        houseNumber = value;
-                        continue;
-                    case "addr:postcode":
-                        postcode = Integer.parseInt(value);
-                        continue;
-                    case "addr:street":
-                        street = value;
-                        continue;
+                if (key.equals("addr:city")) {
+                    city = value;
+                } else if (key.equals("addr:houseNumber")) {
+                    houseNumber = value;
+                } else if (key.equals("addr:postcode")) {
+                    postcode = Integer.parseInt(value);
+                } else if (key.equals("addr:street")) {
+                    street = value;
                 }
                 nextInput = input.next();
             } else {
@@ -311,8 +305,8 @@ public class Parser implements Serializable {
             }
         }
 
-        //Creates a complex 'Node' unless it's not a full complex 'Node', then it just makes a simple one (Mayb change later)
-        if (city == null || houseNumber == null || postcode == 0 || street == null) {
+        //Creates a complex 'Node' unless it doesn't have any of the elements of a complex 'Node', then it just makes a simple one (Mayb change later)
+        if (city == null && houseNumber == null && postcode == 0 && street == null) {
             id2Node.put(id, new Node(lat, lon)); //Instantierer new node (node containing no child-elements)
         } else {
             id2Node.put(id, new Node(lat, lon, city, houseNumber, postcode, street));
