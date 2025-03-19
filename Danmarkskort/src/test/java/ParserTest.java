@@ -91,23 +91,23 @@ class ParserTest {
         parser.parseOSM(new File("data/test1.2.osm"));
         Map<Long, Node> Id2node = parser.getNodes();
         int numberOfCorrectNodes = 0;
-        System.out.println();
+        System.out.println(Id2node.size());
 
         for (long id : Id2node.keySet()) {
             if (id == 125403) {
-                if (!(Id2node.get(id).getX() == 0.56 * 12.5871796 && Id2node.get(id).getY() == -55.6753313)) {
+                if (!(Id2node.get(id).getY() == 0.56 * 12.5871796 && Id2node.get(id).getX() == -55.6753313)) {
                     numberOfCorrectNodes++;
                 }
             } else if (id == 706639) {
-                if (!(Id2node.get(id).getX() == 0.56 * 12.5790260 && Id2node.get(id).getY() == -55.6799858)) {
+                if (!(Id2node.get(id).getY() == 0.56 * 12.5790260 && Id2node.get(id).getX() == -55.6799858)) {
                     numberOfCorrectNodes++;
                 }
             } else if (id == 1418594827) {
-                if (!(Id2node.get(id).getX() == 0.56 * 12.5877190 && Id2node.get(id).getY() == -55.6645970)) {
+                if (!(Id2node.get(id).getY() == 0.56 * 12.5877190 && Id2node.get(id).getX() == -55.6645970)) {
                     numberOfCorrectNodes++;
                 }
             } else if (id == 1520199040) {
-                if (!(Id2node.get(id).getX() == 0.56 * 12.5849000 && Id2node.get(id).getY() == -55.6801210)) {
+                if (!(Id2node.get(id).getY() == 0.56 * 12.5849000 && Id2node.get(id).getX() == -55.6801210)) {
                     numberOfCorrectNodes++;
                 }
             }
@@ -115,6 +115,7 @@ class ParserTest {
 
             if (numberOfCorrectNodes == 4) {
                 assertTrue(true);
+                System.out.println(numberOfCorrectNodes);
             } else {
                 System.out.println(numberOfCorrectNodes);
                 fail();
