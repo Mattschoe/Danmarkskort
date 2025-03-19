@@ -32,6 +32,7 @@ public class Road implements Serializable {
      * @param roadType the type of road
      */
     public Road(List<Node> nodes, boolean foot, boolean bicycle, int maxSpeed, String roadType) {
+        if (roadType.equals("subway")) System.out.println("YIPII KAYEE");
         this.nodes = nodes;
         lines = new HashSet<>();
         this.foot = foot;
@@ -49,6 +50,7 @@ public class Road implements Serializable {
      * @param roadType the type of road
      */
     public Road(List<Node> nodes, boolean foot, boolean bicycle, String roadType) {
+        if (roadType.equals("subway")) System.out.println("WOHOOO");
         this.nodes = nodes;
         lines = new HashSet<>();
         this.foot = foot;

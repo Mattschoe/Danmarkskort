@@ -67,35 +67,25 @@ public class Parser implements Serializable {
             int nextTag = input.next();
             if (nextTag == XMLStreamConstants.START_ELEMENT) {
                 String tagName = input.getLocalName();
-                switch (tagName) {
-                    case "node":
-                        try {
-                            parseNode(input);
-                        } catch (Exception e) {
-                            System.out.println("Failed creating Node! with input: " + input);
-                        }
-                        continue;
-                    case "way":
-                        try {
-                            parseWay(input);
-                        } catch (Exception e) {
-                            System.out.println("Failed creating Way! with input: " + input);
-                        }
+
+                //End of OSM
+                if (tagName.equals("relation")) return;
+
+                if (tagName.equals("node")) {
+                    try {
+                        parseNode(input);
+                    } catch (Exception e) {
+                        System.out.println("Failed creating Node! with input: " + input);
+                    }
+                } else if (tagName.equals("way")) {
+                    try {
+                        parseWay(input);
+                    } catch (Exception e) {
+                        System.out.println("Failed creating Way! with input: " + input);
+                    }
                 }
             }
         }
-
-        //TEST
-        HashSet<String> differentRoads = new HashSet<>();
-        for (Road road : id2Road.values()) {
-            differentRoads.add(road.getRoadType());
-            // if (road.hasRoadType()) System.out.println(road.getRoadType());
-        }
-
-        for (String roadType : differentRoads) {
-            System.out.println(roadType);
-        }
-        //TEST
     }
 
     /**
@@ -112,7 +102,8 @@ public class Parser implements Serializable {
         //Runs through every node and tag contained in that way
         while (input.hasNext()) {
             int nextInput = input.next();
-            //End of tag
+
+            //End of element
             if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) break;
 
             //Hvis det er en node gemmer vi den, og evt. parser en Polygon
@@ -134,6 +125,7 @@ public class Parser implements Serializable {
                 } else if (input.getLocalName().equals("tag")) {
                     //When reaching "tag" elements, we know it isn't a Polygon (no "Node" is mentioned twice), and therefore we parse it as a Road
                     id2Road.put(wayID, parseRoad(input, nextInput, nodesInWay));
+                    return;
                 }
             }
         }
@@ -202,9 +194,10 @@ public class Parser implements Serializable {
         //Loops through tags and saves them
         int nextInput = firstTag;
         while (input.hasNext()) {
-            System.out.println("ny tag!");
             //End of Road
-            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) break;
+            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) {
+                break;
+            }
 
             //Tries and saves the important tags
             if (nextInput == XMLStreamConstants.START_ELEMENT && input.getLocalName().equals("tag"))  {
@@ -220,22 +213,13 @@ public class Parser implements Serializable {
                     bicycle = value.equals("true");
                 } else if (key.equals("foot")) {
                     foot = value.equals("yes");
-                } else if (key.equals("subway")) {
-                    if (value.equals("yes")) roadType = value;
-                }
-                
-                //Also saves the metro's
-                switch (value) {
-                    case "subway":
-                        System.out.println("HEr!");
-                        roadType = value;
+                } else if (key.equals("railway")) {
+                    if (value.equals("subway")) roadType = value;
                 }
 
-            } else { //If it's anything BUT a "tag" element
-                System.out.println("5");
-                break;
+                //Value
+                if (value.equals("subway")) roadType = value;
             }
-            System.out.println("6");
             nextInput = input.next(); //Moves on to the next "tag" element
         }
 
@@ -248,7 +232,6 @@ public class Parser implements Serializable {
         }
         return road;
     }
-
 
     /**
      * Parses a {@link Node} from XMLStreamReader.next() and then adds it to id2Node
