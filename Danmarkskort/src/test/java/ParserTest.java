@@ -86,19 +86,6 @@ class ParserTest {
     }
 
     @Test
-    public void kanParseBounds() throws XMLStreamException, IOException {
-        //Kan aflæse maxlat, minlat, maxlon og minlon
-
-        parser.parseOSM(testFile);
-        double[] bounds = parser.getBounds();
-
-        if (bounds[0] == 55.6804000 && bounds[1] == 55.6631000 && bounds[2] == 12.6031000 && bounds[3] == 12.5730000) {
-            assertTrue(true);
-        }
-        fail();
-    }
-
-    @Test
     public void kanParseNodes() throws XMLStreamException, IOException {
         //Kan aflæse lan, lon id korrekt
         parser.parseOSM(new File("data/test1.2.osm"));

@@ -320,14 +320,7 @@ public class Parser implements Serializable {
     public File getFile() {
         return file;
     }
-    public double[] getBounds() {
-        double[] bounds = new double[4];
-        bounds[0] = minlat;
-        bounds[1] = maxlat;
-        bounds[2] = minlon;
-        bounds[3] = maxlon;
-        return bounds;
-    }
+
     public Map<Long, Node> getNodes() {
         return id2Node;
     }
