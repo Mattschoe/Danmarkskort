@@ -13,6 +13,7 @@ import java.util.zip.ZipInputStream;
 
 public class Parser implements Serializable {
     //region fields
+    @Serial private static final long serialVersionUID = 8838055424703291984L;
     Map<Long, Node> id2Node; //map for storing a Node and the id used to refer to it
     Map<Long, Road> id2Road;
     Map<Long, Polygon> id2Polygon;
@@ -79,7 +80,6 @@ public class Parser implements Serializable {
 
     }
 
-
     /**
      * Parses an .osm-file depending on the value of the start-tags encountered when the file is read line-by-line.
      * @param file the file to be parsed
@@ -93,20 +93,22 @@ public class Parser implements Serializable {
             int nextTag = input.next();
             if (nextTag == XMLStreamConstants.START_ELEMENT) {
                 String tagName = input.getLocalName();
-                switch (tagName) {
-                    case "node":
-                        try {
-                            parseNode(input);
-                        } catch (Exception e) {
-                            System.out.println("Failed creating Node! with input: " + input);
-                        }
-                        continue;
-                    case "way":
-                        try {
-                            parseWay(input);
-                        } catch (Exception e) {
-                            System.out.println("Failed creating Way! with input: " + input);
-                        }
+
+                //End of OSM
+                if (tagName.equals("relation")) return;
+
+                if (tagName.equals("node")) {
+                    try {
+                        parseNode(input);
+                    } catch (Exception e) {
+                        System.out.println("Failed creating Node! with input: " + input);
+                    }
+                } else if (tagName.equals("way")) {
+                    try {
+                        parseWay(input);
+                    } catch (Exception e) {
+                        System.out.println("Failed creating Way! with input: " + input);
+                    }
                 }
             }
         }
@@ -126,7 +128,8 @@ public class Parser implements Serializable {
         //Runs through every node and tag contained in that way
         while (input.hasNext()) {
             int nextInput = input.next();
-            //End of tag
+
+            //End of element
             if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) break;
 
             //Hvis det er en node gemmer vi den, og evt. parser en Polygon
@@ -148,17 +151,17 @@ public class Parser implements Serializable {
                 } else if (input.getLocalName().equals("tag")) {
                     //When reaching "tag" elements, we know it isn't a Polygon (no "Node" is mentioned twice), and therefore we parse it as a Road
                     id2Road.put(wayID, parseRoad(input, nextInput, nodesInWay));
+                    return;
                 }
             }
         }
     }
 
     /**
-     * parses a {@link Polygon} a Polygon is a subset of way. then returns it.
-     * @param input
-     * @param nodesInPolygon
-     * @return
-     * @throws XMLStreamException
+     * Parses a {@link Polygon} a Polygon is a subset of way. then returns it.
+     * @param input the XMLStreamReader that currently is sitting at the beginning of the to-be-parsed Polygon
+     * @param nodesInPolygon the nodes related to the to-be-parsed Polygon
+     * @return Road which should then be stored in the map {@code id2Polygon} for further reference
      */
     private Polygon parsePolygon(XMLStreamReader input, List<Node> nodesInPolygon) throws XMLStreamException {
         assert nodesInPolygon != null;
@@ -218,30 +221,34 @@ public class Parser implements Serializable {
         int nextInput = firstTag;
         while (input.hasNext()) {
             //End of Road
-            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) break;
+            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) {
+                break;
+            }
 
             //Tries and saves the important tags
             if (nextInput == XMLStreamConstants.START_ELEMENT && input.getLocalName().equals("tag"))  {
                 String key = input.getAttributeValue(null, "k"); //for fat i "k" attribute som fx "maxSpeed"
                 String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
-                switch (key) {
-                    case "highway":
-                        roadType = value;
-                        break;
-                    case "maxspeed":
-                        maxSpeed = Integer.parseInt(value);
-                        hasMaxSpeed = true; //Sætter maxSpeed til value og sætter hasMaxSpeed til true.
-                        break;
-                    case "bicycle":
-                        bicycle = value.equals("yes");
-                        break;
-                    case "foot":
-                        foot = value.equals("yes");
-                        break;
+                if (key.equals("highway")) {
+                    roadType = value;
+                } else if (key.equals("maxspeed")) {
+                    maxSpeed = Integer.parseInt(value);
+                    hasMaxSpeed = true;
+                } else if (key.equals("bicycle")) {
+                    bicycle = value.equals("true");
+                } else if (key.equals("foot")) {
+                    foot = value.equals("yes");
+                } else if (key.equals("railway")) {
+                    if (value.equals("subway")) roadType = value;
                 }
-            } else { //If it's anything BUT a "tag" element
-                break;
+
+                //Value
+                if (value.equals("subway")) roadType = value;
+
+                if (key.equals("natural")){
+                    if (value.equals("coastline")) roadType = value;
+                }
             }
             nextInput = input.next(); //Moves on to the next "tag" element
         }
@@ -256,7 +263,6 @@ public class Parser implements Serializable {
         return road;
     }
 
-
     /**
      * Parses a {@link Node} from XMLStreamReader.next() and then adds it to id2Node
      * @throws XMLStreamException if there is a error with the {@code XMLStreamReader}
@@ -266,6 +272,11 @@ public class Parser implements Serializable {
         long id = Long.parseLong(input.getAttributeValue(null, "id"));
         double lat = Double.parseDouble(input.getAttributeValue(null, "lat"));
         double lon = Double.parseDouble(input.getAttributeValue(null, "lon"));
+
+        //TESTING
+        if (id == 340533737) {
+            System.out.println("Hej :)");
+        }
 
         int nextInput = input.next();
         //If simple node, saves it and returns
@@ -280,32 +291,30 @@ public class Parser implements Serializable {
         int postcode = 0;
         String street = null;
         while (input.hasNext()) {
+            //End of Road
+            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("node")) {
+                break;
+            }
+
             if (nextInput == XMLStreamConstants.START_ELEMENT && input.getLocalName().equals("tag")) {
                 String key = input.getAttributeValue(null, "k");
                 String value = input.getAttributeValue(null, "v");
                 if (key == null || value == null) continue;
-                switch (key) {
-                    case "addr:city":
-                        city = value;
-                        continue;
-                    case "addr:housenumber":
-                        houseNumber = value;
-                        continue;
-                    case "addr:postcode":
-                        postcode = Integer.parseInt(value);
-                        continue;
-                    case "addr:street":
-                        street = value;
-                        continue;
+                if (key.equals("addr:city")) {
+                    city = value;
+                } else if (key.equals("addr:houseNumber")) {
+                    houseNumber = value;
+                } else if (key.equals("addr:postcode")) {
+                    postcode = Integer.parseInt(value);
+                } else if (key.equals("addr:street")) {
+                    street = value;
                 }
-                nextInput = input.next();
-            } else {
-                break;
             }
+            nextInput = input.next();
         }
 
-        //Creates a complex 'Node' unless it's not a full complex 'Node', then it just makes a simple one (Mayb change later)
-        if (city == null || houseNumber == null || postcode == 0 || street == null) {
+        //Creates a complex 'Node' unless it doesn't have any of the elements of a complex 'Node', then it just makes a simple one (Mayb change later)
+        if (city == null && houseNumber == null && postcode == 0 && street == null) {
             id2Node.put(id, new Node(lat, lon)); //Instantierer new node (node containing no child-elements)
         } else {
             id2Node.put(id, new Node(lat, lon, city, houseNumber, postcode, street));

@@ -1,5 +1,6 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.AddressSearch.Search;
 import com.example.danmarkskort.Exceptions.ParserSavingException;
 import com.example.danmarkskort.Parser;
 import javafx.scene.canvas.Canvas;
@@ -48,6 +49,9 @@ public class Model {
             }
         }
         assert parser != null;
+
+        //TESTING
+        Search search = new Search(parser.getNodes());
     }
 
     /**

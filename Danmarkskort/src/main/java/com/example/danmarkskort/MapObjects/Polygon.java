@@ -2,10 +2,12 @@ package com.example.danmarkskort.MapObjects;
 
 import javafx.scene.canvas.GraphicsContext;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 
 public class Polygon implements Serializable {
+    @Serial private static final long serialVersionUID = 1444149606229887777L;
     //region fields
     private List<Node> nodes;
     private Set<Line> lines;

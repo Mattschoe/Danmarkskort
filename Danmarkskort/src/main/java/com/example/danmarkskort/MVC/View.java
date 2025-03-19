@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.URL;
 
 public class View {
+    //region fields
     Affine trans;
     Canvas canvas;
     Controller controller;
@@ -25,6 +26,7 @@ public class View {
     Scene scene;
     Stage stage;
     boolean firstTimeDrawingMap;
+    //endregion
 
     /** View-konstruktøren skifter scene ud fra en given stage og filstien til en FXML-fil
      * @param stage givne stage -- ved start-up fås denne af Application's start-metode, ellers genbruger Controlleren Stage'en der allerede vises
@@ -69,10 +71,6 @@ public class View {
         }
     }
 
-    Stage getStage() {
-        return stage;
-    }
-
     void initializeCanvas() {
         //Canvas'et og dets GraphicsContext gemmes
         canvas = controller.getCanvas();
@@ -87,9 +85,6 @@ public class View {
         //Listeners tilføjes, der redrawer Canvas'et når vinduet skifter størrelse
         scene.widthProperty().addListener(_ -> drawMap(parser));
         scene.heightProperty().addListener(_ -> drawMap(parser));
-
-        //Canvas'et tegnes
-        //updateCanvas(canvas);
     }
 
     /**
@@ -116,7 +111,6 @@ public class View {
             System.out.println("Done drawing!");
             firstTimeDrawingMap = false;
         }
-
     }
 
     /**
@@ -141,9 +135,9 @@ public class View {
      * Draws all roads. Method is called in {@link #drawMap(Parser)}
      */
     private void drawRoad() {
-        Road road;
         for (long id : parser.getRoads().keySet()) {
-            road = parser.getRoads().get(id);
+            Road road = parser.getRoads().get(id);
+            if (road.getRoadType().equals("subway")) continue;
             road.drawRoad(canvas);
         }
     }
@@ -158,4 +152,10 @@ public class View {
             polygon.drawPolygon(graphicsContext);
         }
     }
+
+    //region getters and setters
+    Stage getStage() {
+        return stage;
+    }
+    //endregion
 }
