@@ -1,4 +1,4 @@
-package com.example.danmarkskort.AdressSearch;
+package com.example.danmarkskort.AddressSearch;
 
 import com.example.danmarkskort.MapObjects.Node;
 
