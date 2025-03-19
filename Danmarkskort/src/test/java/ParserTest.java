@@ -23,7 +23,7 @@ class ParserTest {
 
     @BeforeEach
     public void setUp() throws XMLStreamException, IOException, ClassNotFoundException {
-        filename = "../Danmarkskort/data/Test1.osm";
+        filename = "../Danmarkskort/data/test1.2.osm";
         testFile = new File(filename);
         parser = new Parser(testFile);
     }
@@ -108,7 +108,7 @@ class ParserTest {
     @Test
     public void kanParseNodes() throws XMLStreamException, IOException {
         //Kan aflæse lan, lon id korrekt
-        parser.parseOSM(new File("data/test1.osm"));
+        parser.parseOSM(new File("data/test1.2.osm"));
         Map<Long, Node> Id2node = parser.getNodes();
         int numberOfCorrectNodes = 0;
 
