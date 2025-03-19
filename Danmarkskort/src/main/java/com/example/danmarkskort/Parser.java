@@ -12,6 +12,7 @@ import java.util.zip.ZipInputStream;
 
 public class Parser implements Serializable {
     //region fields
+    @Serial private static final long serialVersionUID = 8838055424703291984L;
     Map<Long, Node> id2Node; //map for storing a Node and the id used to refer to it
     Map<Long, Road> id2Road;
     Map<Long, Polygon> id2Polygon;
@@ -66,20 +67,22 @@ public class Parser implements Serializable {
             int nextTag = input.next();
             if (nextTag == XMLStreamConstants.START_ELEMENT) {
                 String tagName = input.getLocalName();
-                switch (tagName) {
-                    case "node":
-                        try {
-                            parseNode(input);
-                        } catch (Exception e) {
-                            System.out.println("Failed creating Node! with input: " + input);
-                        }
-                        continue;
-                    case "way":
-                        try {
-                            parseWay(input);
-                        } catch (Exception e) {
-                            System.out.println("Failed creating Way! with input: " + input);
-                        }
+
+                //End of OSM
+                if (tagName.equals("relation")) return;
+
+                if (tagName.equals("node")) {
+                    try {
+                        parseNode(input);
+                    } catch (Exception e) {
+                        System.out.println("Failed creating Node! with input: " + input);
+                    }
+                } else if (tagName.equals("way")) {
+                    try {
+                        parseWay(input);
+                    } catch (Exception e) {
+                        System.out.println("Failed creating Way! with input: " + input);
+                    }
                 }
             }
         }
@@ -99,7 +102,8 @@ public class Parser implements Serializable {
         //Runs through every node and tag contained in that way
         while (input.hasNext()) {
             int nextInput = input.next();
-            //End of tag
+
+            //End of element
             if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) break;
 
             //Hvis det er en node gemmer vi den, og evt. parser en Polygon
@@ -121,17 +125,17 @@ public class Parser implements Serializable {
                 } else if (input.getLocalName().equals("tag")) {
                     //When reaching "tag" elements, we know it isn't a Polygon (no "Node" is mentioned twice), and therefore we parse it as a Road
                     id2Road.put(wayID, parseRoad(input, nextInput, nodesInWay));
+                    return;
                 }
             }
         }
     }
 
     /**
-     * parses a {@link Polygon} a Polygon is a subset of way. then returns it.
-     * @param input
-     * @param nodesInPolygon
-     * @return
-     * @throws XMLStreamException
+     * Parses a {@link Polygon} a Polygon is a subset of way. then returns it.
+     * @param input the XMLStreamReader that currently is sitting at the beginning of the to-be-parsed Polygon
+     * @param nodesInPolygon the nodes related to the to-be-parsed Polygon
+     * @return Road which should then be stored in the map {@code id2Polygon} for further reference
      */
     private Polygon parsePolygon(XMLStreamReader input, List<Node> nodesInPolygon) throws XMLStreamException {
         assert nodesInPolygon != null;
@@ -191,30 +195,30 @@ public class Parser implements Serializable {
         int nextInput = firstTag;
         while (input.hasNext()) {
             //End of Road
-            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) break;
+            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) {
+                break;
+            }
 
             //Tries and saves the important tags
             if (nextInput == XMLStreamConstants.START_ELEMENT && input.getLocalName().equals("tag"))  {
                 String key = input.getAttributeValue(null, "k"); //for fat i "k" attribute som fx "maxSpeed"
                 String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
-                switch (key) {
-                    case "highway":
-                        roadType = value;
-                        break;
-                    case "maxspeed":
-                        maxSpeed = Integer.parseInt(value);
-                        hasMaxSpeed = true; //Sætter maxSpeed til value og sætter hasMaxSpeed til true.
-                        break;
-                    case "bicycle":
-                        bicycle = value.equals("yes");
-                        break;
-                    case "foot":
-                        foot = value.equals("yes");
-                        break;
+                if (key.equals("highway")) {
+                    roadType = value;
+                } else if (key.equals("maxspeed")) {
+                    maxSpeed = Integer.parseInt(value);
+                    hasMaxSpeed = true;
+                } else if (key.equals("bicycle")) {
+                    bicycle = value.equals("true");
+                } else if (key.equals("foot")) {
+                    foot = value.equals("yes");
+                } else if (key.equals("railway")) {
+                    if (value.equals("subway")) roadType = value;
                 }
-            } else { //If it's anything BUT a "tag" element
-                break;
+
+                //Value
+                if (value.equals("subway")) roadType = value;
             }
             nextInput = input.next(); //Moves on to the next "tag" element
         }
@@ -228,7 +232,6 @@ public class Parser implements Serializable {
         }
         return road;
     }
-
 
     /**
      * Parses a {@link Node} from XMLStreamReader.next() and then adds it to id2Node

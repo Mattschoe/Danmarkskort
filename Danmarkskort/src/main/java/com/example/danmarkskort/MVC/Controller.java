@@ -67,12 +67,15 @@ public class Controller {
      */
     private void loadFile(File mapFile) {
         model = new Model(mapFile.getPath(), canvas);
+        assert model.getParser() != null;
     }
 
     /** Funktionalitet forbundet med "Kør standard"-knappen på startskærmen. Køres når knappen klikkes */
     @FXML protected void standardInputButton() throws IOException {
         view = new View(view.getStage(), "mapOverlay.fxml");
-        model = new Model(standardMapFile.getPath(), canvas);
+        loadFile(standardMapFile);
+        assert view != null;
+        view.drawMap(model.getParser());
     }
 
     /** Metode køres når man zoomer på Canvas'et */

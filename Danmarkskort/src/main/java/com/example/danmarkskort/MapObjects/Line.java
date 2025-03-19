@@ -6,10 +6,13 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
+import java.io.ObjectStreamClass;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Random;
 
 public class Line implements Serializable {
+    @Serial private static final long serialVersionUID = -9178696453904098837L;
     private Node start, end;
 
     /**
@@ -29,11 +32,11 @@ public class Line implements Serializable {
      */
     public void drawLine(GraphicsContext graphicsContext) {
         assert start != null && end != null;
-        // start.drawNode(graphicsContext);
-        // end.drawNode(graphicsContext);
         graphicsContext.strokeLine(start.getX(), start.getY(), end.getX(), end.getY());
     }
 
+    //region getters and setters
     public Node getStart() { return start; }
     public Node getEnd() { return end; }
+    //endregion
 }
