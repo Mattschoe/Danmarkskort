@@ -5,22 +5,11 @@ import com.example.danmarkskort.MapObjects.Node;
 import java.util.*;
 
 public class Search {
-    List<Node>[] adresses;
+    Street[] streets;
 
     public Search(Map<Long, Node> unsortedNodes) {
-        Set<String> streetNames = getAllSpecialStreetnames(unsortedNodes.values());
-        adresses = new List[streetNames.size()];
-        System.out.println(streetNames.size());
-
-        //Initializes array
-        for (int i = 0; i < adresses.length; i++) {
-            adresses[i] = new ArrayList<>();
-        }
-
-        //Test
-        for (String streetName : streetNames) {
-            System.out.println(streetName);
-        }
+        Set<String> streetNames = initializeAllStreetNames(unsortedNodes.values());
+        streets = new Street[streetNames.size()];
     }
 
     /**
@@ -28,13 +17,13 @@ public class Search {
      * @param nodes given in constructor
      * @return a Set of strings of streetnames
      */
-    private Set<String> getAllSpecialStreetnames(Collection<Node> nodes) {
+    private Set<String> initializeAllStreetNames(Collection<Node> nodes) {
         Set<String> result = new HashSet<>();
 
         for (Node node : nodes) {
             try {
                 result.add(node.getAddress()[3]);
-            } catch (NullPointerException e) { //Node doesnt have an address
+            } catch (NullPointerException e) { //Node doesn't have an address
 
             }
 
@@ -42,14 +31,18 @@ public class Search {
         return result;
     }
 
-    /**
-     * Initializes all street-names. Goes through all Node's, gets alle special street-names and saves them
-     */
-    private void initializeAllStreetNames() {
+    private void sortAddresses() {
+        MergeSort mergeSort = new MergeSort();
+        mergeSort.sort(streets);
+
+        Street[] sortedArray = (Street[]) mergeSort.getSortedArray();
+        for (int i = 0; i < streets.length; i++) {
+            System.out.println(sortedArray[i]);
+        }
     }
 
     /**
-     * Puts the {@Link Node} in the relevant address
+     * Puts the {@link Node} in the relevant address
      */
     private void putNodeInStreets() {
 
