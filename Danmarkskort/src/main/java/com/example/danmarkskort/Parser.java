@@ -219,6 +219,10 @@ public class Parser implements Serializable {
 
                 //Value
                 if (value.equals("subway")) roadType = value;
+
+                if (key.equals("natural")){
+                    if (value.equals("coastline")) roadType = value;
+                }
             }
             nextInput = input.next(); //Moves on to the next "tag" element
         }
