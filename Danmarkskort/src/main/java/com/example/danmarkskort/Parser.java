@@ -62,7 +62,7 @@ public class Parser implements Serializable {
                         while ((len = zipInputStream.read(buffer)) > 0) {
                             fos.write(buffer, 0, len);
                         }
-                       // fos.flush(); // Ensure all data is written before closing
+                       
                     }
                     zipInputStream.closeEntry();
                    // System.out.println("Extracted file path: " + extractedFile.getAbsolutePath());

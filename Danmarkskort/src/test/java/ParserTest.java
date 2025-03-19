@@ -91,6 +91,7 @@ class ParserTest {
         parser.parseOSM(new File("data/test1.2.osm"));
         Map<Long, Node> Id2node = parser.getNodes();
         int numberOfCorrectNodes = 0;
+        System.out.println();
 
         for (long id : Id2node.keySet()) {
             if (id == 125403) {
@@ -115,6 +116,7 @@ class ParserTest {
             if (numberOfCorrectNodes == 4) {
                 assertTrue(true);
             } else {
+                System.out.println(numberOfCorrectNodes);
                 fail();
             }
 
