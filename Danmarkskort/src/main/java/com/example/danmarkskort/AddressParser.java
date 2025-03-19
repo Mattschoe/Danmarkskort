@@ -27,7 +27,7 @@ public class AddressParser {
                 address[0] = matcher.group("street3");
                 address[1] = matcher.group("house3");
             }
-            
+
             address[0] = matcher.group("street");
             address[1] = matcher.group("house");
             address[2] = matcher.group("postcode");
