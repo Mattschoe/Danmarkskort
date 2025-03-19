@@ -22,6 +22,7 @@ public class Road implements Serializable {
     private int maxSpeed;
     private final String roadType;
     //endregion
+    // private static final long serialVersionUID;
 
     /**
      * ROAD WITH MAXSPEED. A {@link Road} is a collection of {@link Node}'s without the same start and end node.
@@ -57,9 +58,7 @@ public class Road implements Serializable {
         createLines();
     }
 
-    /**
-     * Creates the lines between the {@link Node}'s (Used later for drawing)
-     */
+    ///Creates the lines between the {@link Node}'s (Used later for drawing)
     private void createLines() {
         //Tegner en linje fra den første node til den sidste i rækkefølge. Slutter af med at lave en linje mellem den sidste og første
         Node startNode = nodes.getFirst();
@@ -77,6 +76,15 @@ public class Road implements Serializable {
     public void drawRoad(Canvas mapCanvas) {
         assert mapCanvas != null;
         GraphicsContext graphicsContext = mapCanvas.getGraphicsContext2D();
+        if (roadType.equals("coastline")) {
+            graphicsContext.setStroke(Color.ORANGE);
+            graphicsContext.setLineWidth(2/Math.sqrt(graphicsContext.getTransform().determinant()));
+        }
+        else {
+            graphicsContext.setStroke(Color.WHITE.darker().darker());
+            graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
+        }
+
         for (Line line : lines) {
             line.drawLine(graphicsContext);
         }
@@ -103,11 +111,8 @@ public class Road implements Serializable {
     public boolean hasRoadType() { return !roadType.isEmpty(); }
     //endregion
 
-    /**
-     * Tom metode for at regne maxspeed hvis tagget mangler
-     */
-    @Deprecated
-    private void calculateSpeed(){
-
+    ///Tom metode for at regne maxspeed hvis tagget mangler
+    @Deprecated private void calculateSpeed(){
+        //tom metode er tom
     }
 }

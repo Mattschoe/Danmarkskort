@@ -18,12 +18,11 @@ public class Parser implements Serializable {
     Map<Long, Road> id2Road;
     Map<Long, Polygon> id2Polygon;
     File file; //The file that's loaded in
-    double minlat, maxlat, minlon, maxlon; //Bruges til at holde en indlæst Node's koordinater
+    double[] bounds; //OSM-filens bounds, dvs. de længst væk koordinater hvor noget tegnes
     //endregion
 
     /**
      * Checks what filetype the filepath parameter is and calls the appropriate method
-     *
      * @param file the file that needs to be processed.
      */
     public Parser(File file) throws NullPointerException, IOException, XMLStreamException, FactoryConfigurationError {
@@ -31,6 +30,7 @@ public class Parser implements Serializable {
         id2Node = new HashMap<>();
         id2Road = new HashMap<>();
         id2Polygon = new HashMap<>();
+        bounds = new double[4];
 
         String filename = getFileName();
         //Switch case with what filetype the file is and call the appropriate method:
@@ -96,7 +96,7 @@ public class Parser implements Serializable {
 
                 //End of OSM
                 if (tagName.equals("relation")) return;
-
+                if (tagName.equals("bounds")) parseBounds(input);
                 if (tagName.equals("node")) {
                     try {
                         parseNode(input);
@@ -112,6 +112,14 @@ public class Parser implements Serializable {
                 }
             }
         }
+    }
+
+    ///Saves the OSM-file's bounds-coordinates (so that View can zoom in to these on startup)
+    private void parseBounds(XMLStreamReader input) {
+        bounds[0] = Double.parseDouble(input.getAttributeValue(0)); //Min. latitude
+        bounds[1] = Double.parseDouble(input.getAttributeValue(1)); //Min. longitude
+        bounds[2] = Double.parseDouble(input.getAttributeValue(2)); //Max. latitude
+        bounds[3] = Double.parseDouble(input.getAttributeValue(3)); //Max. longitude
     }
 
     /**
@@ -165,9 +173,6 @@ public class Parser implements Serializable {
      */
     private Polygon parsePolygon(XMLStreamReader input, List<Node> nodesInPolygon) throws XMLStreamException {
         assert nodesInPolygon != null;
-        String building = "";
-        String natural ="";
-        String island = "";
 
         while (input.hasNext()) {
             //End of tag
@@ -180,20 +185,11 @@ public class Parser implements Serializable {
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
                 switch (key) {
                     case "building":
-                        building = value;
-                        return new Polygon(nodesInPolygon,building);
-
-                    case "natural":
-                       if(value.equals("water")){
-                           natural = value;
-                           return new Polygon(nodesInPolygon,natural);
-                       }
-                        break;
+                        return new Polygon(nodesInPolygon, "building");
+                    case "natural", "landuse":
+                        return new Polygon(nodesInPolygon, value);
                     case "place":
-                        if(value.equals("island")){
-                            island = value;
-                            return new Polygon(nodesInPolygon, island);
-                        }
+                        if(value.equals("island")) { return new Polygon(nodesInPolygon, value); }
                         break;
                 }
             }
@@ -230,7 +226,7 @@ public class Parser implements Serializable {
                 String key = input.getAttributeValue(null, "k"); //for fat i "k" attribute som fx "maxSpeed"
                 String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
-                if (key.equals("highway")) {
+                if (key.equals("highway") || key.equals("nautral")) {
                     roadType = value;
                 } else if (key.equals("maxspeed")) {
                     maxSpeed = Integer.parseInt(value);
@@ -272,11 +268,6 @@ public class Parser implements Serializable {
         long id = Long.parseLong(input.getAttributeValue(null, "id"));
         double lat = Double.parseDouble(input.getAttributeValue(null, "lat"));
         double lon = Double.parseDouble(input.getAttributeValue(null, "lon"));
-
-        //TESTING
-        if (id == 340533737) {
-            System.out.println("Hej :)");
-        }
 
         int nextInput = input.next();
         //If simple node, saves it and returns
@@ -322,22 +313,11 @@ public class Parser implements Serializable {
     }
 
 
-    //region getters and setters
-    String getFileName() {
-        return file.getName();
-    }
-    public File getFile() {
-        return file;
-    }
-
-    public Map<Long, Node> getNodes() {
-        return id2Node;
-    }
-    public Map<Long, Road> getRoads() {
-        return id2Road;
-    }
-    public Map<Long, Polygon> getPolygons() {
-        return id2Polygon;
-    }
-    //endregion
+    //GETTERS AND SETTERS
+    public String getFileName() { return file.getName(); }
+    public File getFile() { return file; }
+    public Map<Long, Node> getNodes() { return id2Node; }
+    public Map<Long, Road> getRoads() { return id2Road; }
+    public Map<Long, Polygon> getPolygons() { return id2Polygon; }
+    public double[] getBounds() { return bounds; }
 }

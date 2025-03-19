@@ -1,17 +1,20 @@
 package com.example.danmarkskort.MapObjects;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.*;
+import java.util.List;
 
 public class Polygon implements Serializable {
     @Serial private static final long serialVersionUID = 1444149606229887777L;
     //region fields
-    private List<Node> nodes;
-    private Set<Line> lines;
-    private String type= ""; //The type of polygon, fx: "Building", "Coastline", etc.
+    private final List<Node> nodes;
+    private double[] xPoints;
+    private double[] yPoints;
+    private int nSize;
+    private final String type; //The type of polygon, fx: "Building", "Coastline", etc.
     //endregion
 
     /**
@@ -19,46 +22,63 @@ public class Polygon implements Serializable {
      * @param nodes the collection of nodes belonging to the Polygon
      */
     public Polygon(List<Node> nodes, String type) {
-
         assert nodes.size() != 1;
         this.nodes = nodes;
-        lines = new HashSet<>();
-        createLines();
-        if(type != null){
-            this.type=type;
+        if (type == null) this.type = "";
+        else this.type = type;
+
+        createArrays();
+    }
+
+    ///Skaber to Arrays til stroke- og fillPolygon-metoderne der kaldes ved tegning
+    public void createArrays() {
+        nodes.add(nodes.getFirst());
+        nSize = nodes.size();
+
+        xPoints = new double[nSize];
+        yPoints = new double[nSize];
+
+        for (int i = 0; i < nSize; i++) {
+            xPoints[i] = nodes.get(i).getX();
+            yPoints[i] = nodes.get(i).getY();
         }
     }
 
-    /**
-     * Creates the lines between nodes (Used later for drawing)
-     */
-    private void createLines() {
-        //Tegner en linje fra den første node til den sidste i rækkefølge. Slutter af med at lave en linje mellem den sidste og første
-        Node startNode = nodes.getFirst();
-        for (int i = 1; i < nodes.size(); i++) {
-            lines.add(new Line(startNode, nodes.get(i)));
-            startNode = nodes.get(i);
-        }
-        lines.add(new Line(startNode, nodes.getLast()));
-    }
+    public void drawPolygon(GraphicsContext gc) {
+        Color color = switch(type) {
+            //Værdier fra "natural"-tag
+            case "building"  -> Color.DARKGRAY;
+            case "water"     -> Color.CORNFLOWERBLUE;
+            case "heath"     -> Color.CHARTREUSE;
+            case "coastline" -> Color.PERU;
 
-    /**
-     * Draws the polygon (Building) with the settings given in the {@code graphicsContext}
-     * @param graphicsContext the settings/format to tell the method how to draw
-     */
-    public void drawPolygon(GraphicsContext graphicsContext) {
-        for (Line line : lines) {
-            line.drawLine(graphicsContext);
-        }
+            //Værdier fra "landuse"-tag
+            case "forest"            -> Color.GREEN;
+            case "industrial"        -> Color.YELLOW;
+            case "residential"       -> Color.BURLYWOOD;
+            case "brownfield"        -> Color.SADDLEBROWN;
+            case "grass"             -> Color.GREENYELLOW;
+            case "landuse"           -> Color.DARKVIOLET;
+            case "allotments"        -> Color.HOTPINK;
+            case "recreation_ground" -> Color.LIGHTCORAL;
+            case "construction"      -> Color.TOMATO;
+            case "military"          -> Color.SPRINGGREEN;
+            case "basin"             -> Color.CYAN;
+            case "cemetery"          -> Color.CRIMSON;
+
+            //Standardværdi
+            default -> Color.rgb(0, 74, 127, 0.2);
+        };
+
+        gc.setStroke(color.darker().darker());
+        gc.setFill(color);
+
+        gc.strokePolygon(xPoints, yPoints, nSize);
+        gc.fillPolygon(xPoints, yPoints, nSize);
     }
 
     //region getters
-    public Set<Line> getLines() {
-        return lines;
-    }
     public List<Node> getNodes() { return nodes; }
-    public String getType() {
-        return type;
-    }
+    public String getType() { return type; }
     //endregion
 }

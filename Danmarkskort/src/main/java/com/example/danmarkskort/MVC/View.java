@@ -71,7 +71,8 @@ public class View {
         }
     }
 
-    void initializeCanvas() {
+    ///Giver Canvas en Transform og bunden højde/bredde
+    private void initializeCanvas() {
         //Canvas'et og dets GraphicsContext gemmes
         canvas = controller.getCanvas();
         graphicsContext = canvas.getGraphicsContext2D();
@@ -100,30 +101,27 @@ public class View {
         graphicsContext.setFill(Color.ANTIQUEWHITE);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setTransform(trans);
-        graphicsContext.setLineWidth(1/Math.sqrt(trans.determinant()));
-        graphicsContext.setStroke(Color.BLACK);
 
         //Draws map
-        drawRoad();
-        drawPolygon();
+        drawRoads();
+        drawPolygons();
 
         if (firstTimeDrawingMap) {
             System.out.println("Done drawing!");
             firstTimeDrawingMap = false;
+
+            pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
+            zoom(0, 0, 0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
         }
     }
 
-    /**
-     * OBS STJÅLET FRA NUTAN
-     */
+    ///STJÅLET FRA NUTAN
     public void pan(double dx, double dy) {
         trans.prependTranslation(dx, dy);
         drawMap(parser);
     }
 
-    /**
-     * OBS STJÅLET FRA NUTAN
-     */
+    ///STJÅLET FRA NUTAN
     public void zoom(double dx, double dy, double factor) {
         pan(-dx, -dy);
         trans.prependScale(factor, factor);
@@ -131,10 +129,8 @@ public class View {
         drawMap(parser);
     }
 
-    /**
-     * Draws all roads. Method is called in {@link #drawMap(Parser)}
-     */
-    private void drawRoad() {
+    ///Draws all roads. Method is called in {@link #drawMap(Parser)}
+    private void drawRoads() {
         for (long id : parser.getRoads().keySet()) {
             Road road = parser.getRoads().get(id);
             if (road.getRoadType().equals("subway")) continue;
@@ -142,10 +138,8 @@ public class View {
         }
     }
 
-    /**
-     * Draws all polygons (aka. buildings). Method is called in {@link #drawMap(Parser)}
-     */
-    private void drawPolygon() {
+    ///Draws all polygons (aka. buildings). Method is called in {@link #drawMap(Parser)}
+    private void drawPolygons() {
         Polygon polygon;
         for (long id : parser.getPolygons().keySet()) {
             polygon = parser.getPolygons().get(id);
@@ -153,9 +147,6 @@ public class View {
         }
     }
 
-    //region getters and setters
-    Stage getStage() {
-        return stage;
-    }
-    //endregion
+    //GETTERS AND SETTERS
+    Stage getStage() { return stage; }
 }
