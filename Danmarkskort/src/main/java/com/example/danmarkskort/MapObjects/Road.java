@@ -9,6 +9,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public class Road implements Serializable {
@@ -69,6 +70,10 @@ public class Road implements Serializable {
         lines.add(new Line(startNode, nodes.getLast()));
     }
 
+    /**
+     * Draws the road on a given canvas. This method excludes roads like metro's which are underground. See {@link #drawMetro(Canvas)} for the ability to draw the metro
+     * @param mapCanvas the canvas where the road will be drawn on
+     */
     public void drawRoad(Canvas mapCanvas) {
         assert mapCanvas != null;
         GraphicsContext graphicsContext = mapCanvas.getGraphicsContext2D();
@@ -76,6 +81,13 @@ public class Road implements Serializable {
             line.drawLine(graphicsContext);
         }
     }
+
+    /**
+     * Draws the metro
+     * @param mapCanvas
+     */
+    @Deprecated
+    public void drawMetro(Canvas mapCanvas) {}
 
     //region getters
     public Set<Line> getLines() {
@@ -88,6 +100,7 @@ public class Road implements Serializable {
     public List<Node> getNodes() {
         return nodes;
     }
+    public boolean hasRoadType() { return !roadType.isEmpty(); }
     //endregion
 
     /**

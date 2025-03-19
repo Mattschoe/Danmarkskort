@@ -84,6 +84,18 @@ public class Parser implements Serializable {
                 }
             }
         }
+
+        //TEST
+        HashSet<String> differentRoads = new HashSet<>();
+        for (Road road : id2Road.values()) {
+            differentRoads.add(road.getRoadType());
+            // if (road.hasRoadType()) System.out.println(road.getRoadType());
+        }
+
+        for (String roadType : differentRoads) {
+            System.out.println(roadType);
+        }
+        //TEST
     }
 
     /**
@@ -128,11 +140,10 @@ public class Parser implements Serializable {
     }
 
     /**
-     * parses a {@link Polygon} a Polygon is a subset of way. then returns it.
-     * @param input
-     * @param nodesInPolygon
-     * @return
-     * @throws XMLStreamException
+     * Parses a {@link Polygon} a Polygon is a subset of way. then returns it.
+     * @param input the XMLStreamReader that currently is sitting at the beginning of the to-be-parsed Polygon
+     * @param nodesInPolygon the nodes related to the to-be-parsed Polygon
+     * @return Road which should then be stored in the map {@code id2Polygon} for further reference
      */
     private Polygon parsePolygon(XMLStreamReader input, List<Node> nodesInPolygon) throws XMLStreamException {
         assert nodesInPolygon != null;
@@ -191,6 +202,7 @@ public class Parser implements Serializable {
         //Loops through tags and saves them
         int nextInput = firstTag;
         while (input.hasNext()) {
+            System.out.println("ny tag!");
             //End of Road
             if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) break;
 
@@ -199,24 +211,31 @@ public class Parser implements Serializable {
                 String key = input.getAttributeValue(null, "k"); //for fat i "k" attribute som fx "maxSpeed"
                 String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
-                switch (key) {
-                    case "highway":
-                        roadType = value;
-                        break;
-                    case "maxspeed":
-                        maxSpeed = Integer.parseInt(value);
-                        hasMaxSpeed = true; //Sætter maxSpeed til value og sætter hasMaxSpeed til true.
-                        break;
-                    case "bicycle":
-                        bicycle = value.equals("yes");
-                        break;
-                    case "foot":
-                        foot = value.equals("yes");
-                        break;
+                if (key.equals("highway")) {
+                    roadType = value;
+                } else if (key.equals("maxspeed")) {
+                    maxSpeed = Integer.parseInt(value);
+                    hasMaxSpeed = true;
+                } else if (key.equals("bicycle")) {
+                    bicycle = value.equals("true");
+                } else if (key.equals("foot")) {
+                    foot = value.equals("yes");
+                } else if (key.equals("subway")) {
+                    if (value.equals("yes")) roadType = value;
                 }
+                
+                //Also saves the metro's
+                switch (value) {
+                    case "subway":
+                        System.out.println("HEr!");
+                        roadType = value;
+                }
+
             } else { //If it's anything BUT a "tag" element
+                System.out.println("5");
                 break;
             }
+            System.out.println("6");
             nextInput = input.next(); //Moves on to the next "tag" element
         }
 
