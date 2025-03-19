@@ -273,6 +273,11 @@ public class Parser implements Serializable {
         double lat = Double.parseDouble(input.getAttributeValue(null, "lat"));
         double lon = Double.parseDouble(input.getAttributeValue(null, "lon"));
 
+        //TESTING
+        if (id == 340533737) {
+            System.out.println("Hej :)");
+        }
+
         int nextInput = input.next();
         //If simple node, saves it and returns
         if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("node")) {
@@ -286,6 +291,11 @@ public class Parser implements Serializable {
         int postcode = 0;
         String street = null;
         while (input.hasNext()) {
+            //End of Road
+            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("node")) {
+                break;
+            }
+
             if (nextInput == XMLStreamConstants.START_ELEMENT && input.getLocalName().equals("tag")) {
                 String key = input.getAttributeValue(null, "k");
                 String value = input.getAttributeValue(null, "v");
@@ -299,10 +309,8 @@ public class Parser implements Serializable {
                 } else if (key.equals("addr:street")) {
                     street = value;
                 }
-                nextInput = input.next();
-            } else {
-                break;
             }
+            nextInput = input.next();
         }
 
         //Creates a complex 'Node' unless it doesn't have any of the elements of a complex 'Node', then it just makes a simple one (Mayb change later)
