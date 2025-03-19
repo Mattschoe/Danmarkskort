@@ -11,12 +11,16 @@ public class Search {
         Set<String> streetNames = initializeAllStreetNames(unsortedNodes.values());
         streets = new Street[streetNames.size()];
 
+        //Creates all the streets and puts them in the streets array
         int i = 0;
         for (String street : streetNames) {
             streets[i] = new Street(street);
             i++;
         }
+
+        //Sorts array and puts all nodes in the respectively array
         sortAddresses();
+        putNodeInStreets();
     }
 
     /**
@@ -36,15 +40,18 @@ public class Search {
         return result;
     }
 
+    /**
+     * Sorts the addresses using mergesort and changes the value of the {@code streets} array to a sorted one
+     */
     private void sortAddresses() {
         MergeSort mergeSort = new MergeSort();
         mergeSort.sort(streets);
 
-        Street[] sortedArray = mergeSort.getSortedArray();
+        streets = mergeSort.getSortedArray();
 
         //TESTING
-        for (int i = 0; i < sortedArray.length; i++) {
-            System.out.println(sortedArray[i]);
+        for (int i = 0; i < streets.length; i++) {
+            System.out.println(streets[i]);
         }
     }
 
