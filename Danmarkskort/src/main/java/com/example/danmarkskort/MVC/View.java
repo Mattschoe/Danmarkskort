@@ -69,11 +69,8 @@ public class View {
         }
     }
 
-    Stage getStage() {
-        return stage;
-    }
-
-    void initializeCanvas() {
+    ///Giver Canvas en Transform og bunden højde/bredde
+    private void initializeCanvas() {
         //Canvas'et og dets GraphicsContext gemmes
         canvas = controller.getCanvas();
         graphicsContext = canvas.getGraphicsContext2D();
@@ -87,9 +84,6 @@ public class View {
         //Listeners tilføjes, der redrawer Canvas'et når vinduet skifter størrelse
         scene.widthProperty().addListener(_ -> drawMap(parser));
         scene.heightProperty().addListener(_ -> drawMap(parser));
-
-        //Canvas'et tegnes
-        //updateCanvas(canvas);
     }
 
     /**
@@ -102,11 +96,9 @@ public class View {
 
         //Sets up the graphicsContext for drawing the map (Packs it in a box and sets stroke settings
         graphicsContext.setTransform(new Affine());
-        graphicsContext.setFill(Color.POWDERBLUE);
+        graphicsContext.setFill(Color.ANTIQUEWHITE);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setTransform(trans);
-        graphicsContext.setLineWidth(1/Math.sqrt(trans.determinant()));
-        graphicsContext.setStroke(Color.WHITE.darker());
 
         //Draws map
         drawRoads();
@@ -115,21 +107,21 @@ public class View {
         if (firstTimeDrawingMap) {
             System.out.println("Done drawing!");
             firstTimeDrawingMap = false;
-        }
 
+            pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
+            double factor = 0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]);
+            zoom(0, 0, factor);
+            System.out.println(factor);
+        }
     }
 
-    /**
-     * OBS STJÅLET FRA NUTAN
-     */
+    ///STJÅLET FRA NUTAN
     public void pan(double dx, double dy) {
         trans.prependTranslation(dx, dy);
         drawMap(parser);
     }
 
-    /**
-     * OBS STJÅLET FRA NUTAN
-     */
+    ///STJÅLET FRA NUTAN
     public void zoom(double dx, double dy, double factor) {
         pan(-dx, -dy);
         trans.prependScale(factor, factor);
@@ -137,9 +129,7 @@ public class View {
         drawMap(parser);
     }
 
-    /**
-     * Draws all roads. Method is called in {@link #drawMap(Parser)}
-     */
+    ///Draws all roads. Method is called in {@link #drawMap(Parser)}
     private void drawRoads() {
         Road road;
         for (long id : parser.getRoads().keySet()) {
@@ -148,9 +138,7 @@ public class View {
         }
     }
 
-    /**
-     * Draws all polygons (aka. buildings). Method is called in {@link #drawMap(Parser)}
-     */
+    ///Draws all polygons (aka. buildings). Method is called in {@link #drawMap(Parser)}
     private void drawPolygons() {
         Polygon polygon;
         for (long id : parser.getPolygons().keySet()) {
@@ -158,4 +146,7 @@ public class View {
             polygon.drawPolygon(graphicsContext);
         }
     }
+
+    //GETTERS AND SETTERS
+    Stage getStage() { return stage; }
 }

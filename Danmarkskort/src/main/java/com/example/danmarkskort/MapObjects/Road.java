@@ -50,9 +50,7 @@ public class Road implements Serializable {
         createLines();
     }
 
-    /**
-     * Creates the lines between the {@link Node}'s (Used later for drawing)
-     */
+    ///Creates the lines between the {@link Node}'s (Used later for drawing)
     private void createLines() {
         //Tegner en linje fra den første node til den sidste i rækkefølge. Slutter af med at lave en linje mellem den sidste og første
         Node startNode = nodes.getFirst();
@@ -66,29 +64,31 @@ public class Road implements Serializable {
     public void drawRoad(Canvas mapCanvas) {
         assert mapCanvas != null;
         GraphicsContext graphicsContext = mapCanvas.getGraphicsContext2D();
+        if (roadType.equals("coastline")) {
+            graphicsContext.setStroke(Color.ORANGE);
+            graphicsContext.setLineWidth(2/Math.sqrt(graphicsContext.getTransform().determinant()));
+        }
+        else {
+            graphicsContext.setStroke(Color.WHITE.darker().darker());
+            graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
+        }
+
         for (Line line : lines) {
             line.drawLine(graphicsContext);
         }
     }
 
     //region getters
-    public Set<Line> getLines() {
-        return lines;
-    }
-    public boolean isWalkable() { return foot; }
-    public boolean isCyclable() { return bicycle; }
-    public int getMaxSpeed() { return maxSpeed; }
-    public String getRoadType() { return roadType; }
-    public List<Node> getNodes() {
-        return nodes;
-    }
+    public Set<Line>  getLines() { return lines;    }
+    public boolean  isWalkable() { return foot;     }
+    public boolean  isCyclable() { return bicycle;  }
+    public int     getMaxSpeed() { return maxSpeed; }
+    public String  getRoadType() { return roadType; }
+    public List<Node> getNodes() { return nodes;    }
     //endregion
 
-    /**
-     * Tom metode for at regne maxspeed hvis tagget mangler
-     * @Depricated
-     */
+    ///Tom metode for at regne maxspeed hvis tagget mangler
     private void calculateSpeed(){
-
+        //tom metode er tom
     }
 }

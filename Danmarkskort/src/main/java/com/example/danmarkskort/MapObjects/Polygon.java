@@ -12,7 +12,7 @@ public class Polygon implements Serializable {
     private double[] xPoints;
     private double[] yPoints;
     private int nSize;
-    private String type = ""; //The type of polygon, fx: "Building", "Coastline", etc.
+    private final String type; //The type of polygon, fx: "Building", "Coastline", etc.
     //endregion
 
     /**
@@ -22,10 +22,13 @@ public class Polygon implements Serializable {
     public Polygon(List<Node> nodes, String type) {
         assert nodes.size() != 1;
         this.nodes = nodes;
-        if (type != null) this.type = type;
+        if (type == null) this.type = "";
+        else this.type = type;
+
         createArrays();
     }
 
+    ///Skaber to Arrays til stroke- og fillPolygon-metoderne der kaldes ved tegning
     public void createArrays() {
         nodes.add(nodes.getFirst());
         nSize = nodes.size();
@@ -41,19 +44,16 @@ public class Polygon implements Serializable {
 
     public void drawPolygon(GraphicsContext gc) {
         Color color = switch(type) {
+            //Værdier fra "natural"-tag
             case "building"  -> Color.DARKGRAY;
-          //case "tree_row"  -> Color.GREENYELLOW;
-          //case "tree"      -> Color.LIGHTGREEN;
-          //case "tee"       -> Color.DARKVIOLET;
             case "water"     -> Color.CORNFLOWERBLUE;
-          //case "rock"      -> Color.BLACK;
             case "heath"     -> Color.CHARTREUSE;
-          //case "natural"   -> Color.FUCHSIA;
             case "coastline" -> Color.PERU;
 
+            //Værdier fra "landuse"-tag
             case "forest"            -> Color.GREEN;
             case "industrial"        -> Color.YELLOW;
-            case"residential"        -> Color.BURLYWOOD;
+            case "residential"       -> Color.BURLYWOOD;
             case "brownfield"        -> Color.SADDLEBROWN;
             case "grass"             -> Color.GREENYELLOW;
             case "landuse"           -> Color.DARKVIOLET;
@@ -63,10 +63,14 @@ public class Polygon implements Serializable {
             case "military"          -> Color.SPRINGGREEN;
             case "basin"             -> Color.CYAN;
             case "cemetery"          -> Color.CRIMSON;
+
+            //Standardværdi
             default -> Color.rgb(0, 74, 127, 0.2);
         };
+
         gc.setStroke(color.darker().darker());
         gc.setFill(color);
+
         gc.strokePolygon(xPoints, yPoints, nSize);
         gc.fillPolygon(xPoints, yPoints, nSize);
     }
