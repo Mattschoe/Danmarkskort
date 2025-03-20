@@ -90,7 +90,6 @@ class ParserTest {
         parser.parseOSM(new File("data/test1.2.osm"));
         Map<Long, Node> Id2node = parser.getNodes();
         int numberOfCorrectNodes = 0;
-        System.out.println(Id2node.size());
 
         for (long id : Id2node.keySet()) {
             if (id == 125403) {
@@ -114,9 +113,7 @@ class ParserTest {
 
         if (numberOfCorrectNodes == 4) {
             assertTrue(true);
-            System.out.println(numberOfCorrectNodes);
         } else {
-            System.out.println(numberOfCorrectNodes);
             fail();
         }
     }
@@ -173,9 +170,7 @@ class ParserTest {
         Map<Long, Node> Id2node = parser.getNodes();
 
         int numberOfCorrectRoads = 0;
-
-        System.out.println(Id2road.size());
-
+        
         for (long id : Id2road.keySet()) {
 
             if (id == 1794682) {
@@ -331,7 +326,6 @@ class ParserTest {
         }
         if (numberOfCorrectPolygons == 60) {
             assertTrue(true);
-            System.out.println("Number of correct polygons: " + numberOfCorrectPolygons);
         } else {
             fail();
         }
