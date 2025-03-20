@@ -8,6 +8,7 @@ public class Search {
     //region fields
     ///A list of streets (no duplicates) that the parser has parsed
     private Street[] streets;
+    BinarySearch search;
     //endregion
 
     /**
@@ -18,6 +19,7 @@ public class Search {
         //Gets all street names and saves them in a set
         Set<String> streetNames = initializeAllStreetNames(nodesWithStreetAddresses);
         streets = new Street[streetNames.size()];
+        search = new BinarySearch();
 
         //Creates all the streets and puts them in the streets array
         int i = 0;
@@ -64,6 +66,14 @@ public class Search {
                 if (street.getStreetName().equals(node.getAddress()[3])) street.addNode(node);
             }
         }
+    }
+
+    /**
+     * Gives a specific Node from a given address
+     * @return the Node associated with that address. If it cant find a specific node it just returns the first in the list in Streets
+     */
+    public Node findNode(String address) {
+        return search.search(streets, address);
     }
 
     //region getters and setters
