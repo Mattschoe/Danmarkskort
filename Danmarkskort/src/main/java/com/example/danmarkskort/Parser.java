@@ -62,7 +62,7 @@ public class Parser implements Serializable {
                         while ((len = zipInputStream.read(buffer)) > 0) {
                             fos.write(buffer, 0, len);
                         }
-                       // fos.flush(); // Ensure all data is written before closing
+
                     }
                     zipInputStream.closeEntry();
                     break;
@@ -178,8 +178,8 @@ public class Parser implements Serializable {
             if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) break;
 
             if (nextInput == XMLStreamConstants.START_ELEMENT) {
-                String key = input.getAttributeValue(null, "k"); //for fat i "k" attribute som fx "maxSpeed"
-                String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
+                String key = input.getAttributeValue(null, "k"); //får fat i "k" attribute som fx "maxSpeed"
+                String value = input.getAttributeValue(null, "v"); // får fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
                 switch (key) {
                     case "natural", "landuse":
@@ -247,7 +247,7 @@ public class Parser implements Serializable {
             nextInput = input.next(); //Moves on to the next "tag" element
         }
 
-        //Instansierer en ny Road en road og tager stilling til om den har en maxSpeed eller ej.
+        //Instantierer en ny Road en road og tager stilling til om den har en maxSpeed eller ej.
         Road road;
         if (hasMaxSpeed){
             road = new Road(nodes, foot, bicycle, maxSpeed, roadType);
@@ -259,7 +259,7 @@ public class Parser implements Serializable {
 
     /**
      * Parses a {@link Node} from XMLStreamReader.next() and then adds it to id2Node
-     * @throws XMLStreamException if there is an error with the {@code XMLStreamReader}
+     * @throws XMLStreamException if there is a error with the {@code XMLStreamReader}
      */
     private void parseNode(XMLStreamReader input) throws XMLStreamException {
         //Saves the guaranteed values
