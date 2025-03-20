@@ -10,7 +10,6 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-
 public class Parser implements Serializable {
     //region fields
     @Serial private static final long serialVersionUID = 8838055424703291984L;
@@ -184,10 +183,10 @@ public class Parser implements Serializable {
                 String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
                 switch (key) {
-                    case "building":
-                        return new Polygon(nodesInPolygon, "building");
                     case "natural", "landuse":
                         return new Polygon(nodesInPolygon, value);
+                    case "building":
+                        return new Polygon(nodesInPolygon, "building");
                     case "place":
                         if(value.equals("island")) { return new Polygon(nodesInPolygon, value); }
                         break;
@@ -226,7 +225,7 @@ public class Parser implements Serializable {
                 String key = input.getAttributeValue(null, "k"); //for fat i "k" attribute som fx "maxSpeed"
                 String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
-                if (key.equals("highway") || key.equals("nautral")) {
+                if (key.equals("highway") || key.equals("natural")) {
                     roadType = value;
                 } else if (key.equals("maxspeed")) {
                     maxSpeed = Integer.parseInt(value);
@@ -249,7 +248,7 @@ public class Parser implements Serializable {
             nextInput = input.next(); //Moves on to the next "tag" element
         }
 
-        //Instantierer en ny Road en road og tager stilling til om den har en maxSpeed eller ej.
+        //Instansierer en ny Road en road og tager stilling til om den har en maxSpeed eller ej.
         Road road;
         if (hasMaxSpeed){
             road = new Road(nodes, foot, bicycle, maxSpeed, roadType);
@@ -261,7 +260,7 @@ public class Parser implements Serializable {
 
     /**
      * Parses a {@link Node} from XMLStreamReader.next() and then adds it to id2Node
-     * @throws XMLStreamException if there is a error with the {@code XMLStreamReader}
+     * @throws XMLStreamException if there is an error with the {@code XMLStreamReader}
      */
     private void parseNode(XMLStreamReader input) throws XMLStreamException {
         //Saves the guaranteed values
@@ -272,7 +271,7 @@ public class Parser implements Serializable {
         int nextInput = input.next();
         //If simple node, saves it and returns
         if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("node")) {
-            id2Node.put(id, new Node(lat, lon)); //Instantierer new node (node containing no child-elements)
+            id2Node.put(id, new Node(lat, lon)); //Instansierer new node (node containing no child-elements)
             return;
         }
 
@@ -306,12 +305,11 @@ public class Parser implements Serializable {
 
         //Creates a complex 'Node' unless it doesn't have any of the elements of a complex 'Node', then it just makes a simple one (Mayb change later)
         if (city == null && houseNumber == null && postcode == 0 && street == null) {
-            id2Node.put(id, new Node(lat, lon)); //Instantierer new node (node containing no child-elements)
+            id2Node.put(id, new Node(lat, lon)); //Instansierer new node (node containing no child-elements)
         } else {
             id2Node.put(id, new Node(lat, lon, city, houseNumber, postcode, street));
         }
     }
-
 
     //GETTERS AND SETTERS
     public String getFileName() { return file.getName(); }

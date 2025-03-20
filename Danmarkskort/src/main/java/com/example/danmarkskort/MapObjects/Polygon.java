@@ -32,7 +32,6 @@ public class Polygon implements Serializable {
 
     ///Skaber to Arrays til stroke- og fillPolygon-metoderne der kaldes ved tegning
     public void createArrays() {
-        nodes.add(nodes.getFirst());
         nSize = nodes.size();
 
         xPoints = new double[nSize];

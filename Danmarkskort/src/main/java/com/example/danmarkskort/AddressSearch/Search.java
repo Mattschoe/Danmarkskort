@@ -10,16 +10,10 @@ public class Search {
     public Search(Map<Long, Node> unsortedNodes) {
         Set<String> streetNames = getAllSpecialStreetnames(unsortedNodes.values());
         adresses = new List[streetNames.size()];
-        System.out.println(streetNames.size());
 
         //Initializes array
         for (int i = 0; i < adresses.length; i++) {
             adresses[i] = new ArrayList<>();
-        }
-
-        //Test
-        for (String streetName : streetNames) {
-            System.out.println(streetName);
         }
     }
 
