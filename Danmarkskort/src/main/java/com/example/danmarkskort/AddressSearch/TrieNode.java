@@ -1,56 +1,19 @@
 package com.example.danmarkskort.AddressSearch;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import com.example.danmarkskort.MapObjects.Node;
 
 public class TrieNode {
+    int val;
+    TrieNode[] children = new TrieNode[29];
 
-    ArrayList<TrieNode> children;
-    HashSet<Character> bondosBasement;
-    boolean isEndOfWord; // Skal denne bruges??
-    char character;
-
-    public TrieNode(char character) {
-        this.children = new ArrayList<>();
-        this.isEndOfWord = false;
-        this.character = character;
+    public int getValue() {
+        return val;
     }
 
-    public void addChild(TrieNode child) {
-        getChildren().add(child);
+    public void setValue(int val) {
+        this.val = val;
     }
 
-    public TrieNode findChild(char character) {
-        for (TrieNode child : getChildren()) {
-            if (child.getCharacter() == character) {
-                return child;
-            }
-        }
-        return null;
-    }
-
-    public ArrayList<TrieNode> getChildren() {
+    public TrieNode[] getChildren() {
         return children;
     }
-
-    public char getCharacter() {
-        return character;
-    }
-
-    public boolean isEndOfWord() {
-        return isEndOfWord;
-    }
-
-    /*
-    TrieNode[] children;
-    boolean isEndOfWord;
-
-    public TrieNode() {
-    // Assuming lowercase English letters
-    children = new TrieNode[29];
-    isEndOfWord = false;
-    }
-     */
 }
