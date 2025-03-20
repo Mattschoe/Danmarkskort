@@ -270,6 +270,7 @@ class ParserTest {
                 }
                 if (Id2polygon.get(id).getType().equals("building")) {
                     numberOfCorrectPolygons++;
+                    System.out.println("Saved type in 1");
 
                 }
             } else if (id == 25520717) { //2 - checked
@@ -281,6 +282,7 @@ class ParserTest {
                 }
                 if (Id2polygon.get(id).getType().equals("building")) {
                     numberOfCorrectPolygons++;
+                    System.out.println("Saved type in 2");
                 }
 
             } else if (id == 26084902) { //3 - checked
@@ -311,6 +313,7 @@ class ParserTest {
                 }
                 if (Id2polygon.get(id).getType().equals("natural")) {
                     numberOfCorrectPolygons++;
+                    System.out.println("Saved type in 3");
                 }
             } else if (id == 277422094) { //4 - checked
                 nodes = Id2polygon.get(id).getNodes();
@@ -322,11 +325,13 @@ class ParserTest {
             }
             if (Id2polygon.get(id).getType().equals("natural")) { //8
                 numberOfCorrectPolygons++;
+                System.out.println("Saved type in 4");
             }
         }
         if (numberOfCorrectPolygons == 60) {
             assertTrue(true);
         } else {
+            System.out.println("Number of polygons: " + numberOfCorrectPolygons);
             fail();
         }
     }
