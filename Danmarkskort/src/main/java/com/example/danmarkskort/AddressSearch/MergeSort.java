@@ -35,6 +35,7 @@ public class MergeSort {
     }
 
     private void merge(Street[] inputArray, Street[] leftArray, Street[] rightArray) {
+        this.inputArray = inputArray;
         int leftLength = leftArray.length;
         int rightLength = rightArray.length;
         int i = 0, j = 0, k = 0;
@@ -65,7 +66,6 @@ public class MergeSort {
             j++;
             k++;
         }
-        System.out.println();
     }
 
     public Street[] getSortedArray() {
