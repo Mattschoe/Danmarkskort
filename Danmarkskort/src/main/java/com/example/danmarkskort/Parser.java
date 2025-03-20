@@ -190,6 +190,7 @@ public class Parser implements Serializable {
                         if(value.equals("island")) { return new Polygon(nodesInPolygon, value); }
                         break;
                 }
+                if (value.equals("Cityringen")) return new Polygon(nodesInPolygon, value); //TODO %% Find en bedre måde at IKKE tegne Cityringen
             }
         }
         return new Polygon(nodesInPolygon, null);

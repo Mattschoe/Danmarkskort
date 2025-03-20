@@ -135,8 +135,9 @@ public class View {
 
     ///Draws all roads. Method is called in {@link #drawMap(Parser)}
     private void drawRoads() {
+        Road road;
         for (long id : parser.getRoads().keySet()) {
-            Road road = parser.getRoads().get(id);
+            road = parser.getRoads().get(id);
             if (road.getRoadType().equals("route")) continue;
             road.drawRoad(canvas);
         }

@@ -78,9 +78,10 @@ public class Polygon implements Serializable {
             case "swimming_pool" -> Color.LIGHTBLUE;
 
             //Andre værdier
-            case "amenity"  -> Color.LIGHTGREY;
-            case "building" -> Color.DARKGREY;
-            case "surface"  -> Color.TAN;
+            case "amenity"    -> Color.LIGHTGREY;
+            case "building"   -> Color.DARKGREY;
+            case "surface"    -> Color.TAN;
+            case "Cityringen" -> Color.TRANSPARENT;
             default -> Color.rgb(0, 74, 127, 0.1);
         };
 
