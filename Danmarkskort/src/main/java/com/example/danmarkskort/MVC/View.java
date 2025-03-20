@@ -95,7 +95,8 @@ public class View {
      * @param parser the parser that model has stored
      */
     public void drawMap(Parser parser) {
-        assert parser != null && graphicsContext != null && canvas != null;
+        if (parser == null) return;
+        assert graphicsContext != null && canvas != null;
         this.parser = parser;
 
         //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
@@ -136,7 +137,7 @@ public class View {
     private void drawRoads() {
         for (long id : parser.getRoads().keySet()) {
             Road road = parser.getRoads().get(id);
-            if (road.getRoadType().equals("subway") || road.getRoadType().equals("ferry") || road.getRoadType().equals("tour") || road.getRoadType().equals("boat")) continue;
+            if (road.getRoadType().equals("route")) continue;
             road.drawRoad(canvas);
         }
     }

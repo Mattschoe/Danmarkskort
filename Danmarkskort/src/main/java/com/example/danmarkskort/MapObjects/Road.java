@@ -75,18 +75,22 @@ public class Road implements Serializable {
      */
     public void drawRoad(Canvas mapCanvas) {
         assert mapCanvas != null;
-        GraphicsContext graphicsContext = mapCanvas.getGraphicsContext2D();
-        if (roadType.equals("coastline")) {
-            graphicsContext.setStroke(Color.BLACK.brighter());
-            graphicsContext.setLineWidth(1.5/Math.sqrt(graphicsContext.getTransform().determinant()));
-        }
-        else {
-            graphicsContext.setStroke(Color.WHITE.darker().darker());
-            graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
+        GraphicsContext gc = mapCanvas.getGraphicsContext2D();
+
+        switch (roadType) {
+            case "route":
+                gc.setStroke(Color.DARKRED);
+                gc.setLineWidth(1/Math.sqrt(gc.getTransform().determinant())); break;
+            case "coastline":
+                gc.setStroke(Color.BLACK);
+                gc.setLineWidth(1.5/Math.sqrt(gc.getTransform().determinant())); break;
+            default:
+                gc.setStroke(Color.WHITE.darker().darker());
+                gc.setLineWidth(1/Math.sqrt(gc.getTransform().determinant())); break;
         }
 
         for (Line line : lines) {
-            line.drawLine(graphicsContext);
+            line.drawLine(gc);
         }
     }
 

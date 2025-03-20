@@ -224,7 +224,7 @@ public class Parser implements Serializable {
                 String key = input.getAttributeValue(null, "k"); //for fat i "k" attribute som fx "maxSpeed"
                 String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
-                if (key.equals("highway") || key.equals("natural") || key.equals("route")) {
+                if (key.equals("highway") || key.equals("natural")) {
                     roadType = value;
                 } else if (key.equals("maxspeed")) {
                     maxSpeed = Integer.parseInt(value);
@@ -233,6 +233,8 @@ public class Parser implements Serializable {
                     bicycle = value.equals("true");
                 } else if (key.equals("foot")) {
                     foot = value.equals("yes");
+                } else if (key.equals("route")) {
+                    roadType = key;
                 }
             }
             nextInput = input.next(); //Moves on to the next "tag" element
