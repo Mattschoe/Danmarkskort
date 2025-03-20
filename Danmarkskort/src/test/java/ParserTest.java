@@ -130,7 +130,6 @@ class ParserTest {
         int numberOfCorrectAddresses = 0;
 
         for (long id : Id2node.keySet()) {
-
             if (id == 1418594827) {
                 address = Id2node.get(id).getAddress();
                 if (address[0].equals("København S")) {

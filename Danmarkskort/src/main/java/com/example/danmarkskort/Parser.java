@@ -303,7 +303,7 @@ public class Parser implements Serializable {
                 if (key == null || value == null) continue;
                 if (key.equals("addr:city")) {
                     city = value;
-                } else if (key.equals("addr:houseNumber")) {
+                } else if (key.equals("addr:housenumber")) {
                     houseNumber = value;
                 } else if (key.equals("addr:postcode")) {
                     postcode = Integer.parseInt(value);
