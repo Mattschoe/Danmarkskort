@@ -170,7 +170,7 @@ class ParserTest {
         Map<Long, Node> Id2node = parser.getNodes();
 
         int numberOfCorrectRoads = 0;
-        
+
         for (long id : Id2road.keySet()) {
 
             if (id == 1794682) {
