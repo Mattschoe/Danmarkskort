@@ -5,8 +5,10 @@ import com.example.danmarkskort.MapObjects.Node;
 import java.util.*;
 
 public class Search {
+    //region fields
     ///A list of streets (no duplicates) that the parser has parsed
     private Street[] streets;
+    //endregion
 
     /**
      * Saves all nodes in their given street via a sorted list of {@link Street}'s. Get this list via {@link #getStreets()} and search for a given street via a search algorithm
@@ -56,19 +58,11 @@ public class Search {
      * Puts the {@link Node} in the relevant address
      */
     private void putNodeInStreets(Collection<Node> nodes) {
-        //This is horrible and should be replaced later with binary search or another optimization algorithm
-        for (int i = 0; i < streets.length; i++) {
+        //This is horrible and should be replaced later with binary search or another optimization algorithm -M
+        for (Street street : streets) {
             for (Node node : nodes) {
-                if (streets[i].getStreetName().equals(node.getAddress()[3])) streets[i].addNode(node);
+                if (street.getStreetName().equals(node.getAddress()[3])) street.addNode(node);
             }
-        }
-
-        for (int i = 0; i < streets.length; i++) {
-            System.out.println(streets[i].getStreetName());
-            for (Node node : streets[i].getNodes()) {
-                System.out.println(node.getAddress()[1] + " " + node.getAddress()[0]);
-            }
-            System.out.println();
         }
     }
 
