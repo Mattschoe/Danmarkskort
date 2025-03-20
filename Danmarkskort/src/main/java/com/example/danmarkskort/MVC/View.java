@@ -17,6 +17,7 @@ import java.net.URL;
 public class View {
     //region fields
     Affine trans;
+    Affine background;
     Canvas canvas;
     Controller controller;
     FXMLLoader root;
@@ -77,6 +78,7 @@ public class View {
         canvas = controller.getCanvas();
         graphicsContext = canvas.getGraphicsContext2D();
         trans = new Affine();
+        background = new Affine();
         graphicsContext.setTransform(trans);
 
         //Canvas højde og bredde bindes til vinduets
@@ -97,7 +99,7 @@ public class View {
         this.parser = parser;
 
         //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
-        graphicsContext.setTransform(new Affine());
+        graphicsContext.setTransform(background);
         graphicsContext.setFill(Color.ANTIQUEWHITE);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setTransform(trans);
