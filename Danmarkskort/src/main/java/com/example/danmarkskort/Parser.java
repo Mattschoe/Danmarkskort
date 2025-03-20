@@ -174,24 +174,25 @@ public class Parser implements Serializable {
             int nextInput = input.next();
             if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) break;
 
+
             if (nextInput == XMLStreamConstants.START_ELEMENT) {
-                String key = input.getAttributeValue(null, "k"); //for fat i "k" attribute som fx "maxSpeed"
-                String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
+                String key = input.getAttributeValue(null, "k"); //får fat i "k" attribute som fx "maxSpeed"
+                String value = input.getAttributeValue(null, "v"); // får fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
                 switch (key) {
                     case "building":
-                        building = value;
+                        building = key;
                         return new Polygon(nodesInPolygon,building);
 
                     case "natural":
                        if(value.equals("water")){
-                           natural = value;
+                           natural = key;
                            return new Polygon(nodesInPolygon,natural);
                        }
                         break;
                     case "place":
                         if(value.equals("island")){
-                            island = value;
+                            island = key;
                             return new Polygon(nodesInPolygon, island);
                         }
                         break;

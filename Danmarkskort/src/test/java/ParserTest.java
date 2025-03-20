@@ -257,11 +257,10 @@ class ParserTest {
 
         int numberOfCorrectPolygons = 0;
 
-       // System.out.println("Id2polygon size: " + Id2polygon.size());
+
 
         for (long id : Id2polygon.keySet()) {
-
-            if (id == 25466133) {//1
+            if (id == 25466133L) {//1 - checked
                 nodes = Id2polygon.get(id).getNodes();
                 for (Node node : nodes) {
                     if (Id2node.get(564838218L) == node ||
@@ -290,30 +289,26 @@ class ParserTest {
                             Id2node.get(3093671662L) == node ||
                             Id2node.get(564838220L) == node) {
                         numberOfCorrectPolygons++;
-                        System.out.println("counted correctpolygons up by 1 in 1");
+                        //System.out.println("Actual number of polygons in 1: " + numberOfCorrectPolygons);
                     }
-
-                    if (Id2polygon.get(id).getType().equals("building")) { //2
-                        numberOfCorrectPolygons++;
-                        System.out.println("test 1 type: building");
-                    }
+                }
+                if (Id2polygon.get(id).getType().equals("building")) {
+                    numberOfCorrectPolygons++;
 
                 }
-            } else if (id == 25520717) { //3
+            } else if (id == 25520717) { //2 - checked
                 nodes = Id2polygon.get(id).getNodes();
                 for (Node node : nodes) {
                     if (Id2node.get(278114496L) == node || Id2node.get(278114497L) == node || Id2node.get(278114498L) == node || Id2node.get(278114499L) == node) {
                         numberOfCorrectPolygons++;
-                        //System.out.println("counted correctpolygons up by 1 in 3");
+                        //System.out.println("Actual number of polygons in 2: " + numberOfCorrectPolygons);
                     }
-
-                    if (Id2polygon.get(id).getType().equals("building")) {//4
-                        numberOfCorrectPolygons++;
-                       // System.out.println("counted correctpolygons up by 1 in 4");
-                    }
-
                 }
-            } else if (id == 26084902) { //5
+                if (Id2polygon.get(id).getType().equals("building")) {
+                    numberOfCorrectPolygons++;
+                }
+
+            } else if (id == 26084902) { //3 - checked
                 nodes = Id2polygon.get(id).getNodes();
                 for (Node node : nodes) {
                     if (Id2node.get(285455225L) == node ||
@@ -335,42 +330,33 @@ class ParserTest {
                             Id2node.get(527857417L) == node ||
                             Id2node.get(527857411L) == node ||
                             Id2node.get(527857410L) == node ||
-                            Id2node.get(527857415L) == node) {
+                            Id2node .get(527857415L) == node) {
                         numberOfCorrectPolygons++;
-                        //System.out.println("counted correctpolygons up by 1 in 5");
+                        //System.out.println("Actual number of polygons in 3: " + numberOfCorrectPolygons);
                     }
-
-                    if (Id2polygon.get(id).getType().equals("natural")) { //6
-                        numberOfCorrectPolygons++;
-                        //System.out.println("counted correctpolygons up by 1 in 6");
-                    }
-
                 }
-            } else if (id == 277422094) { //7
+                if (Id2polygon.get(id).getType().equals("natural")) {
+                    numberOfCorrectPolygons++;
+                }
+            } else if (id == 277422094) { //4 - checked
                 nodes = Id2polygon.get(id).getNodes();
                 for (Node node : nodes) {
                     if (Id2node.get(2819167793L) == node || Id2node.get(2819167794L) == node || Id2node.get(2819167795L) == node) {
                         numberOfCorrectPolygons++;
-                      //  System.out.println("counted correctpolygons up by 1 in 7");
-                    }
-
-                    if (Id2polygon.get(id).getType().equals("natural")) { //8
-                        numberOfCorrectPolygons++;
-                        //System.out.println("counted correctpolygons up by 1 in 8");
-                    }
-
                     }
                 }
-
+                }
+            if (Id2polygon.get(id).getType().equals("natural")) { //8
+                numberOfCorrectPolygons++;
+            }
             }
 
-            if (numberOfCorrectPolygons == 59) {
+            if (numberOfCorrectPolygons == 60) {
                 assertTrue(true);
-            } else {
                 System.out.println("Number of correct polygons: " + numberOfCorrectPolygons);
+            } else {
                 fail();
             }
-
         }
     }
 
