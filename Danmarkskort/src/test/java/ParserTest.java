@@ -40,19 +40,18 @@ class ParserTest {
         } catch (XMLStreamException e) {
             fail();
         }
-
     }
 
     @Test
     public void kanIndlaeseRigtigTypeFil() throws FileNotFoundException, IOException {
         // Kan indlæse OSM-fil
         if (filename.endsWith(".osm") || filename.endsWith(".obj") || filename.endsWith(".txt")) {
-           try {
-               parser.parseOSM(testFile);
-               assertTrue(true);
-           } catch (IOException | XMLStreamException e) {
-               fail(e);
-           }
+            try {
+                parser.parseOSM(testFile);
+                assertTrue(true);
+            } catch (IOException | XMLStreamException e) {
+                fail(e);
+            }
         } else {
             throw new IOException("Wrong filetype!");
         }
@@ -113,15 +112,14 @@ class ParserTest {
             }
         }
 
-            if (numberOfCorrectNodes == 4) {
-                assertTrue(true);
-                System.out.println(numberOfCorrectNodes);
-            } else {
-                System.out.println(numberOfCorrectNodes);
-                fail();
-            }
-
+        if (numberOfCorrectNodes == 4) {
+            assertTrue(true);
+            System.out.println(numberOfCorrectNodes);
+        } else {
+            System.out.println(numberOfCorrectNodes);
+            fail();
         }
+    }
 
 
     @Test
@@ -168,7 +166,6 @@ class ParserTest {
     }
 
 
-
     @Test
     public void kanParseRoads() throws XMLStreamException, IOException {
 
@@ -207,11 +204,9 @@ class ParserTest {
                         numberOfCorrectRoads++;
                     }
 
-                        if (Id2road.get(id).getMaxSpeed() == 50) {
-                            numberOfCorrectRoads++;
-                        }
-
-
+                    if (Id2road.get(id).getMaxSpeed() == 50) {
+                        numberOfCorrectRoads++;
+                    }
                 }
             } else if (id == 1881915) {
                 nodes = Id2road.get(id).getNodes();
@@ -224,40 +219,28 @@ class ParserTest {
                         numberOfCorrectRoads++;
                     }
 
-
                     if (Id2road.get(id).getMaxSpeed() == 40) { //Mulighed for at en road ikke har en maxspeed?
-                            numberOfCorrectRoads++;
+                        numberOfCorrectRoads++;
                     }
-
-
                 }
             }
-
-            if (numberOfCorrectRoads == 20) {
-                assertTrue(true);
-            } else {
-                fail();
-            }
-
         }
-
+        if (numberOfCorrectRoads == 24) {
+            assertTrue(true);
+        } else {
+            fail();
+        }
     }
-
-
-
 
 
     @Test
     public void kanParsePolygoner() throws XMLStreamException, IOException {
-
         parser.parseOSM(testFile);
         Map<Long, Road> Id2road = parser.getRoads();
         Map<Long, Node> Id2node = parser.getNodes();
         Map<Long, Polygon> Id2polygon = parser.getPolygons();
 
         int numberOfCorrectPolygons = 0;
-
-
 
         for (long id : Id2polygon.keySet()) {
             if (id == 25466133L) {//1 - checked
@@ -289,7 +272,6 @@ class ParserTest {
                             Id2node.get(3093671662L) == node ||
                             Id2node.get(564838220L) == node) {
                         numberOfCorrectPolygons++;
-                        //System.out.println("Actual number of polygons in 1: " + numberOfCorrectPolygons);
                     }
                 }
                 if (Id2polygon.get(id).getType().equals("building")) {
@@ -301,7 +283,6 @@ class ParserTest {
                 for (Node node : nodes) {
                     if (Id2node.get(278114496L) == node || Id2node.get(278114497L) == node || Id2node.get(278114498L) == node || Id2node.get(278114499L) == node) {
                         numberOfCorrectPolygons++;
-                        //System.out.println("Actual number of polygons in 2: " + numberOfCorrectPolygons);
                     }
                 }
                 if (Id2polygon.get(id).getType().equals("building")) {
@@ -332,7 +313,6 @@ class ParserTest {
                             Id2node.get(527857410L) == node ||
                             Id2node .get(527857415L) == node) {
                         numberOfCorrectPolygons++;
-                        //System.out.println("Actual number of polygons in 3: " + numberOfCorrectPolygons);
                     }
                 }
                 if (Id2polygon.get(id).getType().equals("natural")) {
@@ -345,20 +325,19 @@ class ParserTest {
                         numberOfCorrectPolygons++;
                     }
                 }
-                }
+            }
             if (Id2polygon.get(id).getType().equals("natural")) { //8
                 numberOfCorrectPolygons++;
             }
-            }
-
-            if (numberOfCorrectPolygons == 60) {
-                assertTrue(true);
-                System.out.println("Number of correct polygons: " + numberOfCorrectPolygons);
-            } else {
-                fail();
-            }
+        }
+        if (numberOfCorrectPolygons == 60) {
+            assertTrue(true);
+            System.out.println("Number of correct polygons: " + numberOfCorrectPolygons);
+        } else {
+            fail();
         }
     }
+}
 
 
 
