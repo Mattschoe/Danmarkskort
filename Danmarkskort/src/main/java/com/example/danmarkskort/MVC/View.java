@@ -96,11 +96,12 @@ public class View {
         assert parser != null && graphicsContext != null && canvas != null;
         this.parser = parser;
 
-        //Sets up the graphicsContext for drawing the map (Packs it in a box and sets stroke settings
+        //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
         graphicsContext.setTransform(new Affine());
         graphicsContext.setFill(Color.ANTIQUEWHITE);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setTransform(trans);
+        graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
         //Draws map
         drawRoads();
@@ -133,12 +134,12 @@ public class View {
     private void drawRoads() {
         for (long id : parser.getRoads().keySet()) {
             Road road = parser.getRoads().get(id);
-            if (road.getRoadType().equals("subway")) continue;
+            if (road.getRoadType().equals("subway") || road.getRoadType().equals("ferry") || road.getRoadType().equals("tour") || road.getRoadType().equals("boat")) continue;
             road.drawRoad(canvas);
         }
     }
 
-    ///Draws all polygons (aka. buildings). Method is called in {@link #drawMap(Parser)}
+    ///Draws all polygons (buildings etc.). Method is called in {@link #drawMap(Parser)}
     private void drawPolygons() {
         Polygon polygon;
         for (long id : parser.getPolygons().keySet()) {

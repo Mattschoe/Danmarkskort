@@ -77,8 +77,8 @@ public class Road implements Serializable {
         assert mapCanvas != null;
         GraphicsContext graphicsContext = mapCanvas.getGraphicsContext2D();
         if (roadType.equals("coastline")) {
-            graphicsContext.setStroke(Color.ORANGE);
-            graphicsContext.setLineWidth(2/Math.sqrt(graphicsContext.getTransform().determinant()));
+            graphicsContext.setStroke(Color.BLACK.brighter());
+            graphicsContext.setLineWidth(1.5/Math.sqrt(graphicsContext.getTransform().determinant()));
         }
         else {
             graphicsContext.setStroke(Color.WHITE.darker().darker());
@@ -98,16 +98,12 @@ public class Road implements Serializable {
     public void drawMetro(Canvas mapCanvas) {}
 
     //region getters
-    public Set<Line> getLines() {
-        return lines;
-    }
-    public boolean isWalkable() { return foot; }
-    public boolean isCyclable() { return bicycle; }
-    public int getMaxSpeed() { return maxSpeed; }
-    public String getRoadType() { return roadType; }
-    public List<Node> getNodes() {
-        return nodes;
-    }
+    public Set<Line>  getLines() { return lines;    }
+    public boolean  isWalkable() { return foot;     }
+    public boolean  isCyclable() { return bicycle;  }
+    public int     getMaxSpeed() { return maxSpeed; }
+    public String  getRoadType() { return roadType; }
+    public List<Node> getNodes() { return nodes;    }
     public boolean hasRoadType() { return !roadType.isEmpty(); }
     //endregion
 
