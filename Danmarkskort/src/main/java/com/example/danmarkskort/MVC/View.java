@@ -95,7 +95,7 @@ public class View {
      * @param parser the parser that model has stored
      */
     public void drawMap(Parser parser) {
-        if (parser == null) return;
+        if (parser == null) return; //TODO %% Evt. find en bedre måde at sørge for at initializeCanvas IKKE køres før kortet loades
         assert graphicsContext != null && canvas != null;
         this.parser = parser;
 
