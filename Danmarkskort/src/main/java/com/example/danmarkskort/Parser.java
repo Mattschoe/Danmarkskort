@@ -65,7 +65,6 @@ public class Parser implements Serializable {
                        // fos.flush(); // Ensure all data is written before closing
                     }
                     zipInputStream.closeEntry();
-                   // System.out.println("Extracted file path: " + extractedFile.getAbsolutePath());
                     break;
                 }
             }
@@ -281,7 +280,7 @@ public class Parser implements Serializable {
         int postcode = 0;
         String street = null;
         while (input.hasNext()) {
-            //End of Road
+            //End of Node
             if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("node")) {
                 break;
             }
@@ -292,7 +291,7 @@ public class Parser implements Serializable {
                 if (key == null || value == null) continue;
                 if (key.equals("addr:city")) {
                     city = value;
-                } else if (key.equals("addr:houseNumber")) {
+                } else if (key.equals("addr:housenumber")) {
                     houseNumber = value;
                 } else if (key.equals("addr:postcode")) {
                     postcode = Integer.parseInt(value);
