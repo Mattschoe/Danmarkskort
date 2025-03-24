@@ -1,15 +1,17 @@
 package com.example.danmarkskort.AddressSearch;
 import com.example.danmarkskort.MapObjects.Node;
+import com.sun.jdi.Value;
+
 
 public class TrieNode {
-    int val;
+    Object val;
     TrieNode[] children = new TrieNode[29];
 
-    public int getValue() {
+    public Object getValue() {
         return val;
     }
 
-    public void setValue(int val) {
+    public void setValue(Object val) {
         this.val = val;
     }
 
