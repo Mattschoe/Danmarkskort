@@ -21,6 +21,7 @@ public class Road implements Serializable {
     private final boolean bicycle;
     private int maxSpeed;
     private final String roadType;
+
     //endregion
     // private static final long serialVersionUID;
 
