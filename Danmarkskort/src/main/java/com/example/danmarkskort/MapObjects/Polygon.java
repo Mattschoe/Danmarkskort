@@ -46,27 +46,43 @@ public class Polygon implements Serializable {
     public void drawPolygon(GraphicsContext gc) {
         Color color = switch(type) {
             //Værdier fra "natural"-tag
-            case "building"  -> Color.DARKGRAY;
             case "water"     -> Color.CORNFLOWERBLUE;
-            case "heath"     -> Color.CHARTREUSE;
+            case "heath"     -> Color.SANDYBROWN;
             case "coastline" -> Color.PERU;
 
             //Værdier fra "landuse"-tag
-            case "forest"            -> Color.GREEN;
-            case "industrial"        -> Color.YELLOW;
+            case "forest"            -> Color.DARKOLIVEGREEN;
+            case "industrial"        -> Color.LIGHTYELLOW;
             case "residential"       -> Color.BURLYWOOD;
-            case "brownfield"        -> Color.SADDLEBROWN;
-            case "grass"             -> Color.GREENYELLOW;
+            case "brownfield"        -> Color.BURLYWOOD;
+            case "grass"             -> Color.DARKSEAGREEN;
             case "landuse"           -> Color.DARKVIOLET;
-            case "allotments"        -> Color.HOTPINK;
+            case "allotments"        -> Color.BURLYWOOD;
             case "recreation_ground" -> Color.LIGHTCORAL;
-            case "construction"      -> Color.TOMATO;
-            case "military"          -> Color.SPRINGGREEN;
-            case "basin"             -> Color.CYAN;
-            case "cemetery"          -> Color.CRIMSON;
+            case "construction"      -> Color.LIGHTSLATEGREY;
+            case "military"          -> Color.GOLDENROD;
+            case "basin"             -> Color.LIGHTBLUE;
+            case "cemetery"          -> Color.GREY;
 
-            //Standardværdi
-            default -> Color.rgb(0, 74, 127, 0.2);
+            //Værdier fra "leisure"-tag
+            case "marina"        -> Color.STEELBLUE;
+            case "sports_centre" -> Color.ROSYBROWN;
+            case "yes"           -> Color.DARKSEAGREEN;
+            case "picnic_table"  -> Color.PLUM;
+            case "playground"    -> Color.THISTLE;
+            case "garden"        -> Color.DARKSEAGREEN;
+            case "pitch"         -> Color.LIGHTCORAL;
+            case "track"         -> Color.CORAL;
+            case "leisure"       -> Color.BLACK;
+            case "park"          -> Color.DARKSEAGREEN;
+            case "swimming_pool" -> Color.LIGHTBLUE;
+
+            //Andre værdier
+            case "amenity"    -> Color.LIGHTGREY;
+            case "building"   -> Color.DARKGREY;
+            case "surface"    -> Color.TAN;
+            case "Cityringen" -> Color.TRANSPARENT;
+            default -> Color.rgb(0, 74, 127, 0.1);
         };
 
         gc.setStroke(color.darker().darker());

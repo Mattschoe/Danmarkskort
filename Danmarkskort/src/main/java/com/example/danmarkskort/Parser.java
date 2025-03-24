@@ -40,7 +40,6 @@ public class Parser implements Serializable {
         }
     }
 
-
     /**
      * Creates zipInputStream to read .osm.ZIP-file. Gets ZIP-entry in String format to use in
      * parseOSM().
@@ -182,14 +181,15 @@ public class Parser implements Serializable {
                 String value = input.getAttributeValue(null, "v"); // får fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
                 switch (key) {
-                    case "natural", "landuse":
+                    case "landuse", "leisure", "natural":
                         return new Polygon(nodesInPolygon, value);
-                    case "building":
-                        return new Polygon(nodesInPolygon, "building");
+                    case "amenity", "building", "surface":
+                        return new Polygon(nodesInPolygon, key);
                     case "place":
                         if(value.equals("island")) { return new Polygon(nodesInPolygon, value); }
                         break;
                 }
+                if (value.equals("Cityringen")) return new Polygon(nodesInPolygon, value); //TODO %% Find en bedre måde at IKKE tegne Cityringen
             }
         }
         return new Polygon(nodesInPolygon, null);
@@ -233,15 +233,8 @@ public class Parser implements Serializable {
                     bicycle = value.equals("true");
                 } else if (key.equals("foot")) {
                     foot = value.equals("yes");
-                } else if (key.equals("railway")) {
-                    if (value.equals("subway")) roadType = value;
-                }
-
-                //Value
-                if (value.equals("subway")) roadType = value;
-
-                if (key.equals("natural")){
-                    if (value.equals("coastline")) roadType = value;
+                } else if (key.equals("route")) {
+                    roadType = key;
                 }
             }
             nextInput = input.next(); //Moves on to the next "tag" element
