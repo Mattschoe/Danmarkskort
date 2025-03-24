@@ -5,8 +5,12 @@ import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.Parser;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.stage.Stage;
@@ -27,11 +31,12 @@ public class View {
     Scene scene;
     Stage stage;
     boolean firstTimeDrawingMap;
+    ImageView mapView;
     //endregion
 
     /** View-konstruktøren skifter scene ud fra en given stage og filstien til en FXML-fil
-     * @param stage givne stage -- ved start-up fås denne af Application's start-metode, ellers genbruger Controlleren Stage'en der allerede vises
-     * @param filename givne filsti -- f.eks. "startup.fxml" til start-scenen
+     * @param stage givne stage ved start-up fås denne af Application's start-metode, ellers genbruger Controlleren Stage'en der allerede vises
+     * @param filename givne filsti f.eks. "startup.fxml" til start-scenen
      * @throws IOException kastes hvis programmet fejler i at loade FXML-filen
      */
     public View(Stage stage, String filename) throws IOException {
@@ -67,9 +72,10 @@ public class View {
         stage.show();
 
         //Hvis vi laver en scene med et Canvas initialiseres og tegnes det
-        if (controller.getCanvas() != null) {
-            initializeCanvas();
-        }
+        if (controller.getCanvas() != null) initializeCanvas();
+
+        //Saves the map into an image so we can zoom and pan on the image
+
     }
 
     ///Giver Canvas en Transform og bunden højde/bredde
@@ -106,19 +112,34 @@ public class View {
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
-        //Draws map
         drawRoads();
         drawPolygons();
-        System.out.println("Done drawing!");
 
-
-        /* if (firstTimeDrawingMap) {
-            System.out.println("Done drawing!");
+        if (firstTimeDrawingMap) {
+            System.out.println("Finished first time drawing!");
             firstTimeDrawingMap = false;
 
             pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
             zoom(0, 0, 0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
-        } */
+        } else {
+            System.out.println("Showing image!");
+            changeMapCanvasToImage();
+        }
+    }
+
+    private void changeMapCanvasToImage() {
+        //Gets a image of the map canvas
+        WritableImage mapImage = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
+        canvas.snapshot(new SnapshotParameters(), mapImage);
+        ImageView mapImageView = new ImageView(mapImage);
+        mapImageView.setPreserveRatio(true);
+        mapImageView.setSmooth(true);
+        mapImageView.setCache(true);
+
+        //Replaces the canvas with map
+        AnchorPane canvasRoot = root.getRoot();
+        canvasRoot.getChildren().remove(canvas);
+        canvasRoot.getChildren().add(mapImageView);
     }
 
     ///STJÅLET FRA NUTAN
