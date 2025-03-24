@@ -83,8 +83,15 @@ public class Controller {
 
     /** Metode køres når man zoomer på Canvas'et */
     @FXML protected void onCanvasScroll(ScrollEvent e) {
-        double factor = e.getDeltaY();
-        view.zoom(e.getX(), e.getY(), Math.pow(1.01, factor));
+        double factor = Math.pow(1.01, e.getDeltaY());
+        double zoomLvl = view.getTrans().getMxx();
+
+        //Der zoomes kun hvis...
+        boolean cond1 = 2_000 < zoomLvl && zoomLvl < 140_000; //Hvis man er inde for zoom-grænserne
+        boolean cond2 = zoomLvl < 2_000   && factor > 1;      //Hvis man er zoomet max ud men man zoomer ind
+        boolean cond3 = zoomLvl > 140_000 && factor < 1;      //Hvis man er zoomet max ind men man zoomer ud
+
+        if (cond1 || cond2 || cond3) view.zoom(e.getX(), e.getY(), factor);
     }
 
     /** Metode køres når man slipper sit klik på Canvas'et */
@@ -113,16 +120,12 @@ public class Controller {
      * (Denne metode bruges kun af View-klassen en enkelt gang, så View og Controller kan snakke sammen)
      * @param view View'et som Controllerens view-felt sættes til
      */
-    void setView(View view) {
-        this.view = view;
-    }
+    void setView(View view) { this.view = view; }
 
     /** Returnerer Controllerens canvas-felt, der "populates" direkte idet en scene FXML-loades
      * (Denne metode bruges kun af View-klassen en enkelt gang, så View kan få Canvas'et af Controlleren)
      * @return Controllerens canvas-felt
      */
-    Canvas getCanvas() {
-        return canvas;
-    }
+    Canvas getCanvas() { return canvas; }
     //endregion
 }
