@@ -9,7 +9,11 @@ public class TrieST<Item> {
     public int R = 29; // Størrelse på alfabet (Radix)
     private TrieNode root; // root of trie
 
-    //Få ordets værdi... hvis -1 er det en fejl
+    /**
+     * Takes a string and returns its corresponding value by calling {@link #get(TrieNode, String, int)}
+     * @param word
+     * @return
+     */
     public Object get(String word) {
         TrieNode current = get(root, word, 0);
         if (current == null) return null; //EVT SKAL MATTHIAS' KODE AKTIVERES HER
