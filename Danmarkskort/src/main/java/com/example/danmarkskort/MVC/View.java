@@ -17,6 +17,7 @@ import java.net.URL;
 public class View {
     //region fields
     Affine trans;
+    Affine background;
     Canvas canvas;
     Controller controller;
     FXMLLoader root;
@@ -77,6 +78,7 @@ public class View {
         canvas = controller.getCanvas();
         graphicsContext = canvas.getGraphicsContext2D();
         trans = new Affine();
+        background = new Affine();
         graphicsContext.setTransform(trans);
 
         //Canvas højde og bredde bindes til vinduets
@@ -93,14 +95,16 @@ public class View {
      * @param parser the parser that model has stored
      */
     public void drawMap(Parser parser) {
-        assert parser != null && graphicsContext != null && canvas != null;
+        if (parser == null) return; //TODO %% Evt. find en bedre måde at sørge for at initializeCanvas IKKE køres før kortet loades
+        assert graphicsContext != null && canvas != null;
         this.parser = parser;
 
-        //Sets up the graphicsContext for drawing the map (Packs it in a box and sets stroke settings
-        graphicsContext.setTransform(new Affine());
+        //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
+        graphicsContext.setTransform(background);
         graphicsContext.setFill(Color.ANTIQUEWHITE);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setTransform(trans);
+        graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
         //Draws map
         drawRoads();
@@ -133,14 +137,15 @@ public class View {
 
     ///Draws all roads. Method is called in {@link #drawMap(Parser)}
     private void drawRoads() {
+        Road road;
         for (long id : parser.getRoads().keySet()) {
-            Road road = parser.getRoads().get(id);
-            if (road.getRoadType().equals("subway")) continue;
+            road = parser.getRoads().get(id);
+            if (road.getRoadType().equals("route")) continue;
             road.drawRoad(canvas);
         }
     }
 
-    ///Draws all polygons (aka. buildings). Method is called in {@link #drawMap(Parser)}
+    ///Draws all polygons (buildings etc.). Method is called in {@link #drawMap(Parser)}
     private void drawPolygons() {
         Polygon polygon;
         for (long id : parser.getPolygons().keySet()) {
