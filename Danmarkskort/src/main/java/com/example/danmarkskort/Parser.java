@@ -212,6 +212,7 @@ public class Parser implements Serializable {
         String roadType = "";
         boolean hasMaxSpeed = false;
         boolean significantHighway = false;
+
         //endregion
 
         //Loops through tags and saves them
@@ -227,7 +228,7 @@ public class Parser implements Serializable {
                 String key = input.getAttributeValue(null, "k"); //for fat i "k" attribute som fx "maxSpeed"
                 String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
-                if (key.equals("highway") || key.equals("natural") || key.equals("area:highway")){     //find ud af typen af highway, hvis det er en væsentlig vej, tilføj til sættet med væsentlige veje
+                if (key.equals("highway") || key.equals("natural") || key.equals("area:highway")){     //find ud af typen af highway
                     significantHighway = value.equals("motorway") || value.equals("trunk") || value.equals("primary") || value.equals("secondary") || value.equals("primary_link") || value.equals("secondary_link");
                     roadType = value;
                 } else if (key.equals("maxspeed")) {
@@ -263,7 +264,6 @@ public class Parser implements Serializable {
                 significantHighways.add(road);
             }
         }
-        System.out.println("Mængden af væsentlige veje: " + significantHighways.size());
         return road;
     }
 
@@ -280,7 +280,7 @@ public class Parser implements Serializable {
         int nextInput = input.next();
         //If simple node, saves it and returns
         if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("node")) {
-            id2Node.put(id, new Node(lat, lon)); //Instansierer new node (node containing no child-elements)
+            id2Node.put(id, new Node(lat, lon)); //Instantierer new node (node containing no child-elements)
             return;
         }
 
@@ -314,7 +314,7 @@ public class Parser implements Serializable {
 
         //Creates a complex 'Node' unless it doesn't have any of the elements of a complex 'Node', then it just makes a simple one (Mayb change later)
         if (city == null && houseNumber == null && postcode == 0 && street == null) {
-            id2Node.put(id, new Node(lat, lon)); //Instansierer new node (node containing no child-elements)
+            id2Node.put(id, new Node(lat, lon)); //Instantierer new node (node containing no child-elements)
         } else {
             id2Node.put(id, new Node(lat, lon, city, houseNumber, postcode, street));
         }
@@ -332,4 +332,5 @@ public class Parser implements Serializable {
      * @return the set of significant highways, which will be the only roads drawn when the map is zoomed out a certain amount
      */
     public Set<Road> getSignificantHighways() { return significantHighways; } //
+
 }

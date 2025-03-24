@@ -21,7 +21,7 @@ public class Road implements Serializable {
     private final boolean bicycle;
     private int maxSpeed;
     private final String roadType;
-    private boolean significantHighway; //om det er en væsentlig vej, der skal tegnes når kortet er zoomet ud
+
     //endregion
     // private static final long serialVersionUID;
 
