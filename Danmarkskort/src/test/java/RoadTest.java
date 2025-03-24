@@ -3,16 +3,18 @@ import com.example.danmarkskort.MapObjects.Road;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RoadTest {
-    HashSet<Node> nodes;
+    List<Node> nodes;
 
     @BeforeEach
     public void setup() {
-        nodes = new HashSet<>();
+        nodes = new ArrayList<>();
     }
 
     /**

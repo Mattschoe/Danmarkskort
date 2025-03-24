@@ -17,6 +17,7 @@ import java.net.URL;
 public class View {
     //region fields
     Affine trans;
+    Affine background;
     Canvas canvas;
     Controller controller;
     FXMLLoader root;
@@ -71,11 +72,13 @@ public class View {
         }
     }
 
-    void initializeCanvas() {
+    ///Giver Canvas en Transform og bunden højde/bredde
+    private void initializeCanvas() {
         //Canvas'et og dets GraphicsContext gemmes
         canvas = controller.getCanvas();
         graphicsContext = canvas.getGraphicsContext2D();
         trans = new Affine();
+        background = new Affine();
         graphicsContext.setTransform(trans);
 
         //Canvas højde og bredde bindes til vinduets
@@ -92,38 +95,39 @@ public class View {
      * @param parser the parser that model has stored
      */
     public void drawMap(Parser parser) {
-        assert parser != null && graphicsContext != null && canvas != null;
+        if (parser == null) return; //TODO %% Evt. find en bedre måde at sørge for at initializeCanvas IKKE køres før kortet loades
+        assert graphicsContext != null && canvas != null;
         this.parser = parser;
 
-        //Sets up the graphicsContext for drawing the map (Packs it in a box and sets stroke settings
-        graphicsContext.setTransform(new Affine());
+        //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
+        graphicsContext.setTransform(background);
         graphicsContext.setFill(Color.ANTIQUEWHITE);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setTransform(trans);
-        graphicsContext.setLineWidth(1/Math.sqrt(trans.determinant()));
-        graphicsContext.setStroke(Color.BLACK);
+        graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
         //Draws map
-        drawRoad();
-        drawPolygon();
+        drawRoads();
+        drawPolygons();
+        System.out.println("Done drawing!");
 
-        if (firstTimeDrawingMap) {
+
+        /* if (firstTimeDrawingMap) {
             System.out.println("Done drawing!");
             firstTimeDrawingMap = false;
-        }
+
+            pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
+            zoom(0, 0, 0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
+        } */
     }
 
-    /**
-     * OBS STJÅLET FRA NUTAN
-     */
+    ///STJÅLET FRA NUTAN
     public void pan(double dx, double dy) {
         trans.prependTranslation(dx, dy);
         drawMap(parser);
     }
 
-    /**
-     * OBS STJÅLET FRA NUTAN
-     */
+    ///STJÅLET FRA NUTAN
     public void zoom(double dx, double dy, double factor) {
         pan(-dx, -dy);
         trans.prependScale(factor, factor);
@@ -131,21 +135,18 @@ public class View {
         drawMap(parser);
     }
 
-    /**
-     * Draws all roads. Method is called in {@link #drawMap(Parser)}
-     */
-    private void drawRoad() {
+    ///Draws all roads. Method is called in {@link #drawMap(Parser)}
+    private void drawRoads() {
         Road road;
         for (long id : parser.getRoads().keySet()) {
             road = parser.getRoads().get(id);
+            if (road.getRoadType().equals("route")) continue;
             road.drawRoad(canvas);
         }
     }
 
-    /**
-     * Draws all polygons (aka. buildings). Method is called in {@link #drawMap(Parser)}
-     */
-    private void drawPolygon() {
+    ///Draws all polygons (buildings etc.). Method is called in {@link #drawMap(Parser)}
+    private void drawPolygons() {
         Polygon polygon;
         for (long id : parser.getPolygons().keySet()) {
             polygon = parser.getPolygons().get(id);
@@ -153,9 +154,6 @@ public class View {
         }
     }
 
-    //region getters and setters
-    Stage getStage() {
-        return stage;
-    }
-    //endregion
+    //GETTERS AND SETTERS
+    Stage getStage() { return stage; }
 }

@@ -1,14 +1,16 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.AddressSearch.Search;
 import com.example.danmarkskort.Exceptions.ParserSavingException;
-import com.example.danmarkskort.MapObjects.Line;
 import com.example.danmarkskort.MapObjects.Node;
-import com.example.danmarkskort.MapObjects.Polygon;
 import com.example.danmarkskort.Parser;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 
 import java.io.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Model {
     //region Fields
@@ -51,7 +53,9 @@ public class Model {
             }
         }
         assert parser != null;
-        System.out.println(ObjectStreamClass.lookup(Parser.class).getSerialVersionUID());
+
+        //TESTING
+        //Search search = new Search(getAllNodesWithStreetAddresses(parser.getNodes().values()));
     }
 
     /**
@@ -79,6 +83,22 @@ public class Model {
     }
 
     //region getters and setters
+
+    /**
+     * Gives all nodes that contains an address
+     * @param allNodes all nodes parsed in the parser
+     * @return all nodes with a street address (f.ex: "Decembervej")
+     */
+    public Set<Node> getAllNodesWithStreetAddresses(Collection<Node> allNodes) {
+        Set<Node> nodesWithStreetAddresses = new HashSet<>();
+        for (Node node : allNodes) {
+            try {
+                assert node.getAddress()[3] != null;
+                nodesWithStreetAddresses.add(node);
+            } catch (NullPointerException _) {} //Doesn't have a street address
+        }
+        return nodesWithStreetAddresses;
+    }
     public Parser getParser() {
         return parser;
     }
