@@ -55,7 +55,7 @@ public class Model {
         assert parser != null;
 
         //TESTING
-        Search search = new Search(getAllNodesWithStreetAddresses(parser.getNodes().values()));
+        //Search search = new Search(getAllNodesWithStreetAddresses(parser.getNodes().values()));
     }
 
     /**

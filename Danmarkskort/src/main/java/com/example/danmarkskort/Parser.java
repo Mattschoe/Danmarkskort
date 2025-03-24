@@ -26,9 +26,9 @@ public class Parser implements Serializable {
      */
     public Parser(File file) throws NullPointerException, IOException, XMLStreamException, FactoryConfigurationError {
         this.file = file;
-        id2Node = new HashMap<>();
-        id2Road = new HashMap<>();
-        id2Polygon = new HashMap<>();
+        id2Node = new HashMap<>(7285439);
+        id2Road = new HashMap<>(489884);
+        id2Polygon = new HashMap<>(489884);
         bounds = new double[4];
 
         String filename = getFileName();
@@ -109,6 +109,7 @@ public class Parser implements Serializable {
                     }
                 }
             }
+            //System.out.println("Node count: " + id2Node.size() + " | Way count: " + (id2Road.size() + id2Polygon.size()));
         }
     }
 
