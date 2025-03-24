@@ -26,9 +26,9 @@ public class Parser implements Serializable {
      */
     public Parser(File file) throws NullPointerException, IOException, XMLStreamException, FactoryConfigurationError {
         this.file = file;
-        id2Node = new HashMap<>();
-        id2Road = new HashMap<>();
-        id2Polygon = new HashMap<>();
+        id2Node = new HashMap<>(7285439);
+        id2Road = new HashMap<>(489884);
+        id2Polygon = new HashMap<>(489884);
         bounds = new double[4];
 
         String filename = getFileName();
@@ -61,10 +61,9 @@ public class Parser implements Serializable {
                         while ((len = zipInputStream.read(buffer)) > 0) {
                             fos.write(buffer, 0, len);
                         }
-                       // fos.flush(); // Ensure all data is written before closing
+
                     }
                     zipInputStream.closeEntry();
-                   // System.out.println("Extracted file path: " + extractedFile.getAbsolutePath());
                     break;
                 }
             }
@@ -109,6 +108,7 @@ public class Parser implements Serializable {
                     }
                 }
             }
+            //System.out.println("Node count: " + id2Node.size() + " | Way count: " + (id2Road.size() + id2Polygon.size()));
         }
     }
 
@@ -178,8 +178,8 @@ public class Parser implements Serializable {
             if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) break;
 
             if (nextInput == XMLStreamConstants.START_ELEMENT) {
-                String key = input.getAttributeValue(null, "k"); //for fat i "k" attribute som fx "maxSpeed"
-                String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
+                String key = input.getAttributeValue(null, "k"); //får fat i "k" attribute som fx "maxSpeed"
+                String value = input.getAttributeValue(null, "v"); // får fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
                 switch (key) {
                     case "landuse", "leisure", "natural":
@@ -241,7 +241,7 @@ public class Parser implements Serializable {
             nextInput = input.next(); //Moves on to the next "tag" element
         }
 
-        //Instansierer en ny Road en road og tager stilling til om den har en maxSpeed eller ej.
+        //Instantierer en ny Road en road og tager stilling til om den har en maxSpeed eller ej.
         Road road;
         if (hasMaxSpeed){
             road = new Road(nodes, foot, bicycle, maxSpeed, roadType);
@@ -253,7 +253,7 @@ public class Parser implements Serializable {
 
     /**
      * Parses a {@link Node} from XMLStreamReader.next() and then adds it to id2Node
-     * @throws XMLStreamException if there is an error with the {@code XMLStreamReader}
+     * @throws XMLStreamException if there is a error with the {@code XMLStreamReader}
      */
     private void parseNode(XMLStreamReader input) throws XMLStreamException {
         //Saves the guaranteed values
@@ -274,7 +274,7 @@ public class Parser implements Serializable {
         int postcode = 0;
         String street = null;
         while (input.hasNext()) {
-            //End of Road
+            //End of Node
             if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("node")) {
                 break;
             }
@@ -285,7 +285,7 @@ public class Parser implements Serializable {
                 if (key == null || value == null) continue;
                 if (key.equals("addr:city")) {
                     city = value;
-                } else if (key.equals("addr:houseNumber")) {
+                } else if (key.equals("addr:housenumber")) {
                     houseNumber = value;
                 } else if (key.equals("addr:postcode")) {
                     postcode = Integer.parseInt(value);

@@ -1,12 +1,12 @@
 package com.example.danmarkskort.AddressSearch;
 
 public class Trie {
-
+    /*
     private final TrieNode root;
 
-    // Constructor
+
     public Trie() {
-            root = new TrieNode();
+        root = new TrieNode(Character.MIN_VALUE); // Der er ikke noget der hedder the empty character så Character.min_value svare til ingeting.
     }
 
     // Insert a word into the Trie
@@ -14,7 +14,7 @@ public class Trie {
         TrieNode current = root;
             for (int i = 0; i < word.length(); i++) {
                 char ch = word.charAt(i);
-                if (current.children[ch - 'a'] == null) {
+                if (current.getChildren().contains()) { // Hvis noden ikke har et barn på index positionen tilsvarende bogstavet... *Betyder bare man trækker 1 fra*
                     current.children[ch - 'a'] = new TrieNode();
                 }
                 current = current.children[ch - 'a'];
@@ -35,10 +35,10 @@ public class Trie {
                 }
                 current = current.children[ch - 'a'];
             }
-            return current != null && current.isEndOfWord; //Dette skal ændres
+            return current != null && current.isEndOfWord; //Dette skal ændres!
         }
 
-        // Check if a given prefix exists in the Trie
+        // Check if a given prefix exists in the Trie - SKal dette bruges hmmm?
         public boolean startsWith(String prefix) {
             TrieNode current = root;
             for (int i = 0; i < prefix.length(); i++) {
@@ -65,7 +65,9 @@ public class Trie {
             System.out.println(trie.search("world"));
             System.out.println(trie.search("hi"));
             System.out.println(trie.startsWith("hell"));
+
         }
+        */
     }
 
 
