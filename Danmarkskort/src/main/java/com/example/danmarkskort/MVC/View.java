@@ -109,16 +109,15 @@ public class View {
         //Draws map
         drawRoads();
         drawPolygons();
-        System.out.println("Done drawing!");
 
 
-        /* if (firstTimeDrawingMap) {
+        if (firstTimeDrawingMap) {
             System.out.println("Done drawing!");
             firstTimeDrawingMap = false;
 
             pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
             zoom(0, 0, 0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
-        } */
+        }
     }
 
     ///STJÅLET FRA NUTAN
