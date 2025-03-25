@@ -114,16 +114,18 @@ public class View {
         int fullDetails = 40; //% when all details should be drawn
         int mediumDetails = 70; //% when a balanced amount of details should be drawn
         if (zoomPercentage < fullDetails && zoomPercentage < mediumDetails) { //Draws with all details
+            System.out.println("All details");
             drawAllRoads();
             drawAllPolygons();
         } else if (zoomPercentage < mediumDetails) { //Draws with some details
+            System.out.println("medium details");
             drawAllRoads();
             drawAllPolygons();
         } else { //Draws the map with the least amount of details
+            System.out.println("minimum details");
             drawAllSignificantHighways();
             drawAllPolygons();
         }
-
 
 
         if (firstTimeDrawingMap) {
@@ -172,7 +174,6 @@ public class View {
             pan(dx, dy);
             drawMap(parser);
         }
-        System.out.println(currentZoom);
     }
 
     ///Draws all roads. Method is called in {@link #drawMap(Parser)}

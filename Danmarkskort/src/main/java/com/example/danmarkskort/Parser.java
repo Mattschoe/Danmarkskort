@@ -95,8 +95,9 @@ public class Parser implements Serializable {
 
                 //End of OSM
                 if (tagName.equals("relation")) return;
-                if (tagName.equals("bounds")) parseBounds(input);
-                if (tagName.equals("node")) {
+                if (tagName.equals("bounds")) {
+                    parseBounds(input);
+                } else if (tagName.equals("node")) {
                     try {
                         parseNode(input);
                     } catch (Exception e) {
@@ -119,6 +120,7 @@ public class Parser implements Serializable {
         bounds[1] = Double.parseDouble(input.getAttributeValue(1)); //Min. longitude
         bounds[2] = Double.parseDouble(input.getAttributeValue(2)); //Max. latitude
         bounds[3] = Double.parseDouble(input.getAttributeValue(3)); //Max. longitude
+        if (bounds[0] == 0 || bounds[1] == 0 || bounds[2] == 0 || bounds[3] == 0) System.out.println("Error getting bounds!");
     }
 
     /**
