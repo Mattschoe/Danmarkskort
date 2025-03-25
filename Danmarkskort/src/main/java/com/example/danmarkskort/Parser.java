@@ -13,11 +13,12 @@ import java.util.zip.ZipInputStream;
 public class Parser implements Serializable {
     //region fields
     @Serial private static final long serialVersionUID = 8838055424703291984L;
-    Map<Long, Node> id2Node; //map for storing a Node and the id used to refer to it
-    Map<Long, Road> id2Road;
-    Map<Long, Polygon> id2Polygon;
-    File file; //The file that's loaded in
-    double[] bounds; //OSM-filens bounds, dvs. de længst væk koordinater hvor noget tegnes
+   private Map<Long, Node> id2Node; //map for storing a Node and the id used to refer to it
+    private Map<Long, Road> id2Road;
+    private Map<Long, Polygon> id2Polygon;
+    private File file; //The file that's loaded in
+    private double[] bounds; //OSM-filens bounds, dvs. de længst væk koordinater hvor noget tegnes
+    private Set<Road> significantHighways;
     //endregion
 
     /**
@@ -30,6 +31,7 @@ public class Parser implements Serializable {
         id2Road = new HashMap<>(489884);
         id2Polygon = new HashMap<>(489884);
         bounds = new double[4];
+        significantHighways = new HashSet<>();
 
         String filename = getFileName();
         //Switch case with what filetype the file is and call the appropriate method:
@@ -108,7 +110,6 @@ public class Parser implements Serializable {
                     }
                 }
             }
-            //System.out.println("Node count: " + id2Node.size() + " | Way count: " + (id2Road.size() + id2Polygon.size()));
         }
     }
 
@@ -210,6 +211,8 @@ public class Parser implements Serializable {
         int maxSpeed = 0;
         String roadType = "";
         boolean hasMaxSpeed = false;
+        boolean significantHighway = false;
+
         //endregion
 
         //Loops through tags and saves them
@@ -225,7 +228,8 @@ public class Parser implements Serializable {
                 String key = input.getAttributeValue(null, "k"); //for fat i "k" attribute som fx "maxSpeed"
                 String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
-                if (key.equals("highway") || key.equals("natural")) {
+                if (key.equals("highway") || key.equals("natural") || key.equals("area:highway")){     //find ud af typen af highway
+                    significantHighway = value.equals("motorway") || value.equals("trunk") || value.equals("primary") || value.equals("secondary") || value.equals("primary_link") || value.equals("secondary_link");
                     roadType = value;
                 } else if (key.equals("maxspeed")) {
                     maxSpeed = Integer.parseInt(value);
@@ -234,6 +238,14 @@ public class Parser implements Serializable {
                     bicycle = value.equals("true");
                 } else if (key.equals("foot")) {
                     foot = value.equals("yes");
+                } else if (key.equals("railway")) {
+                    if (value.equals("subway")) roadType = value;
+                }
+                //Value
+                if (value.equals("subway")) roadType = value;
+
+                if (key.equals("natural")){
+                    if (value.equals("coastline")) roadType = value;
                 } else if (key.equals("route")) {
                     roadType = key;
                 }
@@ -245,8 +257,14 @@ public class Parser implements Serializable {
         Road road;
         if (hasMaxSpeed){
             road = new Road(nodes, foot, bicycle, maxSpeed, roadType);
+            if(significantHighway) {
+             significantHighways.add(road);
+            }
         } else {
             road = new Road(nodes, foot, bicycle, roadType);
+            if(significantHighway) {
+                significantHighways.add(road);
+            }
         }
         return road;
     }
@@ -264,7 +282,7 @@ public class Parser implements Serializable {
         int nextInput = input.next();
         //If simple node, saves it and returns
         if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("node")) {
-            id2Node.put(id, new Node(lat, lon)); //Instansierer new node (node containing no child-elements)
+            id2Node.put(id, new Node(lat, lon)); //Instantierer new node (node containing no child-elements)
             return;
         }
 
@@ -298,7 +316,7 @@ public class Parser implements Serializable {
 
         //Creates a complex 'Node' unless it doesn't have any of the elements of a complex 'Node', then it just makes a simple one (Mayb change later)
         if (city == null && houseNumber == null && postcode == 0 && street == null) {
-            id2Node.put(id, new Node(lat, lon)); //Instansierer new node (node containing no child-elements)
+            id2Node.put(id, new Node(lat, lon)); //Instantierer new node (node containing no child-elements)
         } else {
             id2Node.put(id, new Node(lat, lon, city, houseNumber, postcode, street));
         }
@@ -311,4 +329,10 @@ public class Parser implements Serializable {
     public Map<Long, Road> getRoads() { return id2Road; }
     public Map<Long, Polygon> getPolygons() { return id2Polygon; }
     public double[] getBounds() { return bounds; }
+
+    /**
+     * @return the set of significant highways, which will be the only roads drawn when the map is zoomed out a certain amount
+     */
+    public Set<Road> getSignificantHighways() { return significantHighways; } //
+
 }

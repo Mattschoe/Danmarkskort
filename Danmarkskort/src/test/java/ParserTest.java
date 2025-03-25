@@ -26,6 +26,7 @@ class ParserTest {
         filename = "../Danmarkskort/data/test1.2.osm";
         testFile = new File(filename);
         parser = new Parser(testFile);
+
     }
 
     // --------------------------------- Test af indlæsning ------------------------------------
