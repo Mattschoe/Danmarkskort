@@ -1,8 +1,8 @@
 package com.example.danmarkskort;
 
 import com.example.danmarkskort.MapObjects.Node;
-import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Polygon;
+import com.example.danmarkskort.MapObjects.Road;
 
 import javax.xml.stream.*;
 import java.io.*;
@@ -13,7 +13,7 @@ import java.util.zip.ZipInputStream;
 public class Parser implements Serializable {
     //region fields
     @Serial private static final long serialVersionUID = 8838055424703291984L;
-   private Map<Long, Node> id2Node; //map for storing a Node and the id used to refer to it
+    private Map<Long, Node> id2Node; //map for storing a Node and the id used to refer to it
     private Map<Long, Road> id2Road;
     private Map<Long, Polygon> id2Polygon;
     private File file; //The file that's loaded in
@@ -322,17 +322,17 @@ public class Parser implements Serializable {
         }
     }
 
-    //GETTERS AND SETTERS
+    //region GETTERS AND SETTERS
     public String getFileName() { return file.getName(); }
     public File getFile() { return file; }
     public Map<Long, Node> getNodes() { return id2Node; }
     public Map<Long, Road> getRoads() { return id2Road; }
     public Map<Long, Polygon> getPolygons() { return id2Polygon; }
     public double[] getBounds() { return bounds; }
-
     /**
      * @return the set of significant highways, which will be the only roads drawn when the map is zoomed out a certain amount
      */
-    public Set<Road> getSignificantHighways() { return significantHighways; } //
+    public Set<Road> getSignificantHighways() { return significantHighways; }
+    //endregion
 
 }
