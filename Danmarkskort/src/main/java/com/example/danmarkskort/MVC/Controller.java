@@ -1,16 +1,21 @@
 package com.example.danmarkskort.MVC;
 
+import javafx.animation.Animation;
+import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
-
+import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.stage.Stage;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import java.io.File;
-import javafx.scene.control.Label;
+import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.IOException;
 
 public class Controller {
@@ -21,6 +26,8 @@ public class Controller {
     @FXML Label valgtFil;
     @FXML Canvas canvas;
     double lastX, lastY;
+    boolean panRequest, zoomRequest;
+    MouseEvent event;
     //endregion
 
     /** View-konstruktøren skaber/kører en instans af
@@ -31,6 +38,22 @@ public class Controller {
         canvas = new Canvas(400, 600);
         assert standardMapFile.exists();
         System.out.println("Controller created!");
+
+        AnimationTimer fpsTimer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                if (panRequest) {
+                    double dx = event.getX() - lastX;
+                    double dy = event.getY() - lastY;
+                    view.pan(dx, dy);
+
+                    lastX = event.getX();
+                    lastY = event.getY();
+                    panRequest = false;
+                }
+            }
+        };
+        fpsTimer.start();
     }
 
     /** Funktionalitet forbundet med "Upload fil"-knappen på startskærmen. Køres når knappen klikkes */
@@ -81,6 +104,7 @@ public class Controller {
         view.drawMap(model.getParser());
     }
 
+    //region events
     /** Metode køres når man zoomer på Canvas'et */
     @FXML protected void onCanvasScroll(ScrollEvent e) {
         double factor = e.getDeltaY();
@@ -98,15 +122,12 @@ public class Controller {
         lastY = e.getY();
     }
 
-    /** Metode køres når man trækker på Canvas'et */
-    @FXML protected void onCanvasDragged(MouseEvent e) {
-        double dx = e.getX() - lastX;
-        double dy = e.getY() - lastY;
-        view.pan(dx, dy);
-
-        lastX = e.getX();
-        lastY = e.getY();
+    /** Metode køres når man trækker på Canvas'et. Metode er limitet til 60FPS */
+    @FXML protected void onCanvasDragged(MouseEvent event) {
+        this.event = event;
+        panRequest = true;
     }
+    //endregion
 
     //region getters and setters
     /** Sætter Controllerens view-felt til et givent View

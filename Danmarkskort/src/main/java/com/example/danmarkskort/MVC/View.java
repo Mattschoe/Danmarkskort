@@ -27,11 +27,12 @@ public class View {
     Scene scene;
     Stage stage;
     boolean firstTimeDrawingMap;
+    int currentZoom, minZoom, maxZoom;
     //endregion
 
     /** View-konstruktøren skifter scene ud fra en given stage og filstien til en FXML-fil
-     * @param stage givne stage -- ved start-up fås denne af Application's start-metode, ellers genbruger Controlleren Stage'en der allerede vises
-     * @param filename givne filsti -- f.eks. "startup.fxml" til start-scenen
+     * @param stage givne stage ved start-up fås denne af Application's start-metode, ellers genbruger Controlleren Stage'en der allerede vises
+     * @param filename givne filsti f.eks. "startup.fxml" til start-scenen
      * @throws IOException kastes hvis programmet fejler i at loade FXML-filen
      */
     public View(Stage stage, String filename) throws IOException {
@@ -67,9 +68,12 @@ public class View {
         stage.show();
 
         //Hvis vi laver en scene med et Canvas initialiseres og tegnes det
-        if (controller.getCanvas() != null) {
-            initializeCanvas();
-        }
+        if (controller.getCanvas() != null) initializeCanvas();
+
+        //Sets up the Zoom levels
+        currentZoom = 7;
+        minZoom = 1;
+        maxZoom = 6;
     }
 
     ///Giver Canvas en Transform og bunden højde/bredde
@@ -106,19 +110,33 @@ public class View {
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
-        //Draws map
+        int zoomPercentage = (int) (((double) currentZoom/maxZoom) * 100);
+        int fullDetails = 40; //% when all details should be drawn
+        int mediumDetails = 70; //% when a balanced amount of details should be drawn
+        System.out.println(zoomPercentage);
+        if (zoomPercentage < fullDetails && zoomPercentage < mediumDetails) { //Draws with all details
+            System.out.println("full");
+        } else if (zoomPercentage < mediumDetails) { //Draws with some details
+            System.out.println("medium");
+        } else { //Draws the map with least amount of details
+            System.out.println("least");
+        }
+
         drawRoads();
         drawPolygons();
 
-
         if (firstTimeDrawingMap) {
-            System.out.println("Done drawing!");
+            System.out.println("Finished first time drawing!");
             firstTimeDrawingMap = false;
 
             pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
             zoom(0, 0, 0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
         }
+
     }
+
+
+
 
     ///STJÅLET FRA NUTAN
     public void pan(double dx, double dy) {
@@ -126,12 +144,26 @@ public class View {
         drawMap(parser);
     }
 
-    ///STJÅLET FRA NUTAN
+    /**
+     * Zooms in and out, zoom level is limited by {@code minZoom} and {@code maxZoom} which can be changed in the constructor
+     * @param dx deltaX
+     * @param dy deltaY
+     * @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
+     */
     public void zoom(double dx, double dy, double factor) {
-        pan(-dx, -dy);
-        trans.prependScale(factor, factor);
-        pan(dx, dy);
-        drawMap(parser);
+        if (factor >= 1 && currentZoom > minZoom) { //Zoom ind
+            currentZoom--;
+            pan(-dx, -dy);
+            trans.prependScale(factor, factor);
+            pan(dx, dy);
+            drawMap(parser);
+        } else if (factor <= 1 && currentZoom < maxZoom) { //Zoom out
+            currentZoom++;
+            pan(-dx, -dy);
+            trans.prependScale(factor, factor);
+            pan(dx, dy);
+            drawMap(parser);
+        }
     }
 
     ///Draws all roads. Method is called in {@link #drawMap(Parser)}
