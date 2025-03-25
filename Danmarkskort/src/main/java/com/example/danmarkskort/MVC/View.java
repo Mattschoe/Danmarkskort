@@ -121,10 +121,11 @@ public class View {
 
             pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
             zoom(0, 0, 0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
-        } else {
+        }
+        /* else {
             System.out.println("Showing image!");
             changeMapCanvasToImage();
-        }
+        } */
     }
 
     private void changeMapCanvasToImage() {
