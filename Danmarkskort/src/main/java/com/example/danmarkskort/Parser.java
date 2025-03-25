@@ -257,12 +257,12 @@ public class Parser implements Serializable {
         Road road;
         if (hasMaxSpeed){
             road = new Road(nodes, foot, bicycle, maxSpeed, roadType);
-            if(significantHighway) {
+            if (significantHighway) {
              significantHighways.add(road);
             }
         } else {
             road = new Road(nodes, foot, bicycle, roadType);
-            if(significantHighway) {
+            if (significantHighway) {
                 significantHighways.add(road);
             }
         }

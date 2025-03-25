@@ -119,8 +119,8 @@ public class View {
         } else if (zoomPercentage < mediumDetails) { //Draws with some details
             drawAllRoads();
             drawAllPolygons();
-        } else { //Draws the map with least amount of details
-            //drawAllRoads();
+        } else { //Draws the map with the least amount of details
+            drawAllSignificantHighways();
             drawAllPolygons();
         }
 
@@ -130,8 +130,10 @@ public class View {
             System.out.println("Finished first time drawing!");
             firstTimeDrawingMap = false;
 
+            //Moves the view over to the map
+            double startZoom = (0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
             pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
-            zoom(0, 0, 0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
+            zoom(0, 0, startZoom, true);
         }
 
     }
@@ -151,7 +153,7 @@ public class View {
      * @param dy deltaY
      * @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
      */
-    public void zoom(double dx, double dy, double factor) {
+    public void zoom(double dx, double dy, double factor, boolean ignoreMinMax) {
         if (factor >= 1 && currentZoom > minZoom) { //Zoom ind
             currentZoom--;
             pan(-dx, -dy);
@@ -164,7 +166,13 @@ public class View {
             trans.prependScale(factor, factor);
             pan(dx, dy);
             drawMap(parser);
+        } else if (ignoreMinMax) {
+            pan(-dx, -dy);
+            trans.prependScale(factor, factor);
+            pan(dx, dy);
+            drawMap(parser);
         }
+        System.out.println(currentZoom);
     }
 
     ///Draws all roads. Method is called in {@link #drawMap(Parser)}
@@ -183,6 +191,12 @@ public class View {
         for (long id : parser.getPolygons().keySet()) {
             polygon = parser.getPolygons().get(id);
             polygon.drawPolygon(graphicsContext);
+        }
+    }
+
+    private void drawAllSignificantHighways() {
+        for (Road road : parser.getSignificantHighways()) {
+            road.drawRoad(canvas);
         }
     }
 
