@@ -113,13 +113,12 @@ public class View {
         int zoomPercentage = (int) (((double) currentZoom/maxZoom) * 100);
         int fullDetails = 40; //% when all details should be drawn
         int mediumDetails = 70; //% when a balanced amount of details should be drawn
-        System.out.println(zoomPercentage);
         if (zoomPercentage < fullDetails && zoomPercentage < mediumDetails) { //Draws with all details
-            System.out.println("full");
+
         } else if (zoomPercentage < mediumDetails) { //Draws with some details
-            System.out.println("medium");
+
         } else { //Draws the map with least amount of details
-            System.out.println("least");
+
         }
 
         drawRoads();
