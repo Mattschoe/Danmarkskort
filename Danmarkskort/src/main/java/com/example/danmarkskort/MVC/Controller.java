@@ -27,7 +27,8 @@ public class Controller {
     @FXML Canvas canvas;
     double lastX, lastY;
     boolean panRequest, zoomRequest;
-    MouseEvent event;
+    MouseEvent mouseEvent;
+    ScrollEvent scrollEvent;
     //endregion
 
     /** View-konstruktøren skaber/kører en instans af
@@ -39,17 +40,22 @@ public class Controller {
         assert standardMapFile.exists();
         System.out.println("Controller created!");
 
+        //OBS JEG MISTÆNKER DET HER FOR IKKE AT VIRKE
         AnimationTimer fpsTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 if (panRequest) {
-                    double dx = event.getX() - lastX;
-                    double dy = event.getY() - lastY;
+                    double dx = mouseEvent.getX() - lastX;
+                    double dy = mouseEvent.getY() - lastY;
                     view.pan(dx, dy);
 
-                    lastX = event.getX();
-                    lastY = event.getY();
+                    lastX = mouseEvent.getX();
+                    lastY = mouseEvent.getY();
                     panRequest = false;
+                } else if (zoomRequest) {
+                    double factor = scrollEvent.getDeltaY();
+                    view.zoom(scrollEvent.getX(), scrollEvent.getY(), Math.pow(1.01, factor));
+                    zoomRequest = false;
                 }
             }
         };
@@ -106,9 +112,9 @@ public class Controller {
 
     //region events
     /** Metode køres når man zoomer på Canvas'et */
-    @FXML protected void onCanvasScroll(ScrollEvent e) {
-        double factor = e.getDeltaY();
-        view.zoom(e.getX(), e.getY(), Math.pow(1.01, factor));
+    @FXML protected void onCanvasScroll(ScrollEvent event) {
+        scrollEvent = event;
+        zoomRequest = true;
     }
 
     /** Metode køres når man slipper sit klik på Canvas'et */
@@ -124,7 +130,7 @@ public class Controller {
 
     /** Metode køres når man trækker på Canvas'et. Metode er limitet til 60FPS */
     @FXML protected void onCanvasDragged(MouseEvent event) {
-        this.event = event;
+        mouseEvent = event;
         panRequest = true;
     }
     //endregion
