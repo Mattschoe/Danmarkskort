@@ -5,12 +5,8 @@ import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.Parser;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.stage.Stage;
@@ -117,17 +113,18 @@ public class View {
         int zoomPercentage = (int) (((double) currentZoom/maxZoom) * 100);
         int fullDetails = 40; //% when all details should be drawn
         int mediumDetails = 70; //% when a balanced amount of details should be drawn
-        System.out.println(zoomPercentage);
         if (zoomPercentage < fullDetails && zoomPercentage < mediumDetails) { //Draws with all details
-            System.out.println("full");
+            drawAllRoads();
+            drawAllPolygons();
         } else if (zoomPercentage < mediumDetails) { //Draws with some details
-            System.out.println("medium");
+            drawAllRoads();
+            drawAllPolygons();
         } else { //Draws the map with least amount of details
-            System.out.println("least");
+            //drawAllRoads();
+            drawAllPolygons();
         }
 
-        drawRoads();
-        drawPolygons();
+
 
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
@@ -171,7 +168,7 @@ public class View {
     }
 
     ///Draws all roads. Method is called in {@link #drawMap(Parser)}
-    private void drawRoads() {
+    private void drawAllRoads() {
         Road road;
         for (long id : parser.getRoads().keySet()) {
             road = parser.getRoads().get(id);
@@ -181,7 +178,7 @@ public class View {
     }
 
     ///Draws all polygons (buildings etc.). Method is called in {@link #drawMap(Parser)}
-    private void drawPolygons() {
+    private void drawAllPolygons() {
         Polygon polygon;
         for (long id : parser.getPolygons().keySet()) {
             polygon = parser.getPolygons().get(id);
