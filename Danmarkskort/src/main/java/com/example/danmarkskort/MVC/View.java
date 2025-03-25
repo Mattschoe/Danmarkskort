@@ -31,7 +31,6 @@ public class View {
     Scene scene;
     Stage stage;
     boolean firstTimeDrawingMap;
-    ImageView mapView;
     int currentZoom, minZoom, maxZoom;
     //endregion
 
@@ -115,6 +114,18 @@ public class View {
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
+        int zoomPercentage = (int) (((double) currentZoom/maxZoom) * 100);
+        int fullDetails = 40; //% when all details should be drawn
+        int mediumDetails = 70; //% when a balanced amount of details should be drawn
+        System.out.println(zoomPercentage);
+        if (zoomPercentage < fullDetails && zoomPercentage < mediumDetails) { //Draws with all details
+            System.out.println("full");
+        } else if (zoomPercentage < mediumDetails) { //Draws with some details
+            System.out.println("medium");
+        } else { //Draws the map with least amount of details
+            System.out.println("least");
+        }
+
         drawRoads();
         drawPolygons();
 
@@ -125,26 +136,11 @@ public class View {
             pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
             zoom(0, 0, 0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
         }
-        /* else {
-            System.out.println("Showing image!");
-            changeMapCanvasToImage();
-        } */
+
     }
 
-    private void changeMapCanvasToImage() {
-        //Gets a image of the map canvas
-        WritableImage mapImage = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
-        canvas.snapshot(new SnapshotParameters(), mapImage);
-        ImageView mapImageView = new ImageView(mapImage);
-        mapImageView.setPreserveRatio(true);
-        mapImageView.setSmooth(true);
-        mapImageView.setCache(true);
 
-        //Replaces the canvas with map
-        AnchorPane canvasRoot = root.getRoot();
-        canvasRoot.getChildren().remove(canvas);
-        canvasRoot.getChildren().add(mapImageView);
-    }
+
 
     ///STJÅLET FRA NUTAN
     public void pan(double dx, double dy) {
@@ -159,7 +155,6 @@ public class View {
      * @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
      */
     public void zoom(double dx, double dy, double factor) {
-        System.out.println(currentZoom);
         if (factor >= 1 && currentZoom > minZoom) { //Zoom ind
             currentZoom--;
             pan(-dx, -dy);
