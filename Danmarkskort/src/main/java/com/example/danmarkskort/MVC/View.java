@@ -116,15 +116,15 @@ public class View {
         if (zoomPercentage < fullDetails && zoomPercentage < mediumDetails) { //Draws with all details
             System.out.println("All details");
             drawAllRoads();
-            drawAllPolygons();
+            drawAllPolygons(true);
         } else if (zoomPercentage < mediumDetails) { //Draws with some details
             System.out.println("medium details");
             drawAllRoads();
-            drawAllPolygons();
+            drawAllPolygons(true);
         } else { //Draws the map with the least amount of details
             System.out.println("minimum details");
             drawAllSignificantHighways();
-            drawAllPolygons();
+            drawAllPolygons(false);
         }
 
 
@@ -187,11 +187,11 @@ public class View {
     }
 
     ///Draws all polygons (buildings etc.). Method is called in {@link #drawMap(Parser)}
-    private void drawAllPolygons() {
+    private void drawAllPolygons(boolean drawLines) {
         Polygon polygon;
         for (long id : parser.getPolygons().keySet()) {
             polygon = parser.getPolygons().get(id);
-            polygon.drawPolygon(graphicsContext);
+            polygon.drawPolygon(graphicsContext, drawLines);
         }
     }
 

@@ -24,8 +24,12 @@ public class Polygon implements Serializable {
     public Polygon(List<Node> nodes, String type) {
         assert nodes.size() != 1;
         this.nodes = nodes;
-        if (type == null) this.type = "";
-        else this.type = type;
+
+        if (type == null) {
+            this.type = "";
+        } else {
+            this.type = type;
+        }
 
         createArrays();
     }
@@ -43,7 +47,7 @@ public class Polygon implements Serializable {
         }
     }
 
-    public void drawPolygon(GraphicsContext gc) {
+    public void drawPolygon(GraphicsContext gc, boolean drawLines) {
         Color color = switch(type) {
             //Værdier fra "natural"-tag
             case "water"     -> Color.CORNFLOWERBLUE;
@@ -88,7 +92,7 @@ public class Polygon implements Serializable {
         gc.setStroke(color.darker().darker());
         gc.setFill(color);
 
-        gc.strokePolygon(xPoints, yPoints, nSize);
+        if (drawLines) gc.strokePolygon(xPoints, yPoints, nSize);
         gc.fillPolygon(xPoints, yPoints, nSize);
     }
 
