@@ -113,6 +113,7 @@ public class View {
         int zoomPercentage = (int) (((double) currentZoom/maxZoom) * 100);
         int fullDetails = 40; //% when all details should be drawn
         int mediumDetails = 70; //% when a balanced amount of details should be drawn
+        System.out.println(zoomPercentage);
         if (zoomPercentage < fullDetails && zoomPercentage < mediumDetails) { //Draws with all details
             System.out.println("All details");
             drawAllRoads();
@@ -127,17 +128,16 @@ public class View {
             drawAllPolygons(false);
         }
 
-
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
             firstTimeDrawingMap = false;
 
+            //TODO: SKAL OPTIMERES VI DRAWER MAPPET LIKE 5 GANGE FØRSTE GANG
             //Moves the view over to the map
             double startZoom = (0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
-            pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
-            zoom(0, 0, startZoom, true);
+            //pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
+            //zoom(0, 0, startZoom, true);
         }
-
     }
 
 

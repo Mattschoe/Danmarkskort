@@ -113,7 +113,7 @@ public class Controller {
 
     /** Metode køres når man slipper sit klik på Canvas'et */
     @FXML protected void onCanvasClick(MouseEvent e) {
-        System.out.println("Clicked at ("+ e.getY() +", "+ e.getX() +")!");
+        System.out.println("Clicked at ("+ e.getX() +", "+ e.getY() +")!");
     }
 
     /** Metode køres idet man klikker ned på Canvas'et */
