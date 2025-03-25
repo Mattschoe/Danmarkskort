@@ -32,6 +32,7 @@ public class View {
     Stage stage;
     boolean firstTimeDrawingMap;
     ImageView mapView;
+    int currentZoom, minZoom, maxZoom;
     //endregion
 
     /** View-konstruktøren skifter scene ud fra en given stage og filstien til en FXML-fil
@@ -74,8 +75,10 @@ public class View {
         //Hvis vi laver en scene med et Canvas initialiseres og tegnes det
         if (controller.getCanvas() != null) initializeCanvas();
 
-        //Saves the map into an image so we can zoom and pan on the image
-
+        //Sets up the Zoom levels
+        currentZoom = 7;
+        minZoom = 1;
+        maxZoom = 6;
     }
 
     ///Giver Canvas en Transform og bunden højde/bredde
@@ -149,12 +152,27 @@ public class View {
         drawMap(parser);
     }
 
-    ///STJÅLET FRA NUTAN
+    /**
+     * Zooms in and out, zoom level is limited by {@code minZoom} and {@code maxZoom} which can be changed in the constructor
+     * @param dx deltaX
+     * @param dy deltaY
+     * @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
+     */
     public void zoom(double dx, double dy, double factor) {
-        pan(-dx, -dy);
-        trans.prependScale(factor, factor);
-        pan(dx, dy);
-        drawMap(parser);
+        System.out.println(currentZoom);
+        if (factor >= 1 && currentZoom > minZoom) { //Zoom ind
+            currentZoom--;
+            pan(-dx, -dy);
+            trans.prependScale(factor, factor);
+            pan(dx, dy);
+            drawMap(parser);
+        } else if (factor <= 1 && currentZoom < maxZoom) { //Zoom out
+            currentZoom++;
+            pan(-dx, -dy);
+            trans.prependScale(factor, factor);
+            pan(dx, dy);
+            drawMap(parser);
+        }
     }
 
     ///Draws all roads. Method is called in {@link #drawMap(Parser)}
