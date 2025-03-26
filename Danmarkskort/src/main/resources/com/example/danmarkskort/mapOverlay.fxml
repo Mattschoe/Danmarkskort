@@ -29,5 +29,5 @@
       </items>
     </MenuButton>
     <Slider layoutX="445.0" layoutY="348.0" showTickLabels="true" showTickMarks="true" value="50.0" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="15.0" />
-    <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onAction="#searchBarEnter" promptText="Søg efter adresse..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
+    <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onAction="#searchBarEnter" onKeyTyped="#searchBarTyped" promptText="Søg efter adresse..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
 </AnchorPane>

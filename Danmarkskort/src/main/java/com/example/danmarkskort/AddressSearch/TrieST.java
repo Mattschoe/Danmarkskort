@@ -10,7 +10,7 @@ public class TrieST<Item> {
     public TrieST() {
 
         put("Helsinge", new Node(10, 10));
-        put("Helsingor", new Node(20,30));
+        put("Helsinger", new Node(20,30));
         put("Herning", new Node(20,50));
         put("Hobro", new Node(20,70));
         put("Hjorring", new Node(20,20));

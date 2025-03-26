@@ -90,6 +90,13 @@ public class Controller {
 
     @FXML protected void searchBarEnter() throws IOException {
         String input = searchBar.getText();
+        for (String s : trie.keysThatMatch(input)) {
+            System.out.println(trie.get(s));
+        }
+    }
+
+    @FXML protected void searchBarTyped() {
+        String input = searchBar.getText();
         for (String s : trie.keysWithPrefix(input)) {
             System.out.println(s);
         }
