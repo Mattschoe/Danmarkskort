@@ -7,6 +7,8 @@ import javafx.fxml.FXML;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.stage.Stage;
@@ -88,17 +90,20 @@ public class Controller {
         view.drawMap(model.getParser());
     }
 
-    @FXML protected void searchBarEnter() throws IOException {
-        String input = searchBar.getText();
-        for (String s : trie.keysThatMatch(input)) {
-            System.out.println(trie.get(s));
-        }
-    }
-
-    @FXML protected void searchBarTyped() {
-        String input = searchBar.getText();
-        for (String s : trie.keysWithPrefix(input)) {
-            System.out.println(s);
+    @FXML protected void searchBarTyped(KeyEvent event) {
+        if (event.getCharacter().equals("\r")) {
+            System.out.println("enter");
+            /* String input = searchBar.getText();
+            for (String s : trie.keysThatMatch(input)) {
+                System.out.println(trie.get(s));
+            } */
+        } else {
+            System.out.println("skal ikke reagere på enter");
+            String input = searchBar.getText();
+            for (String s : trie.keysWithPrefix(input)) {
+                System.out.println(s);
+                //Skal printes i en drop down menu
+            }
         }
     }
 
