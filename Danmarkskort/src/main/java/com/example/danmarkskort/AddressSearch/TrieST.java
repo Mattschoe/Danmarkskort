@@ -1,13 +1,22 @@
 package com.example.danmarkskort.AddressSearch;
 import com.example.danmarkskort.MapObjects.Node;
-
-
 import java.util.LinkedList;
 
 
 public class TrieST<Item> {
     public int R = 29; // Størrelse på alfabet (Radix)
     private TrieNode root; // root of trie
+
+    public TrieST() {
+
+        put("Helsinge", new Node(10, 10));
+        put("Helsingor", new Node(20,30));
+        put("Herning", new Node(20,50));
+        put("Hobro", new Node(20,70));
+        put("Hjorring", new Node(20,20));
+        put("Horsens", new Node(20,20));
+    }
+
 
     /**
      * Takes a string key and returns its corresponding value by calling private method {@link #get(TrieNode, String, int)}
@@ -52,6 +61,7 @@ public class TrieST<Item> {
      * @param val value of datatype Object
      */
     public void put(String word, Node val) {
+        word = word.toLowerCase();
         root = put(root, word, val, 0);
     }
 
@@ -155,7 +165,9 @@ public class TrieST<Item> {
         }
     }
 
-    // Main Test Method
+
+
+    //Main Test Method
     public static void main(String[] args) {
         TrieST<Node> trie = new TrieST<>();
 
@@ -180,4 +192,6 @@ public class TrieST<Item> {
             System.out.println(s);
         }
     }
+
+
 }

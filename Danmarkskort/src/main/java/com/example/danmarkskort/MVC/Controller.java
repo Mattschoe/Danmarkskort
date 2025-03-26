@@ -1,8 +1,12 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.AddressParser;
+import com.example.danmarkskort.AddressSearch.TrieST;
+import com.example.danmarkskort.MapObjects.Node;
 import javafx.fxml.FXML;
 
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.stage.Stage;
@@ -20,7 +24,9 @@ public class Controller {
     File standardMapFile;
     @FXML Label valgtFil;
     @FXML Canvas canvas;
+    @FXML TextField searchBar;
     double lastX, lastY;
+    TrieST<String> trie; //part of test
     //endregion
 
     /** View-konstruktøren skaber/kører en instans af
@@ -31,6 +37,10 @@ public class Controller {
         canvas = new Canvas(400, 600);
         assert standardMapFile.exists();
         System.out.println("Controller created!");
+
+        this.trie = new TrieST<>();
+
+
     }
 
     /** Funktionalitet forbundet med "Upload fil"-knappen på startskærmen. Køres når knappen klikkes */
@@ -76,6 +86,13 @@ public class Controller {
         loadFile(standardMapFile);
         assert view != null;
         view.drawMap(model.getParser());
+    }
+
+    @FXML protected void searchBarEnter() throws IOException {
+        String input = searchBar.getText();
+        for (String s : trie.keysWithPrefix(input)) {
+            System.out.println(s);
+        }
     }
 
     /** Metode køres når man zoomer på Canvas'et */
