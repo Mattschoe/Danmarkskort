@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.net.URL;
 
 public class View {
-    //region fields
+    //region Fields
     private Affine trans;
     private Affine bgTrans;
     private Canvas canvas;
@@ -27,10 +27,10 @@ public class View {
     private boolean firstTimeDrawingMap;
     //endregion
 
-    /** View-konstruktøren skifter scene ud fra en given stage og filstien til en FXML-fil
-     * @param stage givne stage -- ved start-up fås denne af Application's start-metode, ellers genbruger Controlleren Stage'en der allerede vises
-     * @param filename givne filsti -- f.eks. "startup.fxml" til start-scenen
-     * @throws IOException kastes hvis programmet fejler i at loade FXML-filen
+    /** The View-constructor switches the scene from a given stage and a filepath to an FXML-file
+     * @param stage the given stage -- usually coming from the window we're in, as to not open a new window
+     * @param filename the given filepath -- fx. "startup.fxml" for the start-up scene
+     * @throws IOException thrown if the program fails to load the FXML-file
      */
     public View(Stage stage, String filename) throws IOException {
         //The standard location for fxml. Needs to be added to every filepath
@@ -70,7 +70,7 @@ public class View {
         initializeCanvas();
     }
 
-    ///Giver Canvas en Transform og bunden højde/bredde
+    /// Sets the canvas' transform, and binds its height and width
     private void initializeCanvas() {
         //Canvas'et og dets GraphicsContext gemmes
         canvas = controller.getCanvas();
@@ -118,13 +118,13 @@ public class View {
         }
     }
 
-    ///STJÅLET FRA NUTAN
+    /// Method pans on the canvas -- STOLEN FROM NUTAN
     public void pan(double dx, double dy) {
         trans.prependTranslation(dx, dy);
         drawMap(parser);
     }
 
-    ///STJÅLET FRA NUTAN
+    /// Method zooms on the canvas -- STOLEN FROM NUTAN
     public void zoom(double dx, double dy, double factor) {
         pan(-dx, -dy);
         trans.prependScale(factor, factor);
@@ -132,7 +132,7 @@ public class View {
         drawMap(parser);
     }
 
-    ///Draws all roads. Method is called in {@link #drawMap(Parser)}
+    /// Draws all roads. Method is called in {@link #drawMap(Parser)}
     private void drawRoads() {
         Road road;
         for (long id : parser.getRoads().keySet()) {
@@ -142,7 +142,7 @@ public class View {
         }
     }
 
-    ///Draws all polygons (buildings etc.). Method is called in {@link #drawMap(Parser)}
+    /// Draws all polygons (buildings etc.). Method is called in {@link #drawMap(Parser)}
     private void drawPolygons() {
         Polygon polygon;
         for (long id : parser.getPolygons().keySet()) {
@@ -151,7 +151,8 @@ public class View {
         }
     }
 
-    //GETTERS AND SETTERS
+    //region Getter and setters
     Stage  getStage() { return stage; }
     Affine getTrans() { return trans; }
+    //endregion
 }

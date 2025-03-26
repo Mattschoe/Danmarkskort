@@ -31,7 +31,7 @@
       </items>
     </MenuButton>
 
-    <Slider fx:id="zoombar" layoutX="445.0" layoutY="348.0" max="140000.0" min="2000.0" showTickMarks="true" value="21965.0" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="15.0" />
+    <Slider fx:id="zoomBar" layoutX="445.0" layoutY="348.0" max="140000.0" min="2000.0" showTickMarks="true" value="21965.0" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="15.0" />
 
-    <TextField layoutX="14.0" layoutY="35.0" promptText="Søg efter adresse..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
+    <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onAction="#onSearchBarEnter" onKeyTyped="#onSearchBarType" promptText="Søg efter adresse..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
 </AnchorPane>
