@@ -10,7 +10,8 @@
 <?import javafx.scene.layout.AnchorPane?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.danmarkskort.MVC.Controller">
-    <Canvas fx:id="canvas" height="400.0" onMouseClicked="#onCanvasClick" onMousePressed="#onCanvasPressed" onMouseDragged="#onCanvasDragged" onScroll="#onCanvasScroll" width="600.0" />
+    <Canvas fx:id="canvas" height="400.0" onMouseClicked="#onCanvasClick" onMouseDragged="#onCanvasDragged" onMousePressed="#onCanvasPressed" onScroll="#onCanvasScroll" width="600.0" />
+
     <MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <Menu mnemonicParsing="false" text="File">
             <MenuItem mnemonicParsing="false" text="Close" />
@@ -22,12 +23,15 @@
             <MenuItem mnemonicParsing="false" text="About" />
         </Menu>
     </MenuBar>
+
     <MenuButton layoutX="527.0" layoutY="35.0" mnemonicParsing="false" text="Filtre" AnchorPane.rightAnchor="15.0">
       <items>
           <MenuItem mnemonicParsing="false" text="Action 1" />
           <MenuItem mnemonicParsing="false" text="Action 2" />
       </items>
     </MenuButton>
-    <Slider layoutX="445.0" layoutY="348.0" showTickLabels="true" showTickMarks="true" value="50.0" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="15.0" />
+
+    <Slider fx:id="zoombar" layoutX="445.0" layoutY="348.0" max="140000.0" min="2000.0" showTickMarks="true" value="21965.0" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="15.0" />
+
     <TextField layoutX="14.0" layoutY="35.0" promptText="Søg efter adresse..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
 </AnchorPane>

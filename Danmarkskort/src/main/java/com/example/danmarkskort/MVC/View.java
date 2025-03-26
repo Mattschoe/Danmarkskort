@@ -109,12 +109,14 @@ public class View {
         drawPolygons();
 
         if (firstTimeDrawingMap) {
-            System.out.println("Done drawing!");
             firstTimeDrawingMap = false;
+            System.out.println("Done drawing!");
 
             //STJÅLET FRA NUTAN
             pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
-            zoom(0, 0, 0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
+            double factor = 0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]);
+            controller.setInitZoom(factor);
+            zoom(0, 0, factor);
         }
     }
 

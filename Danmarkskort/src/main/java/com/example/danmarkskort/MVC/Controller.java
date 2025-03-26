@@ -3,6 +3,7 @@ package com.example.danmarkskort.MVC;
 import javafx.fxml.FXML;
 
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Slider;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.stage.Stage;
@@ -20,6 +21,8 @@ public class Controller {
     File standardMapFile;
     @FXML Label valgtFil;
     @FXML Canvas canvas;
+    @FXML private Slider zoombar;
+    private double initZoom;
     double lastX, lastY;
     //endregion
 
@@ -92,6 +95,9 @@ public class Controller {
         boolean cond3 = zoomLvl > 140_000 && factor < 1;      //Hvis man er zoomet max ind men man zoomer ud
 
         if (cond1 || cond2 || cond3) view.zoom(e.getX(), e.getY(), factor);
+
+        zoombar.adjustValue(zoomLvl);
+        //zoombar.adjustValue(zoomLvl / initZoom * 50);
     }
 
     /** Metode køres når man slipper sit klik på Canvas'et */
@@ -127,5 +133,6 @@ public class Controller {
      * @return Controllerens canvas-felt
      */
     Canvas getCanvas() { return canvas; }
+    void setInitZoom(double initZoom) { this.initZoom = initZoom; }
     //endregion
 }
