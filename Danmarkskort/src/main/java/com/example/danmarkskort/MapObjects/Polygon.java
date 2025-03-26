@@ -7,7 +7,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
-public class Polygon implements Serializable, MapObject {
+public class Polygon implements Serializable{
     @Serial private static final long serialVersionUID = 1444149606229887777L;
     //region fields
     private final List<Node> nodes;

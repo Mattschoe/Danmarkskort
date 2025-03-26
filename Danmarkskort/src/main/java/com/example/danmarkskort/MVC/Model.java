@@ -1,24 +1,25 @@
 package com.example.danmarkskort.MVC;
 
-import com.example.danmarkskort.AddressSearch.Search;
 import com.example.danmarkskort.Exceptions.ParserSavingException;
+import com.example.danmarkskort.MapObjects.MapObject;
 import com.example.danmarkskort.MapObjects.Node;
+import com.example.danmarkskort.MapObjects.Road;
+import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.Parser;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 
 import java.io.*;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Model {
     //region Fields
     private File file;
     private Parser parser;
-    GraphicsContext graphicsContext;
-    Canvas canvas;
-    File outputFile; //The output .obj file
+    private GraphicsContext graphicsContext;
+    private Canvas canvas;
+    private File outputFile; //The output .obj file
+    private Tile[][] tileGrid;
     //endregion
 
     /**
@@ -54,8 +55,28 @@ public class Model {
         }
         assert parser != null;
 
+        //Converts into tilegrid
+        initializeTileGrid(0, 0,100,   100, 10);
+        // System.out.println(biggestX + " " + biggestY);
+
+        double[] coords = getMinMaxCoords();
+        System.out.println("Min: " + coords[0] + " " + coords[1] + " | max: " + coords[2] + " " + coords[3]);
+
         //TESTING
+        for (int x = 0; x < tileGrid.length; x++) {
+            for (int y = 0; y < tileGrid[x].length; y++) {
+                tileGrid[x][y].draw(graphicsContext);
+                // System.out.println("(" + x + "," + y + ") " + tileGrid[x][y].getObjectsInTile().size());
+                /* for (MapObject object : tileGrid[x][y].getObjectsInTile()) {
+                    System.out.println(object);
+                } */
+                // System.out.println();
+            }
+        }
+
+        //region TESTING
         //Search search = new Search(getAllNodesWithStreetAddresses(parser.getNodes().values()));
+        //endregion
     }
 
     /**
@@ -79,6 +100,79 @@ public class Model {
         } catch (IOException e) {
             throw new ParserSavingException("Error saving parser as .obj! Error Message: " + e.getMessage());
         }
+
+    }
+
+    /**
+     * Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile
+     */
+    private void initializeTileGrid(double minX, double minY, double maxX, double maxY, int tileSize) {
+        //Calculates number of tiles along each axis
+        int numberOfTilesX = (int) Math.ceil((maxX - minX) / tileSize);
+        int numberOfTilesY = (int) Math.ceil((maxY - minY) / tileSize);
+
+        //Initializes the Tile objects inside the grid variable
+         tileGrid = new Tile[numberOfTilesX][numberOfTilesY];
+         for (int x = 0; x < numberOfTilesX; x++) {
+             for (int y = 0; y < numberOfTilesY; y++) {
+                 tileGrid[x][y] = new Tile();
+             }
+         }
+
+         //Adds Nodes
+         for (Node node : parser.getNodes().values()) {
+             int tileX = (int) ((node.getX() - minX) / tileSize);
+             int tileY = (int) ((node.getY() - minY) / tileSize);
+
+             //Clamps the x, y so they are within bounds (This avoids floating point errors with 0 or negative numbers
+             tileX = Math.min(Math.max(tileX, 0), numberOfTilesX - 1);
+             tileY = Math.min(Math.max(tileY, 0), numberOfTilesY - 1);
+
+             tileGrid[tileX][tileY].addMapObject(node);
+         }
+    }
+
+    /**
+     * @return the minimum x and y coordinate and the maximum. Used for splitting that box into tiles in {@link #initializeTileGrid(double, double, double, double, int)}
+     */
+    private double[] getMinMaxCoords() {
+        double[] minMaxCoords = new double[4];
+        double minX = Double.POSITIVE_INFINITY;
+        double minY = Double.POSITIVE_INFINITY;
+        double maxX = Double.NEGATIVE_INFINITY;
+        double maxY = Double.NEGATIVE_INFINITY;
+
+        //Loops through each node and gets the minimum and maximum node
+        for (Node node : parser.getNodes().values()) {
+            double nodeX = node.getX();
+            double nodeY = node.getY();
+
+            //X
+            if (nodeX < minX ) {
+                minX = nodeX;
+            } else if (nodeX > maxX) {
+                maxX = nodeX;
+            }
+
+            //Y
+            if (nodeY < minY ) {
+                minY = nodeY;
+            } else if (nodeY > maxY) {
+                maxY = nodeY;
+            }
+        }
+        minMaxCoords[0] = minX;
+        minMaxCoords[1] = minY;
+        minMaxCoords[2] = maxX;
+        minMaxCoords[3] = maxY;
+        return minMaxCoords;
+    }
+
+
+    /**
+     * Saves the Tile gid to a OBJ file so we cant fast load it later
+     */
+    private void saveTileGridToOBJ() {
 
     }
 
