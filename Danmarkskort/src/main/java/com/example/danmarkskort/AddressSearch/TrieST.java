@@ -8,7 +8,7 @@ public class TrieST<Item> {
     private TrieNode root; // root of trie
 
     public TrieST() {
-
+        //Test - skal på sigt indsættes under parsing
         put("Helsinge", new Node(10, 10));
         put("Helsinger", new Node(20,30));
         put("Herning", new Node(20,50));
@@ -50,6 +50,8 @@ public class TrieST<Item> {
             return get(current.getChildren()[27], word, depth + 1);
         } else if (c == 'å') {
             return get(current.getChildren()[28], word, depth + 1);
+        } else if (c == ' ') {
+            return get(current.getChildren()[29], word, depth + 1);
         } else {
             return get(current.getChildren()[c - 'a'], word, depth + 1);
         }
@@ -90,7 +92,9 @@ public class TrieST<Item> {
             current.getChildren()[27] = put(current.getChildren()[27], word, val, depth + 1);
         } else if (c == 'å') {
             current.getChildren()[28] = put(current.getChildren()[28], word, val, depth + 1);
-        } else {
+        } else if (c == ' ') {
+            current.getChildren()[29] = put(current.getChildren()[29], word, val, depth + 1);
+        }else {
             current.getChildren()[c - 'a'] = put(current.getChildren()[c - 'a'], word, val, depth + 1); //Sætter bogstav i arrayet
         }
 

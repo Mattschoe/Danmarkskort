@@ -53,9 +53,7 @@ public class Model {
         }
         assert parser != null;
 
-        //TESTING
-        Search search = new Search(getAllNodesWithStreetAddresses(parser.getNodes().values()));
-        System.out.println(search.findNode("Bergthorasgade").getAddress()[3] + " " + search.findNode("Bergthorasgade").getAddress()[1] + " " + search.findNode("Bergthorasgade").getAddress()[2] + " " + search.findNode("Bergthorasgade").getAddress()[0]);
+
     }
 
     /**

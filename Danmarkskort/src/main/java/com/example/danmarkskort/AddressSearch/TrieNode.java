@@ -5,7 +5,7 @@ import com.sun.jdi.Value;
 
 public class TrieNode {
     Object val;
-    TrieNode[] children = new TrieNode[29];
+    TrieNode[] children = new TrieNode[30];
 
     /**
      * Returns value of TrieNode

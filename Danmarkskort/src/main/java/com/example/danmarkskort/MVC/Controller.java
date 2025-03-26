@@ -90,20 +90,23 @@ public class Controller {
         view.drawMap(model.getParser());
     }
 
+
     @FXML protected void searchBarTyped(KeyEvent event) {
         if (event.getCharacter().equals("\r")) {
-            System.out.println("enter");
-            /* String input = searchBar.getText();
+            String input = searchBar.getText();
             for (String s : trie.keysThatMatch(input)) {
                 System.out.println(trie.get(s));
-            } */
+            }
         } else {
-            System.out.println("skal ikke reagere på enter");
             String input = searchBar.getText();
+
+
             for (String s : trie.keysWithPrefix(input)) {
                 System.out.println(s);
                 //Skal printes i en drop down menu
             }
+            
+
         }
     }
 
