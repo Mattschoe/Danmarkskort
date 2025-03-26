@@ -114,9 +114,7 @@ public class View {
 
             //STJÅLET FRA NUTAN
             pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
-            double factor = 0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]);
-            controller.setInitZoom(factor);
-            zoom(0, 0, factor);
+            zoom(0, 0, 0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
         }
     }
 

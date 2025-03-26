@@ -1,5 +1,7 @@
 package com.example.danmarkskort.MVC;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 
 import javafx.scene.canvas.Canvas;
@@ -22,6 +24,7 @@ public class Controller {
     @FXML Label valgtFil;
     @FXML Canvas canvas;
     @FXML private Slider zoombar;
+    private double zoomLvl;
     private double initZoom;
     double lastX, lastY;
     //endregion
@@ -36,7 +39,23 @@ public class Controller {
         System.out.println("Controller created!");
     }
 
-    /** Funktionalitet forbundet med "Upload fil"-knappen på startskærmen. Køres når knappen klikkes */
+    /** Initializes the FXML-document -- if we're in a scene with a zoombar,
+     *  the zoombar's slider is set to communicate with the zoom-level of the canvas/document
+     */
+    public void initialize() {
+        if (zoombar != null) {
+            zoombar.valueProperty().addListener(new ChangeListener<Number>() {
+                @Override public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
+                    zoomLvl = zoombar.getValue();
+                }
+            });
+        }
+    }
+
+    /** Method runs upon clicking the "Upload fil"-button in the start-up scene.
+     *  Lets the user pick a file and tries to parse it as a map. If successful,
+     *  switches the scene to a canvas with the map drawn.
+     */
     @FXML protected void uploadInputButton() throws IOException{
         //Laver en FileChooser til at åbne en stifinder når brugeren klikker 'Upload fil'
         FileChooser fileChooser = new FileChooser();
@@ -87,7 +106,7 @@ public class Controller {
     /** Metode køres når man zoomer på Canvas'et */
     @FXML protected void onCanvasScroll(ScrollEvent e) {
         double factor = Math.pow(1.01, e.getDeltaY());
-        double zoomLvl = view.getTrans().getMxx();
+        zoomLvl = view.getTrans().getMxx();
 
         //Der zoomes kun hvis...
         boolean cond1 = 2_000 < zoomLvl && zoomLvl < 140_000; //Hvis man er inde for zoom-grænserne
@@ -97,21 +116,20 @@ public class Controller {
         if (cond1 || cond2 || cond3) view.zoom(e.getX(), e.getY(), factor);
 
         zoombar.adjustValue(zoomLvl);
-        //zoombar.adjustValue(zoomLvl / initZoom * 50);
     }
 
-    /** Metode køres når man slipper sit klik på Canvas'et */
+    /// Metode køres når man slipper sit klik på Canvas'et
     @FXML protected void onCanvasClick(MouseEvent e) {
         System.out.println("Clicked at ("+ e.getX() +", "+ e.getY() +")!");
     }
 
-    /** Metode køres idet man klikker ned på Canvas'et */
+    /// Metode køres idet man klikker ned på Canvas'et
     @FXML protected  void onCanvasPressed(MouseEvent e) {
         lastX = e.getX();
         lastY = e.getY();
     }
 
-    /** Metode køres når man trækker på Canvas'et */
+    /// Metode køres når man trækker på Canvas'et
     @FXML protected void onCanvasDragged(MouseEvent e) {
         double dx = e.getX() - lastX;
         double dy = e.getY() - lastY;
@@ -133,6 +151,5 @@ public class Controller {
      * @return Controllerens canvas-felt
      */
     Canvas getCanvas() { return canvas; }
-    void setInitZoom(double initZoom) { this.initZoom = initZoom; }
     //endregion
 }
