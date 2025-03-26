@@ -12,18 +12,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-public class Road implements Serializable {
-    @Serial private static final long serialVersionUID = 2430026592275563830L;
+public class Road implements Serializable, MapObject {
     //region Fields
+    @Serial private static final long serialVersionUID = 2430026592275563830L;
     private final List<Node> nodes;
     private final Set<Line> lines;
     private final boolean foot;
     private final boolean bicycle;
     private int maxSpeed;
     private final String roadType;
-
     //endregion
-    // private static final long serialVersionUID;
 
     /**
      * ROAD WITH MAXSPEED. A {@link Road} is a collection of {@link Node}'s without the same start and end node.
@@ -72,26 +70,25 @@ public class Road implements Serializable {
 
     /**
      * Draws the road on a given canvas. This method excludes roads like metro's which are underground. See {@link #drawMetro(Canvas)} for the ability to draw the metro
-     * @param mapCanvas the canvas where the road will be drawn on
+     * @param graphicsContext the graphicsContext where the road will be drawn on
      */
-    public void drawRoad(Canvas mapCanvas) {
-        assert mapCanvas != null;
-        GraphicsContext gc = mapCanvas.getGraphicsContext2D();
+    public void draw(GraphicsContext graphicsContext) {
+        assert graphicsContext != null;
 
         switch (roadType) {
             case "route":
-                gc.setStroke(Color.DARKRED);
-                gc.setLineWidth(1/Math.sqrt(gc.getTransform().determinant())); break;
+                graphicsContext.setStroke(Color.DARKRED);
+                graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant())); break;
             case "coastline":
-                gc.setStroke(Color.BLACK);
-                gc.setLineWidth(1.5/Math.sqrt(gc.getTransform().determinant())); break;
+                graphicsContext.setStroke(Color.BLACK);
+                graphicsContext.setLineWidth(1.5/Math.sqrt(graphicsContext.getTransform().determinant())); break;
             default:
-                gc.setStroke(Color.WHITE.darker().darker());
-                gc.setLineWidth(1/Math.sqrt(gc.getTransform().determinant())); break;
+                graphicsContext.setStroke(Color.WHITE.darker().darker());
+                graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant())); break;
         }
 
         for (Line line : lines) {
-            line.drawLine(gc);
+            line.draw(graphicsContext);
         }
     }
 

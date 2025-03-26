@@ -7,7 +7,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
-public class Polygon implements Serializable {
+public class Polygon implements Serializable, MapObject {
     @Serial private static final long serialVersionUID = 1444149606229887777L;
     //region fields
     private final List<Node> nodes;
@@ -47,7 +47,7 @@ public class Polygon implements Serializable {
         }
     }
 
-    public void drawPolygon(GraphicsContext gc, boolean drawLines) {
+    public void draw(GraphicsContext gc, boolean drawLines) {
         Color color = switch(type) {
             //Værdier fra "natural"-tag
             case "water"     -> Color.CORNFLOWERBLUE;

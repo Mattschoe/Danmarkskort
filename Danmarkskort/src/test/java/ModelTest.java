@@ -45,8 +45,8 @@ public class ModelTest {
     //@Disabled
     @Test
     public void createOBJFile() {
-        Model model = new Model("./data/nordsjolland.osm", canvas);
-        File file = new File("./data/nordsjolland.osm.obj");
+        Model model = new Model("./data/nordsjolland2.osm", canvas);
+        File file = new File("./data/nordsjolland2.osm.obj");
         assertTrue(file.exists());
     }
 

@@ -135,8 +135,8 @@ public class View {
             //TODO: SKAL OPTIMERES VI DRAWER MAPPET LIKE 5 GANGE FØRSTE GANG
             //Moves the view over to the map
             double startZoom = (0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
-            //pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
-            //zoom(0, 0, startZoom, true);
+            pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
+            zoom(0, 0, startZoom, true);
         }
     }
 
@@ -182,7 +182,7 @@ public class View {
         for (long id : parser.getRoads().keySet()) {
             road = parser.getRoads().get(id);
             if (road.getRoadType().equals("route")) continue;
-            road.drawRoad(canvas);
+            road.draw(graphicsContext);
         }
     }
 
@@ -191,13 +191,13 @@ public class View {
         Polygon polygon;
         for (long id : parser.getPolygons().keySet()) {
             polygon = parser.getPolygons().get(id);
-            polygon.drawPolygon(graphicsContext, drawLines);
+            polygon.draw(graphicsContext, drawLines);
         }
     }
 
     private void drawAllSignificantHighways() {
         for (Road road : parser.getSignificantHighways()) {
-            road.drawRoad(canvas);
+            road.draw(graphicsContext);
         }
     }
 

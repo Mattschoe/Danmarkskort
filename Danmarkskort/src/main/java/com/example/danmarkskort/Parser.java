@@ -39,6 +39,10 @@ public class Parser implements Serializable {
             parseZIP(filename);
         } else if (filename.endsWith(".osm")) {
             parseOSM(file);
+            if (isBoundsIncomplete()) {
+                System.out.println("yuup");
+                setStandardBounds();
+            }
         }
     }
 
@@ -120,7 +124,6 @@ public class Parser implements Serializable {
         bounds[1] = Double.parseDouble(input.getAttributeValue(1)); //Min. longitude
         bounds[2] = Double.parseDouble(input.getAttributeValue(2)); //Max. latitude
         bounds[3] = Double.parseDouble(input.getAttributeValue(3)); //Max. longitude
-        if (bounds[0] == 0 || bounds[1] == 0 || bounds[2] == 0 || bounds[3] == 0) System.out.println("Error getting bounds!");
     }
 
     /**
@@ -269,6 +272,24 @@ public class Parser implements Serializable {
             }
         }
         return road;
+    }
+
+    /**
+     * Checks whether
+     * @return true if bounds is incomplete, else false
+     */
+    private boolean isBoundsIncomplete() {
+        return bounds[0] == 0 || bounds[1] == 0 || bounds[2] == 0 || bounds[3] == 0;
+    }
+
+    /**
+     * Sets the standard bounds to the middle of DK
+     */
+    private void setStandardBounds() {
+        bounds[0] = 55.893642;
+        bounds[1] = 11.809332;
+        bounds[2] = 56.145397;
+        bounds[3] = 12.650371;
     }
 
     /**
