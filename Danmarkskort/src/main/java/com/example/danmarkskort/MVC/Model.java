@@ -1,11 +1,8 @@
 package com.example.danmarkskort.MVC;
 
-import com.example.danmarkskort.AddressSearch.Search;
-import com.example.danmarkskort.AddressSearch.TrieST;
 import com.example.danmarkskort.Exceptions.ParserSavingException;
 import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.Parser;
-import com.itextpdf.text.pdf.AcroFields;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 
