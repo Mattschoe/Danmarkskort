@@ -1,5 +1,7 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.MapObjects.Line;
+import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.Polygon;
 import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.Parser;
@@ -110,6 +112,23 @@ public class View {
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
+        //region TESTING
+        Node bestNode = null;
+        int min = 0;
+        for (Node node : parser.getNodes().values()) {
+            if (node.getEdges().size() > min) {
+                System.out.println("Hm?");
+                min = node.getEdges().size();
+                bestNode = node;
+            }
+        }
+
+        for (Line line : bestNode.getEdges()) {
+            line.draw(graphicsContext);
+        }
+        //endregion
+
+        /*
         int zoomPercentage = (int) (((double) currentZoom/maxZoom) * 100);
         int fullDetails = 40; //% when all details should be drawn
         int mediumDetails = 70; //% when a balanced amount of details should be drawn
@@ -127,6 +146,7 @@ public class View {
             drawAllSignificantHighways();
             drawAllPolygons(false);
         }
+        */
 
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");

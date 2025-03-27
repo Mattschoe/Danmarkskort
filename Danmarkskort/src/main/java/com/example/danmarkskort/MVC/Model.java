@@ -46,7 +46,7 @@ public class Model {
             //If anything else it creates a new parser and tries saves it as .obj
             try {
                 parser = new Parser(file);
-                saveParserToOBJ();
+                // saveParserToOBJ();
             } catch (ParserSavingException e) {
                 System.out.println(e.getMessage());
             } catch (Exception e) {

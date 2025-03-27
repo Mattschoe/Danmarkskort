@@ -40,7 +40,6 @@ public class Parser implements Serializable {
         } else if (filename.endsWith(".osm")) {
             parseOSM(file);
             if (isBoundsIncomplete()) {
-                System.out.println("yuup");
                 setStandardBounds();
             }
         }

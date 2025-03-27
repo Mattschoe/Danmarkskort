@@ -59,13 +59,18 @@ public class Road implements Serializable, MapObject {
 
     ///Creates the lines between the {@link Node}'s (Used later for drawing)
     private void createLines() {
-        //Tegner en linje fra den første node til den sidste i rækkefølge. Slutter af med at lave en linje mellem den sidste og første
+        //Tegner en linje fra den første node til den sidste i rækkefølge. (No?) Slutter af med at lave en linje mellem den sidste og første
         Node startNode = nodes.getFirst();
         for (int i = 1; i < nodes.size(); i++) {
-            lines.add(new Line(startNode, nodes.get(i)));
+            Line line = new Line(startNode, nodes.get(i));
+            lines.add(line);
+
+            startNode.addEdge(line);
+            nodes.get(i).addEdge(line);
+
             startNode = nodes.get(i);
         }
-        lines.add(new Line(startNode, nodes.getLast()));
+        //lines.add(new Line(startNode, nodes.getLast())); Tror ikke det her skal bruges i Roads
     }
 
     /**
@@ -107,6 +112,7 @@ public class Road implements Serializable, MapObject {
     public String  getRoadType() { return roadType; }
     public List<Node> getNodes() { return nodes;    }
     public boolean hasRoadType() { return !roadType.isEmpty(); }
+
     //endregion
 
     ///Tom metode for at regne maxspeed hvis tagget mangler
