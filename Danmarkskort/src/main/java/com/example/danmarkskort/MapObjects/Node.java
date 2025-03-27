@@ -20,7 +20,6 @@ public class Node implements Serializable {
     public Node(double latitude, double longitude) {
         calculateXY(latitude, longitude);
     }
-
     /**
      * A Node that contains an address
      * @param latitude

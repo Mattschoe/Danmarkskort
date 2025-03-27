@@ -12,7 +12,6 @@ public class Application extends javafx.application.Application {
     public void start(Stage stage) throws IOException {
         stage.setTitle("Rotternes Danmarkskort");
         stage.getIcons().add(new Image(getClass().getResourceAsStream("icon.png")));
-
         new View(stage, "startup.fxml");
     }
 

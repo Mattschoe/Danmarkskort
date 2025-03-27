@@ -1,24 +1,30 @@
 package com.example.danmarkskort.MVC;
 
+import javafx.animation.Animation;
+import javafx.animation.AnimationTimer;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.SnapshotParameters;
 
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.stage.Stage;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
-import java.io.File;
-import javafx.scene.control.Label;
+import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -33,6 +39,9 @@ public class Controller implements Initializable {
     @FXML TextField searchBar;
     @FXML ListView<String> viewList;
     double lastX, lastY;
+    boolean panRequest, zoomRequest;
+    MouseEvent mouseEvent;
+    ScrollEvent scrollEvent;
     TrieST<String> trieCity; //part of test
     TrieST<String> trieStreet;
     //endregion
@@ -48,6 +57,27 @@ public class Controller implements Initializable {
         this.trieCity = new TrieST<>(true);
         this.trieStreet = new TrieST<>(false);
         listView = new ListView<>();
+
+        //OBS JEG MISTÆNKER DET HER FOR IKKE AT VIRKE
+        AnimationTimer fpsTimer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                if (panRequest) {
+                    double dx = mouseEvent.getX() - lastX;
+                    double dy = mouseEvent.getY() - lastY;
+                    view.pan(dx, dy);
+
+                    lastX = mouseEvent.getX();
+                    lastY = mouseEvent.getY();
+                    panRequest = false;
+                } else if (zoomRequest) {
+                    double factor = scrollEvent.getDeltaY();
+                    view.zoom(scrollEvent.getX(), scrollEvent.getY(), Math.pow(1.01, factor));
+                    zoomRequest = false;
+                }
+            }
+        };
+        fpsTimer.start();
     }
 
     /** Funktionalitet forbundet med "Upload fil"-knappen på startskærmen. Køres når knappen klikkes */
@@ -64,8 +94,11 @@ public class Controller implements Initializable {
                 new ExtensionFilter("Tekst-filer", "*.txt"),
                 new ExtensionFilter("Zip-filer", "*.zip"),
                 new ExtensionFilter("Alle filer", "*.*"));
-        fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-        //"\\Desktop"
+        String routeDesktop = switch(System.getProperty("os.name").split(" ")[0]) {
+            case "Windows" -> System.getProperty("user.home") + "\\Desktop";
+            case "MAC"     -> System.getProperty("user.home") + "/Desktop";
+            default        -> System.getProperty("user.home");};
+        fileChooser.setInitialDirectory(new File(routeDesktop));
 
         //Åbner stifinderen og gemmer filen som brugeren vælger
         File selectedFile = fileChooser.showOpenDialog(new Stage());
@@ -95,6 +128,7 @@ public class Controller implements Initializable {
         view.drawMap(model.getParser());
     }
 
+    //region events
     @FXML private ListView<String> listView;
 
     @FXML protected void searchBarTyped(KeyEvent event) {
@@ -153,15 +187,14 @@ public class Controller implements Initializable {
 
 
     /** Metode køres når man zoomer på Canvas'et */
-    @FXML protected void onCanvasScroll(ScrollEvent e) {
-        System.out.println("Canvas scrolling!");
-        double factor = e.getDeltaY();
-        view.zoom(e.getX(), e.getY(), Math.pow(1.01, factor));
+    @FXML protected void onCanvasScroll(ScrollEvent event) {
+        scrollEvent = event;
+        zoomRequest = true;
     }
 
     /** Metode køres når man slipper sit klik på Canvas'et */
-    @FXML protected void onCanvasClick() {
-        System.out.println("Canvas clicked!");
+    @FXML protected void onCanvasClick(MouseEvent e) {
+        System.out.println("Clicked at ("+ e.getX() +", "+ e.getY() +")!");
     }
 
     /** Metode køres idet man klikker ned på Canvas'et */
@@ -170,15 +203,12 @@ public class Controller implements Initializable {
         lastY = e.getY();
     }
 
-    /** Metode køres når man trækker på Canvas'et */
-    @FXML protected void onCanvasDragged(MouseEvent e) {
-        double dx = e.getX() - lastX;
-        double dy = e.getY() - lastY;
-        view.pan(dx, dy);
-
-        lastX = e.getX();
-        lastY = e.getY();
+    /** Metode køres når man trækker på Canvas'et. Metode er limitet til 60FPS */
+    @FXML protected void onCanvasDragged(MouseEvent event) {
+        mouseEvent = event;
+        panRequest = true;
     }
+    //endregion
 
     //region getters and setters
     /** Sætter Controllerens view-felt til et givent View
@@ -196,7 +226,5 @@ public class Controller implements Initializable {
     Canvas getCanvas() {
         return canvas;
     }
-
-
     //endregion
 }

@@ -17,6 +17,7 @@ import java.net.URL;
 public class View {
     //region fields
     Affine trans;
+    Affine background;
     Canvas canvas;
     Controller controller;
     FXMLLoader root;
@@ -26,11 +27,12 @@ public class View {
     Scene scene;
     Stage stage;
     boolean firstTimeDrawingMap;
+    int currentZoom, minZoom, maxZoom;
     //endregion
 
     /** View-konstruktøren skifter scene ud fra en given stage og filstien til en FXML-fil
-     * @param stage givne stage -- ved start-up fås denne af Application's start-metode, ellers genbruger Controlleren Stage'en der allerede vises
-     * @param filename givne filsti -- f.eks. "startup.fxml" til start-scenen
+     * @param stage givne stage ved start-up fås denne af Application's start-metode, ellers genbruger Controlleren Stage'en der allerede vises
+     * @param filename givne filsti f.eks. "startup.fxml" til start-scenen
      * @throws IOException kastes hvis programmet fejler i at loade FXML-filen
      */
     public View(Stage stage, String filename) throws IOException {
@@ -66,16 +68,21 @@ public class View {
         stage.show();
 
         //Hvis vi laver en scene med et Canvas initialiseres og tegnes det
-        if (controller.getCanvas() != null) {
-            initializeCanvas();
-        }
+        if (controller.getCanvas() != null) initializeCanvas();
+
+        //Sets up the Zoom levels
+        currentZoom = 7;
+        minZoom = 1;
+        maxZoom = 6;
     }
 
-    void initializeCanvas() {
+    ///Giver Canvas en Transform og bunden højde/bredde
+    private void initializeCanvas() {
         //Canvas'et og dets GraphicsContext gemmes
         canvas = controller.getCanvas();
         graphicsContext = canvas.getGraphicsContext2D();
         trans = new Affine();
+        background = new Affine();
         graphicsContext.setTransform(trans);
 
         //Canvas højde og bredde bindes til vinduets
@@ -92,60 +99,84 @@ public class View {
      * @param parser the parser that model has stored
      */
     public void drawMap(Parser parser) {
-        assert parser != null && graphicsContext != null && canvas != null;
+        if (parser == null) return; //TODO %% Evt. find en bedre måde at sørge for at initializeCanvas IKKE køres før kortet loades
+        assert graphicsContext != null && canvas != null;
         this.parser = parser;
 
-        //Sets up the graphicsContext for drawing the map (Packs it in a box and sets stroke settings
-        graphicsContext.setTransform(new Affine());
+        //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
+        graphicsContext.setTransform(background);
         graphicsContext.setFill(Color.ANTIQUEWHITE);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setTransform(trans);
-        graphicsContext.setLineWidth(1/Math.sqrt(trans.determinant()));
-        graphicsContext.setStroke(Color.BLACK);
+        graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
-        //Draws map
-        drawRoad();
-        drawPolygon();
+        int zoomPercentage = (int) (((double) currentZoom/maxZoom) * 100);
+        int fullDetails = 40; //% when all details should be drawn
+        int mediumDetails = 70; //% when a balanced amount of details should be drawn
+        if (zoomPercentage < fullDetails && zoomPercentage < mediumDetails) { //Draws with all details
+
+        } else if (zoomPercentage < mediumDetails) { //Draws with some details
+
+        } else { //Draws the map with least amount of details
+
+        }
+
+        drawRoads();
+        drawPolygons();
 
         if (firstTimeDrawingMap) {
-            System.out.println("Done drawing!");
+            System.out.println("Finished first time drawing!");
             firstTimeDrawingMap = false;
+
+            pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
+            zoom(0, 0, 0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
         }
+
     }
 
-    /**
-     * OBS STJÅLET FRA NUTAN
-     */
+
+
+
+    ///STJÅLET FRA NUTAN
     public void pan(double dx, double dy) {
         trans.prependTranslation(dx, dy);
         drawMap(parser);
     }
 
     /**
-     * OBS STJÅLET FRA NUTAN
+     * Zooms in and out, zoom level is limited by {@code minZoom} and {@code maxZoom} which can be changed in the constructor
+     * @param dx deltaX
+     * @param dy deltaY
+     * @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
      */
     public void zoom(double dx, double dy, double factor) {
-        pan(-dx, -dy);
-        trans.prependScale(factor, factor);
-        pan(dx, dy);
-        drawMap(parser);
+        if (factor >= 1 && currentZoom > minZoom) { //Zoom ind
+            currentZoom--;
+            pan(-dx, -dy);
+            trans.prependScale(factor, factor);
+            pan(dx, dy);
+            drawMap(parser);
+        } else if (factor <= 1 && currentZoom < maxZoom) { //Zoom out
+            currentZoom++;
+            pan(-dx, -dy);
+            trans.prependScale(factor, factor);
+            pan(dx, dy);
+            drawMap(parser);
+        }
     }
 
-    /**
-     * Draws all roads. Method is called in {@link #drawMap(Parser)}
-     */
-    private void drawRoad() {
+    ///Draws all roads. Method is called in {@link #drawMap(Parser)}
+    private void drawRoads() {
+        Road road;
         for (long id : parser.getRoads().keySet()) {
-            Road road = parser.getRoads().get(id);
-            if (road.getRoadType().equals("subway")) continue;
+            road = parser.getRoads().get(id);
+            if (road.getRoadType().equals("route")) continue;
             road.drawRoad(canvas);
         }
     }
 
-    /**
-     * Draws all polygons (aka. buildings). Method is called in {@link #drawMap(Parser)}
-     */
-    private void drawPolygon() {
+    ///Draws all polygons (buildings etc.). Method is called in {@link #drawMap(Parser)}
+    private void drawPolygons() {
         Polygon polygon;
         for (long id : parser.getPolygons().keySet()) {
             polygon = parser.getPolygons().get(id);
@@ -153,9 +184,6 @@ public class View {
         }
     }
 
-    //region getters and setters
-    Stage getStage() {
-        return stage;
-    }
-    //endregion
+    //GETTERS AND SETTERS
+    Stage getStage() { return stage; }
 }

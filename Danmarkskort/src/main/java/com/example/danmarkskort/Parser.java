@@ -10,27 +10,28 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-
 public class Parser implements Serializable {
     //region fields
     @Serial private static final long serialVersionUID = 8838055424703291984L;
-    Map<Long, Node> id2Node; //map for storing a Node and the id used to refer to it
-    Map<Long, Road> id2Road;
-    Map<Long, Polygon> id2Polygon;
-    File file; //The file that's loaded in
-    double minlat, maxlat, minlon, maxlon; //Bruges til at holde en indlæst Node's koordinater
+   private Map<Long, Node> id2Node; //map for storing a Node and the id used to refer to it
+    private Map<Long, Road> id2Road;
+    private Map<Long, Polygon> id2Polygon;
+    private File file; //The file that's loaded in
+    private double[] bounds; //OSM-filens bounds, dvs. de længst væk koordinater hvor noget tegnes
+    private Set<Road> significantHighways;
     //endregion
 
     /**
      * Checks what filetype the filepath parameter is and calls the appropriate method
-     *
      * @param file the file that needs to be processed.
      */
     public Parser(File file) throws NullPointerException, IOException, XMLStreamException, FactoryConfigurationError {
         this.file = file;
-        id2Node = new HashMap<>();
-        id2Road = new HashMap<>();
-        id2Polygon = new HashMap<>();
+        id2Node = new HashMap<>(7285439);
+        id2Road = new HashMap<>(489884);
+        id2Polygon = new HashMap<>(489884);
+        bounds = new double[4];
+        significantHighways = new HashSet<>();
 
         String filename = getFileName();
         //Switch case with what filetype the file is and call the appropriate method:
@@ -63,7 +64,7 @@ public class Parser implements Serializable {
                         while ((len = zipInputStream.read(buffer)) > 0) {
                             fos.write(buffer, 0, len);
                         }
-                       // fos.flush(); // Ensure all data is written before closing
+
                     }
                     zipInputStream.closeEntry();
                     break;
@@ -95,7 +96,7 @@ public class Parser implements Serializable {
 
                 //End of OSM
                 if (tagName.equals("relation")) return;
-
+                if (tagName.equals("bounds")) parseBounds(input);
                 if (tagName.equals("node")) {
                     try {
                         parseNode(input);
@@ -110,7 +111,16 @@ public class Parser implements Serializable {
                     }
                 }
             }
+            //System.out.println("Node count: " + id2Node.size() + " | Way count: " + (id2Road.size() + id2Polygon.size()));
         }
+    }
+
+    ///Saves the OSM-file's bounds-coordinates (so that View can zoom in to these on startup)
+    private void parseBounds(XMLStreamReader input) {
+        bounds[0] = Double.parseDouble(input.getAttributeValue(0)); //Min. latitude
+        bounds[1] = Double.parseDouble(input.getAttributeValue(1)); //Min. longitude
+        bounds[2] = Double.parseDouble(input.getAttributeValue(2)); //Max. latitude
+        bounds[3] = Double.parseDouble(input.getAttributeValue(3)); //Max. longitude
     }
 
     /**
@@ -164,9 +174,6 @@ public class Parser implements Serializable {
      */
     private Polygon parsePolygon(XMLStreamReader input, List<Node> nodesInPolygon) throws XMLStreamException {
         assert nodesInPolygon != null;
-        String building = "";
-        String natural ="";
-        String island = "";
 
         while (input.hasNext()) {
             //End of tag
@@ -174,27 +181,19 @@ public class Parser implements Serializable {
             if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) break;
 
             if (nextInput == XMLStreamConstants.START_ELEMENT) {
-                String key = input.getAttributeValue(null, "k"); //for fat i "k" attribute som fx "maxSpeed"
-                String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
+                String key = input.getAttributeValue(null, "k"); //får fat i "k" attribute som fx "maxSpeed"
+                String value = input.getAttributeValue(null, "v"); // får fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
                 switch (key) {
+                    case "natural", "landuse":
+                        return new Polygon(nodesInPolygon, value);
                     case "building":
-                        building = value;
-                        return new Polygon(nodesInPolygon,building);
-
-                    case "natural":
-                       if(value.equals("water")){
-                           natural = value;
-                           return new Polygon(nodesInPolygon,natural);
-                       }
-                        break;
+                        return new Polygon(nodesInPolygon, "building");
                     case "place":
-                        if(value.equals("island")){
-                            island = value;
-                            return new Polygon(nodesInPolygon, island);
-                        }
+                        if(value.equals("island")) { return new Polygon(nodesInPolygon, value); }
                         break;
                 }
+                if (value.equals("Cityringen")) return new Polygon(nodesInPolygon, value); //TODO %% Find en bedre måde at IKKE tegne Cityringen
             }
         }
         return new Polygon(nodesInPolygon, null);
@@ -214,6 +213,8 @@ public class Parser implements Serializable {
         int maxSpeed = 0;
         String roadType = "";
         boolean hasMaxSpeed = false;
+        boolean significantHighway = false;
+
         //endregion
 
         //Loops through tags and saves them
@@ -229,7 +230,8 @@ public class Parser implements Serializable {
                 String key = input.getAttributeValue(null, "k"); //for fat i "k" attribute som fx "maxSpeed"
                 String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
-                if (key.equals("highway")) {
+                if (key.equals("highway") || key.equals("natural") || key.equals("area:highway")){     //find ud af typen af highway
+                    significantHighway = value.equals("motorway") || value.equals("trunk") || value.equals("primary") || value.equals("secondary") || value.equals("primary_link") || value.equals("secondary_link");
                     roadType = value;
                 } else if (key.equals("maxspeed")) {
                     maxSpeed = Integer.parseInt(value);
@@ -241,7 +243,6 @@ public class Parser implements Serializable {
                 } else if (key.equals("railway")) {
                     if (value.equals("subway")) roadType = value;
                 }
-
                 //Value
                 if (value.equals("subway")) roadType = value;
 
@@ -256,8 +257,14 @@ public class Parser implements Serializable {
         Road road;
         if (hasMaxSpeed){
             road = new Road(nodes, foot, bicycle, maxSpeed, roadType);
+            if(significantHighway) {
+             significantHighways.add(road);
+            }
         } else {
             road = new Road(nodes, foot, bicycle, roadType);
+            if(significantHighway) {
+                significantHighways.add(road);
+            }
         }
         return road;
     }
@@ -315,23 +322,17 @@ public class Parser implements Serializable {
         }
     }
 
+    //GETTERS AND SETTERS
+    public String getFileName() { return file.getName(); }
+    public File getFile() { return file; }
+    public Map<Long, Node> getNodes() { return id2Node; }
+    public Map<Long, Road> getRoads() { return id2Road; }
+    public Map<Long, Polygon> getPolygons() { return id2Polygon; }
+    public double[] getBounds() { return bounds; }
 
-    //region getters and setters
-    String getFileName() {
-        return file.getName();
-    }
-    public File getFile() {
-        return file;
-    }
+    /**
+     * @return the set of significant highways, which will be the only roads drawn when the map is zoomed out a certain amount
+     */
+    public Set<Road> getSignificantHighways() { return significantHighways; } //
 
-    public Map<Long, Node> getNodes() {
-        return id2Node;
-    }
-    public Map<Long, Road> getRoads() {
-        return id2Road;
-    }
-    public Map<Long, Polygon> getPolygons() {
-        return id2Polygon;
-    }
-    //endregion
 }

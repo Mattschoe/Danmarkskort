@@ -21,7 +21,9 @@ public class Road implements Serializable {
     private final boolean bicycle;
     private int maxSpeed;
     private final String roadType;
+
     //endregion
+    // private static final long serialVersionUID;
 
     /**
      * ROAD WITH MAXSPEED. A {@link Road} is a collection of {@link Node}'s without the same start and end node.
@@ -57,9 +59,7 @@ public class Road implements Serializable {
         createLines();
     }
 
-    /**
-     * Creates the lines between the {@link Node}'s (Used later for drawing)
-     */
+    ///Creates the lines between the {@link Node}'s (Used later for drawing)
     private void createLines() {
         //Tegner en linje fra den første node til den sidste i rækkefølge. Slutter af med at lave en linje mellem den sidste og første
         Node startNode = nodes.getFirst();
@@ -76,9 +76,22 @@ public class Road implements Serializable {
      */
     public void drawRoad(Canvas mapCanvas) {
         assert mapCanvas != null;
-        GraphicsContext graphicsContext = mapCanvas.getGraphicsContext2D();
+        GraphicsContext gc = mapCanvas.getGraphicsContext2D();
+
+        switch (roadType) {
+            case "route":
+                gc.setStroke(Color.DARKRED);
+                gc.setLineWidth(1/Math.sqrt(gc.getTransform().determinant())); break;
+            case "coastline":
+                gc.setStroke(Color.BLACK);
+                gc.setLineWidth(1.5/Math.sqrt(gc.getTransform().determinant())); break;
+            default:
+                gc.setStroke(Color.WHITE.darker().darker());
+                gc.setLineWidth(1/Math.sqrt(gc.getTransform().determinant())); break;
+        }
+
         for (Line line : lines) {
-            line.drawLine(graphicsContext);
+            line.drawLine(gc);
         }
     }
 
@@ -90,24 +103,17 @@ public class Road implements Serializable {
     public void drawMetro(Canvas mapCanvas) {}
 
     //region getters
-    public Set<Line> getLines() {
-        return lines;
-    }
-    public boolean isWalkable() { return foot; }
-    public boolean isCyclable() { return bicycle; }
-    public int getMaxSpeed() { return maxSpeed; }
-    public String getRoadType() { return roadType; }
-    public List<Node> getNodes() {
-        return nodes;
-    }
+    public Set<Line>  getLines() { return lines;    }
+    public boolean  isWalkable() { return foot;     }
+    public boolean  isCyclable() { return bicycle;  }
+    public int     getMaxSpeed() { return maxSpeed; }
+    public String  getRoadType() { return roadType; }
+    public List<Node> getNodes() { return nodes;    }
     public boolean hasRoadType() { return !roadType.isEmpty(); }
     //endregion
 
-    /**
-     * Tom metode for at regne maxspeed hvis tagget mangler
-     */
-    @Deprecated
-    private void calculateSpeed(){
-
+    ///Tom metode for at regne maxspeed hvis tagget mangler
+    @Deprecated private void calculateSpeed(){
+        //tom metode er tom
     }
 }
