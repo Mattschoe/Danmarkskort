@@ -84,7 +84,7 @@ public class Controller {
             assert view != null;
 
             view.drawMap(model.getParser());
-            view.setTileGrid(model.getTileGrid());
+            view.setTilesWithObjects(model.getTilesWithObjects());
         }
     }
 

@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 public class View {
     //region fields
@@ -28,6 +29,7 @@ public class View {
     boolean firstTimeDrawingMap;
     int currentZoom, minZoom, maxZoom;
     Tile[][] tileGrid;
+    List<Tile> tilesWithObjects;
     //endregion
 
     /** View-konstruktøren skifter scene ud fra en given stage og filstien til en FXML-fil
@@ -111,7 +113,11 @@ public class View {
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
         //region TESTING
-
+        if (tilesWithObjects != null) {
+            for (Tile tile : tilesWithObjects) {
+                tile.draw(graphicsContext);
+            }
+        }
         //endregion
 
         /*
@@ -210,5 +216,6 @@ public class View {
     //region GETTERS AND SETTERS
     Stage getStage() { return stage; }
     public void setTileGrid(Tile[][] tileGrid) { this.tileGrid = tileGrid; }
+    public void setTilesWithObjects(List<Tile> tilesWithObjects) { this.tilesWithObjects = tilesWithObjects; }
     //endregion
 }

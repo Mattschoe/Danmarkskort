@@ -1,10 +1,7 @@
 package com.example.danmarkskort.MVC;
 
 import com.example.danmarkskort.Exceptions.ParserSavingException;
-import com.example.danmarkskort.MapObjects.MapObject;
-import com.example.danmarkskort.MapObjects.Node;
-import com.example.danmarkskort.MapObjects.Road;
-import com.example.danmarkskort.MapObjects.Tile;
+import com.example.danmarkskort.MapObjects.*;
 import com.example.danmarkskort.Parser;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -20,6 +17,7 @@ public class Model {
     private Canvas canvas;
     private File outputFile; //The output .obj file
     private Tile[][] tileGrid;
+    List<Tile> tilesWithObjects;
     //endregion
 
     /**
@@ -32,6 +30,7 @@ public class Model {
         this.canvas = canvas;
         this.graphicsContext = canvas.getGraphicsContext2D();
         assert file.exists();
+        tilesWithObjects = new ArrayList<>();
 
         //If .obj file
         if (filePath.endsWith(".obj")) {
@@ -57,16 +56,15 @@ public class Model {
 
         //Converts into tilegrid
         double[] tileGridBounds = getMinMaxCoords();
-        int tileSize = 10;
+        int tileSize = 1;
 
         initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 
 
-        //TESTING
+        //Saves all tiles with MapObject in them in a separate list
         for (int x = 0; x < tileGrid.length; x++) {
             for (int y = 0; y < tileGrid[x].length; y++) {
-                tileGrid[x][y].draw(graphicsContext);
-                if (!tileGrid[x][y].getObjectsInTile().isEmpty()) System.out.println("(" + x + ", " + y + "): " + tileGrid[x][y].getObjectsInTile().size());
+                if (!tileGrid[x][y].getObjectsInTile().isEmpty()) tilesWithObjects.add(tileGrid[x][y]);
             }
         }
     }
@@ -107,7 +105,11 @@ public class Model {
          tileGrid = new Tile[numberOfTilesX][numberOfTilesY];
          for (int x = 0; x < numberOfTilesX; x++) {
              for (int y = 0; y < numberOfTilesY; y++) {
-                 tileGrid[x][y] = new Tile();
+                 double i = minX + x * tileSize;
+                 double j = minY + y * tileSize;
+                 System.out.println("Start: " + i + " " + j);
+                 System.out.println("End: " + (i + tileSize) + " " + (j + tileSize));
+                 tileGrid[x][y] = new Tile(i, j, i + tileSize, j + tileSize);
              }
          }
 
@@ -121,6 +123,34 @@ public class Model {
              tileY = Math.min(Math.max(tileY, 0), numberOfTilesY - 1);
 
              tileGrid[tileX][tileY].addMapObject(node);
+         }
+
+         //Adds Roads
+         for (Road road : parser.getRoads().values()) {
+             //Converts start- and endXY to tile sizes
+             double[] boundingBox = road.getBoundingBox();
+             int startTileX = (int) ((boundingBox[0] - minX) / tileSize);
+             int startTileY = (int) ((boundingBox[1] - minY) / tileSize);
+             int endTileX = (int) ((boundingBox[2] - minX) / tileSize);
+             int endTileY = (int) ((boundingBox[3] - minY) / tileSize);
+
+             //Clamps the x, y so they are within bounds (This avoids floating point errors with 0 or negative numbers
+             startTileX = Math.min(Math.max(startTileX, 0), numberOfTilesX - 1);
+             startTileY = Math.min(Math.max(startTileY, 0), numberOfTilesY - 1);
+             endTileX = Math.min(Math.max(endTileX, 0), numberOfTilesX - 1);
+             endTileY = Math.min(Math.max(endTileY, 0), numberOfTilesY - 1);
+
+             //Adds all roads to the tiles that overlap the bounding box
+             for (int tileX = startTileX; tileX <= endTileX; tileX++) {
+                 for (int tileY = startTileY; tileY <= endTileY; tileY++) {
+                     tileGrid[tileX][tileY].addMapObject(road);
+                 }
+             }
+         }
+
+         //TO DO: Adds Polygons
+         for (Polygon polygon : parser.getPolygons().values()) {
+
          }
     }
 
@@ -188,5 +218,6 @@ public class Model {
         return parser;
     }
     public Tile[][] getTileGrid() { return tileGrid; }
+    public List<Tile> getTilesWithObjects() { return tilesWithObjects; }
     //endregion
 }
