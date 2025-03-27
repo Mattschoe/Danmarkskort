@@ -1,8 +1,6 @@
 package com.example.danmarkskort.MVC;
 
-import com.example.danmarkskort.AddressParser;
 import com.example.danmarkskort.AddressSearch.TrieST;
-import com.example.danmarkskort.MapObjects.Node;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -11,7 +9,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -19,11 +16,8 @@ import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
-import java.awt.event.ActionEvent;
 import java.io.File;
 import javafx.scene.control.Label;
-
-import javax.swing.event.ChangeEvent;
 
 import java.io.IOException;
 import java.net.URL;
@@ -39,7 +33,8 @@ public class Controller implements Initializable {
     @FXML TextField searchBar;
     @FXML ListView<String> viewList;
     double lastX, lastY;
-    TrieST<String> trie; //part of test
+    TrieST<String> trieCity; //part of test
+    TrieST<String> trieStreet;
     //endregion
 
     /** View-konstruktøren skaber/kører en instans af
@@ -50,10 +45,9 @@ public class Controller implements Initializable {
         canvas = new Canvas(400, 600);
         assert standardMapFile.exists();
         System.out.println("Controller created!");
-        this.trie = new TrieST<>();
+        this.trieCity = new TrieST<>(true);
+        this.trieStreet = new TrieST<>(false);
         listView = new ListView<>();
-
-
     }
 
     /** Funktionalitet forbundet med "Upload fil"-knappen på startskærmen. Køres når knappen klikkes */
@@ -112,25 +106,49 @@ public class Controller implements Initializable {
             listView.setVisible(true);
         }
 
-        if (event.getCharacter().equals("\r")) { // Hvis der trykkes enter
-            if (trie.keysThatMatch(input)!=null) {
-                System.out.println(trie.get(trie.keysThatMatch(input).getFirst()));
-            } else {
-                System.out.println(trie.keysWithPrefix(input).getFirst());
-            }
-        } else {
-            if (event.getCharacter().equals("\b")) { //hvis der trykkes backspace
-                event.consume();
-            }
-            //Finder de 3 første relevante addresser.
-            for (int i = 0; i < trie.keysWithPrefix(input).size(); i++) {
-                listView.getItems().add(trie.keysWithPrefix(input).get(i));
+        // HVIS DER STADIG ER MULIGE BYER
+        if (!trieCity.keysWithPrefix(input).isEmpty()) {
 
-                if (i > 3) {
-                    return;
+            if (event.getCharacter().equals("\r")) { // Hvis der trykkes enter
+                if (trieCity.keysThatMatch(input)!=null) {
+                    System.out.println(trieCity.get(trieCity.keysThatMatch(input).getFirst()));
+                } else {
+                    System.out.println(trieCity.keysWithPrefix(input).getFirst());
+                }
+            } else {
+                if (event.getCharacter().equals("\b")) { //hvis der trykkes backspace
+                    event.consume();
+                }
+                //Finder de 3 første relevante addresser.
+                for (int i = 0; i < trieCity.keysWithPrefix(input).size(); i++) {
+                    listView.getItems().add(trieCity.keysWithPrefix(input).get(i));
+
+                    if (i > 3) {
+                        return;
+                    }
                 }
             }
 
+        } else { // Skal lede i vejnavne
+            if (event.getCharacter().equals("\r")) { // Hvis der trykkes enter
+                if (trieStreet.keysThatMatch(input)!=null) {
+                    System.out.println(trieStreet.get(trieStreet.keysThatMatch(input).getFirst()));
+                } else {
+                    System.out.println(trieStreet.keysWithPrefix(input).getFirst());
+                }
+            } else {
+                if (event.getCharacter().equals("\b")) { //hvis der trykkes backspace
+                    event.consume();
+                }
+                //Finder de 3 første relevante addresser.
+                for (int i = 0; i < trieStreet.keysWithPrefix(input).size(); i++) {
+                    listView.getItems().add(trieStreet.keysWithPrefix(input).get(i));
+
+                    if (i > 3) {
+                        return;
+                    }
+                }
+            }
         }
     }
 

@@ -6,13 +6,13 @@ import java.util.LinkedList;
 public class TrieST<Item> {
     public int R = 29; // Størrelse på alfabet (Radix)
     private TrieNode root; // root of trie
-    private boolean isCity;
+    private final boolean isCity;
 
-    public TrieST(boolean city) {
-        this.isCity = city;
+    public TrieST(boolean isCity) {
+        this.isCity = isCity;
 
         //Test - skal på sigt indsættes under parsing
-        if (city) {
+        if (isCity) {
             put("Helsinge", new Node(10, 10));
             put("Helsinger", new Node(20, 30));
             put("Herning", new Node(20, 50));
@@ -180,33 +180,7 @@ public class TrieST<Item> {
         }
     }
 
-
-
-    //Main Test Method
-    public static void main(String[] args) {
-        TrieST<Node> trie = new TrieST<>();
-
-        trie.put("soborg", new Node(10, 10));
-        trie.put("sollerod", new Node(20,20));
-
-        System.out.println(trie.keysThatMatch("so").pollLast());//Null
-
-        for (String s :trie.keysWithPrefix("so")) {
-            System.out.println(s);
-        }
-
-        System.out.println(trie.keysThatMatch("sollerod").pollLast()); //should work
-
-        for (String s : trie.keysWithPrefix("sollerod")) {
-            System.out.println(s);
-        }
-
-        System.out.println(trie.keysThatMatch("soborg").pollLast()); //Should work
-
-        for (String s : trie.keysWithPrefix("sob")) {
-            System.out.println(s);
-        }
+    public boolean isCity() {
+        return isCity;
     }
-
-
 }
