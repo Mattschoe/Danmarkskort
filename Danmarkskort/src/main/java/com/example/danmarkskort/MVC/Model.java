@@ -64,7 +64,7 @@ public class Model {
         //Saves all tiles with MapObject in them in a separate list
         for (int x = 0; x < tileGrid.length; x++) {
             for (int y = 0; y < tileGrid[x].length; y++) {
-                if (!tileGrid[x][y].getObjectsInTile().isEmpty()) tilesWithObjects.add(tileGrid[x][y]);
+                if (tileGrid[x][y].getObjectsInTile().size() > 1) tilesWithObjects.add(tileGrid[x][y]);
             }
         }
 
