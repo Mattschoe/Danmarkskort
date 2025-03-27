@@ -56,7 +56,7 @@ public class Model {
 
         //Converts into tilegrid
         double[] tileGridBounds = getMinMaxCoords();
-        int tileSize = 1;
+        int tileSize = 5;
 
         initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 
@@ -66,6 +66,15 @@ public class Model {
             for (int y = 0; y < tileGrid[x].length; y++) {
                 if (!tileGrid[x][y].getObjectsInTile().isEmpty()) tilesWithObjects.add(tileGrid[x][y]);
             }
+        }
+
+        //TEST
+        for (int x = 0; x < tileGrid.length; x++) {
+            System.out.print(x + ": ");
+            for (int y = 0; y < tileGrid[x].length; y++) {
+                System.out.print(tileGrid[x][y].getObjectsInTile().size() + " ");
+            }
+            System.out.println();
         }
     }
 
@@ -105,11 +114,9 @@ public class Model {
          tileGrid = new Tile[numberOfTilesX][numberOfTilesY];
          for (int x = 0; x < numberOfTilesX; x++) {
              for (int y = 0; y < numberOfTilesY; y++) {
-                 double i = minX + x * tileSize;
-                 double j = minY + y * tileSize;
-                 System.out.println("Start: " + i + " " + j);
-                 System.out.println("End: " + (i + tileSize) + " " + (j + tileSize));
-                 tileGrid[x][y] = new Tile(i, j, i + tileSize, j + tileSize);
+                 double i = Math.min(minX + x * tileSize, maxX);
+                 double j = Math.min(minY + y * tileSize, maxY);
+                 tileGrid[x][y] = new Tile(i, j, i + tileSize, j + tileSize, tileSize);
              }
          }
 

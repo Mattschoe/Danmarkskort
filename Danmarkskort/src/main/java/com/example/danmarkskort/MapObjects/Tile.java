@@ -9,9 +9,11 @@ import java.util.List;
 public class Tile implements MapObject{
     List<MapObject> objectsInTile;
     double[] bounds;
+    int tileSize;
 
-    public Tile(double minX, double minY, double maxX, double maxY) {
+    public Tile(double minX, double minY, double maxX, double maxY, int tileSize) {
         objectsInTile = new ArrayList<>();
+        this.tileSize = tileSize;
         bounds = new double[4];
         bounds[0] = minX;
         bounds[1] = minY;
@@ -25,9 +27,11 @@ public class Tile implements MapObject{
 
     @Override
     public void draw(GraphicsContext graphicsContext) {
+        //Tegner tilet
         graphicsContext.setStroke(Color.DARKORANGE);
-        graphicsContext.strokeRect(bounds[0],bounds[1],bounds[2],bounds[3]);
+        graphicsContext.strokeRect(bounds[0],bounds[1], tileSize, tileSize);
 
+        //Tegner objekterne i tilet
         for (MapObject mapObject : objectsInTile) {
             mapObject.draw(graphicsContext);
         }

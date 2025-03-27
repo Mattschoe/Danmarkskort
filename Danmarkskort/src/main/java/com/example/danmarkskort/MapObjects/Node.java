@@ -61,7 +61,7 @@ public class Node implements Serializable, MapObject {
     }
 
     public void draw(GraphicsContext graphicsContext) {
-        //graphicsContext.strokeLine(x, y, x, y);
+        // graphicsContext.strokeLine(x, y, x, y);
     }
 
     /**

@@ -77,7 +77,6 @@ public class Road implements Serializable, MapObject {
      */
     public void draw(GraphicsContext graphicsContext) {
         assert graphicsContext != null;
-
         switch (roadType) {
             case "route":
                 graphicsContext.setStroke(Color.DARKRED);
