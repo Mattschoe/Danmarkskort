@@ -21,6 +21,7 @@ public class Road implements Serializable, MapObject {
     private final boolean bicycle;
     private int maxSpeed;
     private final String roadType;
+    private double[] boundingBox;
     //endregion
 
     /**
@@ -39,6 +40,7 @@ public class Road implements Serializable, MapObject {
         this.maxSpeed = maxSpeed;
         this.roadType = roadType;
         createLines();
+        updateBoundingBox();
     }
 
     /**
@@ -55,15 +57,16 @@ public class Road implements Serializable, MapObject {
         this.bicycle = bicycle;
         this.roadType = roadType;
         createLines();
+        updateBoundingBox();
     }
 
     ///Creates the lines between the {@link Node}'s (Used later for drawing)
     private void createLines() {
         //Tegner en linje fra den første node til den sidste i rækkefølge. (No?) Slutter af med at lave en linje mellem den sidste og første
-        Node startNode = nodes.getFirst();
+        Node currentNode = nodes.getFirst();
         for (int i = 1; i < nodes.size(); i++) {
-            lines.add(new Line(startNode, nodes.get(i)));
-            startNode = nodes.get(i);
+            lines.add(new Line(currentNode, nodes.get(i)));
+            currentNode = nodes.get(i);
         }
         //lines.add(new Line(startNode, nodes.getLast())); Tror ikke det her skal bruges i Roads
     }
@@ -99,6 +102,25 @@ public class Road implements Serializable, MapObject {
     @Deprecated
     public void drawMetro(Canvas mapCanvas) {}
 
+    private void updateBoundingBox() {
+        boundingBox = new double[4];
+        boundingBox[0] = Double.POSITIVE_INFINITY; //minX
+        boundingBox[1] = Double.POSITIVE_INFINITY; //minY
+        boundingBox[2] = Double.NEGATIVE_INFINITY; //maxX
+        boundingBox[3]= Double.NEGATIVE_INFINITY; //maxY
+
+        //Finds the lowest and highest XY
+        for (Node node : nodes) {
+            //X
+            if (node.getX() < boundingBox[0]) boundingBox[0] = node.getX(); //Smaller X
+            if (node.getX() > boundingBox[2]) boundingBox[2] = node.getX(); //Bigger X
+
+            //Y
+            if (node.getY() < boundingBox[1]) boundingBox[1] = node.getY(); //Smaller Y
+            if (node.getY() > boundingBox[3]) boundingBox[3] = node.getY(); //Bigger Y
+        }
+    }
+
     //region getters
     public Set<Line>  getLines() { return lines;    }
     public boolean  isWalkable() { return foot;     }
@@ -107,7 +129,13 @@ public class Road implements Serializable, MapObject {
     public String  getRoadType() { return roadType; }
     public List<Node> getNodes() { return nodes;    }
     public boolean hasRoadType() { return !roadType.isEmpty(); }
-
+    /**
+     * [0] = minX <br>
+     * [1] = minY <br>
+     * [2] = maxX <br>
+     * [3] = maxY <br>
+     */
+    public double[] getBoundingBox() { return boundingBox; }
     //endregion
 
     ///Tom metode for at regne maxspeed hvis tagget mangler
