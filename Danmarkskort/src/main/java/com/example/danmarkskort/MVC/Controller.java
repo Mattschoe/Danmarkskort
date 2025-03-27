@@ -3,9 +3,13 @@ package com.example.danmarkskort.MVC;
 import com.example.danmarkskort.AddressParser;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import com.example.danmarkskort.MapObjects.Node;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 
+import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -14,12 +18,18 @@ import javafx.scene.input.ScrollEvent;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+
+import java.awt.event.ActionEvent;
 import java.io.File;
 import javafx.scene.control.Label;
 
-import java.io.IOException;
+import javax.swing.event.ChangeEvent;
 
-public class Controller {
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
+
+public class Controller implements Initializable {
     //region fields
     View view;
     Model model;
@@ -27,6 +37,7 @@ public class Controller {
     @FXML Label valgtFil;
     @FXML Canvas canvas;
     @FXML TextField searchBar;
+    @FXML ListView<String> viewList;
     double lastX, lastY;
     TrieST<String> trie; //part of test
     //endregion
@@ -39,8 +50,8 @@ public class Controller {
         canvas = new Canvas(400, 600);
         assert standardMapFile.exists();
         System.out.println("Controller created!");
-
         this.trie = new TrieST<>();
+        listView = new ListView<>();
 
 
     }
@@ -90,25 +101,54 @@ public class Controller {
         view.drawMap(model.getParser());
     }
 
+    @FXML private ListView<String> listView;
 
     @FXML protected void searchBarTyped(KeyEvent event) {
-        if (event.getCharacter().equals("\r")) {
-            String input = searchBar.getText();
-            for (String s : trie.keysThatMatch(input)) {
-                System.out.println(trie.get(s));
+        listView.getItems().clear();
+        String input = searchBar.getText();
+        if (searchBar.getText().isEmpty()) {
+            listView.setVisible(false);
+        } else {
+            listView.setVisible(true);
+        }
+
+        if (event.getCharacter().equals("\r")) { // Hvis der trykkes enter
+            if (trie.keysThatMatch(input)!=null) {
+                System.out.println(trie.get(trie.keysThatMatch(input).getFirst()));
+            } else {
+                System.out.println(trie.keysWithPrefix(input).getFirst());
             }
         } else {
-            String input = searchBar.getText();
-
-
-            for (String s : trie.keysWithPrefix(input)) {
-                System.out.println(s);
-                //Skal printes i en drop down menu
+            if (event.getCharacter().equals("\b")) { //hvis der trykkes backspace
+                event.consume();
             }
-            
+            //Finder de 3 første relevante addresser.
+            for (int i = 0; i < trie.keysWithPrefix(input).size(); i++) {
+                listView.getItems().add(trie.keysWithPrefix(input).get(i));
+
+                if (i > 3) {
+                    return;
+                }
+            }
 
         }
     }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+
+
+
+        listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
+                String selected = listView.getSelectionModel().getSelectedItem();
+                searchBar.setText(selected);
+            }
+
+        });
+    }
+
 
     /** Metode køres når man zoomer på Canvas'et */
     @FXML protected void onCanvasScroll(ScrollEvent e) {
@@ -154,5 +194,7 @@ public class Controller {
     Canvas getCanvas() {
         return canvas;
     }
+
+
     //endregion
 }

@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.canvas.Canvas?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuButton?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.Slider?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.canvas.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.danmarkskort.MVC.Controller">
-    <Canvas fx:id="canvas" height="400.0" onMouseClicked="#onCanvasClick" onMousePressed="#onCanvasPressed" onMouseDragged="#onCanvasDragged" onScroll="#onCanvasScroll" width="600.0" />
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.danmarkskort.MVC.Controller">
+    <Canvas fx:id="canvas" height="400.0" onMouseClicked="#onCanvasClick" onMouseDragged="#onCanvasDragged" onMousePressed="#onCanvasPressed" onScroll="#onCanvasScroll" width="600.0" />
     <MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <Menu mnemonicParsing="false" text="File">
             <MenuItem mnemonicParsing="false" text="Close" />
@@ -30,4 +25,6 @@
     </MenuButton>
     <Slider layoutX="445.0" layoutY="348.0" showTickLabels="true" showTickMarks="true" value="50.0" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="15.0" />
     <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onKeyTyped="#searchBarTyped" promptText="Søg efter adresse..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
+   <ListView fx:id="listView" layoutX="15.0" layoutY="61.0" prefHeight="72.0" prefWidth="150.0" visible="false" />
+
 </AnchorPane>

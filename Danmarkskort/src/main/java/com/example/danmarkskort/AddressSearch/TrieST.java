@@ -6,15 +6,26 @@ import java.util.LinkedList;
 public class TrieST<Item> {
     public int R = 29; // Størrelse på alfabet (Radix)
     private TrieNode root; // root of trie
+    private boolean isCity;
 
-    public TrieST() {
+    public TrieST(boolean city) {
+        this.isCity = city;
+
         //Test - skal på sigt indsættes under parsing
-        put("Helsinge", new Node(10, 10));
-        put("Helsinger", new Node(20,30));
-        put("Herning", new Node(20,50));
-        put("Hobro", new Node(20,70));
-        put("Hjorring", new Node(20,20));
-        put("Horsens", new Node(20,20));
+        if (city) {
+            put("Helsinge", new Node(10, 10));
+            put("Helsinger", new Node(20, 30));
+            put("Herning", new Node(20, 50));
+            put("Hobro", new Node(20, 70));
+            put("Hjorring", new Node(20, 20));
+            put("Horsens", new Node(20, 20));
+
+        } else {
+            put("Helsingevej", new Node(20, 21));
+            put("Hobrovej", new Node(20, 22));
+            put("Hjorringvej", new Node(20, 23));
+            put("Horsensvej", new Node(20, 24));
+        }
     }
 
 
