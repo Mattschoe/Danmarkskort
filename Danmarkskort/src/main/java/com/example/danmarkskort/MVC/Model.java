@@ -46,7 +46,7 @@ public class Model {
             //If anything else it creates a new parser and tries saves it as .obj
             try {
                 parser = new Parser(file);
-                // saveParserToOBJ();
+                // saveParserToOBJ(); I STYKKER
             } catch (ParserSavingException e) {
                 System.out.println(e.getMessage());
             } catch (Exception e) {
@@ -57,20 +57,13 @@ public class Model {
 
         //Converts into tilegrid
         initializeTileGrid(0, 0,100,   100, 10);
-        // System.out.println(biggestX + " " + biggestY);
-
         double[] coords = getMinMaxCoords();
-        // System.out.println("Min: " + coords[0] + " " + coords[1] + " | max: " + coords[2] + " " + coords[3]);
 
         //TESTING
         for (int x = 0; x < tileGrid.length; x++) {
             for (int y = 0; y < tileGrid[x].length; y++) {
                 tileGrid[x][y].draw(graphicsContext);
-                // System.out.println("(" + x + "," + y + ") " + tileGrid[x][y].getObjectsInTile().size());
-                /* for (MapObject object : tileGrid[x][y].getObjectsInTile()) {
-                    System.out.println(object);
-                } */
-                // System.out.println();
+                if (!tileGrid[x][y].getObjectsInTile().isEmpty()) System.out.println("(" + x + ", " + y + "): " + tileGrid[x][y].getObjectsInTile().size());
             }
         }
     }

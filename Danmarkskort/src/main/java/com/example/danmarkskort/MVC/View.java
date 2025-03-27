@@ -117,7 +117,6 @@ public class View {
         int min = 0;
         for (Node node : parser.getNodes().values()) {
             if (node.getEdges().size() > min) {
-                System.out.println("Hm?");
                 min = node.getEdges().size();
                 bestNode = node;
             }
