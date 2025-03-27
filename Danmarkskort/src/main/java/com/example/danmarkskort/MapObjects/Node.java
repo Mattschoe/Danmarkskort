@@ -55,8 +55,6 @@ public class Node implements Serializable, MapObject {
         double yNorm = ((latitude - minLat) / (maxLat - minLat));
         x = xNorm * width;
         y = (1 - yNorm) * height; //Makes sure Y isn't mirrored
-
-        System.out.println("(" + x + "," + y + ")");
     }
 
     public void draw(GraphicsContext graphicsContext) {

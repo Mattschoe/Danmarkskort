@@ -135,8 +135,8 @@ public class View {
             //TODO: SKAL OPTIMERES VI DRAWER MAPPET LIKE 5 GANGE FØRSTE GANG
             //Moves the view over to the map
             double startZoom = (0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
-            pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
-            zoom(0, 0, startZoom, true);
+            //pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
+            //zoom(0, 0, startZoom, true);
         }
     }
 
