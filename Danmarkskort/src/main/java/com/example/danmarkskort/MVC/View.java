@@ -113,17 +113,17 @@ public class View {
         int zoomPercentage = (int) (((double) currentZoom/maxZoom) * 100);
         int fullDetails = 40; //% when all details should be drawn
         int mediumDetails = 70; //% when a balanced amount of details should be drawn
-        System.out.println(zoomPercentage);
+        // System.out.println(zoomPercentage);
         if (zoomPercentage < fullDetails && zoomPercentage < mediumDetails) { //Draws with all details
-            System.out.println("All details");
+            // System.out.println("All details");
             drawAllRoads();
             drawAllPolygons(true);
         } else if (zoomPercentage < mediumDetails) { //Draws with some details
-            System.out.println("medium details");
+            // System.out.println("medium details");
             drawAllRoads();
             drawAllPolygons(true);
         } else { //Draws the map with the least amount of details
-            System.out.println("minimum details");
+            // System.out.println("minimum details");
             drawAllSignificantHighways();
             drawAllPolygons(false);
         }

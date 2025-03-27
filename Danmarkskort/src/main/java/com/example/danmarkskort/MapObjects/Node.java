@@ -41,8 +41,22 @@ public class Node implements Serializable, MapObject {
      * @param longitude same as constructor
      */
     private void calculateXY(double latitude, double longitude) {
-        x = 0.56 * longitude;
-        y = -latitude;
+        //Bounds of DKK (ish)
+        double minLat = 54.5;
+        double maxLat = 57.8;
+        double minLon = 8.0;
+        double maxLon = 12.5;
+
+        int width = 400;
+        int height = 600;
+
+        //Calculates XY
+        double xNorm = ((longitude - minLon) / (maxLon - minLon));
+        double yNorm = ((latitude - minLat) / (maxLat - minLat));
+        x = xNorm * width;
+        y = (1 - yNorm) * height; //Makes sure Y isn't mirrored
+
+        System.out.println("(" + x + "," + y + ")");
     }
 
     public void draw(GraphicsContext graphicsContext) {

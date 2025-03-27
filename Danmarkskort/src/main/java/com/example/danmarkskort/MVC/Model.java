@@ -60,7 +60,7 @@ public class Model {
         // System.out.println(biggestX + " " + biggestY);
 
         double[] coords = getMinMaxCoords();
-        System.out.println("Min: " + coords[0] + " " + coords[1] + " | max: " + coords[2] + " " + coords[3]);
+        // System.out.println("Min: " + coords[0] + " " + coords[1] + " | max: " + coords[2] + " " + coords[3]);
 
         //TESTING
         for (int x = 0; x < tileGrid.length; x++) {
@@ -73,10 +73,6 @@ public class Model {
                 // System.out.println();
             }
         }
-
-        //region TESTING
-        //Search search = new Search(getAllNodesWithStreetAddresses(parser.getNodes().values()));
-        //endregion
     }
 
     /**
