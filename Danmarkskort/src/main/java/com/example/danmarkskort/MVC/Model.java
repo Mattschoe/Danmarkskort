@@ -56,8 +56,11 @@ public class Model {
         assert parser != null;
 
         //Converts into tilegrid
-        initializeTileGrid(0, 0,100,   100, 10);
-        double[] coords = getMinMaxCoords();
+        double[] tileGridBounds = getMinMaxCoords();
+        int tileSize = 10;
+
+        initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
+
 
         //TESTING
         for (int x = 0; x < tileGrid.length; x++) {
@@ -166,7 +169,6 @@ public class Model {
     }
 
     //region getters and setters
-
     /**
      * Gives all nodes that contains an address
      * @param allNodes all nodes parsed in the parser
@@ -185,5 +187,6 @@ public class Model {
     public Parser getParser() {
         return parser;
     }
+    public Tile[][] getTileGrid() { return tileGrid; }
     //endregion
 }

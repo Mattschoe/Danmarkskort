@@ -62,12 +62,7 @@ public class Road implements Serializable, MapObject {
         //Tegner en linje fra den første node til den sidste i rækkefølge. (No?) Slutter af med at lave en linje mellem den sidste og første
         Node startNode = nodes.getFirst();
         for (int i = 1; i < nodes.size(); i++) {
-            Line line = new Line(startNode, nodes.get(i));
-            lines.add(line);
-
-            startNode.addEdge(line);
-            nodes.get(i).addEdge(line);
-
+            lines.add(new Line(startNode, nodes.get(i)));
             startNode = nodes.get(i);
         }
         //lines.add(new Line(startNode, nodes.getLast())); Tror ikke det her skal bruges i Roads

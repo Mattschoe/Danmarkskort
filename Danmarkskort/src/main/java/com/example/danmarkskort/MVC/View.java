@@ -1,9 +1,6 @@
 package com.example.danmarkskort.MVC;
 
-import com.example.danmarkskort.MapObjects.Line;
-import com.example.danmarkskort.MapObjects.Node;
-import com.example.danmarkskort.MapObjects.Polygon;
-import com.example.danmarkskort.MapObjects.Road;
+import com.example.danmarkskort.MapObjects.*;
 import com.example.danmarkskort.Parser;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -30,6 +27,7 @@ public class View {
     Stage stage;
     boolean firstTimeDrawingMap;
     int currentZoom, minZoom, maxZoom;
+    Tile[][] tileGrid;
     //endregion
 
     /** View-konstruktøren skifter scene ud fra en given stage og filstien til en FXML-fil
@@ -113,18 +111,7 @@ public class View {
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
         //region TESTING
-        Node bestNode = null;
-        int min = 0;
-        for (Node node : parser.getNodes().values()) {
-            if (node.getEdges().size() > min) {
-                min = node.getEdges().size();
-                bestNode = node;
-            }
-        }
 
-        for (Line line : bestNode.getEdges()) {
-            line.draw(graphicsContext);
-        }
         //endregion
 
         /*
@@ -220,6 +207,8 @@ public class View {
         }
     }
 
-    //GETTERS AND SETTERS
+    //region GETTERS AND SETTERS
     Stage getStage() { return stage; }
+    public void setTileGrid(Tile[][] tileGrid) { this.tileGrid = tileGrid; }
+    //endregion
 }

@@ -13,7 +13,6 @@ public class Node implements Serializable, MapObject {
     @Serial private static final long serialVersionUID = 1444149606229887777L;
     private double x, y;
     private String[] address;
-    private List<Line> edges;
 
     /**
      * A {@link Node} is a point in a (x, y) space. {@link Node} calculates the (x, y) point itself in the {@link #calculateXY} method when being instantiated
@@ -21,7 +20,6 @@ public class Node implements Serializable, MapObject {
      * @param longitude coordinate
      */
     public Node(double latitude, double longitude) {
-        edges = new ArrayList<>();
         calculateXY(latitude, longitude);
     }
 
@@ -35,7 +33,6 @@ public class Node implements Serializable, MapObject {
      * @param street
      */
     public Node(double latitude, double longitude, String city, String houseNumber, int postcode, String street) {
-        edges = new ArrayList<>();
         calculateXY(latitude, longitude);
         address = new String[4];
         saveAddress(city, houseNumber, postcode, street);
@@ -99,9 +96,5 @@ public class Node implements Serializable, MapObject {
     }
     public double getX() { return x; }
     public double getY() { return y; }
-    public void addEdge(Line line) {
-        edges.add(line);
-    }
-    public List<Line> getEdges() { return edges; }
     //endregion
 }
