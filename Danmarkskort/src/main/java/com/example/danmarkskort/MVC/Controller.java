@@ -108,45 +108,31 @@ public class Controller implements Initializable {
 
         // HVIS DER STADIG ER MULIGE BYER
         if (!trieCity.keysWithPrefix(input).isEmpty()) {
-
-            if (event.getCharacter().equals("\r")) { // Hvis der trykkes enter
-                if (trieCity.keysThatMatch(input)!=null) {
-                    System.out.println(trieCity.get(trieCity.keysThatMatch(input).getFirst()));
-                } else {
-                    System.out.println(trieCity.keysWithPrefix(input).getFirst());
-                }
-            } else {
-                if (event.getCharacter().equals("\b")) { //hvis der trykkes backspace
-                    event.consume();
-                }
-                //Finder de 3 første relevante addresser.
-                for (int i = 0; i < trieCity.keysWithPrefix(input).size(); i++) {
-                    listView.getItems().add(trieCity.keysWithPrefix(input).get(i));
-
-                    if (i > 3) {
-                        return;
-                    }
-                }
-            }
+            System.out.println("Dette er byer");
+            autoSuggest(event, input, trieCity);
 
         } else { // Skal lede i vejnavne
-            if (event.getCharacter().equals("\r")) { // Hvis der trykkes enter
-                if (trieStreet.keysThatMatch(input)!=null) {
-                    System.out.println(trieStreet.get(trieStreet.keysThatMatch(input).getFirst()));
-                } else {
-                    System.out.println(trieStreet.keysWithPrefix(input).getFirst());
-                }
-            } else {
-                if (event.getCharacter().equals("\b")) { //hvis der trykkes backspace
-                    event.consume();
-                }
-                //Finder de 3 første relevante addresser.
-                for (int i = 0; i < trieStreet.keysWithPrefix(input).size(); i++) {
-                    listView.getItems().add(trieStreet.keysWithPrefix(input).get(i));
+            System.out.println("Dette er veje");
+            autoSuggest(event, input, trieStreet);
+        }
+    }
 
-                    if (i > 3) {
-                        return;
-                    }
+    private void autoSuggest(KeyEvent event, String input, TrieST<String> trie) {
+        if (event.getCharacter().equals("\r")) { // Hvis der trykkes enter
+            if (trie.keysThatMatch(input)!=null) {
+                System.out.println(trie.get(trie.keysThatMatch(input).getFirst()));
+            } else {
+                System.out.println(trie.keysWithPrefix(input).getFirst());
+            }
+        } else {
+            if (event.getCharacter().equals("\b")) { //hvis der trykkes backspace eller
+                event.consume();
+            }
+            //Finder de 3 første relevante addresser.
+            for (int i = 0; i < trie.keysWithPrefix(input).size(); i++) {
+                listView.getItems().add(trie.keysWithPrefix(input).get(i));
+                if (i > 3) {
+                    return;
                 }
             }
         }
@@ -154,8 +140,6 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
-
 
         listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
             @Override

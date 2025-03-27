@@ -8,7 +8,7 @@ import java.util.List;
 
 public class Street implements Comparable<Street> {
     //region fields
-    private String streetName;
+    private final String streetName;
     private List<Node> nodes;
     //endregion
 
