@@ -19,7 +19,6 @@ public class Controller {
     //region Fields
     private View view;
     private Model model;
-    private double zoomLvl;
     private double lastX, lastY;
 
     @FXML private Canvas canvas;
@@ -27,26 +26,23 @@ public class Controller {
     @FXML private Slider zoomBar;
     //endregion
 
+    //region Constructor(s)
     /// The View-constructor creates an instance of this constructor upon loading an FXML-scene
     public Controller() {
         canvas = new Canvas(400, 600);
         System.out.println("Controller created!");
     }
+    //endregion
 
+    //region (Dynamic) Methods
     /** Runs right after a Controller is created -- if we're in a scene with a zoomBar,
      *  the zoomBar's slider is set to communicate with the zoom-level of the canvas/document
      */
     public void initialize() {
         if (zoomBar != null) {
             zoomBar.valueProperty().addListener((_, _, _) -> {
-                double x = canvas.getWidth()  / 2;
-                double y = canvas.getHeight() / 2;
-                double zoomVal = zoomBar.getValue();
-
-                if (zoomVal - zoomLvl > 0) view.zoom(x, y, 0.7669434906956007);
-                else view.zoom(x, y, 1.3038770289229813);
-
-                zoomLvl = zoomVal;
+                //Functionality for the zoomBar Slider -- I've given up for now
+                //TODO FIX/CHANGE OR REMOVE ZOOMSLIDER
             });
         }
     }
@@ -85,15 +81,6 @@ public class Controller {
         }
     }
 
-    /**
-     * Passes the given file into a Model class that starts parsing it
-     * @param mapFile the file which the map is contained. Given by user when choosing file
-     */
-    private void loadFile(File mapFile) {
-        model = new Model(mapFile.getPath(), canvas);
-        assert model.getParser() != null;
-    }
-
     /// Method runs upon clicking the "Run standard"-button in the start-up scene.
     @FXML protected void standardInputButton() throws IOException {
         File standardMapFile = new File("./data/small.osm.obj"); //Skal ændres senere
@@ -105,31 +92,34 @@ public class Controller {
         view.drawMap(model.getParser());
     }
 
+    /** Passes the given file into a Model class that starts parsing it
+     *  @param mapFile the file which the map is contained. Given by user when choosing file
+     */
+    private void loadFile(File mapFile) {
+        model = new Model(mapFile.getPath(), canvas);
+        assert model.getParser() != null;
+    }
+
     /// Method runs upon zooming/scrolling on the Canvas
     @FXML protected void onCanvasScroll(ScrollEvent e) {
         double factor = Math.pow(1.01, e.getDeltaY());
-        System.out.println(factor);
-        zoomLvl = view.getTrans().getMxx();
+        double zoomLvl = view.getTrans().getMxx();
 
         //Der zoomes kun hvis...
-        boolean cond1 = 2_000 < zoomLvl && zoomLvl < 140_000; //Hvis man er inde for zoom-grænserne
-        boolean cond2 = zoomLvl < 2_000   && factor > 1;      //Hvis man er zoomet max ud men man zoomer ind
+        boolean cond1 = 2_017 < zoomLvl && zoomLvl < 140_000; //Hvis man er inde for zoom-grænserne
+        boolean cond2 = zoomLvl < 2_017   && factor > 1;      //Hvis man er zoomet max ud men man zoomer ind
         boolean cond3 = zoomLvl > 140_000 && factor < 1;      //Hvis man er zoomet max ind men man zoomer ud
 
         if (cond1 || cond2 || cond3) view.zoom(e.getX(), e.getY(), factor);
 
-        zoomBar.adjustValue(zoomLvl);
+        //zoomBar.adjustValue(zoomLvl / 140_000 * 100);
+        //zoomBar.adjustValue(zoomLvl);
     }
 
     /// Method runs upon typing in the search-bar. For now simply prints what's written
     @FXML protected void onSearchBarType(KeyEvent e) {
-        if (e.getCharacter().equals("\n")) System.out.println("SPECIEL TING");
+        if (e.getCharacter().charAt(0) == '\r') System.out.println("ENTER");
         else System.out.println(searchBar.getText());
-    }
-
-    /// Method runs upon pressing 'Enter' in the search-bar
-    @FXML protected void onSearchBarEnter() {
-        System.out.println("LINJESKIFT");
     }
 
     /// Method runs upon releasing a click on the canvas
@@ -152,6 +142,7 @@ public class Controller {
         lastX = e.getX();
         lastY = e.getY();
     }
+    //endregion
 
     //region Getter and setters
     /** Sætter Controllerens view-felt til et givent View

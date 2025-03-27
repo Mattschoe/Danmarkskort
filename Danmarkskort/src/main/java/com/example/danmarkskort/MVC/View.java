@@ -27,6 +27,7 @@ public class View {
     private boolean firstTimeDrawingMap;
     //endregion
 
+    //region Constructor(s)
     /** The View-constructor switches the scene from a given stage and a filepath to an FXML-file
      * @param stage the given stage -- usually coming from the window we're in, as to not open a new window
      * @param filename the given filepath -- fx. "startup.fxml" for the start-up scene
@@ -69,7 +70,9 @@ public class View {
          * blev redundant efter Matthias tilføjede instansiering af canvas i Controller's konstruktør */
         initializeCanvas();
     }
+    //endregion
 
+    //region (Dynamic) Methods
     /// Sets the canvas' transform, and binds its height and width
     private void initializeCanvas() {
         //Canvas'et og dets GraphicsContext gemmes
@@ -150,6 +153,7 @@ public class View {
             polygon.drawPolygon(graphicsContext);
         }
     }
+    //endregion
 
     //region Getter and setters
     Stage  getStage() { return stage; }
