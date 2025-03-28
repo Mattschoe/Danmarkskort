@@ -7,7 +7,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
-public class Polygon implements Serializable{
+public class Polygon implements Serializable, MapObject{
     @Serial private static final long serialVersionUID = 1444149606229887777L;
     //region fields
     private final List<Node> nodes;
@@ -49,6 +49,10 @@ public class Polygon implements Serializable{
             yPoints[i] = nodes.get(i).getY();
         }
     }
+
+    ///Standard draw method, calls the other draw-method with {@code drawLines} as true
+    @Override
+    public void draw(GraphicsContext gc) { draw(gc, true); }
 
     public void draw(GraphicsContext gc, boolean drawLines) {
         Color color = switch(type) {
@@ -122,6 +126,6 @@ public class Polygon implements Serializable{
     //region getters
     public List<Node> getNodes() { return nodes; }
     public String getType() { return type; }
-    public double[] getBoundingBox() { return boundingBox; }
+    @Override public double[] getBoundingBox() { return boundingBox; }
     //endregion
 }
