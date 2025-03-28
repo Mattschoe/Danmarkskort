@@ -40,7 +40,7 @@ public class Road implements Serializable, MapObject {
         this.maxSpeed = maxSpeed;
         this.roadType = roadType;
         createLines();
-        updateBoundingBox();
+        calculateBoundingBox();
     }
 
     /**
@@ -57,7 +57,7 @@ public class Road implements Serializable, MapObject {
         this.bicycle = bicycle;
         this.roadType = roadType;
         createLines();
-        updateBoundingBox();
+        calculateBoundingBox();
     }
 
     ///Creates the lines between the {@link Node}'s (Used later for drawing)
@@ -101,7 +101,7 @@ public class Road implements Serializable, MapObject {
     @Deprecated
     public void drawMetro(Canvas mapCanvas) {}
 
-    private void updateBoundingBox() {
+    private void calculateBoundingBox() {
         boundingBox = new double[4];
         boundingBox[0] = Double.POSITIVE_INFINITY; //minX
         boundingBox[1] = Double.POSITIVE_INFINITY; //minY
