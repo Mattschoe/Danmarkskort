@@ -11,7 +11,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Random;
 
-public class Line implements Serializable, MapObject {
+public class Line implements Serializable {
     @Serial private static final long serialVersionUID = -9178696453904098837L;
     private Node start, end;
 
@@ -30,7 +30,6 @@ public class Line implements Serializable, MapObject {
      * Draws a line between the two points provided in the class' constructor
      * @param graphicsContext the style and context for stroke
      */
-    @Override
     public void draw(GraphicsContext graphicsContext) {
         assert start != null && end != null;
         graphicsContext.strokeLine(start.getX(), start.getY(), end.getX(), end.getY());

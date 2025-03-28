@@ -42,5 +42,7 @@ public class Tile implements MapObject{
     public List<MapObject> getObjectsInTile() {
         return objectsInTile;
     }
+    @Override
+    public double[] getBoundingBox() { return bounds; }
     //endregion
 }

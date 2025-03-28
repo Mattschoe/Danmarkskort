@@ -96,5 +96,9 @@ public class Node implements Serializable, MapObject {
     }
     public double getX() { return x; }
     public double getY() { return y; }
+    @Override
+    public double[] getBoundingBox() {
+        return new double[]{x, y, x, y};
+    }
     //endregion
 }

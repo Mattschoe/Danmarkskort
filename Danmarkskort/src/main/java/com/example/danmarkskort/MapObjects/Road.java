@@ -128,12 +128,7 @@ public class Road implements Serializable, MapObject {
     public String  getRoadType() { return roadType; }
     public List<Node> getNodes() { return nodes;    }
     public boolean hasRoadType() { return !roadType.isEmpty(); }
-    /**
-     * [0] = minX <br>
-     * [1] = minY <br>
-     * [2] = maxX <br>
-     * [3] = maxY <br>
-     */
+    @Override
     public double[] getBoundingBox() { return boundingBox; }
     //endregion
 
