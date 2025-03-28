@@ -28,8 +28,7 @@ public class View {
     Stage stage;
     boolean firstTimeDrawingMap;
     int currentZoom, minZoom, maxZoom;
-    Tile[][] tileGrid;
-    List<Tile> tilesWithObjects;
+    List<Tile> visibleTiles;
     //endregion
 
     /** View-konstruktøren skifter scene ud fra en given stage og filstien til en FXML-fil
@@ -104,17 +103,21 @@ public class View {
         if (parser == null) return; //TODO %% Evt. find en bedre måde at sørge for at initializeCanvas IKKE køres før kortet loades
         assert graphicsContext != null && canvas != null;
         this.parser = parser;
+        double canvasWidth = canvas.getWidth();
+        double canvasHeight = canvas.getHeight();
 
         //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
         graphicsContext.setTransform(background);
         graphicsContext.setFill(Color.ANTIQUEWHITE);
-        graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        graphicsContext.fillRect(0, 0, canvasWidth, canvasHeight);
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
         //region TESTING
-        if (tilesWithObjects != null) {
-            for (Tile tile : tilesWithObjects) {
+        //Tegner kun tiles inde for viewport
+        if (visibleTiles != null) {
+            System.out.println(visibleTiles.size());
+            for (Tile tile : visibleTiles) {
                 tile.draw(graphicsContext);
             }
         }
@@ -149,6 +152,7 @@ public class View {
             double startZoom = (0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
             //pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
             //zoom(0, 0, startZoom, true);
+            return;
         }
     }
 
@@ -215,7 +219,8 @@ public class View {
 
     //region GETTERS AND SETTERS
     Stage getStage() { return stage; }
-    public void setTileGrid(Tile[][] tileGrid) { this.tileGrid = tileGrid; }
-    public void setTilesWithObjects(List<Tile> tilesWithObjects) { this.tilesWithObjects = tilesWithObjects; }
+    public void setVisibleTiles(List<Tile> visibleTiles) {
+        this.visibleTiles = visibleTiles;
+    }
     //endregion
 }

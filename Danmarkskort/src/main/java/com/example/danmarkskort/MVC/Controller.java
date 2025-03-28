@@ -1,5 +1,6 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.MapObjects.Tile;
 import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
@@ -17,6 +18,7 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 public class Controller {
     //region fields
@@ -39,10 +41,12 @@ public class Controller {
         assert standardMapFile.exists();
         System.out.println("Controller created!");
 
+        ///TO DO: Fix, this doesnt work og tror det er fordi den lægger i construktøren men idk -MN
         AnimationTimer fpsTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 if (panRequest) {
+                    view.setVisibleTiles(model.getTilesInView());
                     double dx = event.getX() - lastX;
                     double dy = event.getY() - lastY;
                     view.pan(dx, dy);
@@ -79,12 +83,14 @@ public class Controller {
         //Åbner stifinderen og gemmer filen som brugeren vælger
         File selectedFile = fileChooser.showOpenDialog(new Stage());
         if (selectedFile != null) {
+            //Loads View and model
             view = new View(view.getStage(), "mapOverlay.fxml");
             loadFile(selectedFile);
             assert view != null;
 
+            //Starts up the map
             view.drawMap(model.getParser());
-            view.setTilesWithObjects(model.getTilesWithObjects());
+            view.setVisibleTiles(model.getTilesInView());
         }
     }
 
@@ -108,6 +114,7 @@ public class Controller {
     //region events
     /** Metode køres når man zoomer på Canvas'et */
     @FXML protected void onCanvasScroll(ScrollEvent e) {
+        view.setVisibleTiles(model.getTilesInView());
         double factor = e.getDeltaY();
         view.zoom(e.getX(), e.getY(), Math.pow(1.01, factor), true);
     }
@@ -138,13 +145,19 @@ public class Controller {
     void setView(View view) {
         this.view = view;
     }
-
     /** Returnerer Controllerens canvas-felt, der "populates" direkte idet en scene FXML-loades
      * (Denne metode bruges kun af View-klassen en enkelt gang, så View kan få Canvas'et af Controlleren)
      * @return Controllerens canvas-felt
      */
     Canvas getCanvas() {
         return canvas;
+    }
+    public List<Tile> getVisibleTiles() {
+        System.out.println(model);
+        if (model != null) {
+            return model.getTilesInView();
+        }
+        else return null;
     }
     //endregion
 }

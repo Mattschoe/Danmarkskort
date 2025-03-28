@@ -18,6 +18,9 @@ public class Model {
     private File outputFile; //The output .obj file
     private Tile[][] tileGrid;
     List<Tile> tilesWithObjects;
+    int tileSize;
+    double[] tileGridBounds;
+    int numberOfTilesX, numberOfTilesY;
     //endregion
 
     /**
@@ -31,6 +34,7 @@ public class Model {
         this.graphicsContext = canvas.getGraphicsContext2D();
         assert file.exists();
         tilesWithObjects = new ArrayList<>();
+        tileSize = 1;
 
         //If .obj file
         if (filePath.endsWith(".obj")) {
@@ -55,8 +59,7 @@ public class Model {
         assert parser != null;
 
         //Converts into tilegrid
-        double[] tileGridBounds = getMinMaxCoords();
-        int tileSize = 5;
+        tileGridBounds = getMinMaxCoords();
 
         initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 
@@ -98,8 +101,8 @@ public class Model {
      */
     private void initializeTileGrid(double minX, double minY, double maxX, double maxY, int tileSize) {
         //Calculates number of tiles along each axis
-        int numberOfTilesX = (int) Math.ceil((maxX - minX) / tileSize);
-        int numberOfTilesY = (int) Math.ceil((maxY - minY) / tileSize);
+        numberOfTilesX = (int) Math.ceil((maxX - minX) / tileSize);
+        numberOfTilesY = (int) Math.ceil((maxY - minY) / tileSize);
 
         //Initializes the Tile objects inside the grid variable
          tileGrid = new Tile[numberOfTilesX][numberOfTilesY];
@@ -235,5 +238,32 @@ public class Model {
     }
     public Tile[][] getTileGrid() { return tileGrid; }
     public List<Tile> getTilesWithObjects() { return tilesWithObjects; }
+    /**
+     * All the tiles currently in view
+     * @return all the tiles that are visible given the {@code canvasBounds}
+     */
+    public List<Tile> getTilesInView() {
+        List<Tile> visibleTiles = new ArrayList<>();
+
+        //Gets the start- and endTile given the canvasBounds min- and maxXY
+        int startTileX = (int) ((0 - tileGridBounds[0]) / tileSize); //Upper left of canvas
+        int startTileY = (int) ((0 - tileGridBounds[1]) / tileSize); //Upper left of canvas
+        int endTileX = (int) ((canvas.getWidth() - tileGridBounds[0]) / tileSize); //Lower right of canvas
+        int endTileY = (int) ((canvas.getHeight() - tileGridBounds[1]) / tileSize); //Lower right of canvas
+
+        //Clamps them so they are within bounds (Or avoids overflow errors if no tiles are within bounds)
+        startTileX = Math.max(startTileX, 0);
+        startTileY = Math.max(startTileY, 0);
+        endTileX = Math.min(endTileX, numberOfTilesX);
+        endTileY = Math.min(endTileY, numberOfTilesY);
+
+        //Adds every visible tile into the List of visible tiles
+        for (int i = startTileX; i < endTileX; i++) {
+            for (int j = startTileY; j < endTileY; j++) {
+                visibleTiles.add(tileGrid[i][j]);
+            }
+        }
+        return visibleTiles;
+    }
     //endregion
 }
