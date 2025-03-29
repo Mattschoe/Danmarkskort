@@ -120,7 +120,7 @@ public class View {
         //region TESTING
         //Tegner kun tiles inde for viewport
         if (visibleTiles != null) {
-            //System.out.println(visibleTiles.size());
+            System.out.println(visibleTiles.size());
             for (Tile tile : visibleTiles) {
                 tile.draw(graphicsContext);
             }
@@ -165,8 +165,9 @@ public class View {
     ///STJÅLET FRA NUTAN
     public void pan(double dx, double dy) {
         //Saves the offset
-        viewportOffsetX += dx;
-        viewportOffsetY += dy;
+        viewportOffsetX -= dx;
+        viewportOffsetY -= dy;
+        System.out.println("Offset: " + (int) viewportOffsetX + " " + (int) viewportOffsetY);
 
         //Moves the map
         trans.prependTranslation(dx, dy);

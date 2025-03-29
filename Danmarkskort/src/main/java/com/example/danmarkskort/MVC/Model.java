@@ -19,6 +19,7 @@ public class Model {
     private Tile[][] tileGrid;
     List<Tile> tilesWithObjects;
     int tileSize;
+    ///The bounds of the tile-grid map (aka the coordinate of the first and last grid) <br> \[0] = minX <br> \[1] = minY <br> \[2] = maxX <br> \[3] = maxY
     double[] tileGridBounds;
     int numberOfTilesX, numberOfTilesY;
     //endregion
@@ -35,7 +36,7 @@ public class Model {
         assert file.exists();
 
         tilesWithObjects = new ArrayList<>();
-        tileSize = 1;
+        tileSize = 3;
 
         //If .obj file
         if (filePath.endsWith(".obj")) {
@@ -263,17 +264,23 @@ public class Model {
     }
     /**
      * All the tiles currently in view
+     * @param viewportMinX the minimum X coordinate in the current view. Also known as the {@code View}'s viewportOffsetX <br>
+     * @param viewportMinY the minimum Y coordinate in the current view. Also known as the {@code View}'s viewportOffsetY
      * @return all the tiles that are visible given the {@code canvasBounds}
      */
-    public List<Tile> getTilesInView(double viewportOffsetX, double viewportOffsetY) {
-        double[] viewport = new double[]{-viewportOffsetX, -viewportOffsetY, canvas.getWidth(), canvas.getHeight()};
+    public List<Tile> getTilesInView(double viewportMinX, double viewportMinY) {
         List<Tile> visibleTiles = new ArrayList<>();
 
-        //Gets the start- and endTile given the canvasBounds min- and maxXY
-        int startTileX = (int) ((0 - tileGridBounds[0]) / tileSize); //Upper left of canvas
-        int startTileY = (int) ((0 - tileGridBounds[1]) / tileSize); //Upper left of canvas
-        int endTileX = (int) ((canvas.getWidth() - tileGridBounds[0]) / tileSize); //Lower right of canvas
-        int endTileY = (int) ((canvas.getHeight() - tileGridBounds[1]) / tileSize); //Lower right of canvas
+        //Gets the max coordinate in what we are currently viewing (min is giving as parameters)
+        double viewportMaxX = viewportMinX + canvas.getWidth();
+        double viewportMaxY = viewportMinY + canvas.getHeight();
+        //System.out.println((int) viewportMinX + " " + (int) viewportMinY + " | " + (int) viewportMaxX + " " +  (int)viewportMaxY);
+
+        //Converts viewport's bounding box to tile indices
+        int startTileX = (int) ((viewportMinX - tileGridBounds[0]) / tileSize); //Upper left of canvas
+        int startTileY = (int) ((viewportMinY - tileGridBounds[1]) / tileSize); //Upper left of canvas
+        int endTileX = (int) Math.ceil((viewportMaxX - tileGridBounds[0]) / tileSize); //Lower right of canvas
+        int endTileY = (int) Math.ceil((viewportMaxY - tileGridBounds[1]) / tileSize); //Lower right of canvas
 
         //Clamps them so they are within bounds (Or avoids overflow errors if no tiles are within bounds)
         startTileX = Math.max(startTileX, 0);
