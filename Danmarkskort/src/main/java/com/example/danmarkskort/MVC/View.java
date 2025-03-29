@@ -33,6 +33,8 @@ public class View {
     private double viewportOffsetX = 0;
     ///The offset of which we moved around in the canvas. Always starts at 0 and accumulates when panning and zooming
     private double viewportOffsetY = 0;
+    ///The amount that we are zoomed ind and out. Always start at zoom level 1.0 and is increased multiplicatly in the zoom method
+    private double totalZoomScale = 1.0;
     //endregion
 
     /** View-konstruktøren skifter scene ud fra en given stage og filstien til en FXML-fil
@@ -76,9 +78,9 @@ public class View {
         if (controller.getCanvas() != null) initializeCanvas();
 
         //Sets up the Zoom levels
-        currentZoom = 7;
+        currentZoom = 6;
         minZoom = 1;
-        maxZoom = 6;
+        maxZoom = 7;
     }
 
     ///Giver Canvas en Transform og bunden højde/bredde
@@ -167,7 +169,7 @@ public class View {
         //Saves the offset
         viewportOffsetX -= dx;
         viewportOffsetY -= dy;
-        System.out.println("Offset: " + (int) viewportOffsetX + " " + (int) viewportOffsetY);
+        //System.out.println("Offset: " + (int) viewportOffsetX + " " + (int) viewportOffsetY);
 
         //Moves the map
         trans.prependTranslation(dx, dy);
@@ -181,11 +183,14 @@ public class View {
      * @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
      */
     public void zoom(double dx, double dy, double factor, boolean ignoreMinMax) {
+        totalZoomScale *= factor; //Updates our scale factor
         if (factor >= 1 && currentZoom > minZoom) { //Zoom ind
             currentZoom--;
-            pan(-dx, -dy);
+            //pan(-dx, -dy);
+            trans.prependTranslation(-dx, -dy);
             trans.prependScale(factor, factor);
-            pan(dx, dy);
+            //pan(dx, dy);
+            trans.prependTranslation(dx, dy);
             drawMap(parser);
         } else if (factor <= 1 && currentZoom < maxZoom) { //Zoom out
             currentZoom++;
@@ -233,5 +238,6 @@ public class View {
     }
     public double getViewportOffsetX() { return viewportOffsetX; }
     public double getViewportOffsetY() { return viewportOffsetY; }
+    public double getTotalZoomScale() { return totalZoomScale; }
     //endregion
 }

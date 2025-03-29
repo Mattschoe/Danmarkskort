@@ -49,7 +49,7 @@ public class Controller {
             @Override
             public void handle(long now) {
                 if (panRequest) {
-                    view.setVisibleTiles(model.getTilesInView(view.getViewportOffsetX(), view.getViewportOffsetY()));
+                    view.setVisibleTiles(model.getTilesInView(view.getViewportOffsetX(), view.getViewportOffsetY(), view.getTotalZoomScale()));
                     double dx = event.getX() - lastX;
                     double dy = event.getY() - lastY;
                     view.pan(dx, dy);
@@ -103,7 +103,7 @@ public class Controller {
 
             //Starts up the map
             view.drawMap(model.getParser());
-            view.setVisibleTiles(model.getTilesInView(view.getViewportOffsetX(), view.getViewportOffsetY()));
+            view.setVisibleTiles(model.getTilesInView(view.getViewportOffsetX(), view.getViewportOffsetY(), view.getTotalZoomScale()));
         }
     }
 
@@ -119,7 +119,7 @@ public class Controller {
     /** Metode køres når man zoomer på Canvas'et */
     @FXML protected void onCanvasScroll(ScrollEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked
-        view.setVisibleTiles(model.getTilesInView(view.getViewportOffsetX(), view.getViewportOffsetY())); //Absolut cooked at kalde en view metode, ved hjælp af en model metode, ved at give den parametre med getter metoder fra view, men øh. If it works ig -MN
+        view.setVisibleTiles(model.getTilesInView(view.getViewportOffsetX(), view.getViewportOffsetY(), view.getTotalZoomScale())); //Absolut cooked at kalde en view metode, ved hjælp af en model metode, ved at give den parametre med getter metoder fra view, men øh. If it works ig -MN
         double factor = e.getDeltaY();
         view.zoom(e.getX(), e.getY(), Math.pow(1.01, factor), true);
     }
@@ -161,7 +161,7 @@ public class Controller {
     public List<Tile> getVisibleTiles() {
         System.out.println(model);
         if (model != null) {
-            return model.getTilesInView(view.getViewportOffsetX(), view.getViewportOffsetY());
+            return model.getTilesInView(view.getViewportOffsetX(), view.getViewportOffsetY(), view.getTotalZoomScale());
         }
         else return null;
     }

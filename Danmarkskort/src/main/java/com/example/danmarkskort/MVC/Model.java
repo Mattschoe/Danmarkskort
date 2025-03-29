@@ -264,17 +264,21 @@ public class Model {
     }
     /**
      * All the tiles currently in view
-     * @param viewportMinX the minimum X coordinate in the current view. Also known as the {@code View}'s viewportOffsetX <br>
-     * @param viewportMinY the minimum Y coordinate in the current view. Also known as the {@code View}'s viewportOffsetY
+     * @param viewportOffsetX the minimum X coordinate in the current view.
+     * @param viewportOffsetY the minimum Y coordinate in the current view.
+     * @param totalZoomScale the scale that we are either zoomed in and out. Normally starts at 1.0
      * @return all the tiles that are visible given the {@code canvasBounds}
      */
-    public List<Tile> getTilesInView(double viewportMinX, double viewportMinY) {
+    public List<Tile> getTilesInView(double viewportOffsetX, double viewportOffsetY, double totalZoomScale) {
+        //System.out.println("Scale: " + totalZoomScale);
         List<Tile> visibleTiles = new ArrayList<>();
 
-        //Gets the max coordinate in what we are currently viewing (min is giving as parameters)
-        double viewportMaxX = viewportMinX + canvas.getWidth();
-        double viewportMaxY = viewportMinY + canvas.getHeight();
-        //System.out.println((int) viewportMinX + " " + (int) viewportMinY + " | " + (int) viewportMaxX + " " +  (int)viewportMaxY);
+        //Gets the min and max coordinate in what we are currently viewing
+        double viewportMinX = viewportOffsetX / totalZoomScale;
+        double viewportMinY = viewportOffsetY / totalZoomScale;
+        double viewportMaxX = viewportMinX + (canvas.getWidth() / totalZoomScale);
+        double viewportMaxY = viewportMinY + (canvas.getHeight() / totalZoomScale);
+        System.out.println((int) viewportMinX + " " + (int) viewportMinY + " | " + (int) viewportMaxX + " " +  (int)viewportMaxY);
 
         //Converts viewport's bounding box to tile indices
         int startTileX = (int) ((viewportMinX - tileGridBounds[0]) / tileSize); //Upper left of canvas
