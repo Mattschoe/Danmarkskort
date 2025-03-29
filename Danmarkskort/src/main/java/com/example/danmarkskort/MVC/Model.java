@@ -9,12 +9,12 @@ import javafx.scene.canvas.GraphicsContext;
 import java.io.*;
 import java.util.*;
 
+///A Model is a Singleton class that stores the map in a tile-grid. It also stores the parser which parses the .osm data. Call {@link #getInstance()} to get the Model
 public class Model {
     //region Fields
     private static Model modelInstance;
     private File file;
     private Parser parser;
-    private GraphicsContext graphicsContext;
     private Canvas canvas;
     private File outputFile; //The output .obj file
     private Tile[][] tileGrid;
@@ -31,12 +31,10 @@ public class Model {
     private Model(String filePath, Canvas canvas) {
         assert canvas != null;
         this.canvas = canvas;
-        graphicsContext = canvas.getGraphicsContext2D();
 
         file = new File(filePath);
         assert file.exists();
 
-        graphicsContext = canvas.getGraphicsContext2D();
         tilesWithObjects = new ArrayList<>();
         tileSize = 1;
 
@@ -238,7 +236,6 @@ public class Model {
         return minMaxCoords;
     }
 
-
     /**
      * Saves the Tile gid to a OBJ file so we cant fast load it later
      */
@@ -247,8 +244,6 @@ public class Model {
     }
 
     //region getters and setters
-    public void setFilePath(String filePath) { file = new File(filePath); }
-    public void setCanvas(Canvas canvas) { this.canvas = canvas; }
     /**
      * Gives all nodes that contains an address
      * @param allNodes all nodes parsed in the parser
@@ -267,8 +262,6 @@ public class Model {
     public Parser getParser() {
         return parser;
     }
-    public Tile[][] getTileGrid() { return tileGrid; }
-    public List<Tile> getTilesWithObjects() { return tilesWithObjects; }
     /**
      * All the tiles currently in view
      * @return all the tiles that are visible given the {@code canvasBounds}
