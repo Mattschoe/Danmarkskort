@@ -36,6 +36,14 @@ public class Controller {
         assert standardMapFile.exists();
         System.out.println("Controller created!");
 
+        //Det her er cooked
+        try {
+            model = Model.getInstance();
+        } catch (IllegalStateException e) {
+            //Model not loaded yet, so we wait
+        }
+
+        //region AnimationTimer
         ///TO DO: Fix, this doesnt work og tror det er fordi den lægger i construktøren men idk -MN
         AnimationTimer fpsTimer = new AnimationTimer() {
             @Override
@@ -53,6 +61,16 @@ public class Controller {
             }
         };
         fpsTimer.start();
+        //endregion
+    }
+
+    /**
+     * Passes the given file into a Model class that starts parsing it
+     * @param mapFile the file which the map is contained. Given by user when choosing file
+     */
+    private void loadFile(File mapFile) {
+        model = Model.getInstance(mapFile.getPath(), canvas);
+        assert model.getParser() != null;
     }
 
     /** Funktionalitet forbundet med "Upload fil"-knappen på startskærmen. Køres når knappen klikkes */
@@ -89,15 +107,6 @@ public class Controller {
         }
     }
 
-    /**
-     * Passes the given file into a Model class that starts parsing it
-     * @param mapFile the file which the map is contained. Given by user when choosing file
-     */
-    private void loadFile(File mapFile) {
-        model = Model.getInstance(mapFile.getPath(), canvas);
-        assert model.getParser() != null;
-    }
-
     /** Funktionalitet forbundet med "Kør standard"-knappen på startskærmen. Køres når knappen klikkes */
     @FXML protected void standardInputButton() throws IOException {
         view = new View(view.getStage(), "mapOverlay.fxml");
@@ -109,6 +118,7 @@ public class Controller {
     //region events
     /** Metode køres når man zoomer på Canvas'et */
     @FXML protected void onCanvasScroll(ScrollEvent e) {
+        if (model == null) model = Model.getInstance(); //Det her er even mere cooked
         view.setVisibleTiles(model.getTilesInView());
         double factor = e.getDeltaY();
         view.zoom(e.getX(), e.getY(), Math.pow(1.01, factor), true);
@@ -121,6 +131,7 @@ public class Controller {
 
     /** Metode køres idet man klikker ned på Canvas'et */
     @FXML protected  void onCanvasPressed(MouseEvent e) {
+        if (model == null) model = Model.getInstance(); //Det her er even mere cooked
         lastX = e.getX();
         lastY = e.getY();
     }
