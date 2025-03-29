@@ -29,6 +29,10 @@ public class View {
     boolean firstTimeDrawingMap;
     int currentZoom, minZoom, maxZoom;
     List<Tile> visibleTiles;
+    ///The offset of which we moved around in the canvas. Always starts at 0 and accumulates when panning and zooming
+    private double viewportOffsetX = 0;
+    ///The offset of which we moved around in the canvas. Always starts at 0 and accumulates when panning and zooming
+    private double viewportOffsetY = 0;
     //endregion
 
     /** View-konstruktøren skifter scene ud fra en given stage og filstien til en FXML-fil
@@ -116,7 +120,7 @@ public class View {
         //region TESTING
         //Tegner kun tiles inde for viewport
         if (visibleTiles != null) {
-            System.out.println(visibleTiles.size());
+            //System.out.println(visibleTiles.size());
             for (Tile tile : visibleTiles) {
                 tile.draw(graphicsContext);
             }
@@ -152,7 +156,6 @@ public class View {
             double startZoom = (0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
             //pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
             //zoom(0, 0, startZoom, true);
-            return;
         }
     }
 
@@ -161,6 +164,11 @@ public class View {
 
     ///STJÅLET FRA NUTAN
     public void pan(double dx, double dy) {
+        //Saves the offset
+        viewportOffsetX += dx;
+        viewportOffsetY += dy;
+
+        //Moves the map
         trans.prependTranslation(dx, dy);
         drawMap(parser);
     }
@@ -222,5 +230,7 @@ public class View {
     public void setVisibleTiles(List<Tile> visibleTiles) {
         this.visibleTiles = visibleTiles;
     }
+    public double getViewportOffsetX() { return viewportOffsetX; }
+    public double getViewportOffsetY() { return viewportOffsetY; }
     //endregion
 }

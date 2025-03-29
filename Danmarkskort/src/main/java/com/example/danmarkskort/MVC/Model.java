@@ -4,7 +4,6 @@ import com.example.danmarkskort.Exceptions.ParserSavingException;
 import com.example.danmarkskort.MapObjects.*;
 import com.example.danmarkskort.Parser;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 
 import java.io.*;
 import java.util.*;
@@ -266,7 +265,8 @@ public class Model {
      * All the tiles currently in view
      * @return all the tiles that are visible given the {@code canvasBounds}
      */
-    public List<Tile> getTilesInView() {
+    public List<Tile> getTilesInView(double viewportOffsetX, double viewportOffsetY) {
+        double[] viewport = new double[]{-viewportOffsetX, -viewportOffsetY, canvas.getWidth(), canvas.getHeight()};
         List<Tile> visibleTiles = new ArrayList<>();
 
         //Gets the start- and endTile given the canvasBounds min- and maxXY
