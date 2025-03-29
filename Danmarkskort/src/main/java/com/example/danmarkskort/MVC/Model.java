@@ -11,6 +11,7 @@ import java.util.*;
 
 public class Model {
     //region Fields
+    private static Model modelInstance;
     private File file;
     private Parser parser;
     private GraphicsContext graphicsContext;
@@ -23,16 +24,19 @@ public class Model {
     int numberOfTilesX, numberOfTilesY;
     //endregion
 
+
     /**
      * Checks what filetype the filepath parameter is. Calls {@link #parseOBJ()} if it's a .obj file, if not, it creates a new {@link Parser} class and propagates the responsibility
-     * @param filePath the path where the file that needs parsing is loaded (ex.: "/data/small.osm")
      */
-    public Model(String filePath, Canvas canvas) {
+    private Model(String filePath, Canvas canvas) {
         assert canvas != null;
-        file = new File(filePath);
         this.canvas = canvas;
-        this.graphicsContext = canvas.getGraphicsContext2D();
+        graphicsContext = canvas.getGraphicsContext2D();
+
+        file = new File(filePath);
         assert file.exists();
+
+        graphicsContext = canvas.getGraphicsContext2D();
         tilesWithObjects = new ArrayList<>();
         tileSize = 1;
 
@@ -70,6 +74,31 @@ public class Model {
                 if (tileGrid[x][y].getObjectsInTile().size() > 1) tilesWithObjects.add(tileGrid[x][y]);
             }
         }
+    }
+
+    /**
+     * Method used to initialize the singleton Model. Method is only meant to be called once, for getting the instance, call {@link #getInstance()}
+     * @param filePath the path where the file that needs parsing is loaded (ex.: "/data/small.osm")
+     * @param canvas the Canvas which the scene is drawn upon
+     * @return Model (Singleton)
+     */
+    public static Model getInstance(String filePath, Canvas canvas) {
+        if (modelInstance == null) {
+            modelInstance = new Model(filePath, canvas);
+        }
+        return modelInstance;
+    }
+
+    /**
+     * Method used to get the singleton Model. The method {@link #getInstance(String, Canvas)} HAS to be called first to initialize the singleton
+     * @return Model (Singleton)
+     * @throws IllegalStateException if the singleton is not initialized
+     */
+    public static Model getInstance() {
+        if (modelInstance == null) {
+            throw new IllegalStateException("Singleton is not initialized, Call getInstance(String filePath, Canvas canvas) first.");
+        }
+        return modelInstance;
     }
 
     /**
@@ -218,6 +247,8 @@ public class Model {
     }
 
     //region getters and setters
+    public void setFilePath(String filePath) { file = new File(filePath); }
+    public void setCanvas(Canvas canvas) { this.canvas = canvas; }
     /**
      * Gives all nodes that contains an address
      * @param allNodes all nodes parsed in the parser

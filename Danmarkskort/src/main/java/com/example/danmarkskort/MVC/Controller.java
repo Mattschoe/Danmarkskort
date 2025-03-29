@@ -1,17 +1,12 @@
 package com.example.danmarkskort.MVC;
 
 import com.example.danmarkskort.MapObjects.Tile;
-import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -99,7 +94,7 @@ public class Controller {
      * @param mapFile the file which the map is contained. Given by user when choosing file
      */
     private void loadFile(File mapFile) {
-        model = new Model(mapFile.getPath(), canvas);
+        model = Model.getInstance(mapFile.getPath(), canvas);
         assert model.getParser() != null;
     }
 
