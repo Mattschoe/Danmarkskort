@@ -3,11 +3,13 @@ package com.example.danmarkskort.MVC;
 import com.example.danmarkskort.MapObjects.*;
 import com.example.danmarkskort.Parser;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
+import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -225,6 +227,11 @@ public class View {
     Stage getStage() { return stage; }
     public void setVisibleTiles(List<Tile> visibleTiles) {
         this.visibleTiles = visibleTiles;
+    }
+    public double[] getViewport() throws NonInvertibleTransformException {
+        Point2D minXY = trans.inverseTransform(0, 0);
+        Point2D maxXY = trans.inverseTransform(canvas.getWidth(), canvas.getHeight());
+        return new double[]{minXY.getX(), minXY.getY(), maxXY.getX(), maxXY.getY()};
     }
     public double getViewportOffsetX() { return viewportOffsetX; }
     public double getViewportOffsetY() { return viewportOffsetY; }

@@ -7,6 +7,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -25,6 +26,7 @@ public class Controller {
     double lastX, lastY;
     boolean panRequest, zoomRequest;
     MouseEvent event;
+    double[] viewport;
     //endregion
 
     /** View-konstruktøren skaber/kører en instans af
@@ -49,7 +51,11 @@ public class Controller {
             @Override
             public void handle(long now) {
                 if (panRequest) {
-                    view.setVisibleTiles(model.getTilesInView(view.getViewportOffsetX(), view.getViewportOffsetY(), view.getTotalZoomScale()));
+                    try {
+                        view.setVisibleTiles(model.getTilesInView(view.getViewport())); //Absolut cooked at kalde en view metode, ved hjælp af en model metode, ved at give den parametre med getter metoder fra view, men øh. If it works ig -MN
+                    } catch (NonInvertibleTransformException exception) {
+                        System.out.println("Error getting viewport from view!");
+                    }
                     double dx = event.getX() - lastX;
                     double dy = event.getY() - lastY;
                     view.pan(dx, dy);
@@ -103,7 +109,11 @@ public class Controller {
 
             //Starts up the map
             view.drawMap(model.getParser());
-            view.setVisibleTiles(model.getTilesInView(view.getViewportOffsetX(), view.getViewportOffsetY(), view.getTotalZoomScale()));
+            try {
+                view.setVisibleTiles(model.getTilesInView(view.getViewport())); //Absolut cooked at kalde en view metode, ved hjælp af en model metode, ved at give den parametre med getter metoder fra view, men øh. If it works ig -MN
+            } catch (NonInvertibleTransformException exception) {
+                System.out.println("Error getting viewport from view!");
+            }
         }
     }
 
@@ -119,7 +129,13 @@ public class Controller {
     /** Metode køres når man zoomer på Canvas'et */
     @FXML protected void onCanvasScroll(ScrollEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked
-        view.setVisibleTiles(model.getTilesInView(view.getViewportOffsetX(), view.getViewportOffsetY(), view.getTotalZoomScale())); //Absolut cooked at kalde en view metode, ved hjælp af en model metode, ved at give den parametre med getter metoder fra view, men øh. If it works ig -MN
+
+        try {
+            view.setVisibleTiles(model.getTilesInView(view.getViewport())); //Absolut cooked at kalde en view metode, ved hjælp af en model metode, ved at give den parametre med getter metoder fra view, men øh. If it works ig -MN
+        } catch (NonInvertibleTransformException exception) {
+            System.out.println("Error getting viewport from view!");
+        }
+
         double factor = e.getDeltaY();
         view.zoom(e.getX(), e.getY(), Math.pow(1.01, factor), true);
     }
@@ -157,13 +173,6 @@ public class Controller {
      */
     Canvas getCanvas() {
         return canvas;
-    }
-    public List<Tile> getVisibleTiles() {
-        System.out.println(model);
-        if (model != null) {
-            return model.getTilesInView(view.getViewportOffsetX(), view.getViewportOffsetY(), view.getTotalZoomScale());
-        }
-        else return null;
     }
     //endregion
 }
