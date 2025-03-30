@@ -28,8 +28,8 @@ public class Tile implements MapObject{
     @Override
     public void draw(GraphicsContext graphicsContext) {
         //Tegner tilet
-        graphicsContext.setStroke(Color.DARKORANGE);
-        graphicsContext.strokeRect(bounds[0],bounds[1], tileSize, tileSize);
+        //graphicsContext.setStroke(Color.DARKORANGE);
+        //graphicsContext.strokeRect(bounds[0],bounds[1], tileSize, tileSize);
 
         //Tegner objekterne i tilet
         for (MapObject mapObject : objectsInTile) {

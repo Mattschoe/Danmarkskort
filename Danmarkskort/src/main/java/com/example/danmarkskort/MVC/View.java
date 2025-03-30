@@ -122,11 +122,12 @@ public class View {
         //region TESTING
         //Tegner kun tiles inde for viewport
         if (visibleTiles != null) {
-            System.out.println(visibleTiles.size());
+            System.out.println("Drawing: " + visibleTiles.size());
             for (Tile tile : visibleTiles) {
                 tile.draw(graphicsContext);
             }
         }
+        System.out.println("Finished drawing!");
         //endregion
 
         /*

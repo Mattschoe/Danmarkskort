@@ -14,7 +14,6 @@ public class Model {
     private static Model modelInstance;
     private File file;
     private Parser parser;
-    private Canvas canvas;
     private File outputFile; //The output .obj file
     private Tile[][] tileGrid;
     List<Tile> tilesWithObjects;
@@ -30,13 +29,12 @@ public class Model {
      */
     private Model(String filePath, Canvas canvas) {
         assert canvas != null;
-        this.canvas = canvas;
 
         file = new File(filePath);
         assert file.exists();
 
         tilesWithObjects = new ArrayList<>();
-        tileSize = 3;
+        tileSize = 10;
 
         //If .obj file
         if (filePath.endsWith(".obj")) {
