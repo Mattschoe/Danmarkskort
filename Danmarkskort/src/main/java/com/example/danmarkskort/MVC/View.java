@@ -30,9 +30,7 @@ public class View {
     int currentZoom, minZoom, maxZoom;
     List<Tile> visibleTiles;
     ///The offset of which we moved around in the canvas. Always starts at 0 and accumulates when panning and zooming
-    private double viewportOffsetX = 0;
-    ///The offset of which we moved around in the canvas. Always starts at 0 and accumulates when panning and zooming
-    private double viewportOffsetY = 0;
+    private double viewportOffsetX = 0; private double viewportOffsetY = 0;
     ///The amount that we are zoomed ind and out. Always start at zoom level 1.0 and is increased multiplicatly in the zoom method
     private double totalZoomScale = 1.0;
     //endregion
@@ -184,26 +182,18 @@ public class View {
      */
     public void zoom(double dx, double dy, double factor, boolean ignoreMinMax) {
         totalZoomScale *= factor; //Updates our scale factor
-        if (factor >= 1 && currentZoom > minZoom) { //Zoom ind
-            currentZoom--;
-            //pan(-dx, -dy);
-            trans.prependTranslation(-dx, -dy);
-            trans.prependScale(factor, factor);
-            //pan(dx, dy);
-            trans.prependTranslation(dx, dy);
-            drawMap(parser);
-        } else if (factor <= 1 && currentZoom < maxZoom) { //Zoom out
-            currentZoom++;
-            pan(-dx, -dy);
-            trans.prependScale(factor, factor);
-            pan(dx, dy);
-            drawMap(parser);
-        } else if (ignoreMinMax) {
-            pan(-dx, -dy);
-            trans.prependScale(factor, factor);
-            pan(dx, dy);
-            drawMap(parser);
+        if (factor >= 1 && currentZoom > minZoom) currentZoom--; //Zoom ind
+        else if (factor <= 1 && currentZoom < maxZoom) currentZoom++; //Zoom out
+        else if (ignoreMinMax) { //Needs to be changed
+
+        } else { //If we are not allowed to zoom
+            return;
         }
+        //Zooms
+        trans.prependTranslation(-dx, -dy);
+        trans.prependScale(factor, factor);
+        trans.prependTranslation(dx, dy);
+        drawMap(parser);
     }
 
     ///Draws all roads. Method is called in {@link #drawMap(Parser)}
