@@ -165,7 +165,7 @@ public class Controller implements Initializable {
             //Finder de 3 første relevante addresser.
             for (int i = 0; i < trie.keysWithPrefix(input).size(); i++) {
                 listView.getItems().add(trie.keysWithPrefix(input).get(i));
-                if (i > 3) {
+                if (i >= 2) {
                     return;
                 }
             }
