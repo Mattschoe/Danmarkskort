@@ -152,15 +152,15 @@ public class View {
     public void zoom(double dx, double dy, double factor) {
         if (factor >= 1 && currentZoom > minZoom) { //Zoom ind
             currentZoom--;
-            pan(-dx, -dy);
+            trans.prependTranslation(-dx, -dy);
             trans.prependScale(factor, factor);
-            pan(dx, dy);
+            trans.prependTranslation(dx, dy);
             drawMap(parser);
         } else if (factor <= 1 && currentZoom < maxZoom) { //Zoom out
             currentZoom++;
-            pan(-dx, -dy);
+            trans.prependTranslation(-dx, -dy);
             trans.prependScale(factor, factor);
-            pan(dx, dy);
+            trans.prependTranslation(dx, dy);
             drawMap(parser);
         }
     }
