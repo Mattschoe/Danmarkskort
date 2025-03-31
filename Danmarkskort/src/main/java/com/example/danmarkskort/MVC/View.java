@@ -38,7 +38,7 @@ public class View {
     //endregion
 
     /** View-konstruktøren skifter scene ud fra en given stage og filstien til en FXML-fil
-     * @param stage givne stage ved start-up fås denne af Application's start-metode, ellers genbruger Controlleren Stage'en der allerede vises
+     * @param stage givne stage ved start-up fås denne af App's start-metode, ellers genbruger Controlleren Stage'en der allerede vises
      * @param filename givne filsti f.eks. "startup.fxml" til start-scenen
      * @throws IOException kastes hvis programmet fejler i at loade FXML-filen
      */
