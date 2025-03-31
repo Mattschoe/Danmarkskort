@@ -1,31 +1,44 @@
 package com.example.danmarkskort.MVC;
 
 import com.example.danmarkskort.Exceptions.ParserSavingException;
-import com.example.danmarkskort.MapObjects.*;
+import com.example.danmarkskort.MapObjects.Node;
+import com.example.danmarkskort.MapObjects.Polygon;
+import com.example.danmarkskort.MapObjects.Road;
+import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.Parser;
 import javafx.scene.canvas.Canvas;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 ///A Model is a Singleton class that stores the map in a tile-grid. It also stores the parser which parses the .osm data. Call {@link #getInstance()} to get the Model
 public class Model {
     //region Fields
     private static Model modelInstance;
-    private File file;
+    private final File file;
     private Parser parser;
     private File outputFile; //The output .obj file
     private Tile[][] tileGrid;
-    List<Tile> tilesWithObjects;
-    int tileSize;
+    private List<Tile> tilesWithObjects;
+    private int tileSize;
     ///The bounds of the tile-grid map (aka the coordinate of the first and last grid) <br> \[0] = minX <br> \[1] = minY <br> \[2] = maxX <br> \[3] = maxY
-    double[] tileGridBounds;
-    int numberOfTilesX, numberOfTilesY;
+    private double[] tileGridBounds;
+    private int numberOfTilesX, numberOfTilesY;
     //endregion
 
-
-    /**
-     * Checks what filetype the filepath parameter is. Calls {@link #parseOBJ()} if it's a .obj file, if not, it creates a new {@link Parser} class and propagates the responsibility
+    //region Constructor(s)
+    /** Checks what filetype the filepath parameter is.
+     *  Calls {@link #parseOBJ()} if it's an OBJ-file, if not, creates a new {@link Parser} class and propagates the responsibility
      */
     private Model(String filePath, Canvas canvas) {
         assert canvas != null;
@@ -49,7 +62,7 @@ public class Model {
             //If anything else it creates a new parser and tries saves it as .obj
             try {
                 parser = new Parser(file);
-                // saveParserToOBJ(); I STYKKER
+                //saveParserToOBJ(); I STYKKER :(
             } catch (ParserSavingException e) {
                 System.out.println(e.getMessage());
             } catch (Exception e) {
@@ -71,7 +84,9 @@ public class Model {
             }
         }
     }
+    //endregion
 
+    //region Methods
     /**
      * Method used to initialize the singleton Model. Method is only meant to be called once, for getting the instance, call {@link #getInstance()}
      * @param filePath the path where the file that needs parsing is loaded (ex.: "/data/small.osm")
@@ -118,12 +133,9 @@ public class Model {
         } catch (IOException e) {
             throw new ParserSavingException("Error saving parser as .obj! Error Message: " + e.getMessage());
         }
-
     }
 
-    /**
-     * Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile
-     */
+    /// Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile
     private void initializeTileGrid(double minX, double minY, double maxX, double maxY, int tileSize) {
         //Calculates number of tiles along each axis
         numberOfTilesX = (int) Math.ceil((maxX - minX) / tileSize);
@@ -234,14 +246,14 @@ public class Model {
         return minMaxCoords;
     }
 
-    /**
-     * Saves the Tile gid to a OBJ file so we cant fast load it later
-     */
+    /// Saves the Tile gid to a OBJ file so we cant fast load it later
     private void saveTileGridToOBJ() {
-
+        //TODO MAKE THIS WORK ;_;
     }
+    //endregion
 
-    //region getters and setters
+    //region Getters and setters
+    public Parser getParser() { return parser; }
     /**
      * Gives all nodes that contains an address
      * @param allNodes all nodes parsed in the parser
@@ -257,9 +269,7 @@ public class Model {
         }
         return nodesWithStreetAddresses;
     }
-    public Parser getParser() {
-        return parser;
-    }
+
     /**
      * All the tiles currently in view
      * @param viewport an array of length 4 with the following specifics: <br> [0] = minX <br> [1] = minY <br> [2] = maxX <br> [3] = maxY

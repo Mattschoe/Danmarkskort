@@ -3,15 +3,16 @@ package com.example.danmarkskort.MVC;
 import com.example.danmarkskort.MapObjects.Tile;
 import javafx.animation.AnimationTimer;
 import com.example.danmarkskort.AddressSearch.TrieST;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.transform.NonInvertibleTransformException;
@@ -25,18 +26,11 @@ import java.util.List;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class Controller implements Initializable {
-    //region fields
-    View view;
-    Model model;
-    File standardMapFile;
-    @FXML Label valgtFil;
-    @FXML Canvas canvas;
-    @FXML
-    TextField searchBar;
-    @FXML
-    ListView<String> viewList;
-    double lastX, lastY;
+public class Controller {
+    //region Fields
+    private View view;
+    private Model model;
+    private double lastX, lastY;
     boolean panRequest, zoomRequest;
     MouseEvent mouseEvent;
     ScrollEvent scrollEvent;
@@ -44,16 +38,19 @@ public class Controller implements Initializable {
     TrieST<String> trieStreet;
     MouseEvent event;
     double[] viewport;
+
+    @FXML private Canvas canvas;
+    @FXML private TextField searchBar;
+    @FXML private Slider zoomBar;
+    @FXML ListView<String> viewList;
     //endregion
 
-    /** View-konstruktøren skaber/kører en instans af
-     * konstruktøren her, når den loader en FXML-scene
-     */
+    //region Constructor(s)
+    /// The View-constructor creates an instance of this constructor upon loading an FXML-scene
     public Controller() {
-        standardMapFile = new File("./data/small.osm.obj"); //Skal ændres senere
         canvas = new Canvas(400, 600);
-        assert standardMapFile.exists();
         System.out.println("Controller created!");
+
         this.trieCity = new TrieST<>(true);
         this.trieStreet = new TrieST<>(false);
         listView = new ListView<>();
@@ -66,8 +63,8 @@ public class Controller implements Initializable {
         }
 
         //region AnimationTimer
-        ///TO DO: Fix, this doesnt work og tror det er fordi den lægger i construktøren men idk -MN
-        //OBS JEG MISTÆNKER DET HER FOR IKKE AT VIRKE
+        //TODO: Fix, this doesnt work og tror det er fordi den lægger i construktøren men idk -MN
+        //OBS JEG (MATTHIAS) MISTÆNKER DET HER FOR IKKE AT VIRKE
         AnimationTimer fpsTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
@@ -92,11 +89,10 @@ public class Controller implements Initializable {
             }
         };
         fpsTimer.start();
-        //endregion
     }
+    //endregion
 
-    /**
-     * Passes the given file into a Model class that starts parsing it
+    /** Passes the given file into a Model class that starts parsing it
      * @param mapFile the file which the map is contained. Given by user when choosing file
      */
     private void loadFile(File mapFile) {
@@ -104,20 +100,36 @@ public class Controller implements Initializable {
         assert model.getParser() != null;
     }
 
-    /** Funktionalitet forbundet med "Upload fil"-knappen på startskærmen. Køres når knappen klikkes */
-    @FXML protected void uploadInputButton() throws IOException{
+    //region Methods
+    /** Method runs right after a Controller is created -- if we're in a scene with a zoomBar,
+     *  the zoomBar's slider is set to communicate with the zoom-level of the canvas/document
+     */
+    @Deprecated protected void initialize() {
+        if (zoomBar != null) {
+            zoomBar.valueProperty().addListener((_, _, _) -> {
+                //Functionality for the zoomBar Slider -- I (Olli) have given up for the time being
+                //TODO FIX/CHANGE/REMOVE ZOOMSLIDER
+            });
+        }
+    }
+
+    /** Method runs upon clicking the "Upload file"-button in the start-up scene.
+     *  Lets the user pick a file and tries to parse it as a map. If successful,
+     *  switches the scene to a canvas with the map drawn.
+     */
+    @FXML protected void uploadInputButton() throws IOException {
         //Laver en FileChooser til at åbne en stifinder når brugeren klikker 'Upload fil'
         FileChooser fileChooser = new FileChooser();
 
         //Sætter et par stilistiske elementer
-        fileChooser.setTitle("Vælg fil");
+        fileChooser.setTitle("Choose your file");
         fileChooser.getExtensionFilters().addAll(
-                new ExtensionFilter("Alle læsbare filer", "*.osm","*.obj","*.txt","*.zip"),
-                new ExtensionFilter("OpenStreetMap-filer", "*.osm"),
-                new ExtensionFilter("Parser-klasse", "*.obj"),
-                new ExtensionFilter("Tekst-filer", "*.txt"),
-                new ExtensionFilter("Zip-filer", "*.zip"),
-                new ExtensionFilter("Alle filer", "*.*"));
+                new ExtensionFilter("All readable files", "*.osm","*.obj","*.txt","*.zip"),
+                new ExtensionFilter("OpenStreetMap-files", "*.osm"),
+                new ExtensionFilter("Parser-class objects", "*.obj"),
+                new ExtensionFilter("Text-files", "*.txt"),
+                new ExtensionFilter("Zip-files", "*.zip"),
+                new ExtensionFilter("All files", "*.*"));
         String routeDesktop = switch(System.getProperty("os.name").split(" ")[0]) {
             case "Windows" -> System.getProperty("user.home") + "\\Desktop";
             case "MAC"     -> System.getProperty("user.home") + "/Desktop";
@@ -142,15 +154,18 @@ public class Controller implements Initializable {
         }
     }
 
-    /** Funktionalitet forbundet med "Kør standard"-knappen på startskærmen. Køres når knappen klikkes */
+    /// Method runs upon clicking the "Run standard"-button in the start-up scene
     @FXML protected void standardInputButton() throws IOException {
+        File standardMapFile = new File("./data/small.osm.obj"); //TODO skal ændres senere
+        assert standardMapFile.exists();
+
         view = new View(view.getStage(), "mapOverlay.fxml");
         loadFile(standardMapFile);
-        assert view != null;
+
         view.drawMap(model.getParser());
     }
 
-    //region events
+    //regionEvents
     @FXML private ListView<String> listView;
 
     @FXML protected void searchBarTyped(KeyEvent event) {
@@ -187,28 +202,15 @@ public class Controller implements Initializable {
             //Finder de 3 første relevante addresser.
             for (int i = 0; i < trie.keysWithPrefix(input).size(); i++) {
                 listView.getItems().add(trie.keysWithPrefix(input).get(i));
-                if (i >= 2) {
+                if (i > 3) {
                     return;
                 }
             }
         }
     }
 
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
-                String selected = listView.getSelectionModel().getSelectedItem();
-                searchBar.setText(selected);
-            }
-
-        });
-    }
-
-
-    /** Metode køres når man zoomer på Canvas'et */
+    /// Method runs upon zooming/scrolling on the Canvas
     @FXML protected void onCanvasScroll(ScrollEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked
 
@@ -222,39 +224,36 @@ public class Controller implements Initializable {
         view.zoom(e.getX(), e.getY(), Math.pow(1.01, factor), true);
     }
 
-    /** Metode køres når man slipper sit klik på Canvas'et */
+    /// Method runs upon releasing a click on the canvas
     @FXML protected void onCanvasClick(MouseEvent e) {
         System.out.println("Clicked at ("+ e.getX() +", "+ e.getY() +")!");
     }
 
-    /** Metode køres idet man klikker ned på Canvas'et */
+    /// Method runs upon pressing on the canvas
     @FXML protected  void onCanvasPressed(MouseEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked
         lastX = e.getX();
         lastY = e.getY();
     }
 
-    /** Metode køres når man trækker på Canvas'et. Metode er limitet til 60FPS */
+    /// Method runs upon dragging on the canvas
     @FXML protected void onCanvasDragged(MouseEvent event) {
         this.event = event;
         panRequest = true;
     }
     //endregion
 
-    //region getters and setters
+    //region Getters and setters
     /** Sætter Controllerens view-felt til et givent View
      * (Denne metode bruges kun af View-klassen en enkelt gang, så View og Controller kan snakke sammen)
      * @param view View'et som Controllerens view-felt sættes til
      */
-    void setView(View view) {
-        this.view = view;
-    }
+    public void setView(View view) { this.view = view; }
+
     /** Returnerer Controllerens canvas-felt, der "populates" direkte idet en scene FXML-loades
      * (Denne metode bruges kun af View-klassen en enkelt gang, så View kan få Canvas'et af Controlleren)
      * @return Controllerens canvas-felt
      */
-    Canvas getCanvas() {
-        return canvas;
-    }
+    public Canvas getCanvas() { return canvas; }
     //endregion
 }
