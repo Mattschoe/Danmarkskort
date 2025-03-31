@@ -1,31 +1,27 @@
 package com.example.danmarkskort.MVC;
 
-import javafx.animation.Animation;
+import com.example.danmarkskort.MapObjects.Tile;
 import javafx.animation.AnimationTimer;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.SnapshotParameters;
-
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Label;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -36,14 +32,18 @@ public class Controller implements Initializable {
     File standardMapFile;
     @FXML Label valgtFil;
     @FXML Canvas canvas;
-    @FXML TextField searchBar;
-    @FXML ListView<String> viewList;
+    @FXML
+    TextField searchBar;
+    @FXML
+    ListView<String> viewList;
     double lastX, lastY;
     boolean panRequest, zoomRequest;
     MouseEvent mouseEvent;
     ScrollEvent scrollEvent;
     TrieST<String> trieCity; //part of test
     TrieST<String> trieStreet;
+    MouseEvent event;
+    double[] viewport;
     //endregion
 
     /** View-konstruktøren skaber/kører en instans af
@@ -58,26 +58,50 @@ public class Controller implements Initializable {
         this.trieStreet = new TrieST<>(false);
         listView = new ListView<>();
 
+        //Det her er cooked -MN
+        try {
+            model = Model.getInstance();
+        } catch (IllegalStateException e) {
+            //Model not loaded yet, so we wait
+        }
+
+        //region AnimationTimer
+        ///TO DO: Fix, this doesnt work og tror det er fordi den lægger i construktøren men idk -MN
         //OBS JEG MISTÆNKER DET HER FOR IKKE AT VIRKE
         AnimationTimer fpsTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 if (panRequest) {
-                    double dx = mouseEvent.getX() - lastX;
-                    double dy = mouseEvent.getY() - lastY;
+                    try {
+                        view.setVisibleTiles(model.getTilesInView(view.getViewport())); //Absolut cooked at kalde en view metode, ved hjælp af en model metode, ved at give den parametre med getter metoder fra view, men øh. If it works ig -MN
+                    } catch (NonInvertibleTransformException exception) {
+                        System.out.println("Error getting viewport from view!");
+                    }
+                    double dx = event.getX() - lastX;
+                    double dy = event.getY() - lastY;
                     view.pan(dx, dy);
 
-                    lastX = mouseEvent.getX();
-                    lastY = mouseEvent.getY();
+                    lastX = event.getX();
+                    lastY = event.getY();
                     panRequest = false;
                 } else if (zoomRequest) {
                     double factor = scrollEvent.getDeltaY();
-                    view.zoom(scrollEvent.getX(), scrollEvent.getY(), Math.pow(1.01, factor));
+                    view.zoom(scrollEvent.getX(), scrollEvent.getY(), Math.pow(1.01, factor), true);
                     zoomRequest = false;
                 }
             }
         };
         fpsTimer.start();
+        //endregion
+    }
+
+    /**
+     * Passes the given file into a Model class that starts parsing it
+     * @param mapFile the file which the map is contained. Given by user when choosing file
+     */
+    private void loadFile(File mapFile) {
+        model = Model.getInstance(mapFile.getPath(), canvas);
+        assert model.getParser() != null;
     }
 
     /** Funktionalitet forbundet med "Upload fil"-knappen på startskærmen. Køres når knappen klikkes */
@@ -103,21 +127,19 @@ public class Controller implements Initializable {
         //Åbner stifinderen og gemmer filen som brugeren vælger
         File selectedFile = fileChooser.showOpenDialog(new Stage());
         if (selectedFile != null) {
+            //Loads View and model
             view = new View(view.getStage(), "mapOverlay.fxml");
             loadFile(selectedFile);
             assert view != null;
 
+            //Starts up the map
             view.drawMap(model.getParser());
+            try {
+                view.setVisibleTiles(model.getTilesInView(view.getViewport())); //Absolut cooked at kalde en view metode, ved hjælp af en model metode, ved at give den parametre med getter metoder fra view, men øh. If it works ig -MN
+            } catch (NonInvertibleTransformException exception) {
+                System.out.println("Error getting viewport from view!");
+            }
         }
-    }
-
-    /**
-     * Passes the given file into a Model class that starts parsing it
-     * @param mapFile the file which the map is contained. Given by user when choosing file
-     */
-    private void loadFile(File mapFile) {
-        model = new Model(mapFile.getPath(), canvas);
-        assert model.getParser() != null;
     }
 
     /** Funktionalitet forbundet med "Kør standard"-knappen på startskærmen. Køres når knappen klikkes */
@@ -187,9 +209,17 @@ public class Controller implements Initializable {
 
 
     /** Metode køres når man zoomer på Canvas'et */
-    @FXML protected void onCanvasScroll(ScrollEvent event) {
-        scrollEvent = event;
-        zoomRequest = true;
+    @FXML protected void onCanvasScroll(ScrollEvent e) {
+        if (model == null) model = Model.getInstance(); //Det her er even mere cooked
+
+        try {
+            view.setVisibleTiles(model.getTilesInView(view.getViewport())); //Absolut cooked at kalde en view metode, ved hjælp af en model metode, ved at give den parametre med getter metoder fra view, men øh. If it works ig -MN
+        } catch (NonInvertibleTransformException exception) {
+            System.out.println("Error getting viewport from view!");
+        }
+
+        double factor = e.getDeltaY();
+        view.zoom(e.getX(), e.getY(), Math.pow(1.01, factor), true);
     }
 
     /** Metode køres når man slipper sit klik på Canvas'et */
@@ -199,13 +229,14 @@ public class Controller implements Initializable {
 
     /** Metode køres idet man klikker ned på Canvas'et */
     @FXML protected  void onCanvasPressed(MouseEvent e) {
+        if (model == null) model = Model.getInstance(); //Det her er even mere cooked
         lastX = e.getX();
         lastY = e.getY();
     }
 
     /** Metode køres når man trækker på Canvas'et. Metode er limitet til 60FPS */
     @FXML protected void onCanvasDragged(MouseEvent event) {
-        mouseEvent = event;
+        this.event = event;
         panRequest = true;
     }
     //endregion
@@ -218,7 +249,6 @@ public class Controller implements Initializable {
     void setView(View view) {
         this.view = view;
     }
-
     /** Returnerer Controllerens canvas-felt, der "populates" direkte idet en scene FXML-loades
      * (Denne metode bruges kun af View-klassen en enkelt gang, så View kan få Canvas'et af Controlleren)
      * @return Controllerens canvas-felt

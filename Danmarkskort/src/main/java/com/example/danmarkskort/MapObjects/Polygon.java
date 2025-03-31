@@ -7,14 +7,16 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
-public class Polygon implements Serializable {
+public class Polygon implements Serializable, MapObject{
     @Serial private static final long serialVersionUID = 1444149606229887777L;
     //region fields
     private final List<Node> nodes;
     private double[] xPoints;
     private double[] yPoints;
-    private int nSize;
-    private final String type; //The type of polygon, fx: "Building", "Coastline", etc.
+    private int nodeSize; //Øh? Er denne her nødvendig?
+    ///The type of polygon, fx: "Building", "Coastline", etc.
+    private final String type;
+    private double[] boundingBox;
     //endregion
 
     /**
@@ -24,26 +26,35 @@ public class Polygon implements Serializable {
     public Polygon(List<Node> nodes, String type) {
         assert nodes.size() != 1;
         this.nodes = nodes;
-        if (type == null) this.type = "";
-        else this.type = type;
+
+        if (type == null) {
+            this.type = "";
+        } else {
+            this.type = type;
+        }
 
         createArrays();
+        calculateBoundingBox();
     }
 
     ///Skaber to Arrays til stroke- og fillPolygon-metoderne der kaldes ved tegning
     public void createArrays() {
-        nSize = nodes.size();
+        nodeSize = nodes.size();
 
-        xPoints = new double[nSize];
-        yPoints = new double[nSize];
+        xPoints = new double[nodeSize];
+        yPoints = new double[nodeSize];
 
-        for (int i = 0; i < nSize; i++) {
+        for (int i = 0; i < nodeSize; i++) {
             xPoints[i] = nodes.get(i).getX();
             yPoints[i] = nodes.get(i).getY();
         }
     }
 
-    public void drawPolygon(GraphicsContext gc) {
+    ///Standard draw method, calls the other draw-method with {@code drawLines} as true
+    @Override
+    public void draw(GraphicsContext gc) { draw(gc, true); }
+
+    public void draw(GraphicsContext gc, boolean drawLines) {
         Color color = switch(type) {
             //Værdier fra "natural"-tag
             case "water"     -> Color.CORNFLOWERBLUE;
@@ -88,12 +99,33 @@ public class Polygon implements Serializable {
         gc.setStroke(color.darker().darker());
         gc.setFill(color);
 
-        gc.strokePolygon(xPoints, yPoints, nSize);
-        gc.fillPolygon(xPoints, yPoints, nSize);
+        if (drawLines) gc.strokePolygon(xPoints, yPoints, nodeSize);
+        gc.fillPolygon(xPoints, yPoints, nodeSize);
+    }
+
+    private void calculateBoundingBox() {
+        boundingBox = new double[4];
+        boundingBox[0] = Double.POSITIVE_INFINITY; //minX
+        boundingBox[1] = Double.POSITIVE_INFINITY; //minY
+        boundingBox[2] = Double.NEGATIVE_INFINITY; //maxX
+        boundingBox[3]= Double.NEGATIVE_INFINITY; //maxY
+
+        //Finds the lowest and highest X
+        for (double x : xPoints) {
+            if (x < boundingBox[0]) boundingBox[0] = x;
+            if (x > boundingBox[2]) boundingBox[2] = x;
+        }
+
+        //Finds the lowest and highest Y
+        for (double y : yPoints) {
+            if (y < boundingBox[1]) boundingBox[1] = y;
+            if (y > boundingBox[3]) boundingBox[3] = y;
+        }
     }
 
     //region getters
     public List<Node> getNodes() { return nodes; }
     public String getType() { return type; }
+    @Override public double[] getBoundingBox() { return boundingBox; }
     //endregion
 }
