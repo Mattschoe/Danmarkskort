@@ -25,6 +25,7 @@ public class View {
     private final Scene scene;
     private final Stage stage;
     private boolean firstTimeDrawingMap;
+    int currentZoom, minZoom, maxZoom;
     //endregion
 
     //region Constructor(s)
@@ -38,7 +39,7 @@ public class View {
         String fxmlLocation = "/com/example/danmarkskort/" + filename;
         firstTimeDrawingMap = true;
 
-        //Gemmer Stage'en
+        //Saves the Stage
         this.stage = stage;
 
         //Skaber en FXMLLoader, klar til at loade den specificerede FXML-fil
@@ -69,6 +70,11 @@ public class View {
         /* Her plejede at være et if-statement ift. hvorvidt controller.getCanvas() var null, men dette
          * blev redundant efter Matthias tilføjede instansiering af canvas i Controller's konstruktør */
         initializeCanvas();
+
+        //Sets up the Zoom levels
+        currentZoom = 7;
+        minZoom = 1;
+        maxZoom = 6;
     }
     //endregion
 
@@ -109,16 +115,28 @@ public class View {
 
         //Draws map
         drawPolygons();
+        int zoomPercentage = (int) (((double) currentZoom/maxZoom) * 100);
+        int fullDetails = 40; //% when all details should be drawn
+        int mediumDetails = 70; //% when a balanced amount of details should be drawn
+        if (zoomPercentage < fullDetails && zoomPercentage < mediumDetails) { //Draws with all details
+
+        } else if (zoomPercentage < mediumDetails) { //Draws with some details
+
+        } else { //Draws the map with least amount of details
+
+        }
+
+        drawPolygons();
         drawRoads();
 
         if (firstTimeDrawingMap) {
+            System.out.println("Finished first time drawing!");
             firstTimeDrawingMap = false;
-            System.out.println("Done drawing!");
 
-            //STJÅLET FRA NUTAN
             pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
             zoom(0, 0, 0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
         }
+
     }
 
     /// Method pans on the canvas -- STOLEN FROM NUTAN
@@ -127,11 +145,26 @@ public class View {
         drawMap(parser);
     }
 
-    /// Method zooms on the canvas -- STOLEN FROM NUTAN
+    /**
+     * Zooms in and out, zoom level is limited by {@code minZoom} and {@code maxZoom} which can be changed in the constructor
+     * @param dx deltaX
+     * @param dy deltaY
+     * @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
+     */
     public void zoom(double dx, double dy, double factor) {
-        pan(-dx, -dy);
-        trans.prependScale(factor, factor);
-        pan(dx, dy);
+        if (factor >= 1 && currentZoom > minZoom) { //Zoom ind
+            currentZoom--;
+            trans.prependTranslation(-dx, -dy);
+            trans.prependScale(factor, factor);
+            trans.prependTranslation(dx, dy);
+            drawMap(parser);
+        } else if (factor <= 1 && currentZoom < maxZoom) { //Zoom out
+            currentZoom++;
+            trans.prependTranslation(-dx, -dy);
+            trans.prependScale(factor, factor);
+            trans.prependTranslation(dx, dy);
+            drawMap(parser);
+        }
     }
 
     /// Draws all roads. Method is called in {@link #drawMap(Parser)}

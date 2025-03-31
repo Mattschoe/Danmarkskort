@@ -1,29 +1,50 @@
 package com.example.danmarkskort.MVC;
 
+import javafx.animation.Animation;
+import javafx.animation.AnimationTimer;
+import com.example.danmarkskort.AddressSearch.TrieST;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.SnapshotParameters;
 
+import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import java.io.File;
-
 import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
 
 public class Controller {
     //region Fields
     private View view;
     private Model model;
     private double lastX, lastY;
+    boolean panRequest, zoomRequest;
+    MouseEvent mouseEvent;
+    ScrollEvent scrollEvent;
+    TrieST<String> trieCity; //part of test
+    TrieST<String> trieStreet;
 
     @FXML private Canvas canvas;
     @FXML private TextField searchBar;
     @FXML private Slider zoomBar;
+    @FXML ListView<String> listView;
     //endregion
 
     //region Constructor(s)
@@ -31,6 +52,31 @@ public class Controller {
     public Controller() {
         canvas = new Canvas(400, 600);
         System.out.println("Controller created!");
+
+        this.trieCity = new TrieST<>(true);
+        this.trieStreet = new TrieST<>(false);
+        listView = new ListView<>();
+
+        //OBS JEG MISTÆNKER DET HER FOR IKKE AT VIRKE
+        AnimationTimer fpsTimer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                if (panRequest) {
+                    double dx = mouseEvent.getX() - lastX;
+                    double dy = mouseEvent.getY() - lastY;
+                    view.pan(dx, dy);
+
+                    lastX = mouseEvent.getX();
+                    lastY = mouseEvent.getY();
+                    panRequest = false;
+                } else if (zoomRequest) {
+                    double factor = scrollEvent.getDeltaY();
+                    view.zoom(scrollEvent.getX(), scrollEvent.getY(), Math.pow(1.01, factor));
+                    zoomRequest = false;
+                }
+            }
+        };
+        fpsTimer.start();
     }
     //endregion
 
@@ -41,8 +87,8 @@ public class Controller {
     public void initialize() {
         if (zoomBar != null) {
             zoomBar.valueProperty().addListener((_, _, _) -> {
-                //Functionality for the zoomBar Slider -- I've given up for now
-                //TODO FIX/CHANGE OR REMOVE ZOOMSLIDER
+                //Functionality for the zoomBar Slider -- I (Olli) have given up for the time being
+                //TODO FIX/CHANGE/REMOVE ZOOMSLIDER
             });
         }
     }
@@ -135,12 +181,15 @@ public class Controller {
 
     /// Method runs upon dragging on the canvas
     @FXML protected void onCanvasDragged(MouseEvent e) {
-        double dx = e.getX() - lastX;
+        mouseEvent = e;
+        panRequest = true;
+
+        /*double dx = e.getX() - lastX;
         double dy = e.getY() - lastY;
         view.pan(dx, dy);
 
         lastX = e.getX();
-        lastY = e.getY();
+        lastY = e.getY();*/
     }
     //endregion
 

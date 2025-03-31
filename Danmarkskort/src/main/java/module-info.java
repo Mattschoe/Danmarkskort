@@ -5,6 +5,7 @@ module com.example.danmarkskort {
     requires org.controlsfx.controls;
     requires java.desktop;
     requires itextpdf;
+    requires jdk.jdi;
 
     opens com.example.danmarkskort to javafx.fxml;
     exports com.example.danmarkskort;

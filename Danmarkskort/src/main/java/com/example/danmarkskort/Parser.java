@@ -19,6 +19,7 @@ public class Parser implements Serializable {
     Map<Long, Polygon> id2Polygon;
     File file; //The file that's loaded in
     double[] bounds; //OSM-filens bounds, dvs. de længst væk koordinater hvor noget tegnes
+    private Set<Road> significantHighways;
     //endregion
 
     //region Constructor(s)
@@ -32,6 +33,7 @@ public class Parser implements Serializable {
         id2Road = new HashMap<>(489884);
         id2Polygon = new HashMap<>(489884);
         bounds = new double[4];
+        significantHighways = new HashSet<>();
 
         String filename = getFile().getName();
         //Switch case with what filetype the file is and call the appropriate method:
@@ -259,6 +261,8 @@ public class Parser implements Serializable {
         int maxSpeed = 0;
         String roadType = "";
         boolean hasMaxSpeed = false;
+        boolean significantHighway = false;
+
         //endregion
 
         //Loops through tags and saves them
@@ -274,7 +278,8 @@ public class Parser implements Serializable {
                 String key = input.getAttributeValue(null, "k"); //for fat i "k" attribute som fx "maxSpeed"
                 String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
-                if (key.equals("highway") || key.equals("natural")) {
+                if (key.equals("highway") || key.equals("natural") || key.equals("area:highway")){     //find ud af typen af highway
+                    significantHighway = value.equals("motorway") || value.equals("trunk") || value.equals("primary") || value.equals("secondary") || value.equals("primary_link") || value.equals("secondary_link");
                     roadType = value;
                 } else if (key.equals("maxspeed")) {
                     maxSpeed = Integer.parseInt(value);
@@ -294,8 +299,11 @@ public class Parser implements Serializable {
         Road road;
         if (hasMaxSpeed){
             road = new Road(nodes, foot, bicycle, maxSpeed, roadType);
+            if(significantHighway) significantHighways.add(road);
+
         } else {
             road = new Road(nodes, foot, bicycle, roadType);
+            if(significantHighway) significantHighways.add(road);
         }
         return road;
     }
@@ -360,5 +368,8 @@ public class Parser implements Serializable {
     public Map<Long, Node>    getNodes()    { return id2Node;    }
     public Map<Long, Road>    getRoads()    { return id2Road;    }
     public Map<Long, Polygon> getPolygons() { return id2Polygon; }
+
+    /// @return the set of significant highways, which will be the only roads drawn when the map is zoomed out a certain amount
+    public Set<Road> getSignificantHighways() { return significantHighways; } //
     //endregion
 }

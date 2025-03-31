@@ -12,6 +12,7 @@ import java.util.Set;
 
 public class Road implements Serializable {
     @Serial private static final long serialVersionUID = 2430026592275563830L;
+
     //region Fields
     private final List<Node> nodes;
     private final Set<Line> lines;
@@ -20,7 +21,6 @@ public class Road implements Serializable {
     private int maxSpeed;
     private String roadType;
     //endregion
-    // private static final long serialVersionUID;
 
     /**
      * ROAD WITH MAXSPEED. A {@link Road} is a collection of {@link Node}'s without the same start and end node.

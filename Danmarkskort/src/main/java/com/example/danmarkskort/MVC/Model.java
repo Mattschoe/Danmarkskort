@@ -1,6 +1,5 @@
 package com.example.danmarkskort.MVC;
 
-import com.example.danmarkskort.AddressSearch.Search;
 import com.example.danmarkskort.Exceptions.ParserSavingException;
 import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.Parser;
@@ -54,8 +53,7 @@ public class Model {
         }
         assert parser != null;
 
-        //TESTING
-        //Search search = new Search(getAllNodesWithStreetAddresses(parser.getNodes().values()));
+
     }
 
     /**
@@ -102,5 +100,6 @@ public class Model {
     public Parser getParser() {
         return parser;
     }
+
     //endregion
 }
