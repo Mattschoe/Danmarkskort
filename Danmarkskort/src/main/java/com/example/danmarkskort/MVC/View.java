@@ -1,18 +1,20 @@
 package com.example.danmarkskort.MVC;
 
-import com.example.danmarkskort.MapObjects.Polygon;
-import com.example.danmarkskort.MapObjects.Road;
+import com.example.danmarkskort.MapObjects.*;
 import com.example.danmarkskort.Parser;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
+import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 public class View {
     //region fields
@@ -28,6 +30,11 @@ public class View {
     Stage stage;
     boolean firstTimeDrawingMap;
     int currentZoom, minZoom, maxZoom;
+    List<Tile> visibleTiles;
+    ///The offset of which we moved around in the canvas. Always starts at 0 and accumulates when panning and zooming
+    private double viewportOffsetX = 0; private double viewportOffsetY = 0;
+    ///The amount that we are zoomed ind and out. Always start at zoom level 1.0 and is increased multiplicatly in the zoom method
+    private double totalZoomScale = 1.0;
     //endregion
 
     /** View-konstruktøren skifter scene ud fra en given stage og filstien til en FXML-fil
@@ -71,9 +78,9 @@ public class View {
         if (controller.getCanvas() != null) initializeCanvas();
 
         //Sets up the Zoom levels
-        currentZoom = 7;
+        currentZoom = 6;
         minZoom = 1;
-        maxZoom = 6;
+        maxZoom = 7;
     }
 
     ///Giver Canvas en Transform og bunden højde/bredde
@@ -102,36 +109,57 @@ public class View {
         if (parser == null) return; //TODO %% Evt. find en bedre måde at sørge for at initializeCanvas IKKE køres før kortet loades
         assert graphicsContext != null && canvas != null;
         this.parser = parser;
+        double canvasWidth = canvas.getWidth();
+        double canvasHeight = canvas.getHeight();
 
         //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
         graphicsContext.setTransform(background);
         graphicsContext.setFill(Color.ANTIQUEWHITE);
-        graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        graphicsContext.fillRect(0, 0, canvasWidth, canvasHeight);
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
+        //region TESTING
+        //Tegner kun tiles inde for viewport
+        if (visibleTiles != null) {
+            System.out.println("Drawing: " + visibleTiles.size());
+            for (Tile tile : visibleTiles) {
+                tile.draw(graphicsContext);
+            }
+        }
+        System.out.println("Finished drawing!");
+        //endregion
+
+        /*
         int zoomPercentage = (int) (((double) currentZoom/maxZoom) * 100);
         int fullDetails = 40; //% when all details should be drawn
         int mediumDetails = 70; //% when a balanced amount of details should be drawn
+        // System.out.println(zoomPercentage);
         if (zoomPercentage < fullDetails && zoomPercentage < mediumDetails) { //Draws with all details
-
+            // System.out.println("All details");
+            drawAllRoads();
+            drawAllPolygons(true);
         } else if (zoomPercentage < mediumDetails) { //Draws with some details
-
-        } else { //Draws the map with least amount of details
-
+            // System.out.println("medium details");
+            drawAllRoads();
+            drawAllPolygons(true);
+        } else { //Draws the map with the least amount of details
+            // System.out.println("minimum details");
+            drawAllSignificantHighways();
+            drawAllPolygons(false);
         }
-
-        drawRoads();
-        drawPolygons();
+        */
 
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
             firstTimeDrawingMap = false;
 
-            pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
-            zoom(0, 0, 0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
+            //TODO: SKAL OPTIMERES VI DRAWER MAPPET LIKE 5 GANGE FØRSTE GANG
+            //Moves the view over to the map
+            double startZoom = (0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
+            //pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
+            //zoom(0, 0, startZoom, true);
         }
-
     }
 
 
@@ -139,6 +167,12 @@ public class View {
 
     ///STJÅLET FRA NUTAN
     public void pan(double dx, double dy) {
+        //Saves the offset
+        viewportOffsetX -= dx;
+        viewportOffsetY -= dy;
+        //System.out.println("Offset: " + (int) viewportOffsetX + " " + (int) viewportOffsetY);
+
+        //Moves the map
         trans.prependTranslation(dx, dy);
         drawMap(parser);
     }
@@ -149,41 +183,59 @@ public class View {
      * @param dy deltaY
      * @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
      */
-    public void zoom(double dx, double dy, double factor) {
-        if (factor >= 1 && currentZoom > minZoom) { //Zoom ind
-            currentZoom--;
-            trans.prependTranslation(-dx, -dy);
-            trans.prependScale(factor, factor);
-            trans.prependTranslation(dx, dy);
-            drawMap(parser);
-        } else if (factor <= 1 && currentZoom < maxZoom) { //Zoom out
-            currentZoom++;
-            trans.prependTranslation(-dx, -dy);
-            trans.prependScale(factor, factor);
-            trans.prependTranslation(dx, dy);
-            drawMap(parser);
+    public void zoom(double dx, double dy, double factor, boolean ignoreMinMax) {
+        totalZoomScale *= factor; //Updates our scale factor
+        if (factor >= 1 && currentZoom > minZoom) currentZoom--; //Zoom ind
+        else if (factor <= 1 && currentZoom < maxZoom) currentZoom++; //Zoom out
+        else if (ignoreMinMax) { //Needs to be changed
+
+        } else { //If we are not allowed to zoom
+            return;
         }
+        //Zooms
+        trans.prependTranslation(-dx, -dy);
+        trans.prependScale(factor, factor);
+        trans.prependTranslation(dx, dy);
+        drawMap(parser);
     }
 
     ///Draws all roads. Method is called in {@link #drawMap(Parser)}
-    private void drawRoads() {
+    private void drawAllRoads() {
         Road road;
         for (long id : parser.getRoads().keySet()) {
             road = parser.getRoads().get(id);
             if (road.getRoadType().equals("route")) continue;
-            road.drawRoad(canvas);
+            road.draw(graphicsContext);
         }
     }
 
     ///Draws all polygons (buildings etc.). Method is called in {@link #drawMap(Parser)}
-    private void drawPolygons() {
+    private void drawAllPolygons(boolean drawLines) {
         Polygon polygon;
         for (long id : parser.getPolygons().keySet()) {
             polygon = parser.getPolygons().get(id);
-            polygon.drawPolygon(graphicsContext);
+            polygon.draw(graphicsContext, drawLines);
         }
     }
 
-    //GETTERS AND SETTERS
+    private void drawAllSignificantHighways() {
+        for (Road road : parser.getSignificantHighways()) {
+            road.draw(graphicsContext);
+        }
+    }
+
+    //region GETTERS AND SETTERS
     Stage getStage() { return stage; }
+    public void setVisibleTiles(List<Tile> visibleTiles) {
+        this.visibleTiles = visibleTiles;
+    }
+    public double[] getViewport() throws NonInvertibleTransformException {
+        Point2D minXY = trans.inverseTransform(0, 0);
+        Point2D maxXY = trans.inverseTransform(canvas.getWidth(), canvas.getHeight());
+        return new double[]{minXY.getX(), minXY.getY(), maxXY.getX(), maxXY.getY()};
+    }
+    public double getViewportOffsetX() { return viewportOffsetX; }
+    public double getViewportOffsetY() { return viewportOffsetY; }
+    public double getTotalZoomScale() { return totalZoomScale; }
+    //endregion
 }

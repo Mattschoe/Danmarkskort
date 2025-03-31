@@ -6,8 +6,10 @@ import javafx.scene.paint.Color;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Node implements Serializable {
+public class Node implements Serializable, MapObject {
     @Serial private static final long serialVersionUID = 1444149606229887777L;
     private double x, y;
     private String[] address;
@@ -20,6 +22,7 @@ public class Node implements Serializable {
     public Node(double latitude, double longitude) {
         calculateXY(latitude, longitude);
     }
+
     /**
      * A Node that contains an address
      * @param latitude
@@ -41,12 +44,24 @@ public class Node implements Serializable {
      * @param longitude same as constructor
      */
     private void calculateXY(double latitude, double longitude) {
-        x = 0.56 * longitude;
-        y = -latitude;
+        //Bounds of DKK (ish)
+        double minLat = 54.5;
+        double maxLat = 57.8;
+        double minLon = 8.0;
+        double maxLon = 12.5;
+
+        int width = 400;
+        int height = 600;
+
+        //Calculates XY
+        double xNorm = ((longitude - minLon) / (maxLon - minLon));
+        double yNorm = ((latitude - minLat) / (maxLat - minLat));
+        x = xNorm * width;
+        y = (1 - yNorm) * height; //Makes sure Y isn't mirrored
     }
 
-    public void drawNode(GraphicsContext graphicsContext) {
-        graphicsContext.strokeLine(x, y, x, y);
+    public void draw(GraphicsContext graphicsContext) {
+        // graphicsContext.strokeLine(x, y, x, y);
     }
 
     /**
@@ -81,5 +96,9 @@ public class Node implements Serializable {
     }
     public double getX() { return x; }
     public double getY() { return y; }
+    @Override
+    public double[] getBoundingBox() {
+        return new double[]{x, y, x, y};
+    }
     //endregion
 }

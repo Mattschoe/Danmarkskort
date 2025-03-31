@@ -1,8 +1,8 @@
 package com.example.danmarkskort;
 
 import com.example.danmarkskort.MapObjects.Node;
-import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Polygon;
+import com.example.danmarkskort.MapObjects.Road;
 
 import javax.xml.stream.*;
 import java.io.*;
@@ -13,7 +13,7 @@ import java.util.zip.ZipInputStream;
 public class Parser implements Serializable {
     //region fields
     @Serial private static final long serialVersionUID = 8838055424703291984L;
-   private Map<Long, Node> id2Node; //map for storing a Node and the id used to refer to it
+    private Map<Long, Node> id2Node; //map for storing a Node and the id used to refer to it
     private Map<Long, Road> id2Road;
     private Map<Long, Polygon> id2Polygon;
     private File file; //The file that's loaded in
@@ -39,6 +39,9 @@ public class Parser implements Serializable {
             parseZIP(filename);
         } else if (filename.endsWith(".osm")) {
             parseOSM(file);
+            if (isBoundsIncomplete()) {
+                setStandardBounds();
+            }
         }
     }
 
@@ -96,8 +99,9 @@ public class Parser implements Serializable {
 
                 //End of OSM
                 if (tagName.equals("relation")) return;
-                if (tagName.equals("bounds")) parseBounds(input);
-                if (tagName.equals("node")) {
+                if (tagName.equals("bounds")) {
+                    parseBounds(input);
+                } else if (tagName.equals("node")) {
                     try {
                         parseNode(input);
                     } catch (Exception e) {
@@ -111,7 +115,6 @@ public class Parser implements Serializable {
                     }
                 }
             }
-            //System.out.println("Node count: " + id2Node.size() + " | Way count: " + (id2Road.size() + id2Polygon.size()));
         }
     }
 
@@ -248,6 +251,8 @@ public class Parser implements Serializable {
 
                 if (key.equals("natural")){
                     if (value.equals("coastline")) roadType = value;
+                } else if (key.equals("route")) {
+                    roadType = key;
                 }
             }
             nextInput = input.next(); //Moves on to the next "tag" element
@@ -257,16 +262,34 @@ public class Parser implements Serializable {
         Road road;
         if (hasMaxSpeed){
             road = new Road(nodes, foot, bicycle, maxSpeed, roadType);
-            if(significantHighway) {
+            if (significantHighway) {
              significantHighways.add(road);
             }
         } else {
             road = new Road(nodes, foot, bicycle, roadType);
-            if(significantHighway) {
+            if (significantHighway) {
                 significantHighways.add(road);
             }
         }
         return road;
+    }
+
+    /**
+     * Checks whether
+     * @return true if bounds is incomplete, else false
+     */
+    private boolean isBoundsIncomplete() {
+        return bounds[0] == 0 || bounds[1] == 0 || bounds[2] == 0 || bounds[3] == 0;
+    }
+
+    /**
+     * Sets the standard bounds to the middle of DK
+     */
+    private void setStandardBounds() {
+        bounds[0] = 55.893642;
+        bounds[1] = 11.809332;
+        bounds[2] = 56.145397;
+        bounds[3] = 12.650371;
     }
 
     /**
@@ -322,17 +345,17 @@ public class Parser implements Serializable {
         }
     }
 
-    //GETTERS AND SETTERS
+    //region GETTERS AND SETTERS
     public String getFileName() { return file.getName(); }
     public File getFile() { return file; }
     public Map<Long, Node> getNodes() { return id2Node; }
     public Map<Long, Road> getRoads() { return id2Road; }
     public Map<Long, Polygon> getPolygons() { return id2Polygon; }
     public double[] getBounds() { return bounds; }
-
     /**
      * @return the set of significant highways, which will be the only roads drawn when the map is zoomed out a certain amount
      */
-    public Set<Road> getSignificantHighways() { return significantHighways; } //
+    public Set<Road> getSignificantHighways() { return significantHighways; }
+    //endregion
 
 }
