@@ -121,34 +121,27 @@ public class View {
 
         //region TESTING
         //Tegner kun tiles inde for viewport
-        if (visibleTiles != null) {
-            System.out.println("Drawing: " + visibleTiles.size());
-            for (Tile tile : visibleTiles) {
-                tile.draw(graphicsContext);
-            }
-        }
         System.out.println("Finished drawing!");
         //endregion
 
-        /*
+
         int zoomPercentage = (int) (((double) currentZoom/maxZoom) * 100);
         int fullDetails = 40; //% when all details should be drawn
         int mediumDetails = 70; //% when a balanced amount of details should be drawn
         // System.out.println(zoomPercentage);
-        if (zoomPercentage < fullDetails && zoomPercentage < mediumDetails) { //Draws with all details
-            // System.out.println("All details");
+        if (zoomPercentage < fullDetails) { //Draws with all details
+            System.out.println("All details");
             drawAllRoads();
             drawAllPolygons(true);
         } else if (zoomPercentage < mediumDetails) { //Draws with some details
-            // System.out.println("medium details");
+            System.out.println("medium details");
             drawAllRoads();
             drawAllPolygons(true);
         } else { //Draws the map with the least amount of details
-            // System.out.println("minimum details");
+            System.out.println("minimum details");
             drawAllSignificantHighways();
             drawAllPolygons(false);
         }
-        */
 
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
@@ -190,6 +183,7 @@ public class View {
         else if (ignoreMinMax) { //Needs to be changed
 
         } else { //If we are not allowed to zoom
+            System.out.println("Nuhu");
             return;
         }
         //Zooms
@@ -234,8 +228,5 @@ public class View {
         Point2D maxXY = trans.inverseTransform(canvas.getWidth(), canvas.getHeight());
         return new double[]{minXY.getX(), minXY.getY(), maxXY.getX(), maxXY.getY()};
     }
-    public double getViewportOffsetX() { return viewportOffsetX; }
-    public double getViewportOffsetY() { return viewportOffsetY; }
-    public double getTotalZoomScale() { return totalZoomScale; }
     //endregion
 }
