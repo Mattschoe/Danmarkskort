@@ -118,12 +118,12 @@ public class View {
         int zoomPercentage = (int) (((double) currentZoom/maxZoom) * 100);
         int fullDetails = 40; //% when all details should be drawn
         int mediumDetails = 70; //% when a balanced amount of details should be drawn
-        if (zoomPercentage < fullDetails && zoomPercentage < mediumDetails) { //Draws with all details
-
-        } else if (zoomPercentage < mediumDetails) { //Draws with some details
-
-        } else { //Draws the map with least amount of details
-
+        if (zoomPercentage < fullDetails && zoomPercentage < mediumDetails) {
+            //Draws with all details
+        } else if (zoomPercentage < mediumDetails) {
+            //Draws with some details
+        } else {
+            //Draws the map with least amount of details
         }
 
         drawPolygons();

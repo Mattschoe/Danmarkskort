@@ -1,5 +1,6 @@
 package com.example.danmarkskort;
 
+import javafx.application.Application;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import com.example.danmarkskort.MVC.View;
@@ -7,7 +8,7 @@ import com.example.danmarkskort.MVC.View;
 import java.io.IOException;
 import java.util.Objects;
 
-public class Application extends javafx.application.Application {
+public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -19,7 +20,5 @@ public class Application extends javafx.application.Application {
         new View(stage, "startup.fxml");
     }
 
-    public static void main(String[] args) {
-        launch();
-    }
+    public static void main(String[] args) { launch(); }
 }

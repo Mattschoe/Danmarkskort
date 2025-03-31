@@ -362,7 +362,7 @@ public class Parser implements Serializable {
     }
     //endregion
 
-    //region Getters and Setters
+    //region Getters and setters
     public File               getFile()     { return file;       }
     public double[]           getBounds()   { return bounds;     }
     public Map<Long, Node>    getNodes()    { return id2Node;    }

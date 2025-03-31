@@ -6,20 +6,27 @@ import com.example.danmarkskort.Parser;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 public class Model {
     //region Fields
-    private File file;
+    private final File file;
     private Parser parser;
-    GraphicsContext graphicsContext;
-    Canvas canvas;
-    File outputFile; //The output .obj file
+    private GraphicsContext graphicsContext;
+    private Canvas canvas;
+    private File outputFile; //The output .obj file
     //endregion
 
+    //region Constructor(s)
     /**
      * Checks what filetype the filepath parameter is. Calls {@link #parseOBJ()} if it's a .obj file, if not, it creates a new {@link Parser} class and propagates the responsibility
      * @param filePath the path where the file that needs parsing is loaded (ex.: "/data/small.osm")
@@ -52,10 +59,10 @@ public class Model {
             }
         }
         assert parser != null;
-
-
     }
+    //endregion
 
+    //region Methods
     /**
      * Parses a .obj file. This method is called in the Parser constructer if the givin filepath ends with .obj
      */
@@ -77,10 +84,10 @@ public class Model {
         } catch (IOException e) {
             throw new ParserSavingException("Error saving parser as .obj! Error Message: " + e.getMessage());
         }
-
     }
+    //endregion
 
-    //region getters and setters
+    //region Getters and setters
 
     /**
      * Gives all nodes that contains an address
@@ -97,9 +104,7 @@ public class Model {
         }
         return nodesWithStreetAddresses;
     }
-    public Parser getParser() {
-        return parser;
-    }
+    public Parser getParser() { return parser; }
 
     //endregion
 }

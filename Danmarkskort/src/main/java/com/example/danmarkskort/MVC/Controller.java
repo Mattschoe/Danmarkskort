@@ -1,34 +1,21 @@
 package com.example.danmarkskort.MVC;
 
-import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import com.example.danmarkskort.AddressSearch.TrieST;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.SnapshotParameters;
 
-import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.control.Label;
-import javafx.scene.image.ImageView;
-import javafx.scene.image.WritableImage;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 
 public class Controller {
     //region Fields
@@ -57,7 +44,7 @@ public class Controller {
         this.trieStreet = new TrieST<>(false);
         listView = new ListView<>();
 
-        //OBS JEG MISTÆNKER DET HER FOR IKKE AT VIRKE
+        //OBS JEG (MATTHIAS) MISTÆNKER DET HER FOR IKKE AT VIRKE
         AnimationTimer fpsTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
@@ -80,11 +67,11 @@ public class Controller {
     }
     //endregion
 
-    //region (Dynamic) Methods
+    //region Methods
     /** Runs right after a Controller is created -- if we're in a scene with a zoomBar,
      *  the zoomBar's slider is set to communicate with the zoom-level of the canvas/document
      */
-    public void initialize() {
+    @Deprecated protected void initialize() {
         if (zoomBar != null) {
             zoomBar.valueProperty().addListener((_, _, _) -> {
                 //Functionality for the zoomBar Slider -- I (Olli) have given up for the time being
@@ -162,12 +149,6 @@ public class Controller {
         //zoomBar.adjustValue(zoomLvl);
     }
 
-    /// Method runs upon typing in the search-bar. For now simply prints what's written
-    @FXML protected void onSearchBarType(KeyEvent e) {
-        if (e.getCharacter().charAt(0) == '\r') System.out.println("ENTER");
-        else System.out.println(searchBar.getText());
-    }
-
     /// Method runs upon releasing a click on the canvas
     @FXML protected void onCanvasClick(MouseEvent e) {
         System.out.println("Clicked at ("+ e.getX() +", "+ e.getY() +")!");
@@ -183,27 +164,26 @@ public class Controller {
     @FXML protected void onCanvasDragged(MouseEvent e) {
         mouseEvent = e;
         panRequest = true;
+    }
 
-        /*double dx = e.getX() - lastX;
-        double dy = e.getY() - lastY;
-        view.pan(dx, dy);
-
-        lastX = e.getX();
-        lastY = e.getY();*/
+    /// Method runs upon typing in the search-bar. For now simply prints what's written
+    @FXML protected void onSearchBarType(KeyEvent e) {
+        if (e.getCharacter().charAt(0) == '\r') System.out.println("ENTER");
+        else System.out.println(searchBar.getText());
     }
     //endregion
 
-    //region Getter and setters
+    //region Getters and setters
     /** Sætter Controllerens view-felt til et givent View
      * (Denne metode bruges kun af View-klassen en enkelt gang, så View og Controller kan snakke sammen)
      * @param view View'et som Controllerens view-felt sættes til
      */
-    void setView(View view) { this.view = view; }
+    public void setView(View view) { this.view = view; }
 
     /** Returnerer Controllerens canvas-felt, der "populates" direkte idet en scene FXML-loades
      * (Denne metode bruges kun af View-klassen en enkelt gang, så View kan få Canvas'et af Controlleren)
      * @return Controllerens canvas-felt
      */
-    Canvas getCanvas() { return canvas; }
+    public Canvas getCanvas() { return canvas; }
     //endregion
 }

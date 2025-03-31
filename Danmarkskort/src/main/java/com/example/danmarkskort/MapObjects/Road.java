@@ -22,6 +22,7 @@ public class Road implements Serializable {
     private String roadType;
     //endregion
 
+    //region Constructor(s)
     /**
      * ROAD WITH MAXSPEED. A {@link Road} is a collection of {@link Node}'s without the same start and end node.
      * @param nodes the collection of nodes
@@ -55,8 +56,10 @@ public class Road implements Serializable {
         this.roadType = roadType;
         createLines();
     }
+    //endregion
 
-    ///Creates the lines between the {@link Node}'s (Used later for drawing)
+    //region Methods
+    /// Creates the lines between the {@link Node}'s (Used later for drawing)
     private void createLines() {
         //Tegner en linje fra den første node til den sidste i rækkefølge. Slutter af med at lave en linje mellem den sidste og første
         Node startNode = nodes.getFirst();
@@ -82,7 +85,7 @@ public class Road implements Serializable {
                 gc.setStroke(Color.BLACK);
                 gc.setLineWidth(1.5/Math.sqrt(gc.getTransform().determinant())); break;
             default:
-                gc.setStroke(Color.rgb(47, 47, 47));
+                gc.setStroke(Color.rgb(114, 114, 114));
                 gc.setLineWidth(1/Math.sqrt(gc.getTransform().determinant())); break;
         }
 
@@ -91,12 +94,12 @@ public class Road implements Serializable {
         }
     }
 
-    /**
-     * Draws the metro
-     * @param mapCanvas
-     */
-    @Deprecated
-    public void drawMetro(Canvas mapCanvas) {}
+    /// Draws the metro, bus-routes, etc.
+    @Deprecated public void drawMetro(Canvas mapCanvas) {}
+
+    /// Calculates maxSpeed if the tag wasn't present in the OSM-file
+    @Deprecated private void calculateSpeed() {}
+    //endregion
 
     //region Getters and setters
     public Set<Line>  getLines()           { return lines;    }
@@ -108,9 +111,4 @@ public class Road implements Serializable {
     public void       setType(String type) { roadType = type; }
     public boolean    hasRoadType()        { return !roadType.isEmpty(); }
     //endregion
-
-    ///Tom metode for at regne maxspeed hvis tagget mangler
-    @Deprecated private void calculateSpeed(){
-        //tom metode er tom
-    }
 }

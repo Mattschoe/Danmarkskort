@@ -18,6 +18,7 @@ public class Polygon implements Serializable {
     private String type; //The type of polygon, fx: "Building", "Coastline", etc.
     //endregion
 
+    //region Constructor(s)
     /**
      * A {@link Polygon} is a collection of {@link Node}'s with the same start- and end {@link Node}
      * @param nodes the collection of nodes belonging to the Polygon
@@ -30,7 +31,9 @@ public class Polygon implements Serializable {
 
         createArrays();
     }
+    //endregion
 
+    //region Methods
     ///Skaber to Arrays til stroke- og fillPolygon-metoderne der kaldes ved tegning
     private void createArrays() {
         nSize = nodes.size();
@@ -92,6 +95,7 @@ public class Polygon implements Serializable {
         gc.strokePolygon(xPoints, yPoints, nSize);
         gc.fillPolygon(xPoints, yPoints, nSize);
     }
+    //endregion
 
     //region Getters and setters
     public List<Node> getNodes()           { return nodes; }
