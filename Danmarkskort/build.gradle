@@ -27,6 +27,7 @@ tasks.withType(JavaCompile) {
 application {
     mainModule = 'com.example.danmarkskort'
     mainClass = 'com.example.danmarkskort.Application'
+    applicationDefaultJvmArgs = ['-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8']
 }
 
 javafx {
