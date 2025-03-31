@@ -34,7 +34,7 @@ public class Model {
         assert file.exists();
 
         tilesWithObjects = new ArrayList<>();
-        tileSize = 10;
+        tileSize = 5;
 
         //If .obj file
         if (filePath.endsWith(".obj")) {
