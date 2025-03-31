@@ -34,7 +34,7 @@
 
     <Slider fx:id="zoomBar" layoutX="445.0" layoutY="348.0" max="140000.0" min="2000.0" value="21695.0" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="15.0" />
 
-    <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onKeyTyped="#onSearchBarType" promptText="Søg efter adresse..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
+    <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onKeyTyped="#searchBarTyped" promptText="Søg efter adresse..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
 
     <ListView fx:id="listView" layoutX="15.0" layoutY="61.0" prefHeight="72.0" prefWidth="150.0" visible="false" />
 </AnchorPane>

@@ -1,18 +1,14 @@
 package com.example.danmarkskort.MVC;
 
-import com.example.danmarkskort.MapObjects.Tile;
 import javafx.animation.AnimationTimer;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.transform.NonInvertibleTransformException;
@@ -22,27 +18,22 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.net.URL;
-import java.util.ResourceBundle;
 
 public class Controller {
     //region Fields
     private View view;
     private Model model;
     private double lastX, lastY;
-    boolean panRequest, zoomRequest;
-    MouseEvent mouseEvent;
-    ScrollEvent scrollEvent;
-    TrieST<String> trieCity; //part of test
-    TrieST<String> trieStreet;
-    MouseEvent event;
-    double[] viewport;
+    private boolean panRequest, zoomRequest;
+    private ScrollEvent scrollEvent;
+    private TrieST<String> trieCity; //part of test
+    private TrieST<String> trieStreet;
+    private MouseEvent event;
 
     @FXML private Canvas canvas;
+    @FXML private ListView<String> listView;
     @FXML private TextField searchBar;
     @FXML private Slider zoomBar;
-    @FXML ListView<String> viewList;
     //endregion
 
     //region Constructor(s)
@@ -63,7 +54,7 @@ public class Controller {
         }
 
         //region AnimationTimer
-        //TODO: Fix, this doesnt work og tror det er fordi den lægger i construktøren men idk -MN
+        //TODO: Fix, this doesnt work og tror det er fordi den lægger i konstruktøren men idk -MN
         //OBS JEG (MATTHIAS) MISTÆNKER DET HER FOR IKKE AT VIRKE
         AnimationTimer fpsTimer = new AnimationTimer() {
             @Override
@@ -92,15 +83,15 @@ public class Controller {
     }
     //endregion
 
+    //region Methods
     /** Passes the given file into a Model class that starts parsing it
-     * @param mapFile the file which the map is contained. Given by user when choosing file
+     *  @param mapFile the file which the map is contained. Given by user when choosing file
      */
     private void loadFile(File mapFile) {
         model = Model.getInstance(mapFile.getPath(), canvas);
         assert model.getParser() != null;
     }
 
-    //region Methods
     /** Method runs right after a Controller is created -- if we're in a scene with a zoomBar,
      *  the zoomBar's slider is set to communicate with the zoom-level of the canvas/document
      */
@@ -165,9 +156,7 @@ public class Controller {
         view.drawMap(model.getParser());
     }
 
-    //regionEvents
-    @FXML private ListView<String> listView;
-
+    /// Methods runs upon typing in the search-bar
     @FXML protected void searchBarTyped(KeyEvent event) {
         listView.getItems().clear();
         String input = searchBar.getText();
@@ -188,6 +177,7 @@ public class Controller {
         }
     }
 
+    /// Auto-suggests roads and cities in a drop-down menu from the search-bar (????)
     private void autoSuggest(KeyEvent event, String input, TrieST<String> trie) {
         if (event.getCharacter().equals("\r")) { // Hvis der trykkes enter
             if (trie.keysThatMatch(input)!=null) {
@@ -199,7 +189,7 @@ public class Controller {
             if (event.getCharacter().equals("\b")) { //hvis der trykkes backspace eller
                 event.consume();
             }
-            //Finder de 3 første relevante addresser.
+            //Finder de 3 første relevante adresser.
             for (int i = 0; i < trie.keysWithPrefix(input).size(); i++) {
                 listView.getItems().add(trie.keysWithPrefix(input).get(i));
                 if (i > 3) {
@@ -208,7 +198,6 @@ public class Controller {
             }
         }
     }
-
 
     /// Method runs upon zooming/scrolling on the Canvas
     @FXML protected void onCanvasScroll(ScrollEvent e) {
@@ -231,7 +220,7 @@ public class Controller {
 
     /// Method runs upon pressing on the canvas
     @FXML protected  void onCanvasPressed(MouseEvent e) {
-        if (model == null) model = Model.getInstance(); //Det her er even mere cooked
+        if (model == null) model = Model.getInstance(); //Det her er even mere cooked xd
         lastX = e.getX();
         lastY = e.getY();
     }

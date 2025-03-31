@@ -14,12 +14,12 @@ public class Parser implements Serializable {
     @Serial private static final long serialVersionUID = 8838055424703291984L;
 
     //region Fields
-    private Map<Long, Node> id2Node; //map for storing a Node and the id used to refer to it
-    private Map<Long, Road> id2Road;
-    private Map<Long, Polygon> id2Polygon;
-    private File file; //The file that's loaded in
-    private double[] bounds; //OSM-filens bounds, dvs. de længst væk koordinater hvor noget tegnes
-    private Set<Road> significantHighways;
+    private final Map<Long, Node>    id2Node; //map for storing a Node and the id used to refer to it
+    private final Map<Long, Road>    id2Road;
+    private final Map<Long, Polygon> id2Polygon;
+    private final File      file; //The file that's loaded in
+    private final double[]  bounds; //OSM-filens bounds, dvs. de længst væk koordinater hvor noget tegnes
+    private final Set<Road> significantHighways;
     //endregion
 
     //region Constructor(s)

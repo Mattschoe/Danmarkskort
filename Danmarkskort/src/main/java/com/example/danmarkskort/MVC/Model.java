@@ -87,11 +87,10 @@ public class Model {
     //endregion
 
     //region Methods
-    /**
-     * Method used to initialize the singleton Model. Method is only meant to be called once, for getting the instance, call {@link #getInstance()}
-     * @param filePath the path where the file that needs parsing is loaded (ex.: "/data/small.osm")
-     * @param canvas the Canvas which the scene is drawn upon
-     * @return Model (Singleton)
+    /** Method used to initialize the singleton Model. Method is only meant to be called once, for getting the instance, call {@link #getInstance()}
+     *  @param filePath the path where the file that needs parsing is loaded (ex.: "/data/small.osm")
+     *  @param canvas the Canvas which the scene is drawn upon
+     *  @return Model (Singleton)
      */
     public static Model getInstance(String filePath, Canvas canvas) {
         if (modelInstance == null) {
@@ -100,10 +99,9 @@ public class Model {
         return modelInstance;
     }
 
-    /**
-     * Method used to get the singleton Model. The method {@link #getInstance(String, Canvas)} HAS to be called first to initialize the singleton
-     * @return Model (Singleton)
-     * @throws IllegalStateException if the singleton is not initialized
+    /** Method used to get the singleton Model. The method {@link #getInstance(String, Canvas)} HAS to be called first to initialize the singleton
+     *  @return Model (Singleton)
+     *  @throws IllegalStateException if the singleton is not initialized
      */
     public static Model getInstance() {
         if (modelInstance == null) {
@@ -112,18 +110,14 @@ public class Model {
         return modelInstance;
     }
 
-    /**
-     * Parses a .obj file. This method is called in the Parser constructer if the givin filepath ends with .obj
-     */
+    /// Parses a .obj file. This method is called in the Parser constructer if the givin filepath ends with .obj
     private void parseOBJ() throws IOException, ClassNotFoundException {
         ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
         parser = (Parser) input.readObject();
         input.close();
     }
 
-    /**
-     * Saves the parser to a .obj file so it can be called later. Method is called in {@link #Model} if the file isn't a .obj
-     */
+    /// Saves the parser to a .obj file so it can be called later. Method is called in {@link #Model} if the file isn't a .obj
     private void saveParserToOBJ() {
         outputFile = new File(file+".obj");
         try {
@@ -210,9 +204,7 @@ public class Model {
          }
     }
 
-    /**
-     * @return the minimum x and y coordinate and the maximum. Used for splitting that box into tiles in {@link #initializeTileGrid(double, double, double, double, int)}
-     */
+    /// @return the minimum x and y coordinate and the maximum. Used for splitting that box into tiles in {@link #initializeTileGrid(double, double, double, double, int)}
     private double[] getMinMaxCoords() {
         double[] minMaxCoords = new double[4];
         double minX = Double.POSITIVE_INFINITY;

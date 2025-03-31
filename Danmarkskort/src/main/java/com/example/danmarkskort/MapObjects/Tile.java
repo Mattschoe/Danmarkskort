@@ -7,9 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Tile implements MapObject{
-    List<MapObject> objectsInTile;
-    double[] bounds;
-    int tileSize;
+    private List<MapObject> objectsInTile;
+    private double[]        bounds;
+    private int             tileSize;
 
     public Tile(double minX, double minY, double maxX, double maxY, int tileSize) {
         objectsInTile = new ArrayList<>();
@@ -37,11 +37,9 @@ public class Tile implements MapObject{
         }
     }
 
+    //region Getters and setters
+    public List<MapObject> getObjectsInTile() { return objectsInTile; }
 
-    //region getters and setters
-    public List<MapObject> getObjectsInTile() {
-        return objectsInTile;
-    }
     @Override
     public double[] getBoundingBox() { return bounds; }
     //endregion

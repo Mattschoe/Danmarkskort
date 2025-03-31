@@ -70,7 +70,7 @@ public class Road implements Serializable, MapObject {
             lines.add(new Line(currentNode, nodes.get(i)));
             currentNode = nodes.get(i);
         }
-        //lines.add(new Line(startNode, nodes.getLast())); Tror ikke det her skal bruges i Roads
+        //lines.add(new Line(currentNode, nodes.getLast())); //Tror ikke det her skal bruges i Roads
     }
 
     /**

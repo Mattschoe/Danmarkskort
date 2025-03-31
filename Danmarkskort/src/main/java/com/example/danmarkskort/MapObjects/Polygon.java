@@ -15,8 +15,7 @@ public class Polygon implements Serializable, MapObject{
     private double[] xPoints;
     private double[] yPoints;
     private int nodesSize; //Øh? Er denne her nødvendig?
-    ///The type of polygon, fx: "Building", "Coastline", etc.
-    private String type;
+    private String type; //The type of polygon, fx: "Building", "Coastline", etc.
     private double[] boundingBox;
     //endregion
 
@@ -133,6 +132,7 @@ public class Polygon implements Serializable, MapObject{
     public String     getType()            { return type; }
     public void       setType(String type) { this.type = type; }
 
-    @Override public double[] getBoundingBox() { return boundingBox; }
+    @Override
+    public double[] getBoundingBox() { return boundingBox; }
     //endregion
 }

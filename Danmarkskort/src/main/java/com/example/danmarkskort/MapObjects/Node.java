@@ -5,8 +5,6 @@ import javafx.scene.canvas.GraphicsContext;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Node implements Serializable, MapObject {
     @Serial private static final long serialVersionUID = 1444149606229887777L;
@@ -18,7 +16,7 @@ public class Node implements Serializable, MapObject {
 
     //region Constructor(s)
     /** A {@link Node} is a point in a (x, y) space. {@link Node} calculates the (x, y) point
-     * itself in the {@link #calculateXY} method when being instantiated
+     *  itself in the {@link #calculateXY} method when being instantiated
      */
     public Node(double latitude, double longitude) {
         calculateXY(latitude, longitude);
@@ -33,13 +31,12 @@ public class Node implements Serializable, MapObject {
     //endregion
 
     //region Methods
-    /**
-     * Calculates X and Y from Latitude and Longitude using same method as teacher
-     * @param latitude same as constructor
-     * @param longitude same as constructor
+    /** Calculates X and Y from Latitude and Longitude using same method as teacher
+     *  @param latitude same as constructor
+     *  @param longitude same as constructor
      */
     private void calculateXY(double latitude, double longitude) {
-        //Bounds of DKK (ish)
+        //Bounds of DK (ish)
         double minLat = 54.5;
         double maxLat = 57.8;
         double minLon = 8.0;
@@ -59,12 +56,11 @@ public class Node implements Serializable, MapObject {
         //graphicsContext.strokeLine(x, y, x, y);
     }
 
-    /**
-     * Parses address, checks its correct and saves it in a 4 size array
-     * @param city same as constructor
-     * @param houseNumber same as constructor
-     * @param postcode same as constructor
-     * @param street same as constructor
+    /** Parses address, checks its correct and saves it in a 4 size array
+     *  @param city same as constructor
+     *  @param houseNumber same as constructor
+     *  @param postcode same as constructor
+     *  @param street same as constructor
      */
     private void saveAddress(String city, String houseNumber, int postcode, String street) {
         address[0] = city;
@@ -80,18 +76,16 @@ public class Node implements Serializable, MapObject {
     //endregion
 
     //region Getters and setters
-    /**
-     * Address array where the Node stores the address (if it has one). Remember to check for null-errors! <br>
-     * address[0] = City, fx: "København S"<br>
-     * address[1] = House-number, fx: "2" <br>
-     * address[2] = postcode, fx: "2860" <br>
-     * address[3] = street, fx: "Decembervej"
+    /** Address array where the Node stores the address (if it has one). Remember to check for null-errors! <br>
+     *  address[0] = City, fx: "København S"<br>
+     *  address[1] = House-number, fx: "2" <br>
+     *  address[2] = postcode, fx: "2860" <br>
+     *  address[3] = street, fx: "Decembervej"
      */
-    public String[] getAddress() {
-        return address;
-    }
-    public double getX() { return x; }
-    public double getY() { return y; }
+    public String[] getAddress() { return address; }
+    public double   getX()       { return x; }
+    public double   getY()       { return y; }
+
     @Override
     public double[] getBoundingBox() {
         return new double[]{x, y, x, y};

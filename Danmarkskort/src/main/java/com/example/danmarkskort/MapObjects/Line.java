@@ -9,14 +9,13 @@ public class Line implements Serializable {
     @Serial private static final long serialVersionUID = -9178696453904098837L;
 
     //region Fields
-    private Node start, end;
+    private final Node start, end;
     //endregion
 
     //region Constructor(s)
-    /**
-     * A {@link Line} is a connection between a {@link Node} and another {@link Node}. A {@link Line} resides within a {@link Road} class
-     * @param start node
-     * @param end node
+    /** A {@link Line} is a connection between a {@link Node} and another {@link Node}. A {@link Line} resides within a {@link Road} class
+     *  @param start node
+     *  @param end node
      */
     public Line(Node start, Node end) {
         assert start != null && end != null;
