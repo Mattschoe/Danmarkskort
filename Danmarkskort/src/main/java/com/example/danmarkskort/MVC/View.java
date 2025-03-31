@@ -72,7 +72,7 @@ public class View {
     }
     //endregion
 
-    //region (Dynamic) Methods
+    //region Methods
     /// Sets the canvas' transform, and binds its height and width
     private void initializeCanvas() {
         //Canvas'et og dets GraphicsContext gemmes
@@ -108,8 +108,8 @@ public class View {
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
         //Draws map
-        drawRoads();
         drawPolygons();
+        drawRoads();
 
         if (firstTimeDrawingMap) {
             firstTimeDrawingMap = false;
@@ -132,25 +132,20 @@ public class View {
         pan(-dx, -dy);
         trans.prependScale(factor, factor);
         pan(dx, dy);
-        drawMap(parser);
     }
 
     /// Draws all roads. Method is called in {@link #drawMap(Parser)}
     private void drawRoads() {
-        Road road;
-        for (long id : parser.getRoads().keySet()) {
-            road = parser.getRoads().get(id);
-            if (road.getRoadType().equals("route")) continue;
-            road.drawRoad(canvas);
+        for (Road r : parser.getRoads().values()) {
+            if (r.getType().equals("route")) continue;
+            r.drawRoad(graphicsContext);
         }
     }
 
     /// Draws all polygons (buildings etc.). Method is called in {@link #drawMap(Parser)}
     private void drawPolygons() {
-        Polygon polygon;
-        for (long id : parser.getPolygons().keySet()) {
-            polygon = parser.getPolygons().get(id);
-            polygon.drawPolygon(graphicsContext);
+        for (Polygon p : parser.getPolygons().values()) {
+            p.drawPolygon(graphicsContext);
         }
     }
     //endregion

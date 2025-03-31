@@ -3,13 +3,11 @@ package com.example.danmarkskort.MapObjects;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.transform.Affine;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 public class Road implements Serializable {
@@ -20,7 +18,7 @@ public class Road implements Serializable {
     private final boolean foot;
     private final boolean bicycle;
     private int maxSpeed;
-    private final String roadType;
+    private String roadType;
     //endregion
     // private static final long serialVersionUID;
 
@@ -70,12 +68,11 @@ public class Road implements Serializable {
     }
 
     /**
-     * Draws the road on a given canvas. This method excludes roads like metro's which are underground. See {@link #drawMetro(Canvas)} for the ability to draw the metro
-     * @param mapCanvas the canvas where the road will be drawn on
+     * Draws the road on a given canvas. This method excludes roads like metros which are underground. See {@link #drawMetro(Canvas)} for the ability to draw the metro
+     * @param gc the GraphicContext where the road will be drawn on
      */
-    public void drawRoad(Canvas mapCanvas) {
-        assert mapCanvas != null;
-        GraphicsContext gc = mapCanvas.getGraphicsContext2D();
+    public void drawRoad(GraphicsContext gc) {
+        assert gc != null;
 
         switch (roadType) {
             case "route":
@@ -85,7 +82,7 @@ public class Road implements Serializable {
                 gc.setStroke(Color.BLACK);
                 gc.setLineWidth(1.5/Math.sqrt(gc.getTransform().determinant())); break;
             default:
-                gc.setStroke(Color.WHITE.darker().darker());
+                gc.setStroke(Color.rgb(47, 47, 47));
                 gc.setLineWidth(1/Math.sqrt(gc.getTransform().determinant())); break;
         }
 
@@ -101,14 +98,15 @@ public class Road implements Serializable {
     @Deprecated
     public void drawMetro(Canvas mapCanvas) {}
 
-    //region getters
-    public Set<Line>  getLines() { return lines;    }
-    public boolean  isWalkable() { return foot;     }
-    public boolean  isCyclable() { return bicycle;  }
-    public int     getMaxSpeed() { return maxSpeed; }
-    public String  getRoadType() { return roadType; }
-    public List<Node> getNodes() { return nodes;    }
-    public boolean hasRoadType() { return !roadType.isEmpty(); }
+    //region Getters and setters
+    public Set<Line>  getLines()           { return lines;    }
+    public boolean    isWalkable()         { return foot;     }
+    public boolean    isCyclable()         { return bicycle;  }
+    public int        getMaxSpeed()        { return maxSpeed; }
+    public List<Node> getNodes()           { return nodes;    }
+    public String     getType()            { return roadType; }
+    public void       setType(String type) { roadType = type; }
+    public boolean    hasRoadType()        { return !roadType.isEmpty(); }
     //endregion
 
     ///Tom metode for at regne maxspeed hvis tagget mangler

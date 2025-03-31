@@ -11,8 +11,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class Parser implements Serializable {
-    //region fields
     @Serial private static final long serialVersionUID = 8838055424703291984L;
+
+    //region Fields
     Map<Long, Node> id2Node; //map for storing a Node and the id used to refer to it
     Map<Long, Road> id2Road;
     Map<Long, Polygon> id2Polygon;
@@ -20,6 +21,7 @@ public class Parser implements Serializable {
     double[] bounds; //OSM-filens bounds, dvs. de længst væk koordinater hvor noget tegnes
     //endregion
 
+    //region Constructor(s)
     /**
      * Checks what filetype the filepath parameter is and calls the appropriate method
      * @param file the file that needs to be processed.
@@ -31,7 +33,7 @@ public class Parser implements Serializable {
         id2Polygon = new HashMap<>(489884);
         bounds = new double[4];
 
-        String filename = getFileName();
+        String filename = getFile().getName();
         //Switch case with what filetype the file is and call the appropriate method:
         if (filename.endsWith(".zip")) {
             parseZIP(filename);
@@ -39,7 +41,9 @@ public class Parser implements Serializable {
             parseOSM(file);
         }
     }
+    //endregion
 
+    //region Methods
     /**
      * Creates zipInputStream to read .osm.ZIP-file. Gets ZIP-entry in String format to use in
      * parseOSM().
@@ -92,19 +96,18 @@ public class Parser implements Serializable {
                 String tagName = input.getLocalName();
 
                 //End of OSM
-                if (tagName.equals("relation")) return;
                 if (tagName.equals("bounds")) parseBounds(input);
-                if (tagName.equals("node")) {
-                    try {
-                        parseNode(input);
-                    } catch (Exception e) {
+                else if (tagName.equals("node")) {
+                    try { parseNode(input); } catch (Exception e) {
                         System.out.println("Failed creating Node! with input: " + input);
                     }
                 } else if (tagName.equals("way")) {
-                    try {
-                        parseWay(input);
-                    } catch (Exception e) {
+                    try { parseWay(input); } catch (Exception e) {
                         System.out.println("Failed creating Way! with input: " + input);
+                    }
+                } else if (tagName.equals("relation")) {
+                    try { parseRelation(input); } catch (Exception e) {
+                        System.out.println("Failed creating Relation! " + e.getMessage());
                     }
                 }
             }
@@ -118,6 +121,52 @@ public class Parser implements Serializable {
         bounds[1] = Double.parseDouble(input.getAttributeValue(1)); //Min. longitude
         bounds[2] = Double.parseDouble(input.getAttributeValue(2)); //Max. latitude
         bounds[3] = Double.parseDouble(input.getAttributeValue(3)); //Max. longitude
+    }
+
+    private void parseRelation(XMLStreamReader input) throws XMLStreamException {
+        //The relation's "fields"
+        List<Long> members = new ArrayList<>();
+        String type = "";
+
+        //Runs through every child of the relation until a relation end-element is encountered
+        while (input.hasNext()) {
+            int nextInput = input.next();
+
+            //Checks whether we've found the end element and terminates the while-loop if so
+            if (nextInput == XMLStreamConstants.END_ELEMENT
+                    && input.getLocalName().equals("relation")) { break; }
+
+            //Handles the relation's children
+            if (nextInput == XMLStreamConstants.START_ELEMENT) {
+                //All 'member'-tags are added to the list of the Relation's members
+                if (input.getLocalName().equals("member")) {
+                    members.add(Long.valueOf(input.getAttributeValue(null, "ref")));
+                }
+                //For all 'tag'-tags temporarily save key and value, and do certain things in certain cases...
+                else if (input.getLocalName().equals("tag")) {
+                    String key = input.getAttributeValue(null, "k");
+                    String val = input.getAttributeValue(null, "v");
+                    if (key == null || val == null) continue; //If k or v are null we skip the element
+                    else if (key.equals("amenity") || key.equals("building") || key.equals("surface")) {
+                        type = key;
+                    }
+                    else if (key.equals("landuse") || key.equals("leisure") || key.equals("natural") || val.equals("route")) {
+                        type = val;
+                    }
+                }
+
+                for (long memberID : members) {
+                    if (id2Polygon.containsKey(memberID)) {
+                        Polygon member = id2Polygon.get(memberID);
+                        if (member.getType().isEmpty()) member.setType(type);
+                    }
+                    else if (id2Road.containsKey(memberID)) {
+                        Road member = id2Road.get(memberID);
+                        if (member.getType().isEmpty()) member.setType(type);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -253,7 +302,7 @@ public class Parser implements Serializable {
 
     /**
      * Parses a {@link Node} from XMLStreamReader.next() and then adds it to id2Node
-     * @throws XMLStreamException if there is a error with the {@code XMLStreamReader}
+     * @throws XMLStreamException if there is an error with the {@code XMLStreamReader}
      */
     private void parseNode(XMLStreamReader input) throws XMLStreamException {
         //Saves the guaranteed values
@@ -303,12 +352,13 @@ public class Parser implements Serializable {
             id2Node.put(id, new Node(lat, lon, city, houseNumber, postcode, street));
         }
     }
+    //endregion
 
-    //GETTERS AND SETTERS
-    public String getFileName() { return file.getName(); }
-    public File getFile() { return file; }
-    public Map<Long, Node> getNodes() { return id2Node; }
-    public Map<Long, Road> getRoads() { return id2Road; }
+    //region Getters and Setters
+    public File               getFile()     { return file;       }
+    public double[]           getBounds()   { return bounds;     }
+    public Map<Long, Node>    getNodes()    { return id2Node;    }
+    public Map<Long, Road>    getRoads()    { return id2Road;    }
     public Map<Long, Polygon> getPolygons() { return id2Polygon; }
-    public double[] getBounds() { return bounds; }
+    //endregion
 }

@@ -9,12 +9,13 @@ import java.util.List;
 
 public class Polygon implements Serializable {
     @Serial private static final long serialVersionUID = 1444149606229887777L;
-    //region fields
+
+    //region Fields
     private final List<Node> nodes;
     private double[] xPoints;
     private double[] yPoints;
     private int nSize;
-    private final String type; //The type of polygon, fx: "Building", "Coastline", etc.
+    private String type; //The type of polygon, fx: "Building", "Coastline", etc.
     //endregion
 
     /**
@@ -31,7 +32,7 @@ public class Polygon implements Serializable {
     }
 
     ///Skaber to Arrays til stroke- og fillPolygon-metoderne der kaldes ved tegning
-    public void createArrays() {
+    private void createArrays() {
         nSize = nodes.size();
 
         xPoints = new double[nSize];
@@ -92,8 +93,9 @@ public class Polygon implements Serializable {
         gc.fillPolygon(xPoints, yPoints, nSize);
     }
 
-    //region getters
-    public List<Node> getNodes() { return nodes; }
-    public String getType() { return type; }
+    //region Getters and setters
+    public List<Node> getNodes()           { return nodes; }
+    public String     getType()            { return type; }
+    public void       setType(String type) { this.type = type; }
     //endregion
 }
