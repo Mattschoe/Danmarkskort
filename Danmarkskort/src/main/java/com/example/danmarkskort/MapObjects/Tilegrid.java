@@ -38,6 +38,10 @@ public class Tilegrid {
         }
     }
 
+    /**
+     * Draws the {@code visibleTiles} given the Level of detail
+     * @param levelOfDetail ranging from 1 to 5, where 1 being the minimum amount and 5 being the maximum amount of details.
+     */
     public void drawVisibleTiles(GraphicsContext graphicsContext, int levelOfDetail) {
         // drawPredefinedRelations(); //OBS det her betyder at vi tegner selvom det ikke kan ses, skal måske ændres senere
 

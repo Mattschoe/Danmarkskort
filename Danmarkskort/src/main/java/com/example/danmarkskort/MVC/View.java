@@ -30,11 +30,8 @@ public class View {
     Stage stage;
     boolean firstTimeDrawingMap;
     int currentZoom, minZoom, maxZoom;
+    Tilegrid tilegrid;
     List<Tile> visibleTiles;
-    ///The offset of which we moved around in the canvas. Always starts at 0 and accumulates when panning and zooming
-    private double viewportOffsetX = 0; private double viewportOffsetY = 0;
-    ///The amount that we are zoomed ind and out. Always start at zoom level 1.0 and is increased multiplicatly in the zoom method
-    private double totalZoomScale = 1.0;
     //endregion
 
     /** View-konstruktøren skifter scene ud fra en given stage og filstien til en FXML-fil
@@ -109,23 +106,21 @@ public class View {
         if (parser == null) return; //TODO %% Evt. find en bedre måde at sørge for at initializeCanvas IKKE køres før kortet loades
         assert graphicsContext != null && canvas != null;
         this.parser = parser;
-        double canvasWidth = canvas.getWidth();
-        double canvasHeight = canvas.getHeight();
 
         //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
         graphicsContext.setTransform(background);
         graphicsContext.setFill(Color.ANTIQUEWHITE);
-        graphicsContext.fillRect(0, 0, canvasWidth, canvasHeight);
+        graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
         //region TESTING
         //Tegner kun tiles inde for viewport
-        System.out.println("Finished drawing!");
+        if (tilegrid != null) tilegrid.drawVisibleTiles(graphicsContext, 5);
         //endregion
 
 
-        int zoomPercentage = (int) (((double) currentZoom/maxZoom) * 100);
+        /* int zoomPercentage = (int) (((double) currentZoom/maxZoom) * 100);
         int fullDetails = 40; //% when all details should be drawn
         int mediumDetails = 70; //% when a balanced amount of details should be drawn
         // System.out.println(zoomPercentage);
@@ -143,6 +138,8 @@ public class View {
             drawAllPolygons(false);
         }
 
+         */
+
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
             firstTimeDrawingMap = false;
@@ -156,15 +153,8 @@ public class View {
     }
 
 
-
-
     ///STJÅLET FRA NUTAN
     public void pan(double dx, double dy) {
-        //Saves the offset
-        viewportOffsetX -= dx;
-        viewportOffsetY -= dy;
-        //System.out.println("Offset: " + (int) viewportOffsetX + " " + (int) viewportOffsetY);
-
         //Moves the map
         trans.prependTranslation(dx, dy);
         drawMap(parser);
@@ -177,7 +167,6 @@ public class View {
      * @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
      */
     public void zoom(double dx, double dy, double factor, boolean ignoreMinMax) {
-        totalZoomScale *= factor; //Updates our scale factor
         if (factor >= 1 && currentZoom > minZoom) currentZoom--; //Zoom ind
         else if (factor <= 1 && currentZoom < maxZoom) currentZoom++; //Zoom out
         else if (ignoreMinMax) { //Needs to be changed
@@ -228,5 +217,6 @@ public class View {
         Point2D maxXY = trans.inverseTransform(canvas.getWidth(), canvas.getHeight());
         return new double[]{minXY.getX(), minXY.getY(), maxXY.getX(), maxXY.getY()};
     }
+    public void setTilegrid(Tilegrid tilegrid) { this.tilegrid = tilegrid; }
     //endregion
 }

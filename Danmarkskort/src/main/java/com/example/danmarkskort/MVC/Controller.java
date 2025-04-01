@@ -43,7 +43,6 @@ public class Controller implements Initializable {
     TrieST<String> trieCity; //part of test
     TrieST<String> trieStreet;
     MouseEvent event;
-    double[] viewport;
     //endregion
 
     /** View-konstruktøren skaber/kører en instans af
@@ -61,22 +60,18 @@ public class Controller implements Initializable {
         //Det her er cooked -MN
         try {
             model = Model.getInstance();
-        } catch (IllegalStateException e) {
-            //Model not loaded yet, so we wait
-        }
+            view.setTilegrid(model.getTilegrid());
+        } catch (IllegalStateException _) {} //Model not loaded yet, so we wait
+
 
         //region AnimationTimer
-        ///TO DO: Fix, this doesnt work og tror det er fordi den lægger i construktøren men idk -MN
-        //OBS JEG MISTÆNKER DET HER FOR IKKE AT VIRKE
+        //TO DO: Fix, this doesnt work og tror det er fordi den lægger i construktøren men idk -MN
+        //OBS JEG MISTÆNKER DET HER FOR IKKE AT VIRKE -MN
+        //UPDATE: Jeg tror endnu mindre på det nu -MN
         AnimationTimer fpsTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 if (panRequest) {
-                    try {
-                        view.setVisibleTiles(model.getTilesInView(view.getViewport())); //Absolut cooked at kalde en view metode, ved hjælp af en model metode, ved at give den parametre med getter metoder fra view, men øh. If it works ig -MN
-                    } catch (NonInvertibleTransformException exception) {
-                        System.out.println("Error getting viewport from view!");
-                    }
                     double dx = event.getX() - lastX;
                     double dy = event.getY() - lastY;
                     view.pan(dx, dy);
@@ -134,11 +129,6 @@ public class Controller implements Initializable {
 
             //Starts up the map
             view.drawMap(model.getParser());
-            try {
-                view.setVisibleTiles(model.getTilesInView(view.getViewport())); //Absolut cooked at kalde en view metode, ved hjælp af en model metode, ved at give den parametre med getter metoder fra view, men øh. If it works ig -MN
-            } catch (NonInvertibleTransformException exception) {
-                System.out.println("Error getting viewport from view!");
-            }
         }
     }
 
@@ -211,13 +201,6 @@ public class Controller implements Initializable {
     /** Metode køres når man zoomer på Canvas'et */
     @FXML protected void onCanvasScroll(ScrollEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked
-
-        try {
-            view.setVisibleTiles(model.getTilesInView(view.getViewport())); //Absolut cooked at kalde en view metode, ved hjælp af en model metode, ved at give den parametre med getter metoder fra view, men øh. If it works ig -MN
-        } catch (NonInvertibleTransformException exception) {
-            System.out.println("Error getting viewport from view!");
-        }
-
         double factor = e.getDeltaY();
         view.zoom(e.getX(), e.getY(), Math.pow(1.01, factor), true);
     }
