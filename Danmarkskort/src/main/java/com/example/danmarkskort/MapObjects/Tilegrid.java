@@ -19,13 +19,12 @@ public class Tilegrid {
     List<Tile> visibleTiles;
     //endregion
 
-    public Tilegrid(Tile[][] grid, double[] tileGridBounds, int tileSize) {
+    public Tilegrid(Tile[][] grid, double[] tileGridBounds, int tileSize, int numberOfTilesX, int numberOfTilesY) {
         this.grid = grid;
         this.tileGridBounds = tileGridBounds;
         this.tileSize = tileSize;
-
-        numberOfTilesX = (int) Math.ceil((tileGridBounds[2] - tileGridBounds[0]) / tileSize);
-        numberOfTilesY = (int) Math.ceil((tileGridBounds[3] - tileGridBounds[1]) / tileSize);
+        this.numberOfTilesX = numberOfTilesX;
+        this.numberOfTilesY = numberOfTilesY;
 
         initializePredefinedRelations();
     }
@@ -42,9 +41,10 @@ public class Tilegrid {
      * Draws the {@code visibleTiles} given the Level of detail
      * @param levelOfDetail ranging from 1 to 5, where 1 being the minimum amount and 5 being the maximum amount of details.
      */
-    public void drawVisibleTiles(GraphicsContext graphicsContext, int levelOfDetail) {
+    public void drawVisibleTiles(GraphicsContext graphicsContext, double[] viewport, int levelOfDetail) {
         // drawPredefinedRelations(); //OBS det her betyder at vi tegner selvom det ikke kan ses, skal måske ændres senere
-
+        visibleTiles = getTilesInView(viewport);
+        System.out.println(visibleTiles.size());
         for (Tile tile : visibleTiles) {
             tile.draw(graphicsContext);
         }
@@ -62,7 +62,7 @@ public class Tilegrid {
      * @param viewport an array of length 4 with the following specifics: <br> [0] = minX <br> [1] = minY <br> [2] = maxX <br> [3] = maxY
      * @return all the tiles that are visible given the {@code canvasBounds}
      */
-    public List<Tile> getTilesInView(double[] viewport) {
+    private List<Tile> getTilesInView(double[] viewport) {
         List<Tile> visibleTiles = new ArrayList<>();
 
         //Converts viewport's bounding box to tile indices

@@ -60,7 +60,6 @@ public class Controller implements Initializable {
         //Det her er cooked -MN
         try {
             model = Model.getInstance();
-            view.setTilegrid(model.getTilegrid());
         } catch (IllegalStateException _) {} //Model not loaded yet, so we wait
 
 
@@ -96,6 +95,7 @@ public class Controller implements Initializable {
      */
     private void loadFile(File mapFile) {
         model = Model.getInstance(mapFile.getPath(), canvas);
+        view.setTilegrid(model.getTilegrid());
         assert model.getParser() != null;
     }
 

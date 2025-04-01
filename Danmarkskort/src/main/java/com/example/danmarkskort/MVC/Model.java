@@ -15,6 +15,7 @@ public class Model {
     private File file;
     private Parser parser;
     private File outputFile; //The output .obj file
+    int numberOfTilesX, numberOfTilesY;
     Tilegrid tilegrid;
     //endregion
 
@@ -54,11 +55,11 @@ public class Model {
 
         //region Tilegrid
         //Converts into tilegrid
-        int tileSize = 10;
+        int tileSize = 5;
         double[] tileGridBounds = getMinMaxCoords();
         Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 
-        tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize);
+        tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
         //endregion
     }
 
@@ -116,8 +117,8 @@ public class Model {
      */
     private Tile[][] initializeTileGrid(double minX, double minY, double maxX, double maxY, int tileSize) {
         //Calculates number of tiles along each axis
-        int numberOfTilesX = tilegrid.getNumberOfTilesX();
-        int numberOfTilesY = tilegrid.getNumberOfTilesY();
+        numberOfTilesX = (int) Math.ceil((maxX - minX) / tileSize);
+        numberOfTilesY = (int) Math.ceil((maxY - minY) / tileSize);
 
         //Initializes the Tile objects inside the grid variable
          Tile[][] tileGrid = new Tile[numberOfTilesX][numberOfTilesY];

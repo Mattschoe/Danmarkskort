@@ -116,7 +116,13 @@ public class View {
 
         //region TESTING
         //Tegner kun tiles inde for viewport
-        if (tilegrid != null) tilegrid.drawVisibleTiles(graphicsContext, 5);
+        if (tilegrid != null) {
+            try {
+                tilegrid.drawVisibleTiles(graphicsContext, getViewport(), 5);
+            } catch (NonInvertibleTransformException e) {
+                System.out.println("Error getting viewport! Error: " + e.getMessage());
+            }
+        }
         //endregion
 
 

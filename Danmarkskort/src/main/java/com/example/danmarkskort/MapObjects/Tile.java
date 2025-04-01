@@ -1,6 +1,7 @@
 package com.example.danmarkskort.MapObjects;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.HashSet;
