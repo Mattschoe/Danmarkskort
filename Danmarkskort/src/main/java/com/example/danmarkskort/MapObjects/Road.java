@@ -121,15 +121,15 @@ public class Road implements Serializable, MapObject {
     }
 
     //region getters
-    public Set<Line> getLines() { return lines;    }
-    public boolean isWalkable() { return foot;     }
-    public boolean isCyclable() { return bicycle;  }
-    public int getMaxSpeed() { return maxSpeed; }
+    public Set<Line>  getLines() { return lines;    }
+    public boolean  isWalkable() { return foot;     }
+    public boolean  isCyclable() { return bicycle;  }
+    public int     getMaxSpeed() { return maxSpeed; }
+    public String  getRoadType() { return roadType; }
     public List<Node> getNodes() { return nodes;    }
-    public String getType() { return roadType; }
-    public void setType(String type) { roadType = type; }
     public boolean hasRoadType() { return !roadType.isEmpty(); }
-    @Override public double[] getBoundingBox() { return boundingBox; }
+    @Override
+    public double[] getBoundingBox() { return boundingBox; }
     //endregion
 
     ///Tom metode for at regne maxspeed hvis tagget mangler
