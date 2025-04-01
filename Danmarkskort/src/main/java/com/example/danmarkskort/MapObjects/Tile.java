@@ -50,21 +50,21 @@ public class Tile implements MapObject{
 
     /**
      * Draws the {@code visibleTiles} given the Level of detail
-     * @param LevelOfDetail ranging from 1 to 5, where 1 being the minimum amount and 5 being the maximum amount of details.
+     * @param LevelOfDetail ranging from 0 to 4, where 0 being the minimum amount and 4 being the maximum amount of details.
      */
     public void draw(GraphicsContext graphicsContext, int LevelOfDetail) {
         //Level 1:
         drawMotorway(graphicsContext);
-        if (LevelOfDetail > 1) {
+        if (LevelOfDetail > 0) {
             drawTrunk(graphicsContext);
             drawPrimary(graphicsContext);
-            if (LevelOfDetail > 2) {
+            if (LevelOfDetail > 1) {
                 drawSecondary(graphicsContext);
-                if (LevelOfDetail > 3) {
+                if (LevelOfDetail > 2) {
                     drawTertiary(graphicsContext);
                     drawUnclassified(graphicsContext);
                     drawResidential(graphicsContext);
-                    if (LevelOfDetail > 4) {
+                    if (LevelOfDetail > 3) {
                         drawBuildings(graphicsContext);
                     }
                 }

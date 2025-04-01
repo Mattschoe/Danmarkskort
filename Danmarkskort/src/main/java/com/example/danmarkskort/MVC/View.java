@@ -75,9 +75,9 @@ public class View {
         if (controller.getCanvas() != null) initializeCanvas();
 
         //Sets up the Zoom levels
-        currentZoom = 6;
+        currentZoom = 10;
         minZoom = 1;
-        maxZoom = 7;
+        maxZoom = 8;
     }
 
     ///Giver Canvas en Transform og bunden højde/bredde
@@ -118,33 +118,14 @@ public class View {
         //Tegner kun tiles inde for viewport
         if (tilegrid != null) {
             try {
-                tilegrid.drawVisibleTiles(graphicsContext, getViewport(), 5);
+                System.out.println(getLOD());
+                tilegrid.drawVisibleTiles(graphicsContext, getViewport(), getLOD());
             } catch (NonInvertibleTransformException e) {
                 System.out.println("Error getting viewport! Error: " + e.getMessage());
             }
         }
         //endregion
 
-
-        /* int zoomPercentage = (int) (((double) currentZoom/maxZoom) * 100);
-        int fullDetails = 40; //% when all details should be drawn
-        int mediumDetails = 70; //% when a balanced amount of details should be drawn
-        // System.out.println(zoomPercentage);
-        if (zoomPercentage < fullDetails) { //Draws with all details
-            System.out.println("All details");
-            drawAllRoads();
-            drawAllPolygons(true);
-        } else if (zoomPercentage < mediumDetails) { //Draws with some details
-            System.out.println("medium details");
-            drawAllRoads();
-            drawAllPolygons(true);
-        } else { //Draws the map with the least amount of details
-            System.out.println("minimum details");
-            drawAllSignificantHighways();
-            drawAllPolygons(false);
-        }
-
-         */
 
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
@@ -211,6 +192,15 @@ public class View {
         for (Road road : parser.getSignificantHighways()) {
             road.draw(graphicsContext);
         }
+    }
+
+    /**
+     * Changes the current zoom level to a range from 0 to 4 (needed for the LOD)
+     */
+    private int getLOD() {
+        if (currentZoom > maxZoom) return 0;
+        if (currentZoom < minZoom) return 4;
+        return (maxZoom - currentZoom) * 4 / (maxZoom - minZoom);
     }
 
     //region GETTERS AND SETTERS

@@ -39,13 +39,13 @@ public class Tilegrid {
 
     /**
      * Draws the {@code visibleTiles} given the Level of detail
-     * @param levelOfDetail ranging from 1 to 5, where 1 being the minimum amount and 5 being the maximum amount of details.
+     * @param levelOfDetail ranging from 0 to 4, where 0 being the minimum amount and 4 being the maximum amount of details.
      */
     public void drawVisibleTiles(GraphicsContext graphicsContext, double[] viewport, int levelOfDetail) {
         // drawPredefinedRelations(); //OBS det her betyder at vi tegner selvom det ikke kan ses, skal måske ændres senere
         visibleTiles = getTilesInView(viewport);
         for (Tile tile : visibleTiles) {
-            tile.draw(graphicsContext);
+            tile.draw(graphicsContext, levelOfDetail);
         }
     }
 
