@@ -3,27 +3,27 @@ package com.example.danmarkskort.MapObjects;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.transform.Affine;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 public class Road implements Serializable, MapObject {
-    //region Fields
     @Serial private static final long serialVersionUID = 2430026592275563830L;
+
+    //region Fields
     private final List<Node> nodes;
     private final Set<Line> lines;
     private final boolean foot;
     private final boolean bicycle;
     private int maxSpeed;
-    private final String roadType;
+    private String roadType;
     private double[] boundingBox;
     //endregion
 
+    //region Constructor(s)
     /**
      * ROAD WITH MAXSPEED. A {@link Road} is a collection of {@link Node}'s without the same start and end node.
      * @param nodes the collection of nodes
@@ -59,8 +59,10 @@ public class Road implements Serializable, MapObject {
         createLines();
         calculateBoundingBox();
     }
+    //endregion
 
-    ///Creates the lines between the {@link Node}'s (Used later for drawing)
+    //region Methods
+    /// Creates the lines between the {@link Node}'s (Used later for drawing)
     private void createLines() {
         //Tegner en linje fra den første node til den sidste i rækkefølge. (No?) Slutter af med at lave en linje mellem den sidste og første
         Node currentNode = nodes.getFirst();
@@ -68,7 +70,7 @@ public class Road implements Serializable, MapObject {
             lines.add(new Line(currentNode, nodes.get(i)));
             currentNode = nodes.get(i);
         }
-        //lines.add(new Line(startNode, nodes.getLast())); Tror ikke det her skal bruges i Roads
+        //lines.add(new Line(currentNode, nodes.getLast())); //Tror ikke det her skal bruges i Roads
     }
 
     /**
@@ -85,7 +87,7 @@ public class Road implements Serializable, MapObject {
                 graphicsContext.setStroke(Color.BLACK);
                 graphicsContext.setLineWidth(1.5/Math.sqrt(graphicsContext.getTransform().determinant())); break;
             default:
-                graphicsContext.setStroke(Color.WHITE.darker().darker());
+                graphicsContext.setStroke(Color.rgb(100, 100, 100));
                 graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant())); break;
         }
 
@@ -93,13 +95,6 @@ public class Road implements Serializable, MapObject {
             line.draw(graphicsContext);
         }
     }
-
-    /**
-     * Draws the metro
-     * @param mapCanvas
-     */
-    @Deprecated
-    public void drawMetro(Canvas mapCanvas) {}
 
     private void calculateBoundingBox() {
         boundingBox = new double[4];
@@ -120,20 +115,24 @@ public class Road implements Serializable, MapObject {
         }
     }
 
-    //region getters
-    public Set<Line>  getLines() { return lines;    }
-    public boolean  isWalkable() { return foot;     }
-    public boolean  isCyclable() { return bicycle;  }
-    public int     getMaxSpeed() { return maxSpeed; }
-    public String  getRoadType() { return roadType; }
-    public List<Node> getNodes() { return nodes;    }
-    public boolean hasRoadType() { return !roadType.isEmpty(); }
+    /// Draws the metro, bus-routes, etc.
+    @Deprecated public void drawMetro(Canvas mapCanvas) {}
+
+    /// Calculates maxSpeed if the tag wasn't present in the OSM-file
+    @Deprecated private void calculateSpeed() {}
+    //endregion
+
+    //region Getters and setters
+    public Set<Line>  getLines()           { return lines;    }
+    public boolean    isWalkable()         { return foot;     }
+    public boolean    isCyclable()         { return bicycle;  }
+    public int        getMaxSpeed()        { return maxSpeed; }
+    public List<Node> getNodes()           { return nodes;    }
+    public String     getType()            { return roadType; }
+    public void       setType(String type) { roadType = type; }
+    public boolean    hasRoadType()        { return !roadType.isEmpty(); }
+
     @Override
     public double[] getBoundingBox() { return boundingBox; }
     //endregion
-
-    ///Tom metode for at regne maxspeed hvis tagget mangler
-    @Deprecated private void calculateSpeed(){
-        //tom metode er tom
-    }
 }

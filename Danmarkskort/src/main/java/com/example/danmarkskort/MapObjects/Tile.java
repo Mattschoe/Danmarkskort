@@ -9,11 +9,14 @@ import java.util.List;
 import java.util.Set;
 
 public class Tile implements MapObject{
-    List<MapObject> objectsInTile;
-    double[] bounds;
-    int tileSize;
-    Set<MapObject> predefinedRelations, motorway, trunk, primary, secondary, tertiary, unclassified, residential, buildings;
+    //region Fields
+    private List<MapObject> objectsInTile;
+    private double[]        bounds;
+    private int             tileSize;
+    private Set<MapObject>  predefinedRelations, motorway, trunk, primary, secondary, tertiary, unclassified, residential, buildings;
+    //endregion
 
+    //region Constructor(s)
     public Tile(double minX, double minY, double maxX, double maxY, int tileSize) {
         objectsInTile = new ArrayList<>();
         this.tileSize = tileSize;
@@ -23,18 +26,24 @@ public class Tile implements MapObject{
         bounds[2] = maxX;
         bounds[3] = maxY;
 
-        //region Initialization of Mapobject sets
+        //region Initialization of MapObject sets
         predefinedRelations = new HashSet<>();
-        motorway = new HashSet<>();
-        trunk = new HashSet<>();
-        primary = new HashSet<>();
-        secondary = new HashSet<>();
-        tertiary = new HashSet<>();
-        unclassified = new HashSet<>();
-        residential = new HashSet<>();
-        buildings = new HashSet<>();
+        motorway            = new HashSet<>();
+        trunk               = new HashSet<>();
+        primary             = new HashSet<>();
+        secondary           = new HashSet<>();
+        tertiary            = new HashSet<>();
+        unclassified        = new HashSet<>();
+        residential         = new HashSet<>();
+        buildings           = new HashSet<>();
         //endregion
         initializeDrawMethods();
+    }
+    //endregion
+
+    //region (Public) Methods
+    public void addMapObject(MapObject object) {
+        objectsInTile.add(object);
     }
 
     @Override
@@ -49,9 +58,8 @@ public class Tile implements MapObject{
         }
     }
 
-    /**
-     * Draws the {@code visibleTiles} given the Level of detail
-     * @param LevelOfDetail ranging from 1 to 5, where 1 being the minimum amount and 5 being the maximum amount of details.
+    /** Draws the {@code visibleTiles} given the Level of detail
+     *  @param LevelOfDetail ranging from 1 to 5, where 1 being the minimum amount and 5 being the maximum amount of details.
      */
     public void draw(GraphicsContext graphicsContext, int LevelOfDetail) {
         //Level 1:
@@ -73,7 +81,7 @@ public class Tile implements MapObject{
         }
     }
 
-    //region private draw methods
+    //region Private draw-methods
     ///All big Motorways
     private void drawMotorway(GraphicsContext graphicsContext) {
         for (MapObject mapObject : motorway) {
@@ -125,13 +133,11 @@ public class Tile implements MapObject{
     //endregion
 
 
-    /**
-     * Initializes all the draw methods so we later can call them in {@link #draw(GraphicsContext, int)}
-     */
+    /// Initializes all the draw methods so we later can call them in {@link #draw(GraphicsContext, int)}
     private void initializeDrawMethods() {
         for (MapObject mapObject : objectsInTile) {
             if (mapObject instanceof Road road && road.hasRoadType()) {
-                String roadType = road.getRoadType();
+                String roadType = road.getType();
                 if (roadType.equals("motorway")) {
                     motorway.add(mapObject);
                 } else if (roadType.equals("trunk")) {
@@ -152,15 +158,11 @@ public class Tile implements MapObject{
             }
         }
     }
+    //endregion
 
-    public void addMapObject(MapObject object) {
-        objectsInTile.add(object);
-    }
+    //region Getters and setters
+    public List<MapObject> getObjectsInTile() { return objectsInTile; }
 
-    //region getters and setters
-    public List<MapObject> getObjectsInTile() {
-        return objectsInTile;
-    }
     @Override
     public double[] getBoundingBox() { return bounds; }
     //endregion

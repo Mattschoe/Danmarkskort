@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.canvas.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.danmarkskort.MVC.Controller">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.danmarkskort.MVC.Controller">
     <Canvas fx:id="canvas" height="400.0" onMouseClicked="#onCanvasClick" onMouseDragged="#onCanvasDragged" onMousePressed="#onCanvasPressed" onScroll="#onCanvasScroll" width="600.0" />
+
     <MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <Menu mnemonicParsing="false" text="File">
             <MenuItem mnemonicParsing="false" text="Close" />
@@ -17,14 +24,17 @@
             <MenuItem mnemonicParsing="false" text="About" />
         </Menu>
     </MenuBar>
+
     <MenuButton layoutX="527.0" layoutY="35.0" mnemonicParsing="false" text="Filtre" AnchorPane.rightAnchor="15.0">
       <items>
           <MenuItem mnemonicParsing="false" text="Action 1" />
           <MenuItem mnemonicParsing="false" text="Action 2" />
       </items>
     </MenuButton>
-    <Slider layoutX="445.0" layoutY="348.0" showTickLabels="true" showTickMarks="true" value="50.0" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="15.0" />
-    <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onKeyTyped="#searchBarTyped" promptText="Søg efter adresse..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
-   <ListView fx:id="listView" layoutX="15.0" layoutY="61.0" prefHeight="72.0" prefWidth="150.0" visible="false" />
 
+    <Slider fx:id="zoomBar" layoutX="445.0" layoutY="348.0" max="140000.0" min="2000.0" value="21695.0" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="15.0" />
+
+    <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onKeyTyped="#searchBarTyped" promptText="Søg efter adresse..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
+
+    <ListView fx:id="listView" layoutX="15.0" layoutY="61.0" prefHeight="72.0" prefWidth="150.0" visible="false" />
 </AnchorPane>

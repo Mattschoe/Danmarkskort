@@ -9,16 +9,17 @@ import java.util.List;
 
 public class Polygon implements Serializable, MapObject{
     @Serial private static final long serialVersionUID = 1444149606229887777L;
-    //region fields
+
+    //region Fields
     private final List<Node> nodes;
     private double[] xPoints;
     private double[] yPoints;
-    private int nodeSize; //Øh? Er denne her nødvendig?
-    ///The type of polygon, fx: "Building", "Coastline", etc.
-    private final String type;
+    private int nodesSize; //Øh? Er denne her nødvendig?
+    private String type; //The type of polygon, fx: "Building", "Coastline", etc.
     private double[] boundingBox;
     //endregion
 
+    //region Constructor(s)
     /**
      * A {@link Polygon} is a collection of {@link Node}'s with the same start- and end {@link Node}
      * @param nodes the collection of nodes belonging to the Polygon
@@ -36,15 +37,17 @@ public class Polygon implements Serializable, MapObject{
         createArrays();
         calculateBoundingBox();
     }
+    //endregion
 
+    //region Methods
     ///Skaber to Arrays til stroke- og fillPolygon-metoderne der kaldes ved tegning
-    public void createArrays() {
-        nodeSize = nodes.size();
+    private void createArrays() {
+        nodesSize = nodes.size();
 
-        xPoints = new double[nodeSize];
-        yPoints = new double[nodeSize];
+        xPoints = new double[nodesSize];
+        yPoints = new double[nodesSize];
 
-        for (int i = 0; i < nodeSize; i++) {
+        for (int i = 0; i < nodesSize; i++) {
             xPoints[i] = nodes.get(i).getX();
             yPoints[i] = nodes.get(i).getY();
         }
@@ -99,8 +102,8 @@ public class Polygon implements Serializable, MapObject{
         gc.setStroke(color.darker().darker());
         gc.setFill(color);
 
-        if (drawLines) gc.strokePolygon(xPoints, yPoints, nodeSize);
-        gc.fillPolygon(xPoints, yPoints, nodeSize);
+        if (drawLines) gc.strokePolygon(xPoints, yPoints, nodesSize);
+        gc.fillPolygon(xPoints, yPoints, nodesSize);
     }
 
     private void calculateBoundingBox() {
@@ -122,11 +125,15 @@ public class Polygon implements Serializable, MapObject{
             if (y > boundingBox[3]) boundingBox[3] = y;
         }
     }
+    //endregion
 
-    //region getters
-    public List<Node> getNodes() { return nodes; }
-    public String getType() { return type; }
-    public boolean hasType() { return !type.isEmpty(); }
-    @Override public double[] getBoundingBox() { return boundingBox; }
+    //region Getters and setters
+    public List<Node> getNodes()           { return nodes;           }
+    public String     getType()            { return type;            }
+    public void       setType(String type) { this.type = type;       }
+    public boolean    hasType()            { return !type.isEmpty(); }
+
+    @Override
+    public double[] getBoundingBox() { return boundingBox; }
     //endregion
 }

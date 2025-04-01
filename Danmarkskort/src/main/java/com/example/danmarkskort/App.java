@@ -12,12 +12,13 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        stage.setTitle("Rotternes Danmarkskort");
-        stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("icon.png"))));
+        stage.setTitle("Rats' Map of Denmark");
+
+        Image icon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("icon.png")));
+        stage.getIcons().add(icon);
+
         new View(stage, "startup.fxml");
     }
 
-    public static void main(String[] args) {
-        launch();
-    }
+    public static void main(String[] args) { launch(); }
 }
