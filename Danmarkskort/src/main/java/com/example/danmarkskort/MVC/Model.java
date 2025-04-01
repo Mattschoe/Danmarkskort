@@ -22,6 +22,7 @@ public class Model {
 
     /**
      * Checks what filetype the filepath parameter is. Calls {@link #parseOBJ()} if it's a .obj file, if not, it creates a new {@link Parser} class and propagates the responsibility
+     * @param filePath the path where the file that needs parsing is loaded (ex.: "/data/small.osm")
      */
     private Model(String filePath, Canvas canvas) {
         assert canvas != null;

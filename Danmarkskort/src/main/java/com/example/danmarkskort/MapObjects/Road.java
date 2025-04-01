@@ -3,13 +3,11 @@ package com.example.danmarkskort.MapObjects;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.transform.Affine;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 public class Road implements Serializable, MapObject {
@@ -20,10 +18,11 @@ public class Road implements Serializable, MapObject {
     private final boolean foot;
     private final boolean bicycle;
     private int maxSpeed;
-    private final String roadType;
+    private String roadType;
     private double[] boundingBox;
     //endregion
 
+    //region Constructor(s)
     /**
      * ROAD WITH MAXSPEED. A {@link Road} is a collection of {@link Node}'s without the same start and end node.
      * @param nodes the collection of nodes
@@ -59,8 +58,10 @@ public class Road implements Serializable, MapObject {
         createLines();
         calculateBoundingBox();
     }
+    //endregion
 
-    ///Creates the lines between the {@link Node}'s (Used later for drawing)
+    //region Methods
+    /// Creates the lines between the {@link Node}'s (Used later for drawing)
     private void createLines() {
         //Tegner en linje fra den første node til den sidste i rækkefølge. (No?) Slutter af med at lave en linje mellem den sidste og første
         Node currentNode = nodes.getFirst();
@@ -85,7 +86,7 @@ public class Road implements Serializable, MapObject {
                 graphicsContext.setStroke(Color.BLACK);
                 graphicsContext.setLineWidth(1.5/Math.sqrt(graphicsContext.getTransform().determinant())); break;
             default:
-                graphicsContext.setStroke(Color.WHITE.darker().darker());
+                graphicsContext.setStroke(Color.rgb(114, 114, 114));
                 graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant())); break;
         }
 
@@ -94,12 +95,8 @@ public class Road implements Serializable, MapObject {
         }
     }
 
-    /**
-     * Draws the metro
-     * @param mapCanvas
-     */
-    @Deprecated
-    public void drawMetro(Canvas mapCanvas) {}
+    /// Draws the metro, bus-routes, etc.
+    @Deprecated public void drawMetro(Canvas mapCanvas) {}
 
     private void calculateBoundingBox() {
         boundingBox = new double[4];
@@ -131,9 +128,4 @@ public class Road implements Serializable, MapObject {
     @Override
     public double[] getBoundingBox() { return boundingBox; }
     //endregion
-
-    ///Tom metode for at regne maxspeed hvis tagget mangler
-    @Deprecated private void calculateSpeed(){
-        //tom metode er tom
-    }
 }

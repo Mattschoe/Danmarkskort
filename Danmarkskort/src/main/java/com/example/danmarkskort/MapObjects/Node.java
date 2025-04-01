@@ -2,7 +2,6 @@ package com.example.danmarkskort.MapObjects;
 
 import com.example.danmarkskort.Exceptions.InvalidAddressException;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -11,9 +10,13 @@ import java.util.List;
 
 public class Node implements Serializable, MapObject {
     @Serial private static final long serialVersionUID = 1444149606229887777L;
+
+    //region Fields
     private double x, y;
     private String[] address;
+    //endregion
 
+    //region Constructor(s)
     /**
      * A {@link Node} is a point in a (x, y) space. {@link Node} calculates the (x, y) point itself in the {@link #calculateXY} method when being instantiated
      * @param latitude coordinate
@@ -37,7 +40,9 @@ public class Node implements Serializable, MapObject {
         address = new String[4];
         saveAddress(city, houseNumber, postcode, street);
     }
+    //endregion
 
+    //region Methods
     /**
      * Calculates X and Y from Latitude and Longitude using same method as teacher
      * @param latitude same as constructor
@@ -82,8 +87,9 @@ public class Node implements Serializable, MapObject {
             throw new InvalidAddressException(address);
         }
     }
+    //endregion
 
-    //region getters and setters
+    //region Getters and setters
     /**
      * Address array where the Node stores the address (if it has one). Remember to check for null-errors! <br>
      * address[0] = City, fx: "København S"<br>
