@@ -60,7 +60,7 @@ public class Polygon implements Serializable, MapObject{
     public void draw(GraphicsContext gc, boolean drawLines) {
         Color color = switch(type) {
             //Værdier fra "natural"-tag
-            case "water"     -> Color.CORNFLOWERBLUE;
+            case "water"     -> Color.LIGHTBLUE;
             case "heath"     -> Color.SANDYBROWN;
             case "coastline" -> Color.PERU;
 
