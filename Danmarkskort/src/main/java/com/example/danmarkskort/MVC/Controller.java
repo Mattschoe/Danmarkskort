@@ -197,12 +197,11 @@ public class Controller implements Initializable {
         });
     }
 
-
     /** Metode køres når man zoomer på Canvas'et */
     @FXML protected void onCanvasScroll(ScrollEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked
         double factor = e.getDeltaY();
-        view.zoom(e.getX(), e.getY(), Math.pow(1.01, factor), true);
+        view.zoom(e.getX(), e.getY(), Math.pow(1.01, factor), false);
     }
 
     /** Metode køres når man slipper sit klik på Canvas'et */

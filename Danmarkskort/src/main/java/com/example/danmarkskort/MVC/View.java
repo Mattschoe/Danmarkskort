@@ -75,9 +75,9 @@ public class View {
         if (controller.getCanvas() != null) initializeCanvas();
 
         //Sets up the Zoom levels
-        currentZoom = 8;
         minZoom = 1;
-        maxZoom = 8;
+        maxZoom = 15;
+        currentZoom = maxZoom;
     }
 
     ///Giver Canvas en Transform og bunden højde/bredde
@@ -118,8 +118,8 @@ public class View {
         //Tegner kun tiles inde for viewport
         if (tilegrid != null) {
             try {
-                System.out.println(getLOD());
                 tilegrid.drawVisibleTiles(graphicsContext, getViewport(), getLOD());
+                //tilegrid.drawVisibleTiles(graphicsContext, getViewport(), 4);
             } catch (NonInvertibleTransformException e) {
                 System.out.println("Error getting viewport! Error: " + e.getMessage());
             }
@@ -130,12 +130,6 @@ public class View {
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
             firstTimeDrawingMap = false;
-
-            //TODO: SKAL OPTIMERES VI DRAWER MAPPET LIKE 5 GANGE FØRSTE GANG
-            //Moves the view over to the map
-            double startZoom = (0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
-            //pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
-            //zoom(0, 0, startZoom, true);
         }
     }
 
@@ -169,38 +163,17 @@ public class View {
         drawMap(parser);
     }
 
-    ///Draws all roads. Method is called in {@link #drawMap(Parser)}
-    private void drawAllRoads() {
-        Road road;
-        for (long id : parser.getRoads().keySet()) {
-            road = parser.getRoads().get(id);
-            if (road.getRoadType().equals("route")) continue;
-            road.draw(graphicsContext);
-        }
-    }
-
-    ///Draws all polygons (buildings etc.). Method is called in {@link #drawMap(Parser)}
-    private void drawAllPolygons(boolean drawLines) {
-        Polygon polygon;
-        for (long id : parser.getPolygons().keySet()) {
-            polygon = parser.getPolygons().get(id);
-            polygon.draw(graphicsContext, drawLines);
-        }
-    }
-
-    private void drawAllSignificantHighways() {
-        for (Road road : parser.getSignificantHighways()) {
-            road.draw(graphicsContext);
-        }
-    }
-
     /**
-     * Changes the current zoom level to a range from 0 to 4 (needed for the LOD)
+     * Changes the current zoom level to a range from 0 to 4 (needed for the LOD). 0 Being minimum amount of details, 4 being maximum
      */
     private int getLOD() {
-        if (currentZoom > maxZoom) return 0;
-        if (currentZoom < minZoom) return 4;
-        return (maxZoom - currentZoom) * 4 / (maxZoom - minZoom);
+        int zoomPercentage = (currentZoom - minZoom) * 100 / (maxZoom - minZoom);
+        System.out.println(zoomPercentage);
+        if (zoomPercentage <= 35) return 4;
+        if (zoomPercentage <= 70) return 3;
+        if (zoomPercentage <= 80) return 2;
+        if (zoomPercentage <= 90) return 1;
+        else return 0;
     }
 
     //region GETTERS AND SETTERS

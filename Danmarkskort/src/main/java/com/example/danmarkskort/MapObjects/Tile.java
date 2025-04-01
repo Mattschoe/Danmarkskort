@@ -12,7 +12,7 @@ public class Tile implements MapObject{
     List<MapObject> objectsInTile;
     double[] bounds;
     int tileSize;
-    Set<MapObject> predefinedRelations, motorway, trunk, primary, secondary, tertiary, unclassified, residential, buildings;
+    Set<MapObject> predefinedRelations, motorway, trunk, primary, secondary, tertiary, unclassified, residential, defaultRoad, buildings, area;
 
     public Tile(double minX, double minY, double maxX, double maxY, int tileSize) {
         objectsInTile = new ArrayList<>();
@@ -32,7 +32,9 @@ public class Tile implements MapObject{
         tertiary = new HashSet<>();
         unclassified = new HashSet<>();
         residential = new HashSet<>();
+        defaultRoad = new HashSet<>();
         buildings = new HashSet<>();
+        area = new HashSet<>();
         //endregion
     }
 
@@ -50,22 +52,29 @@ public class Tile implements MapObject{
 
     /**
      * Draws the {@code visibleTiles} given the Level of detail
-     * @param LevelOfDetail ranging from 0 to 4, where 0 being the minimum amount and 4 being the maximum amount of details.
+     * @param levelOfDetail ranging from 0 to 4, where 0 being the minimum amount and 4 being the maximum amount of details.
      */
-    public void draw(GraphicsContext graphicsContext, int LevelOfDetail) {
-        //Level 1:
+    public void draw(GraphicsContext graphicsContext, int levelOfDetail) {
+        //Tegner tilet
+        graphicsContext.setStroke(Color.DARKORANGE);
+        graphicsContext.strokeRect(bounds[0],bounds[1], tileSize, tileSize);
+
+        //HUSK: Altid tegn farve/baggrund før du tegner road på hvert level
         drawMotorway(graphicsContext);
         drawTrunk(graphicsContext);
-        if (LevelOfDetail > 0) {
+        if (levelOfDetail > 0) {
             drawPrimary(graphicsContext);
-            if (LevelOfDetail > 1) {
+            if (levelOfDetail > 1) {
                 drawSecondary(graphicsContext);
-                if (LevelOfDetail > 2) {
+                if (levelOfDetail > 2) {
                     drawTertiary(graphicsContext);
                     drawUnclassified(graphicsContext);
                     drawResidential(graphicsContext);
-                    if (LevelOfDetail > 3) {
+                    drawDefaultRoad(graphicsContext);
+                    if (levelOfDetail > 3) {
+                        drawArea(graphicsContext);
                         drawBuildings(graphicsContext);
+                        draw(graphicsContext, levelOfDetail - 1);
                     }
                 }
             }
@@ -115,9 +124,24 @@ public class Tile implements MapObject{
             mapObject.draw(graphicsContext);
         }
     }
+
+    ///Roads without a type
+    private void drawDefaultRoad(GraphicsContext graphicsContext) {
+        for (MapObject mapObject : defaultRoad) {
+            mapObject.draw(graphicsContext);
+        }
+    }
+
     ///Buildings
     private void drawBuildings(GraphicsContext graphicsContext) {
         for (MapObject mapObject : buildings) {
+            mapObject.draw(graphicsContext);
+        }
+    }
+
+    ///Area colors
+    private void drawArea(GraphicsContext graphicsContext) {
+        for (MapObject mapObject : area) {
             mapObject.draw(graphicsContext);
         }
     }
@@ -129,25 +153,24 @@ public class Tile implements MapObject{
      */
     public void initializeDrawMethods() {
         for (MapObject mapObject : objectsInTile) {
-            if (mapObject instanceof Road road && road.hasRoadType()) {
+            if (mapObject instanceof Road road) {
                 String roadType = road.getRoadType();
-                if (roadType.equals("motorway")) {
-                    motorway.add(mapObject);
-                } else if (roadType.equals("trunk")) {
-                    trunk.add(mapObject);
-                } else if (roadType.equals("primary")) {
-                    primary.add(mapObject);
-                } else if (roadType.equals("secondary")) {
-                    secondary.add(mapObject);
-                } else if (roadType.equals("tertiary")) {
-                    tertiary.add(mapObject);
-                } else if (roadType.equals("unclassified")) {
-                    unclassified.add(mapObject);
-                } else if (roadType.equals("residential")) {
-                    residential.add(mapObject);
+                switch (roadType) {
+                    case "motorway" -> motorway.add(mapObject);
+                    case "trunk" -> trunk.add(mapObject);
+                    case "primary" -> primary.add(mapObject);
+                    case "secondary" -> secondary.add(mapObject);
+                    case "tertiary" -> tertiary.add(mapObject);
+                    case "unclassified" -> unclassified.add(mapObject);
+                    case "residential" -> residential.add(mapObject);
+                    default -> defaultRoad.add(mapObject);
                 }
-            } else if (mapObject instanceof Polygon polygon && polygon.hasType()) {
-                buildings.add(polygon);
+            } else if (mapObject instanceof Polygon polygon) {
+                String polygonType = polygon.getType();
+                switch (polygonType) {
+                    case "building" -> buildings.add(mapObject);
+                    default -> area.add(mapObject);
+                }
             }
         }
     }
