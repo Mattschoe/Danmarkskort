@@ -55,8 +55,8 @@ public class Tile implements MapObject{
     public void draw(GraphicsContext graphicsContext, int LevelOfDetail) {
         //Level 1:
         drawMotorway(graphicsContext);
+        drawTrunk(graphicsContext);
         if (LevelOfDetail > 0) {
-            drawTrunk(graphicsContext);
             drawPrimary(graphicsContext);
             if (LevelOfDetail > 1) {
                 drawSecondary(graphicsContext);

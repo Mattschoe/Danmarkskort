@@ -75,7 +75,7 @@ public class View {
         if (controller.getCanvas() != null) initializeCanvas();
 
         //Sets up the Zoom levels
-        currentZoom = 10;
+        currentZoom = 8;
         minZoom = 1;
         maxZoom = 8;
     }
