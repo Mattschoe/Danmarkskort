@@ -126,6 +126,7 @@ public class Polygon implements Serializable, MapObject{
     //region getters
     public List<Node> getNodes() { return nodes; }
     public String getType() { return type; }
+    public boolean hasType() { return !type.isEmpty(); }
     @Override public double[] getBoundingBox() { return boundingBox; }
     //endregion
 }

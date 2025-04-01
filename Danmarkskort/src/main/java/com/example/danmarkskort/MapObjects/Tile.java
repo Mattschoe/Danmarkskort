@@ -36,10 +36,6 @@ public class Tile implements MapObject{
         initializeDrawMethods();
     }
 
-    public void addMapObject(MapObject object) {
-        objectsInTile.add(object);
-    }
-
     @Override
     public void draw(GraphicsContext graphicsContext) {
         //Tegner tilet
@@ -56,21 +52,20 @@ public class Tile implements MapObject{
      * Draws the {@code visibleTiles} given the Level of detail
      * @param LevelOfDetail ranging from 1 to 5, where 1 being the minimum amount and 5 being the maximum amount of details.
      */
-    public void draw(int LevelOfDetail) {
+    public void draw(GraphicsContext graphicsContext, int LevelOfDetail) {
         //Level 1:
-        drawPredefinedRelations();
-        drawMotorway();
+        drawMotorway(graphicsContext);
         if (LevelOfDetail > 1) {
-            drawTrunk();
-            drawPrimary();
+            drawTrunk(graphicsContext);
+            drawPrimary(graphicsContext);
             if (LevelOfDetail > 2) {
-                drawSecondary();
+                drawSecondary(graphicsContext);
                 if (LevelOfDetail > 3) {
-                    drawTertiary();
-                    drawUnclassified();
-                    drawResidential();
+                    drawTertiary(graphicsContext);
+                    drawUnclassified(graphicsContext);
+                    drawResidential(graphicsContext);
                     if (LevelOfDetail > 4) {
-                        drawBuildings();
+                        drawBuildings(graphicsContext);
                     }
                 }
             }
@@ -78,32 +73,87 @@ public class Tile implements MapObject{
     }
 
     //region private draw methods
-    ///All big relations (Predifined in parser, fx: Sjælland, Jylland, osv.)
-    private void drawPredefinedRelations() {}
     ///All big Motorways
-    private void drawMotorway() {}
+    private void drawMotorway(GraphicsContext graphicsContext) {
+        for (MapObject mapObject : motorway) {
+            mapObject.draw(graphicsContext);
+        }
+    }
     ///All important roads that aren't motorways
-    private void drawTrunk() {}
+    private void drawTrunk(GraphicsContext graphicsContext) {
+        for (MapObject mapObject : trunk) {
+            mapObject.draw(graphicsContext);
+        }
+    }
     ///All next important roads (Big town to big town)
-    private void drawPrimary() {}
+    private void drawPrimary(GraphicsContext graphicsContext) {
+        for (MapObject mapObject : primary) {
+            mapObject.draw(graphicsContext);
+        }
+    }
     ///All next most important roads (town to town)
-    private void drawSecondary() {}
+    private void drawSecondary(GraphicsContext graphicsContext) {
+        for (MapObject mapObject : secondary) {
+            mapObject.draw(graphicsContext);
+        }
+    }
     ///All next most important roads
-    private void drawTertiary() {}
+    private void drawTertiary(GraphicsContext graphicsContext) {
+        for (MapObject mapObject : tertiary) {
+            mapObject.draw(graphicsContext);
+        }
+    }
     ///Least most important roads
-    private void drawUnclassified() {}
+    private void drawUnclassified(GraphicsContext graphicsContext) {
+        for (MapObject mapObject : unclassified) {
+            mapObject.draw(graphicsContext);
+        }
+    }
     ///Roads which serve acces to housing
-    private void drawResidential() {}
+    private void drawResidential(GraphicsContext graphicsContext) {
+        for (MapObject mapObject : residential) {
+            mapObject.draw(graphicsContext);
+        }
+    }
     ///Buildings
-    private void drawBuildings() {}
+    private void drawBuildings(GraphicsContext graphicsContext) {
+        for (MapObject mapObject : buildings) {
+            mapObject.draw(graphicsContext);
+        }
+    }
     //endregion
 
 
     /**
-     * Initializes all the draw methods so we later can call them in {@link #draw(int)}
+     * Initializes all the draw methods so we later can call them in {@link #draw(GraphicsContext, int)}
      */
     private void initializeDrawMethods() {
+        for (MapObject mapObject : objectsInTile) {
+            if (mapObject instanceof Road road && road.hasRoadType()) {
+                String roadType = road.getRoadType();
+                if (roadType.equals("motorway")) {
+                    motorway.add(mapObject);
+                } else if (roadType.equals("trunk")) {
+                    trunk.add(mapObject);
+                } else if (roadType.equals("primary")) {
+                    primary.add(mapObject);
+                } else if (roadType.equals("secondary")) {
+                    secondary.add(mapObject);
+                } else if (roadType.equals("tertiary")) {
+                    tertiary.add(mapObject);
+                } else if (roadType.equals("unclassified")) {
+                    unclassified.add(mapObject);
+                } else if (roadType.equals("residential")) {
+                    residential.add(mapObject);
+                }
+            } else if (mapObject instanceof Polygon polygon && polygon.hasType()) {
+                buildings.add(polygon);
+            }
+        }
+    }
 
+    public void addMapObject(MapObject object) {
+        objectsInTile.add(object);
     }
 
     //region getters and setters
