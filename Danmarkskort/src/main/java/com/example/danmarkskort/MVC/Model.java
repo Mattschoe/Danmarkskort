@@ -1,5 +1,6 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.AddressSearch.TrieST;
 import com.example.danmarkskort.Exceptions.ParserSavingException;
 import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.Polygon;
@@ -31,13 +32,15 @@ public class Model {
     private File outputFile; //The output .obj file
     private int numberOfTilesX, numberOfTilesY;
     private final Tilegrid tilegrid;
+    private TrieST<String> trieCity;
+    private TrieST<String> trieStreet;
     //endregion
 
     //region Constructor(s)
     /** Checks what filetype the filepath parameter is.
      *  Calls {@link #parseOBJ()} if it's an OBJ-file, if not, creates a new {@link Parser} class and propagates the responsibility
      */
-    private Model(String filePath, Canvas canvas) {
+    public Model(String filePath, Canvas canvas) {
         assert canvas != null;
 
         file = new File(filePath);
@@ -75,6 +78,8 @@ public class Model {
 
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
         //endregion
+
+        loadAddressNodes();
     }
     //endregion
 
@@ -235,10 +240,31 @@ public class Model {
     private void saveTileGridToOBJ() {
         //TODO MAKE THIS WORK ???
     }
+
+    private void loadAddressNodes() {
+        trieCity = new TrieST<>(true);
+        trieStreet = new TrieST<>(false);
+        int testCounter = 0;
+        for (Node node : parser.getAddressNodes()) {
+            String[] address = node.getAddress();
+
+            testCounter++;
+            System.out.println(testCounter);
+            if (address[0] != null) trieCity.put(address[0],node);
+        }
+
+    }
+
     //endregion
 
     //region Getters and setters
     public Parser   getParser()   { return parser;   }
     public Tilegrid getTilegrid() { return tilegrid; }
+    public TrieST<String> getTrieCity() {
+        return trieCity;
+    }
+    public TrieST<String> getTrieStreet() {
+        return trieStreet;
+    }
     //endregion
 }

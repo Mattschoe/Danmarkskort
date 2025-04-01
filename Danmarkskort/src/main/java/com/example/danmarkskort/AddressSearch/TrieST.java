@@ -11,7 +11,7 @@ public class TrieST<Item> {
     public TrieST(boolean isCity) {
         this.isCity = isCity;
 
-        //Test - skal på sigt indsættes under parsing
+        /*Test - skal på sigt indsættes under parsing
         if (isCity) {
             put("Helsinge", new Node(10, 10));
             put("Helsinger", new Node(20, 30));
@@ -26,6 +26,8 @@ public class TrieST<Item> {
             put("Hjorringvej", new Node(20, 23));
             put("Horsensvej", new Node(20, 24));
         }
+
+         */
     }
 
 

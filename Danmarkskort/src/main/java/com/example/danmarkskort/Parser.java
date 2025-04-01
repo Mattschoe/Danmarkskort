@@ -20,6 +20,7 @@ public class Parser implements Serializable {
     private final File      file; //The file that's loaded in
     private final double[]  bounds; //OSM-filens bounds, dvs. de længst væk koordinater hvor noget tegnes
     private final Set<Road> significantHighways;
+    private final Set<Node> addressNodes;
     //endregion
 
     //region Constructor(s)
@@ -34,6 +35,7 @@ public class Parser implements Serializable {
         id2Polygon = new HashMap<>(489884);
         bounds = new double[4];
         significantHighways = new HashSet<>();
+        addressNodes = new HashSet<>();
 
         String filename = getFile().getName();
         //Switch case with what filetype the file is and call the appropriate method:
@@ -371,7 +373,9 @@ public class Parser implements Serializable {
         if (city == null && houseNumber == null && postcode == 0 && street == null) {
             id2Node.put(id, new Node(lat, lon)); //Instansierer new node (node containing no child-elements)
         } else {
-            id2Node.put(id, new Node(lat, lon, city, houseNumber, postcode, street));
+            Node complexNode = new Node(lat, lon, city, houseNumber, postcode, street);
+            addressNodes.add(complexNode);
+            id2Node.put(id, complexNode);
         }
     }
     //endregion
@@ -384,6 +388,10 @@ public class Parser implements Serializable {
     public Map<Long, Polygon> getPolygons() { return id2Polygon; }
 
     /// @return the set of significant highways, which will be the only roads drawn when the map is zoomed out a certain amount
-    public Set<Road> getSignificantHighways() { return significantHighways; } //
+    public Set<Road> getSignificantHighways() { return significantHighways; }
+
+    public Set<Node> getAddressNodes() {
+        return addressNodes;
+    }//
     //endregion
 }

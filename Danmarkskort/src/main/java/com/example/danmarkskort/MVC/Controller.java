@@ -46,9 +46,6 @@ public class Controller implements Initializable {
     public Controller() {
         canvas = new Canvas(400, 600);
         System.out.println("Controller created!");
-
-        this.trieCity = new TrieST<>(true);
-        this.trieStreet = new TrieST<>(false);
         listView = new ListView<>();
 
         //Det her er cooked -MN
@@ -92,6 +89,9 @@ public class Controller implements Initializable {
         model = Model.getInstance(mapFile.getPath(), canvas);
         view.setTilegrid(model.getTilegrid());
         assert model.getParser() != null;
+        //Test
+        this.trieCity = model.getTrieCity();
+        this.trieStreet = model.getTrieStreet();
     }
 
     /** Method runs right after a Controller is created -- if we're in a scene with a zoomBar,
