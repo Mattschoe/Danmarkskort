@@ -187,7 +187,7 @@ public class Controller implements Initializable {
     /// Auto-suggests roads and cities in a drop-down menu from the search-bar (????)
     private void autoSuggest(KeyEvent event, String input, TrieST<String> trie) {
         if (event.getCharacter().equals("\r")) { // Hvis der trykkes enter
-            if (trie.keysThatMatch(input)!=null) {
+            if (trie.keysThatMatch(input) != null) {
                 System.out.println(trie.get(trie.keysThatMatch(input).getFirst()));
             } else {
                 System.out.println(trie.keysWithPrefix(input).getFirst());

@@ -30,7 +30,7 @@ public class Model {
     private Parser parser;
     private File outputFile; //The output .obj file
     private int numberOfTilesX, numberOfTilesY;
-    private Tilegrid tilegrid;
+    private final Tilegrid tilegrid;
     //endregion
 
     //region Constructor(s)
@@ -102,7 +102,7 @@ public class Model {
         return modelInstance;
     }
 
-    /// Parses a .obj file. This method is called in the Parser constructer if the givin filepath ends with .obj
+    /// Parses a .obj file. This method is called in the Parser constructor if the given filepath ends with .obj
     private void parseOBJ() throws IOException, ClassNotFoundException {
         ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
         parser = (Parser) input.readObject();
@@ -155,14 +155,14 @@ public class Model {
              double[] boundingBox = road.getBoundingBox();
              int startTileX = (int) ((boundingBox[0] - minX) / tileSize);
              int startTileY = (int) ((boundingBox[1] - minY) / tileSize);
-             int endTileX = (int) ((boundingBox[2] - minX) / tileSize);
-             int endTileY = (int) ((boundingBox[3] - minY) / tileSize);
+             int endTileX   = (int) ((boundingBox[2] - minX) / tileSize);
+             int endTileY   = (int) ((boundingBox[3] - minY) / tileSize);
 
              //Clamps the x, y so they are within bounds (This avoids floating point errors with 0 or negative numbers
              startTileX = Math.min(Math.max(startTileX, 0), numberOfTilesX - 1);
              startTileY = Math.min(Math.max(startTileY, 0), numberOfTilesY - 1);
-             endTileX = Math.min(Math.max(endTileX, 0), numberOfTilesX - 1);
-             endTileY = Math.min(Math.max(endTileY, 0), numberOfTilesY - 1);
+             endTileX   = Math.min(Math.max(endTileX,   0), numberOfTilesX - 1);
+             endTileY   = Math.min(Math.max(endTileY,   0), numberOfTilesY - 1);
 
              //Adds all roads to the tiles that overlap the bounding box
              for (int tileX = startTileX; tileX <= endTileX; tileX++) {
@@ -172,20 +172,20 @@ public class Model {
              }
          }
 
-         //TO DO: Adds Polygons
+         //Adds Polygons
          for (Polygon polygon : parser.getPolygons().values()) {
              //Converts start- and endXY to tile sizes
              double[] boundingBox = polygon.getBoundingBox();
              int startTileX = (int) ((boundingBox[0] - minX) / tileSize);
              int startTileY = (int) ((boundingBox[1] - minY) / tileSize);
-             int endTileX = (int) ((boundingBox[2] - minX) / tileSize);
-             int endTileY = (int) ((boundingBox[3] - minY) / tileSize);
+             int endTileX   = (int) ((boundingBox[2] - minX) / tileSize);
+             int endTileY   = (int) ((boundingBox[3] - minY) / tileSize);
 
              //Clamps the x, y so they are within bounds (This avoids floating point errors with 0 or negative numbers
              startTileX = Math.min(Math.max(startTileX, 0), numberOfTilesX - 1);
              startTileY = Math.min(Math.max(startTileY, 0), numberOfTilesY - 1);
-             endTileX = Math.min(Math.max(endTileX, 0), numberOfTilesX - 1);
-             endTileY = Math.min(Math.max(endTileY, 0), numberOfTilesY - 1);
+             endTileX   = Math.min(Math.max(endTileX,   0), numberOfTilesX - 1);
+             endTileY   = Math.min(Math.max(endTileY,   0), numberOfTilesY - 1);
 
              //Adds all roads to the tiles that overlap the bounding box
              for (int tileX = startTileX; tileX <= endTileX; tileX++) {
@@ -238,20 +238,6 @@ public class Model {
     //endregion
 
     //region Getters and setters
-    /** Gives all nodes that contains an address
-     *  @param allNodes all nodes parsed in the parser
-     *  @return all nodes with a street address (f.ex: "Decembervej")
-     */
-    public Set<Node> getAllNodesWithStreetAddresses(Collection<Node> allNodes) {
-        Set<Node> nodesWithStreetAddresses = new HashSet<>();
-        for (Node node : allNodes) {
-            try {
-                assert node.getAddress()[3] != null;
-                nodesWithStreetAddresses.add(node);
-            } catch (NullPointerException _) {} //Doesn't have a street address
-        }
-        return nodesWithStreetAddresses;
-    }
     public Parser   getParser()   { return parser;   }
     public Tilegrid getTilegrid() { return tilegrid; }
     //endregion

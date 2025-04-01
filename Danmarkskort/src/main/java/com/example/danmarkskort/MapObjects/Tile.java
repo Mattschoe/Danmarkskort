@@ -132,26 +132,19 @@ public class Tile implements MapObject{
     }
     //endregion
 
-
     /// Initializes all the draw methods so we later can call them in {@link #draw(GraphicsContext, int)}
     private void initializeDrawMethods() {
         for (MapObject mapObject : objectsInTile) {
             if (mapObject instanceof Road road && road.hasRoadType()) {
                 String roadType = road.getType();
-                if (roadType.equals("motorway")) {
-                    motorway.add(mapObject);
-                } else if (roadType.equals("trunk")) {
-                    trunk.add(mapObject);
-                } else if (roadType.equals("primary")) {
-                    primary.add(mapObject);
-                } else if (roadType.equals("secondary")) {
-                    secondary.add(mapObject);
-                } else if (roadType.equals("tertiary")) {
-                    tertiary.add(mapObject);
-                } else if (roadType.equals("unclassified")) {
-                    unclassified.add(mapObject);
-                } else if (roadType.equals("residential")) {
-                    residential.add(mapObject);
+                switch (roadType) {
+                    case "motorway"     -> motorway.add(mapObject);
+                    case "trunk"        -> trunk.add(mapObject);
+                    case "primary"      -> primary.add(mapObject);
+                    case "secondary"    -> secondary.add(mapObject);
+                    case "tertiary"     -> tertiary.add(mapObject);
+                    case "unclassified" -> unclassified.add(mapObject);
+                    case "residential"  -> residential.add(mapObject);
                 }
             } else if (mapObject instanceof Polygon polygon && polygon.hasType()) {
                 buildings.add(polygon);

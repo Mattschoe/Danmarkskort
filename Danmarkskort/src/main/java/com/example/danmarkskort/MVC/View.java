@@ -169,11 +169,10 @@ public class View {
         drawMap(parser);
     }
 
-    /**
-     * Zooms in and out, zoom level is limited by {@code minZoom} and {@code maxZoom} which can be changed in the constructor
-     * @param dx deltaX
-     * @param dy deltaY
-     * @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
+    /** Zooms in and out, zoom level is limited by {@code minZoom} and {@code maxZoom} which can be changed in the constructor
+     *  @param dx deltaX
+     *  @param dy deltaY
+     *  @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
      */
     public void zoom(double dx, double dy, double factor, boolean ignoreMinMax) {
         if (factor >= 1 && currentZoom > minZoom) currentZoom--; //Zoom ind
