@@ -10,11 +10,12 @@
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
-    <Label text="Choose startup:" textFill="WHITE">
+    <Label text="Vælg opstart:" textFill="WHITE">
       <font>
          <Font name="System Bold" size="12.0" />
       </font>
     </Label>
-    <Button onAction="#uploadInputButton" text="Upload file" textAlignment="CENTER" />
-    <Button onAction="#standardInputButton" text="Run standard" textAlignment="CENTER" />
+    <Button onAction="#uploadInputButton" text="Upload fil" textAlignment="CENTER" />
+    <Button onAction="#standardInputButton" text="Kør standard" textAlignment="CENTER" />
+    <Label fx:id="valgtFil" textFill="WHITE" />
 </VBox>

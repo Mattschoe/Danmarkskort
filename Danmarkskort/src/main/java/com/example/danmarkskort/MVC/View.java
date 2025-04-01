@@ -17,16 +17,18 @@ import java.net.URL;
 import java.util.List;
 
 public class View {
-    //region Fields
-    private Affine trans;
-    private Affine backgroundTrans;
-    private Canvas canvas;
-    private final Controller controller;
-    private GraphicsContext graphicsContext;
-    private Parser parser;
-    private final Scene scene;
-    private final Stage stage;
-    private boolean firstTimeDrawingMap;
+    //region fields
+    Affine trans;
+    Affine background;
+    Canvas canvas;
+    Controller controller;
+    FXMLLoader root;
+    String fxmlLocation; //The standard location for fxml. Needs to be added to every filepath
+    GraphicsContext graphicsContext;
+    Parser parser;
+    Scene scene;
+    Stage stage;
+    boolean firstTimeDrawingMap;
     int currentZoom, minZoom, maxZoom;
     Tilegrid tilegrid;
     List<Tile> visibleTiles;
@@ -38,17 +40,16 @@ public class View {
      * @throws IOException kastes hvis programmet fejler i at loade FXML-filen
      */
     public View(Stage stage, String filename) throws IOException {
-        //The standard location for fxml. Needs to be added to every filepath
-        String fxmlLocation = "/com/example/danmarkskort/" + filename;
+        fxmlLocation = "/com/example/danmarkskort/" + filename;
         firstTimeDrawingMap = true;
 
-        //Saves the Stage
+        //Gemmer Stage'en
         this.stage = stage;
 
         //Skaber en FXMLLoader, klar til at loade den specificerede FXML-fil
         URL url = getClass().getResource(fxmlLocation);
         assert url != null;
-        FXMLLoader root = new FXMLLoader(url);
+        root = new FXMLLoader(url);
 
         //Hvis det er start-scenen, får vinduet en forudbestemt størrelse, ellers sættes den dynamisk
         double width, height;
@@ -70,7 +71,8 @@ public class View {
         stage.setScene(scene);
         stage.show();
 
-        initializeCanvas();
+        //Hvis vi laver en scene med et Canvas initialiseres og tegnes det
+        if (controller.getCanvas() != null) initializeCanvas();
 
         //Sets up the Zoom levels
         currentZoom = 8;
@@ -83,8 +85,8 @@ public class View {
         //Canvas'et og dets GraphicsContext gemmes
         canvas = controller.getCanvas();
         graphicsContext = canvas.getGraphicsContext2D();
-        trans   = new Affine();
-        backgroundTrans = new Affine();
+        trans = new Affine();
+        background = new Affine();
         graphicsContext.setTransform(trans);
 
         //Canvas højde og bredde bindes til vinduets
@@ -106,7 +108,7 @@ public class View {
         this.parser = parser;
 
         //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
-        graphicsContext.setTransform(backgroundTrans);
+        graphicsContext.setTransform(background);
         graphicsContext.setFill(Color.ANTIQUEWHITE);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setTransform(trans);
@@ -137,7 +139,8 @@ public class View {
         }
     }
 
-    /// Method pans on the canvas -- STOLEN FROM NUTAN
+
+    ///STJÅLET FRA NUTAN
     public void pan(double dx, double dy) {
         //Moves the map
         trans.prependTranslation(dx, dy);
@@ -164,6 +167,31 @@ public class View {
         trans.prependScale(factor, factor);
         trans.prependTranslation(dx, dy);
         drawMap(parser);
+    }
+
+    ///Draws all roads. Method is called in {@link #drawMap(Parser)}
+    private void drawAllRoads() {
+        Road road;
+        for (long id : parser.getRoads().keySet()) {
+            road = parser.getRoads().get(id);
+            if (road.getRoadType().equals("route")) continue;
+            road.draw(graphicsContext);
+        }
+    }
+
+    ///Draws all polygons (buildings etc.). Method is called in {@link #drawMap(Parser)}
+    private void drawAllPolygons(boolean drawLines) {
+        Polygon polygon;
+        for (long id : parser.getPolygons().keySet()) {
+            polygon = parser.getPolygons().get(id);
+            polygon.draw(graphicsContext, drawLines);
+        }
+    }
+
+    private void drawAllSignificantHighways() {
+        for (Road road : parser.getSignificantHighways()) {
+            road.draw(graphicsContext);
+        }
     }
 
     /**

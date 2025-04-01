@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Polygon implements Serializable, MapObject{
     @Serial private static final long serialVersionUID = 1444149606229887777L;
-    //region Fields
+    //region fields
     private final List<Node> nodes;
     private double[] xPoints;
     private double[] yPoints;
@@ -19,7 +19,6 @@ public class Polygon implements Serializable, MapObject{
     private double[] boundingBox;
     //endregion
 
-    //region Constructor(s)
     /**
      * A {@link Polygon} is a collection of {@link Node}'s with the same start- and end {@link Node}
      * @param nodes the collection of nodes belonging to the Polygon
@@ -37,11 +36,9 @@ public class Polygon implements Serializable, MapObject{
         createArrays();
         calculateBoundingBox();
     }
-    //endregion
 
-    //region Methods
     ///Skaber to Arrays til stroke- og fillPolygon-metoderne der kaldes ved tegning
-    private void createArrays() {
+    public void createArrays() {
         nodeSize = nodes.size();
 
         xPoints = new double[nodeSize];
@@ -125,7 +122,6 @@ public class Polygon implements Serializable, MapObject{
             if (y > boundingBox[3]) boundingBox[3] = y;
         }
     }
-    //endregion
 
     //region getters
     public List<Node> getNodes() { return nodes; }

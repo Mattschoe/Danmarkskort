@@ -7,8 +7,10 @@ import org.junit.jupiter.api.Test;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.*;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -193,7 +195,7 @@ class ParserTest {
                         numberOfCorrectRoads++;
                     }
 
-                    if (Id2road.get(id).getType().equals("highway")) {
+                    if (Id2road.get(id).getRoadType().equals("highway")) {
                         numberOfCorrectRoads++;
                     }
 
@@ -208,7 +210,7 @@ class ParserTest {
                         numberOfCorrectRoads++;
                     }
 
-                    if (Id2road.get(id).getType().equals("highway")) {
+                    if (Id2road.get(id).getRoadType().equals("highway")) {
                         numberOfCorrectRoads++;
                     }
 
