@@ -89,9 +89,7 @@ public class Controller implements Initializable {
         model = Model.getInstance(mapFile.getPath(), canvas);
         view.setTilegrid(model.getTilegrid());
         assert model.getParser() != null;
-        //Test
-        this.trieCity = model.getTrieCity();
-        this.trieStreet = model.getTrieStreet();
+
     }
 
     /** Method runs right after a Controller is created -- if we're in a scene with a zoomBar,
@@ -165,6 +163,10 @@ public class Controller implements Initializable {
 
     /// Methods runs upon typing in the search-bar
     @FXML protected void searchBarTyped(KeyEvent event) {
+        if (this.trieCity == null) {
+            this.trieCity = model.getTrieCity();
+            this.trieStreet = model.getTrieStreet();
+        }
         listView.getItems().clear();
         String input = searchBar.getText();
         if (searchBar.getText().isEmpty()) {
