@@ -15,7 +15,7 @@ public class Polygon implements Serializable, MapObject{
     private double[] yPoints;
     private int nodeSize; //Øh? Er denne her nødvendig?
     ///The type of polygon, fx: "Building", "Coastline", etc.
-    private String type; //The type of polygon, fx: "Building", "Coastline", etc.
+    private final String type;
     private double[] boundingBox;
     //endregion
 
