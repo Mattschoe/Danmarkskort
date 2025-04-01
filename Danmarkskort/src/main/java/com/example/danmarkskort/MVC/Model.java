@@ -187,6 +187,13 @@ public class Model {
                  }
              }
          }
+
+         //Initializes all tile grids draw methods
+         for (int x = 0; x < numberOfTilesX; x++) {
+             for (int y = 0; y < numberOfTilesY; y++) {
+                 tileGrid[x][y].initializeDrawMethods();
+             }
+         }
          return tileGrid;
     }
 

@@ -34,7 +34,6 @@ public class Tile implements MapObject{
         residential = new HashSet<>();
         buildings = new HashSet<>();
         //endregion
-        initializeDrawMethods();
     }
 
     @Override
@@ -128,7 +127,7 @@ public class Tile implements MapObject{
     /**
      * Initializes all the draw methods so we later can call them in {@link #draw(GraphicsContext, int)}
      */
-    private void initializeDrawMethods() {
+    public void initializeDrawMethods() {
         for (MapObject mapObject : objectsInTile) {
             if (mapObject instanceof Road road && road.hasRoadType()) {
                 String roadType = road.getRoadType();
