@@ -69,6 +69,7 @@ public class Tilegrid {
         int startTileY = (int) ((viewport[1] - tileGridBounds[1]) / tileSize); //Upper left of canvas
         int endTileX = (int) Math.ceil((viewport[2] - tileGridBounds[0]) / tileSize); //Lower right of canvas
         int endTileY = (int) Math.ceil((viewport[3] - tileGridBounds[1]) / tileSize); //Lower right of canvas
+        
 
         //Clamps them so they are within bounds (Or avoids overflow errors if no tiles are within bounds)
         startTileX = Math.max(startTileX, 0);

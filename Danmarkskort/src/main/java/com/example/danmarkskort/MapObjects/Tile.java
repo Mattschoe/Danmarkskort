@@ -56,8 +56,8 @@ public class Tile implements MapObject{
      */
     public void draw(GraphicsContext graphicsContext, int levelOfDetail) {
         //Tegner tilet
-        graphicsContext.setStroke(Color.DARKORANGE);
-        graphicsContext.strokeRect(bounds[0],bounds[1], tileSize, tileSize);
+        //graphicsContext.setStroke(Color.DARKORANGE);
+        //graphicsContext.strokeRect(bounds[0],bounds[1], tileSize, tileSize);
 
         //HUSK: Altid tegn farve/baggrund før du tegner road på hvert level
         drawMotorway(graphicsContext);
