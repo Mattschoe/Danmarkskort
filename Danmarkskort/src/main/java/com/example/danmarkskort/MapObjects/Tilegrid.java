@@ -44,7 +44,6 @@ public class Tilegrid {
     public void drawVisibleTiles(GraphicsContext graphicsContext, double[] viewport, int levelOfDetail) {
         // drawPredefinedRelations(); //OBS det her betyder at vi tegner selvom det ikke kan ses, skal måske ændres senere
         visibleTiles = getTilesInView(viewport);
-        System.out.println(visibleTiles.size());
         for (Tile tile : visibleTiles) {
             tile.draw(graphicsContext);
         }

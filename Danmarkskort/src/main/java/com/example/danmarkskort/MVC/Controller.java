@@ -164,38 +164,43 @@ public class Controller implements Initializable {
     /// Methods runs upon typing in the search-bar
     @FXML protected void searchBarTyped(KeyEvent event) {
         if (this.trieCity == null) {
+            System.out.println("Trie loaded!");
             this.trieCity = model.getTrieCity();
             this.trieStreet = model.getTrieStreet();
+
+            for (String s : trieCity.keys()) {
+                System.out.println(s);
+            }
         }
         listView.getItems().clear();
-        String input = searchBar.getText();
-        if (searchBar.getText().isEmpty()) {
-            listView.setVisible(false);
-        } else {
-            listView.setVisible(true);
-        }
 
+            String input = searchBar.getText();
+        if (input == null) return;
+
+        System.out.println("input: " + input);
+        listView.setVisible(searchBar.getText() != null);
         // HVIS DER STADIG ER MULIGE BYER
-        if (!trieCity.keysWithPrefix(input).isEmpty()) {
-            System.out.println("Dette er byer");
+        if (!trieCity.keysWithPrefix(input).isEmpty()) { //Her skabes problemer
             autoSuggest(event, input, trieCity);
-
         } else { // Skal lede i vejnavne
-            System.out.println("Dette er veje");
             autoSuggest(event, input, trieStreet);
         }
     }
 
     /// Auto-suggests roads and cities in a drop-down menu from the search-bar (????)
     private void autoSuggest(KeyEvent event, String input, TrieST<String> trie) {
-        if (event.getCharacter().equals("\r")) { // Hvis der trykkes enter
-            if (trie.keysThatMatch(input) != null) {
-                System.out.println(trie.get(trie.keysThatMatch(input).getFirst()));
+        if (event.getCharacter().equals("\r") && input != null) { // Hvis der trykkes enter og der er et input
+            System.out.println("enter entered!");
+            if (!trie.keysThatMatch(input).isEmpty()) {
+                System.out.print("Found exact value: ");
+                System.out.println(trie.get(trie.keysThatMatch(input).getFirst())); //Kaster exception!
             } else {
-                System.out.println(trie.keysWithPrefix(input).getFirst());
+                System.out.println("Didnt find exact key");
+                System.out.println("value of closest key: " + trie.get(trie.keysWithPrefix(input).getFirst()));
             }
         } else {
             if (event.getCharacter().equals("\b")) { //hvis der trykkes backspace eller
+                System.out.println("Backspace pressed.");
                 event.consume();
             }
             //Finder de 3 første relevante adresser.

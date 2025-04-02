@@ -10,26 +10,7 @@ public class TrieST<Item> {
 
     public TrieST(boolean isCity) {
         this.isCity = isCity;
-
-        /*Test - skal på sigt indsættes under parsing
-        if (isCity) {
-            put("Helsinge", new Node(10, 10));
-            put("Helsinger", new Node(20, 30));
-            put("Herning", new Node(20, 50));
-            put("Hobro", new Node(20, 70));
-            put("Hjorring", new Node(20, 20));
-            put("Horsens", new Node(20, 20));
-
-        } else {
-            put("Helsingevej", new Node(20, 21));
-            put("Hobrovej", new Node(20, 22));
-            put("Hjorringvej", new Node(20, 23));
-            put("Horsensvej", new Node(20, 24));
-        }
-
-         */
     }
-
 
     /**
      * Takes a string key and returns its corresponding value by calling private method {@link #get(TrieNode, String, int)}
@@ -54,8 +35,9 @@ public class TrieST<Item> {
      */
     private TrieNode get(TrieNode current, String word, int depth) { // Return value associated with key in the subtrie rooted at x.
         if (current == null) return null; //Hvis ordet ikke har en tilhørende value
-        if (depth == word.length())
+        if (depth == word.length()) {
             return current; //Hvis dybden af træet passer med ordlængde har man fundet den korrekte subtrie
+        }
         char c = word.charAt(depth); // Use dth key char to identify subtrie.
         if (c == 'æ') {
             return get(current.getChildren()[26], word, depth + 1);

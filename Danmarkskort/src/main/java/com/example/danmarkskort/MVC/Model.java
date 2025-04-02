@@ -248,8 +248,6 @@ public class Model {
         for (Node node : parser.getAddressNodes()) {
             String[] address = node.getAddress();
 
-            testCounter++;
-            System.out.println(testCounter);
             if (address[0] != null) trieCity.put(address[0],node);
         }
 
