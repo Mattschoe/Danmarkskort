@@ -162,7 +162,12 @@ public class Parser implements Serializable {
                 for (long memberID : members) {
                     if (id2Polygon.containsKey(memberID)) {
                         Polygon member = id2Polygon.get(memberID);
-                        if (member.getType().isEmpty()) member.setType(type);
+                        if (member.getType().isEmpty()) {
+                            member.setType(type);
+                            member.determineColor();
+                            //TODO %% testing ift. at tegne flere relations / relations rigtigt
+                            //System.out.println("Relation "+ memberID +" updated with type: "+ type +"!");
+                        }
                     }
                     else if (id2Road.containsKey(memberID)) {
                         Road member = id2Road.get(memberID);

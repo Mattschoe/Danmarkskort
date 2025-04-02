@@ -113,7 +113,7 @@ public class View {
 
         //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
         graphicsContext.setTransform(bgTrans);
-        graphicsContext.setFill(Color.ANTIQUEWHITE);
+        graphicsContext.setFill(Color.LIGHTBLUE);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
