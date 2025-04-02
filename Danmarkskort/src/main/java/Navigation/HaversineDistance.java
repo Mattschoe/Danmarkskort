@@ -1,6 +1,5 @@
 package Navigation;
 
-
 public class HaversineDistance {
     private double haversineDistance;
     private double lat1;
