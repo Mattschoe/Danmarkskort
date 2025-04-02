@@ -81,7 +81,7 @@ public class Road implements Serializable, MapObject {
         assert graphicsContext != null;
         switch (roadType) {
             case "route":
-                graphicsContext.setStroke(Color.DARKRED);
+                graphicsContext.setStroke(Color.TRANSPARENT);
                 graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant())); break;
             case "coastline":
                 graphicsContext.setStroke(Color.BLACK);
