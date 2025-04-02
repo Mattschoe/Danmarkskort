@@ -29,9 +29,9 @@ public class Parser implements Serializable {
      */
     public Parser(File file) throws NullPointerException, IOException, XMLStreamException, FactoryConfigurationError {
         this.file = file;
-        id2Node = new HashMap<>(7285439);
-        id2Road = new HashMap<>(489884);
-        id2Polygon = new HashMap<>(489884);
+        id2Node = new HashMap<>(49_721_049);
+        id2Road = new HashMap<>(3_146_438);
+        id2Polygon = new HashMap<>(3_146_438);
         bounds = new double[4];
         significantHighways = new HashSet<>();
 

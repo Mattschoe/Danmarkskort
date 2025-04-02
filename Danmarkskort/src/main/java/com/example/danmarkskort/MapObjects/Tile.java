@@ -12,7 +12,7 @@ public class Tile implements MapObject{
     List<MapObject> objectsInTile;
     double[] bounds;
     int tileSize;
-    Set<MapObject> predefinedRelations, motorway, trunk, primary, secondary, tertiary, unclassified, residential, defaultRoad, buildings, area;
+    Set<MapObject> predefinedRelations, motorway, trunk, primary, secondary, tertiary, unclassified, residential, defaultRoad, buildings, area, coastline;
 
     //region Constructor(s)
     public Tile(double minX, double minY, double maxX, double maxY, int tileSize) {
@@ -36,6 +36,7 @@ public class Tile implements MapObject{
         defaultRoad = new HashSet<>();
         buildings = new HashSet<>();
         area = new HashSet<>();
+        coastline = new HashSet<>();
         //endregion
     }
     //endregion
@@ -69,6 +70,7 @@ public class Tile implements MapObject{
         //HUSK: Altid tegn farve/baggrund før du tegner road på hvert level
         drawMotorway(graphicsContext);
         drawTrunk(graphicsContext);
+        drawCoastline(graphicsContext);
         if (levelOfDetail > 0) {
             drawPrimary(graphicsContext);
             if (levelOfDetail > 1) {
@@ -152,6 +154,13 @@ public class Tile implements MapObject{
             mapObject.draw(graphicsContext);
         }
     }
+
+    ///Area colors
+    private void drawCoastline(GraphicsContext graphicsContext) {
+        for (MapObject mapObject : coastline) {
+            mapObject.draw(graphicsContext);
+        }
+    }
     //endregion
 
 
@@ -170,6 +179,7 @@ public class Tile implements MapObject{
                     case "tertiary" -> tertiary.add(mapObject);
                     case "unclassified" -> unclassified.add(mapObject);
                     case "residential" -> residential.add(mapObject);
+                    case "coastline" -> coastline.add(mapObject);
                     default -> defaultRoad.add(mapObject);
                 }
             } else if (mapObject instanceof Polygon polygon) {
