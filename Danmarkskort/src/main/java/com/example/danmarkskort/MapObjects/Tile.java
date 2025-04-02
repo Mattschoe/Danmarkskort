@@ -161,7 +161,7 @@ public class Tile implements MapObject{
     public void initializeDrawMethods() {
         for (MapObject mapObject : objectsInTile) {
             if (mapObject instanceof Road road) {
-                String roadType = road.getRoadType();
+                String roadType = road.getType();
                 switch (roadType) {
                     case "motorway" -> motorway.add(mapObject);
                     case "trunk" -> trunk.add(mapObject);
