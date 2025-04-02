@@ -1,6 +1,5 @@
 package com.example.danmarkskort.MVC;
 
-import com.example.danmarkskort.MapObjects.Tile;
 import javafx.animation.AnimationTimer;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import javafx.beans.value.ChangeListener;
@@ -8,21 +7,18 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -35,7 +31,7 @@ public class Controller implements Initializable {
     private ScrollEvent scrollEvent;
     private TrieST<String> trieCity; //part of test
     private TrieST<String> trieStreet;
-    private MouseEvent event;
+    private MouseEvent mouseEvent;
 
     @FXML private Canvas canvas;
     @FXML private ListView<String> listView;
@@ -61,19 +57,20 @@ public class Controller implements Initializable {
 
 
         //region AnimationTimer
-        //TO DO: Fix, this doesnt work og tror det er fordi den lægger i construktøren men idk -MN
+        //TODO: Fix, this doesnt work og tror det er fordi den lægger i konstruktøren men idk -MN
         //OBS JEG MISTÆNKER DET HER FOR IKKE AT VIRKE -MN
         //UPDATE: Jeg tror endnu mindre på det nu -MN
+        //UPDATE: Jeg tror en lille smule på det, men jeg har ikke læst op på AnimationTimer-klassen endnu -OFS
         AnimationTimer fpsTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 if (panRequest) {
-                    double dx = event.getX() - lastX;
-                    double dy = event.getY() - lastY;
+                    double dx = mouseEvent.getX() - lastX;
+                    double dy = mouseEvent.getY() - lastY;
                     view.pan(dx, dy);
 
-                    lastX = event.getX();
-                    lastY = event.getY();
+                    lastX = mouseEvent.getX();
+                    lastY = mouseEvent.getY();
                     panRequest = false;
                 } else if (zoomRequest) {
                     double factor = scrollEvent.getDeltaY();
@@ -210,8 +207,8 @@ public class Controller implements Initializable {
     /// Method runs upon zooming/scrolling on the Canvas
     @FXML protected void onCanvasScroll(ScrollEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked
-        double factor = e.getDeltaY();
-        view.zoom(e.getX(), e.getY(), Math.pow(1.01, factor), false);
+        scrollEvent = e;
+        zoomRequest = true;
     }
 
     /** Metode køres når man slipper sit klik på Canvas'et */
@@ -227,8 +224,8 @@ public class Controller implements Initializable {
     }
 
     /// Method runs upon dragging on the canvas
-    @FXML protected void onCanvasDragged(MouseEvent event) {
-        this.event = event;
+    @FXML protected void onCanvasDragged(MouseEvent e) {
+        mouseEvent = e;
         panRequest = true;
     }
     //endregion

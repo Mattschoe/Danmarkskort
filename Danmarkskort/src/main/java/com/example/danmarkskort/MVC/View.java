@@ -1,7 +1,5 @@
 package com.example.danmarkskort.MVC;
 
-import com.example.danmarkskort.MapObjects.Polygon;
-import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.MapObjects.Tilegrid;
 import com.example.danmarkskort.Parser;
@@ -153,7 +151,7 @@ public class View {
      *  @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
      */
     public void zoom(double dx, double dy, double factor, boolean ignoreMinMax) {
-        if (factor >= 1 && currentZoom > minZoom) currentZoom--; //Zoom ind
+        /*if (factor >= 1 && currentZoom > minZoom) currentZoom--; //Zoom ind
         else if (factor <= 1 && currentZoom < maxZoom) currentZoom++; //Zoom out
         else if (ignoreMinMax) {
             //Needs to be changed
@@ -161,7 +159,7 @@ public class View {
             //If we are not allowed to zoom
             System.out.println("Nuhu");
             return;
-        }
+        }*/
 
         //Zooms
         trans.prependTranslation(-dx, -dy);
@@ -170,16 +168,12 @@ public class View {
         drawMap(parser);
     }
 
-    /**
-     * Changes the current zoom level to a range from 0 to 4 (needed for the LOD). 0 Being minimum amount of details, 4 being maximum
-     */
+    /// Changes the current zoom level to a range from 0 to 4 (needed for the LOD). 0 is minimum amount of details, 4 is maximum
     private int getLOD() {
-        int zoomPercentage = (currentZoom - minZoom) * 100 / (maxZoom - minZoom);
-        System.out.println(zoomPercentage);
-        if (zoomPercentage <= 35) return 4;
-        if (zoomPercentage <= 70) return 3;
-        if (zoomPercentage <= 80) return 2;
-        if (zoomPercentage <= 90) return 1;
+        if (trans.getMxx() > 65) return 4;
+        if (trans.getMxx() > 40) return 3;
+        if (trans.getMxx() > 8)  return 2;
+        if (trans.getMxx() > 4)  return 1;
         else return 0;
     }
     //endregion
