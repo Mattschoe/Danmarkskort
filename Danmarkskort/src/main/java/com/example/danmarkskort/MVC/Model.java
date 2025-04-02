@@ -1,27 +1,41 @@
 package com.example.danmarkskort.MVC;
 
 import com.example.danmarkskort.Exceptions.ParserSavingException;
-import com.example.danmarkskort.MapObjects.*;
+import com.example.danmarkskort.MapObjects.Node;
+import com.example.danmarkskort.MapObjects.Polygon;
+import com.example.danmarkskort.MapObjects.Road;
+import com.example.danmarkskort.MapObjects.Tile;
+import com.example.danmarkskort.MapObjects.Tilegrid;
 import com.example.danmarkskort.Parser;
 import javafx.scene.canvas.Canvas;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 ///A Model is a Singleton class that stores the map in a tile-grid. It also stores the parser which parses the .osm data. Call {@link #getInstance()} to get the Model
 public class Model {
     //region Fields
     private static Model modelInstance;
-    private File file;
+    private final File file;
     private Parser parser;
     private File outputFile; //The output .obj file
-    int numberOfTilesX, numberOfTilesY;
-    Tilegrid tilegrid;
+    private int numberOfTilesX, numberOfTilesY;
+    private final Tilegrid tilegrid;
     //endregion
 
-
-    /**
-     * Checks what filetype the filepath parameter is. Calls {@link #parseOBJ()} if it's a .obj file, if not, it creates a new {@link Parser} class and propagates the responsibility
+    //region Constructor(s)
+    /** Checks what filetype the filepath parameter is.
+     *  Calls {@link #parseOBJ()} if it's an OBJ-file, if not, creates a new {@link Parser} class and propagates the responsibility
      */
     private Model(String filePath, Canvas canvas) {
         assert canvas != null;
@@ -43,7 +57,7 @@ public class Model {
             //If anything else it creates a new parser and tries saves it as .obj
             try {
                 parser = new Parser(file);
-                // saveParserToOBJ(); I STYKKER
+                //saveParserToOBJ(); I STYKKER :(
             } catch (ParserSavingException e) {
                 System.out.println(e.getMessage());
             } catch (Exception e) {
@@ -62,12 +76,13 @@ public class Model {
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
         //endregion
     }
+    //endregion
 
-    /**
-     * Method used to initialize the singleton Model. Method is only meant to be called once, for getting the instance, call {@link #getInstance()}
-     * @param filePath the path where the file that needs parsing is loaded (ex.: "/data/small.osm")
-     * @param canvas the Canvas which the scene is drawn upon
-     * @return Model (Singleton)
+    //region Methods
+    /** Method used to initialize the singleton Model. Method is only meant to be called once, for getting the instance, call {@link #getInstance()}
+     *  @param filePath the path where the file that needs parsing is loaded (ex.: "/data/small.osm")
+     *  @param canvas the Canvas which the scene is drawn upon
+     *  @return Model (Singleton)
      */
     public static Model getInstance(String filePath, Canvas canvas) {
         if (modelInstance == null) {
@@ -76,10 +91,9 @@ public class Model {
         return modelInstance;
     }
 
-    /**
-     * Method used to get the singleton Model. The method {@link #getInstance(String, Canvas)} HAS to be called first to initialize the singleton
-     * @return Model (Singleton)
-     * @throws IllegalStateException if the singleton is not initialized
+    /** Method used to get the singleton Model. The method {@link #getInstance(String, Canvas)} HAS to be called first to initialize the singleton
+     *  @return Model (Singleton)
+     *  @throws IllegalStateException if the singleton is not initialized
      */
     public static Model getInstance() {
         if (modelInstance == null) {
@@ -88,18 +102,14 @@ public class Model {
         return modelInstance;
     }
 
-    /**
-     * Parses a .obj file. This method is called in the Parser constructer if the givin filepath ends with .obj
-     */
+    /// Parses a .obj file. This method is called in the Parser constructor if the given filepath ends with .obj
     private void parseOBJ() throws IOException, ClassNotFoundException {
         ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
         parser = (Parser) input.readObject();
         input.close();
     }
 
-    /**
-     * Saves the parser to a .obj file so it can be called later. Method is called in {@link #Model} if the file isn't a .obj
-     */
+    /// Saves the parser to a .obj file so it can be called later. Method is called in {@link #Model} if the file isn't a .obj
     private void saveParserToOBJ() {
         outputFile = new File(file+".obj");
         try {
@@ -109,12 +119,9 @@ public class Model {
         } catch (IOException e) {
             throw new ParserSavingException("Error saving parser as .obj! Error Message: " + e.getMessage());
         }
-
     }
 
-    /**
-     * Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile
-     */
+    /// Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile
     private Tile[][] initializeTileGrid(double minX, double minY, double maxX, double maxY, int tileSize) {
         //Calculates number of tiles along each axis
         numberOfTilesX = (int) Math.ceil((maxX - minX) / tileSize);
@@ -165,7 +172,7 @@ public class Model {
              }
          }
 
-         //TO DO: Adds Polygons
+         //Adds Polygons
          for (Polygon polygon : parser.getPolygons().values()) {
              //Converts start- and endXY to tile sizes
              double[] boundingBox = polygon.getBoundingBox();
@@ -197,9 +204,7 @@ public class Model {
          return tileGrid;
     }
 
-    /**
-     * @return the minimum x and y coordinate and the maximum. Used for splitting that box into tiles in {@link #initializeTileGrid(double, double, double, double, int)}
-     */
+    /// @return the minimum x and y coordinate and the maximum. Used for splitting that box into tiles in {@link #initializeTileGrid(double, double, double, double, int)}
     private double[] getMinMaxCoords() {
         double[] minMaxCoords = new double[4];
         double minX = Double.POSITIVE_INFINITY;
@@ -233,32 +238,14 @@ public class Model {
         return minMaxCoords;
     }
 
-    /**
-     * Saves the Tile gid to a OBJ file so we cant fast load it later
-     */
+    /// Saves the Tile gid to a OBJ file so we cant fast load it later
     private void saveTileGridToOBJ() {
+        //TODO MAKE THIS WORK ???
+    }
+    //endregion
 
-    }
-
-    //region getters and setters
-    /**
-     * Gives all nodes that contains an address
-     * @param allNodes all nodes parsed in the parser
-     * @return all nodes with a street address (f.ex: "Decembervej")
-     */
-    public Set<Node> getAllNodesWithStreetAddresses(Collection<Node> allNodes) {
-        Set<Node> nodesWithStreetAddresses = new HashSet<>();
-        for (Node node : allNodes) {
-            try {
-                assert node.getAddress()[3] != null;
-                nodesWithStreetAddresses.add(node);
-            } catch (NullPointerException _) {} //Doesn't have a street address
-        }
-        return nodesWithStreetAddresses;
-    }
-    public Parser getParser() {
-        return parser;
-    }
+    //region Getters and setters
+    public Parser   getParser()   { return parser;   }
     public Tilegrid getTilegrid() { return tilegrid; }
     //endregion
 }

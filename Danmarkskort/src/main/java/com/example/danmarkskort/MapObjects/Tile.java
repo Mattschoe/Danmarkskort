@@ -14,6 +14,7 @@ public class Tile implements MapObject{
     int tileSize;
     Set<MapObject> predefinedRelations, motorway, trunk, primary, secondary, tertiary, unclassified, residential, defaultRoad, buildings, area;
 
+    //region Constructor(s)
     public Tile(double minX, double minY, double maxX, double maxY, int tileSize) {
         objectsInTile = new ArrayList<>();
         this.tileSize = tileSize;
@@ -23,7 +24,7 @@ public class Tile implements MapObject{
         bounds[2] = maxX;
         bounds[3] = maxY;
 
-        //region Initialization of Mapobject sets
+        //region Initialization of MapObject sets
         predefinedRelations = new HashSet<>();
         motorway = new HashSet<>();
         trunk = new HashSet<>();
@@ -36,6 +37,12 @@ public class Tile implements MapObject{
         buildings = new HashSet<>();
         area = new HashSet<>();
         //endregion
+    }
+    //endregion
+
+    //region (Public) Methods
+    public void addMapObject(MapObject object) {
+        objectsInTile.add(object);
     }
 
     @Override
@@ -81,7 +88,7 @@ public class Tile implements MapObject{
         }
     }
 
-    //region private draw methods
+    //region Private draw-methods
     ///All big Motorways
     private void drawMotorway(GraphicsContext graphicsContext) {
         for (MapObject mapObject : motorway) {
@@ -174,15 +181,11 @@ public class Tile implements MapObject{
             }
         }
     }
+    //endregion
 
-    public void addMapObject(MapObject object) {
-        objectsInTile.add(object);
-    }
+    //region Getters and setters
+    public List<MapObject> getObjectsInTile() { return objectsInTile; }
 
-    //region getters and setters
-    public List<MapObject> getObjectsInTile() {
-        return objectsInTile;
-    }
     @Override
     public double[] getBoundingBox() { return bounds; }
     //endregion
