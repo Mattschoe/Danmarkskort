@@ -68,7 +68,7 @@ public class Controller implements Initializable {
 
         AnimationTimer fpsTimer = new AnimationTimer() {
             @Override public void handle(long now) {
-                if (fpsCount != null) displayFPS(now);
+                //if (fpsCount != null) displayFPS(now);
 
                 if (panRequest) {
                     double dx = mouseEvent.getX() - lastX;
