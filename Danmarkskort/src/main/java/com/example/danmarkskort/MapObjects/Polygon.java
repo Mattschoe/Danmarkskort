@@ -28,7 +28,6 @@ public class Polygon implements Serializable, MapObject{
         assert nodes.size() != 1;
         this.nodes = nodes;
         this.type = type;
-        if (type.isEmpty()) color = Color.BLUE;
 
         createArrays();
         determineColor();
