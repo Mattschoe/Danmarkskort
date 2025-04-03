@@ -124,8 +124,10 @@ public class Model {
     /// Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile
     private Tile[][] initializeTileGrid(double minX, double minY, double maxX, double maxY, int tileSize) {
         //Calculates number of tiles along each axis
+        System.out.println(maxX + " " + maxY + " | " + minX + " " + minY);
         numberOfTilesX = (int) Math.ceil((maxX - minX) / tileSize);
         numberOfTilesY = (int) Math.ceil((maxY - minY) / tileSize);
+        System.out.println(numberOfTilesX + " " + numberOfTilesY);
 
         //Initializes the Tile objects inside the grid variable
          Tile[][] tileGrid = new Tile[numberOfTilesX][numberOfTilesY];
@@ -149,7 +151,7 @@ public class Model {
              tileGrid[tileX][tileY].addMapObject(node);
          }
 
-         //Adds Roads
+         //region Adds Roads
          for (Road road : parser.getRoads().valueCollection()) {
              //Converts start- and endXY to tile sizes
              double[] boundingBox = road.getBoundingBox();
@@ -171,8 +173,9 @@ public class Model {
                  }
              }
          }
+         //endregion
 
-         //Adds Polygons
+         //region Adds Polygons
          for (Polygon polygon : parser.getPolygons().valueCollection()) {
              //Converts start- and endXY to tile sizes
              double[] boundingBox = polygon.getBoundingBox();
@@ -194,6 +197,7 @@ public class Model {
                  }
              }
          }
+         //endregion
 
          //Initializes all tile grids draw methods
          for (int x = 0; x < numberOfTilesX; x++) {

@@ -120,6 +120,7 @@ public class Parser implements Serializable {
                 }
             }
         }
+        System.out.println(maxLat + " " + maxLon);
     }
 
 
@@ -135,11 +136,15 @@ public class Parser implements Serializable {
      * Parses a {@link Node} from XMLStreamReader.next() and then adds it to id2Node
      * @throws XMLStreamException if there is an error with the {@code XMLStreamReader}
      */
+    static double maxLat = 0;
+    static double maxLon = 0;
     private void parseNode(XMLStreamReader input) throws XMLStreamException {
         //Saves the guaranteed values
         long id = Long.parseLong(input.getAttributeValue(null, "id"));
         double lat = Double.parseDouble(input.getAttributeValue(null, "lat"));
         double lon = Double.parseDouble(input.getAttributeValue(null, "lon"));
+        if (lat > maxLat) maxLat = lat;
+        if (lon > maxLon) maxLon = lon;
 
         int nextInput = input.next();
         //If simple node, saves it and returns

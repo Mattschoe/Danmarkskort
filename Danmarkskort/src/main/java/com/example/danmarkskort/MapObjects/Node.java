@@ -2,7 +2,9 @@ package com.example.danmarkskort.MapObjects;
 
 import com.example.danmarkskort.Exceptions.InvalidAddressException;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
+import java.awt.*;
 import java.io.Serial;
 import java.io.Serializable;
 
@@ -61,7 +63,8 @@ public class Node implements Serializable, MapObject {
     }
 
     public void draw(GraphicsContext graphicsContext) {
-        //graphicsContext.strokeLine(x, y, x, y);
+        graphicsContext.setStroke(Color.RED);
+        graphicsContext.strokeLine(x, y, x, y);
     }
 
     /** Parses address, checks its correct and saves it in a 4 size array
