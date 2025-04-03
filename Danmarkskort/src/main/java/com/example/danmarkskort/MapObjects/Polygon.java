@@ -30,7 +30,8 @@ public class Polygon implements Serializable, MapObject{
         this.type = type;
 
         createArrays();
-        determineColor();
+        if (type.isEmpty()) color = Color.RED;
+        else determineColor();
         calculateBoundingBox();
     }
     //endregion
