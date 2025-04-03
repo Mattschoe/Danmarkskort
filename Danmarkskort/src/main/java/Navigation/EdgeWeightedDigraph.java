@@ -1,5 +1,8 @@
 package Navigation;
 
+import com.example.danmarkskort.MapObjects.Line;
+import com.example.danmarkskort.MapObjects.Node;
+
 import java.util.HashSet;
 
 public class EdgeWeightedDigraph {
@@ -20,7 +23,7 @@ public class EdgeWeightedDigraph {
             adj[v] = new HashSet<>();
     }
 
-    public void addEdge(DirectedEdge e) {
+    /*public void addEdge(DirectedEdge e) {
         int v = e.from();
         int w = e.to();
         validateVertex(v);
@@ -29,10 +32,21 @@ public class EdgeWeightedDigraph {
             indegree[w]++;
             E++;
         }
+    }*/
+
+    public void addLineAsEdge(Line line) {
+        line.calcHaversineDistance();  // Compute Haversine distance
+        line.assignWeight();  // Use length as weight
+
+        Node from = line.getStart();  // Assuming Node has an ID
+        Node to = line.getEnd();
+
+        DirectedEdge edge = new DirectedEdge(from, to, line.getWeight());
+        //addEdge(edge);
     }
 
     public Iterable<DirectedEdge> adj(int v) {
-        validateVertex(v);
+       // validateVertex(v);
         return adj[v];
     }
 
@@ -44,10 +58,10 @@ public class EdgeWeightedDigraph {
         return list;
     }
 
-    private void validateVertex(int v) {
+  /*  private void validateVertex(int v) {
         if (v < 0 || v >= V)
             throw new IllegalArgumentException("vertex " + v + " is not between 0 and " + (V-1));
-    }
+    }*/
 
 
     public int getV(){
