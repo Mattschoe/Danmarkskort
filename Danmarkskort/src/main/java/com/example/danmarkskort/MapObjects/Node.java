@@ -22,7 +22,15 @@ public class Node implements Serializable, MapObject {
         calculateXY(latitude, longitude);
     }
 
-    /// A Node that contains an address
+    /**
+     * A Node that contains an address
+     * @param latitude
+     * @param longitude
+     * @param city
+     * @param houseNumber
+     * @param postcode
+     * @param street
+     */
     public Node(double latitude, double longitude, String city, String houseNumber, int postcode, String street) {
         calculateXY(latitude, longitude);
         address = new String[4];

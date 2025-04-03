@@ -1,7 +1,5 @@
 package com.example.danmarkskort.MVC;
 
-import com.example.danmarkskort.MapObjects.Polygon;
-import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.MapObjects.Tilegrid;
 import com.example.danmarkskort.Parser;
@@ -79,9 +77,9 @@ public class View {
         initializeCanvas();
 
         //Sets up the Zoom levels
-        currentZoom = 6;
         minZoom = 1;
-        maxZoom = 7;
+        maxZoom = 15;
+        currentZoom = maxZoom;
     }
     //endregion
 
@@ -96,11 +94,11 @@ public class View {
         graphicsContext.setTransform(trans);
 
         //Canvas højde og bredde bindes til vinduets
-        canvas.widthProperty() .bind(scene.widthProperty());
+        canvas.widthProperty().bind(scene.widthProperty());
         canvas.heightProperty().bind(scene.heightProperty());
 
         //Listeners tilføjes, der redrawer Canvas'et når vinduet skifter størrelse
-        scene.widthProperty() .addListener(_ -> drawMap(parser));
+        scene.widthProperty().addListener(_ -> drawMap(parser));
         scene.heightProperty().addListener(_ -> drawMap(parser));
     }
 
@@ -115,7 +113,7 @@ public class View {
 
         //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
         graphicsContext.setTransform(bgTrans);
-        graphicsContext.setFill(Color.ANTIQUEWHITE);
+        graphicsContext.setFill(Color.LIGHTBLUE);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
@@ -125,40 +123,18 @@ public class View {
         //Tegner kun tiles inde for viewport
         if (tilegrid != null) {
             try {
-                tilegrid.drawVisibleTiles(graphicsContext, getViewport(), 5);
+                tilegrid.drawVisibleTiles(graphicsContext, getViewport(), getLOD());
+                //tilegrid.drawVisibleTiles(graphicsContext, getViewport(), 4);
             } catch (NonInvertibleTransformException e) {
                 System.out.println("Error getting viewport! Error: " + e.getMessage());
             }
         }
         //endregion
 
-        /* int zoomPercentage = (int) (((double) currentZoom/maxZoom) * 100);
-        int fullDetails = 40; //% when all details should be drawn
-        int mediumDetails = 70; //% when a balanced amount of details should be drawn
-        // System.out.println(zoomPercentage);
-        if (zoomPercentage < fullDetails) { //Draws with all details
-            System.out.println("All details");
-            drawAllRoads();
-            drawAllPolygons(true);
-        } else if (zoomPercentage < mediumDetails) { //Draws with some details
-            System.out.println("medium details");
-            drawAllRoads();
-            drawAllPolygons(true);
-        } else { //Draws the map with the least amount of details
-            System.out.println("minimum details");
-            drawAllSignificantHighways();
-            drawAllPolygons(false);
-        } */
 
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
             firstTimeDrawingMap = false;
-
-            //TODO: SKAL OPTIMERES VI DRAWER MAPPET LIKE 5 GANGE FØRSTE GANG
-            //Moves the view over to the map
-            double startZoom = (0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
-            //pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
-            //zoom(0, 0, startZoom, true);
         }
     }
 
@@ -175,7 +151,7 @@ public class View {
      *  @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
      */
     public void zoom(double dx, double dy, double factor, boolean ignoreMinMax) {
-        if (factor >= 1 && currentZoom > minZoom) currentZoom--; //Zoom ind
+        /*if (factor >= 1 && currentZoom > minZoom) currentZoom--; //Zoom ind
         else if (factor <= 1 && currentZoom < maxZoom) currentZoom++; //Zoom out
         else if (ignoreMinMax) {
             //Needs to be changed
@@ -183,7 +159,7 @@ public class View {
             //If we are not allowed to zoom
             System.out.println("Nuhu");
             return;
-        }
+        }*/
 
         //Zooms
         trans.prependTranslation(-dx, -dy);
@@ -192,37 +168,19 @@ public class View {
         drawMap(parser);
     }
 
-    /// Draws all roads. Method is called in {@link #drawMap(Parser)}
-    private void drawAllRoads() {
-        Road road;
-        for (long id : parser.getRoads().keySet()) {
-            road = parser.getRoads().get(id);
-            if (road.getType().equals("route")) continue;
-            road.draw(graphicsContext);
-        }
-    }
-
-    /// Draws all polygons (buildings etc.). Method is called in {@link #drawMap(Parser)}
-    private void drawAllPolygons(boolean drawLines) {
-        Polygon polygon;
-        for (long id : parser.getPolygons().keySet()) {
-            polygon = parser.getPolygons().get(id);
-            polygon.draw(graphicsContext, drawLines);
-        }
-    }
-
-    private void drawAllSignificantHighways() {
-        for (Road road : parser.getSignificantHighways()) {
-            road.draw(graphicsContext);
-        }
+    /// Changes the current zoom level to a range from 0 to 4 (needed for the LOD). 0 is minimum amount of details, 4 is maximum
+    private int getLOD() {
+        if (trans.getMxx() > 65) return 4;
+        if (trans.getMxx() > 40) return 3;
+        if (trans.getMxx() > 8)  return 2;
+        if (trans.getMxx() > 4)  return 1;
+        else return 0;
     }
     //endregion
 
     //region Getters and setters
-    public Stage  getStage()                     { return stage;             }
-    public Affine getTrans()                     { return trans;             }
-    public void   setTilegrid(Tilegrid tilegrid) { this.tilegrid = tilegrid; }
-
+    public Stage getStage() { return stage; }
+    public Affine getTrans() { return trans; }
     public void setVisibleTiles(List<Tile> visibleTiles) {
         this.visibleTiles = visibleTiles;
     }
@@ -231,5 +189,6 @@ public class View {
         Point2D maxXY = trans.inverseTransform(canvas.getWidth(), canvas.getHeight());
         return new double[]{minXY.getX(), minXY.getY(), maxXY.getX(), maxXY.getY()};
     }
+    public void setTilegrid(Tilegrid tilegrid) { this.tilegrid = tilegrid; }
     //endregion
 }

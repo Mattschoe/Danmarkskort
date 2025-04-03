@@ -39,13 +39,13 @@ public class Tilegrid {
 
     /**
      * Draws the {@code visibleTiles} given the Level of detail
-     * @param levelOfDetail ranging from 1 to 5, where 1 being the minimum amount and 5 being the maximum amount of details.
+     * @param levelOfDetail ranging from 0 to 4, where 0 being the minimum amount and 4 being the maximum amount of details.
      */
     public void drawVisibleTiles(GraphicsContext graphicsContext, double[] viewport, int levelOfDetail) {
         // drawPredefinedRelations(); //OBS det her betyder at vi tegner selvom det ikke kan ses, skal måske ændres senere
         visibleTiles = getTilesInView(viewport);
         for (Tile tile : visibleTiles) {
-            tile.draw(graphicsContext);
+            tile.draw(graphicsContext, levelOfDetail);
         }
     }
 
@@ -69,6 +69,7 @@ public class Tilegrid {
         int startTileY = (int) ((viewport[1] - tileGridBounds[1]) / tileSize); //Upper left of canvas
         int endTileX = (int) Math.ceil((viewport[2] - tileGridBounds[0]) / tileSize); //Lower right of canvas
         int endTileY = (int) Math.ceil((viewport[3] - tileGridBounds[1]) / tileSize); //Lower right of canvas
+        
 
         //Clamps them so they are within bounds (Or avoids overflow errors if no tiles are within bounds)
         startTileX = Math.max(startTileX, 0);

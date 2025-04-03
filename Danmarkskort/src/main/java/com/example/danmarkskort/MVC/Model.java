@@ -70,9 +70,9 @@ public class Model {
         assert parser != null;
         //endregion
 
-        //region TileGrid
-        //Converts into TileGrid
-        int tileSize = 5;
+        //region Tilegrid
+        //Converts into tilegrid
+        int tileSize = 10;
         double[] tileGridBounds = getMinMaxCoords();
         Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 
@@ -160,14 +160,14 @@ public class Model {
              double[] boundingBox = road.getBoundingBox();
              int startTileX = (int) ((boundingBox[0] - minX) / tileSize);
              int startTileY = (int) ((boundingBox[1] - minY) / tileSize);
-             int endTileX   = (int) ((boundingBox[2] - minX) / tileSize);
-             int endTileY   = (int) ((boundingBox[3] - minY) / tileSize);
+             int endTileX = (int) ((boundingBox[2] - minX) / tileSize);
+             int endTileY = (int) ((boundingBox[3] - minY) / tileSize);
 
              //Clamps the x, y so they are within bounds (This avoids floating point errors with 0 or negative numbers
              startTileX = Math.min(Math.max(startTileX, 0), numberOfTilesX - 1);
              startTileY = Math.min(Math.max(startTileY, 0), numberOfTilesY - 1);
-             endTileX   = Math.min(Math.max(endTileX,   0), numberOfTilesX - 1);
-             endTileY   = Math.min(Math.max(endTileY,   0), numberOfTilesY - 1);
+             endTileX = Math.min(Math.max(endTileX, 0), numberOfTilesX - 1);
+             endTileY = Math.min(Math.max(endTileY, 0), numberOfTilesY - 1);
 
              //Adds all roads to the tiles that overlap the bounding box
              for (int tileX = startTileX; tileX <= endTileX; tileX++) {
@@ -183,20 +183,27 @@ public class Model {
              double[] boundingBox = polygon.getBoundingBox();
              int startTileX = (int) ((boundingBox[0] - minX) / tileSize);
              int startTileY = (int) ((boundingBox[1] - minY) / tileSize);
-             int endTileX   = (int) ((boundingBox[2] - minX) / tileSize);
-             int endTileY   = (int) ((boundingBox[3] - minY) / tileSize);
+             int endTileX = (int) ((boundingBox[2] - minX) / tileSize);
+             int endTileY = (int) ((boundingBox[3] - minY) / tileSize);
 
              //Clamps the x, y so they are within bounds (This avoids floating point errors with 0 or negative numbers
              startTileX = Math.min(Math.max(startTileX, 0), numberOfTilesX - 1);
              startTileY = Math.min(Math.max(startTileY, 0), numberOfTilesY - 1);
-             endTileX   = Math.min(Math.max(endTileX,   0), numberOfTilesX - 1);
-             endTileY   = Math.min(Math.max(endTileY,   0), numberOfTilesY - 1);
+             endTileX = Math.min(Math.max(endTileX, 0), numberOfTilesX - 1);
+             endTileY = Math.min(Math.max(endTileY, 0), numberOfTilesY - 1);
 
              //Adds all roads to the tiles that overlap the bounding box
              for (int tileX = startTileX; tileX <= endTileX; tileX++) {
                  for (int tileY = startTileY; tileY <= endTileY; tileY++) {
                      tileGrid[tileX][tileY].addMapObject(polygon);
                  }
+             }
+         }
+
+         //Initializes all tile grids draw methods
+         for (int x = 0; x < numberOfTilesX; x++) {
+             for (int y = 0; y < numberOfTilesY; y++) {
+                 tileGrid[x][y].initializeDrawMethods();
              }
          }
          return tileGrid;

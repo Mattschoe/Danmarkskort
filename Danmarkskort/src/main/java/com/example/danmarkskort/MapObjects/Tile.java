@@ -9,12 +9,10 @@ import java.util.List;
 import java.util.Set;
 
 public class Tile implements MapObject{
-    //region Fields
-    private List<MapObject> objectsInTile;
-    private double[]        bounds;
-    private int             tileSize;
-    private Set<MapObject>  predefinedRelations, motorway, trunk, primary, secondary, tertiary, unclassified, residential, buildings;
-    //endregion
+    List<MapObject> objectsInTile;
+    double[] bounds;
+    int tileSize;
+    Set<MapObject> predefinedRelations, motorway, trunk, primary, secondary, tertiary, unclassified, residential, defaultRoad, buildings, area, coastline;
 
     //region Constructor(s)
     public Tile(double minX, double minY, double maxX, double maxY, int tileSize) {
@@ -28,16 +26,18 @@ public class Tile implements MapObject{
 
         //region Initialization of MapObject sets
         predefinedRelations = new HashSet<>();
-        motorway            = new HashSet<>();
-        trunk               = new HashSet<>();
-        primary             = new HashSet<>();
-        secondary           = new HashSet<>();
-        tertiary            = new HashSet<>();
-        unclassified        = new HashSet<>();
-        residential         = new HashSet<>();
-        buildings           = new HashSet<>();
+        motorway = new HashSet<>();
+        trunk = new HashSet<>();
+        primary = new HashSet<>();
+        secondary = new HashSet<>();
+        tertiary = new HashSet<>();
+        unclassified = new HashSet<>();
+        residential = new HashSet<>();
+        defaultRoad = new HashSet<>();
+        buildings = new HashSet<>();
+        area = new HashSet<>();
+        coastline = new HashSet<>();
         //endregion
-        initializeDrawMethods();
     }
     //endregion
 
@@ -58,23 +58,32 @@ public class Tile implements MapObject{
         }
     }
 
-    /** Draws the {@code visibleTiles} given the Level of detail
-     *  @param LevelOfDetail ranging from 1 to 5, where 1 being the minimum amount and 5 being the maximum amount of details.
+    /**
+     * Draws the {@code visibleTiles} given the Level of detail
+     * @param levelOfDetail ranging from 0 to 4, where 0 being the minimum amount and 4 being the maximum amount of details.
      */
-    public void draw(GraphicsContext graphicsContext, int LevelOfDetail) {
-        //Level 1:
+    public void draw(GraphicsContext graphicsContext, int levelOfDetail) {
+        //Tegner tilet
+        //graphicsContext.setStroke(Color.DARKORANGE);
+        //graphicsContext.strokeRect(bounds[0],bounds[1], tileSize, tileSize);
+
+        //HUSK: Altid tegn farve/baggrund før du tegner road på hvert level
         drawMotorway(graphicsContext);
-        if (LevelOfDetail > 1) {
-            drawTrunk(graphicsContext);
+        drawTrunk(graphicsContext);
+        drawCoastline(graphicsContext);
+        if (levelOfDetail > 0) {
             drawPrimary(graphicsContext);
-            if (LevelOfDetail > 2) {
+            if (levelOfDetail > 1) {
                 drawSecondary(graphicsContext);
-                if (LevelOfDetail > 3) {
+                if (levelOfDetail > 2) {
                     drawTertiary(graphicsContext);
                     drawUnclassified(graphicsContext);
                     drawResidential(graphicsContext);
-                    if (LevelOfDetail > 4) {
+                    drawDefaultRoad(graphicsContext);
+                    if (levelOfDetail > 3) {
+                        drawArea(graphicsContext);
                         drawBuildings(graphicsContext);
+                        draw(graphicsContext, levelOfDetail - 1);
                     }
                 }
             }
@@ -124,30 +133,61 @@ public class Tile implements MapObject{
             mapObject.draw(graphicsContext);
         }
     }
+
+    ///Roads without a type
+    private void drawDefaultRoad(GraphicsContext graphicsContext) {
+        for (MapObject mapObject : defaultRoad) {
+            mapObject.draw(graphicsContext);
+        }
+    }
+
     ///Buildings
     private void drawBuildings(GraphicsContext graphicsContext) {
         for (MapObject mapObject : buildings) {
             mapObject.draw(graphicsContext);
         }
     }
+
+    ///Area colors
+    private void drawArea(GraphicsContext graphicsContext) {
+        for (MapObject mapObject : area) {
+            mapObject.draw(graphicsContext);
+        }
+    }
+
+    ///Area colors
+    private void drawCoastline(GraphicsContext graphicsContext) {
+        for (MapObject mapObject : coastline) {
+            mapObject.draw(graphicsContext);
+        }
+    }
     //endregion
 
-    /// Initializes all the draw methods so we later can call them in {@link #draw(GraphicsContext, int)}
-    private void initializeDrawMethods() {
+
+    /**
+     * Initializes all the draw methods so we later can call them in {@link #draw(GraphicsContext, int)}
+     */
+    public void initializeDrawMethods() {
         for (MapObject mapObject : objectsInTile) {
-            if (mapObject instanceof Road road && road.hasRoadType()) {
+            if (mapObject instanceof Road road) {
                 String roadType = road.getType();
                 switch (roadType) {
-                    case "motorway"     -> motorway.add(mapObject);
-                    case "trunk"        -> trunk.add(mapObject);
-                    case "primary"      -> primary.add(mapObject);
-                    case "secondary"    -> secondary.add(mapObject);
-                    case "tertiary"     -> tertiary.add(mapObject);
+                    case "motorway" -> motorway.add(mapObject);
+                    case "trunk" -> trunk.add(mapObject);
+                    case "primary" -> primary.add(mapObject);
+                    case "secondary" -> secondary.add(mapObject);
+                    case "tertiary" -> tertiary.add(mapObject);
                     case "unclassified" -> unclassified.add(mapObject);
-                    case "residential"  -> residential.add(mapObject);
+                    case "residential" -> residential.add(mapObject);
+                    case "coastline" -> coastline.add(mapObject);
+                    default -> defaultRoad.add(mapObject);
                 }
-            } else if (mapObject instanceof Polygon polygon && polygon.hasType()) {
-                buildings.add(polygon);
+            } else if (mapObject instanceof Polygon polygon) {
+                String polygonType = polygon.getType();
+                switch (polygonType) {
+                    case "building" -> buildings.add(mapObject);
+                    default -> area.add(mapObject);
+                }
             }
         }
     }

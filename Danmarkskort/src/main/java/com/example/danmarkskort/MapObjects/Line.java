@@ -1,9 +1,15 @@
 package com.example.danmarkskort.MapObjects;
 
+import javafx.geometry.Point2D;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
+import java.io.ObjectStreamClass;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Random;
 
 public class Line implements Serializable {
     @Serial private static final long serialVersionUID = -9178696453904098837L;

@@ -5,7 +5,6 @@ import com.example.danmarkskort.AddressSearch.TrieST;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.ListView;
@@ -14,7 +13,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -33,7 +31,7 @@ public class Controller implements Initializable {
     private ScrollEvent scrollEvent;
     private TrieST<String> trieCity; //part of test
     private TrieST<String> trieStreet;
-    private MouseEvent event;
+    private MouseEvent mouseEvent;
 
     @FXML private Canvas canvas;
     @FXML private ListView<String> listView;
@@ -41,8 +39,9 @@ public class Controller implements Initializable {
     @FXML private TextField searchBar;
     //endregion
 
-    //region Constructor(s)
-    /// The View-constructor creates an instance of this constructor upon loading an FXML-scene
+    /** View-konstruktøren skaber/kører en instans af
+     * konstruktøren her, når den loader en FXML-scene
+     */
     public Controller() {
         canvas = new Canvas(400, 600);
         System.out.println("Controller created!");
@@ -55,19 +54,20 @@ public class Controller implements Initializable {
 
 
         //region AnimationTimer
-        //TODO: Fix, this doesnt work og tror det er fordi den lægger i construktøren men idk -MN
-        //OBS JEG (MATTHIAS) MISTÆNKER DET HER FOR IKKE AT VIRKE -MN
+        //TODO: Fix, this doesnt work og tror det er fordi den lægger i konstruktøren men idk -MN
+        //OBS JEG MISTÆNKER DET HER FOR IKKE AT VIRKE -MN
         //UPDATE: Jeg tror endnu mindre på det nu -MN
+        //UPDATE: Jeg tror en lille smule på det, men jeg har ikke læst op på AnimationTimer-klassen endnu -OFS
         AnimationTimer fpsTimer = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 if (panRequest) {
-                    double dx = event.getX() - lastX;
-                    double dy = event.getY() - lastY;
+                    double dx = mouseEvent.getX() - lastX;
+                    double dy = mouseEvent.getY() - lastY;
                     view.pan(dx, dy);
 
-                    lastX = event.getX();
-                    lastY = event.getY();
+                    lastX = mouseEvent.getX();
+                    lastY = mouseEvent.getY();
                     panRequest = false;
                 } else if (zoomRequest) {
                     double factor = scrollEvent.getDeltaY();
@@ -215,16 +215,16 @@ public class Controller implements Initializable {
     /// Method runs upon zooming/scrolling on the Canvas
     @FXML protected void onCanvasScroll(ScrollEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked
-        double factor = e.getDeltaY();
-        view.zoom(e.getX(), e.getY(), Math.pow(1.01, factor), true);
+        scrollEvent = e;
+        zoomRequest = true;
     }
 
-    /// Method runs upon releasing a click on the canvas
+    /** Metode køres når man slipper sit klik på Canvas'et */
     @FXML protected void onCanvasClick(MouseEvent e) {
         System.out.println("Clicked at ("+ e.getX() +", "+ e.getY() +")!");
     }
 
-    /// Method runs upon pressing on the canvas
+    /** Metode køres idet man klikker ned på Canvas'et */
     @FXML protected  void onCanvasPressed(MouseEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked xd
         lastX = e.getX();
@@ -232,8 +232,8 @@ public class Controller implements Initializable {
     }
 
     /// Method runs upon dragging on the canvas
-    @FXML protected void onCanvasDragged(MouseEvent event) {
-        this.event = event;
+    @FXML protected void onCanvasDragged(MouseEvent e) {
+        mouseEvent = e;
         panRequest = true;
     }
     //endregion

@@ -30,9 +30,9 @@ public class Parser implements Serializable {
      */
     public Parser(File file) throws NullPointerException, IOException, XMLStreamException, FactoryConfigurationError {
         this.file = file;
-        id2Node = new HashMap<>(7285439);
-        id2Road = new HashMap<>(489884);
-        id2Polygon = new HashMap<>(489884);
+        id2Node = new HashMap<>(49_721_049);
+        id2Road = new HashMap<>(3_146_438);
+        id2Polygon = new HashMap<>(3_146_438);
         bounds = new double[4];
         significantHighways = new HashSet<>();
         addressNodes = new HashSet<>();
@@ -164,7 +164,11 @@ public class Parser implements Serializable {
                 for (long memberID : members) {
                     if (id2Polygon.containsKey(memberID)) {
                         Polygon member = id2Polygon.get(memberID);
-                        if (member.getType().isEmpty()) member.setType(type);
+                        if (member.getType().isEmpty()) {
+                            member.setType(type);
+                            //TODO %% testing ift. at tegne flere relations / relations rigtigt
+                            //System.out.println("Relation "+ memberID +" updated with type: "+ type +"!");
+                        }
                     }
                     else if (id2Road.containsKey(memberID)) {
                         Road member = id2Road.get(memberID);
@@ -248,7 +252,7 @@ public class Parser implements Serializable {
                 if (value.equals("Cityringen")) return new Polygon(nodesInPolygon, value); //TODO %% Find en bedre måde at IKKE tegne Cityringen
             }
         }
-        return new Polygon(nodesInPolygon, null);
+        return new Polygon(nodesInPolygon, "");
     }
 
     /**
@@ -380,14 +384,16 @@ public class Parser implements Serializable {
     }
     //endregion
 
-    //region Getters and setters
-    public File               getFile()     { return file;       }
-    public double[]           getBounds()   { return bounds;     }
-    public Map<Long, Node>    getNodes()    { return id2Node;    }
-    public Map<Long, Road>    getRoads()    { return id2Road;    }
+    //region GETTERS AND SETTERS
+    public String getFileName() { return file.getName(); }
+    public File getFile() { return file; }
+    public Map<Long, Node> getNodes() { return id2Node; }
+    public Map<Long, Road> getRoads() { return id2Road; }
     public Map<Long, Polygon> getPolygons() { return id2Polygon; }
-
-    /// @return the set of significant highways, which will be the only roads drawn when the map is zoomed out a certain amount
+    public double[] getBounds() { return bounds; }
+    /**
+     * @return the set of significant highways, which will be the only roads drawn when the map is zoomed out a certain amount
+     */
     public Set<Road> getSignificantHighways() { return significantHighways; }
 
     public Set<Node> getAddressNodes() {
