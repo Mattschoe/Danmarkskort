@@ -245,7 +245,14 @@ public class Model {
         //TODO MAKE THIS WORK ???
     }
 
+    /**
+     * Inserts all streets and cities of the complex nodes to Tries
+     */
     private void loadAddressNodes() {
+        //TODO
+        //æøå issues
+        //Hvis man trykker på forslag og derfor enter = null
+        //HÅNDTERING AF VEJE MED SAMME VEJNAVN
         trieCity = new TrieST<>(true);
         trieStreet = new TrieST<>(false);
         Set<String> streets = new HashSet<>();
