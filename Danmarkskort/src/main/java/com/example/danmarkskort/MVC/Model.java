@@ -17,11 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 ///A Model is a Singleton class that stores the map in a tile-grid. It also stores the parser which parses the .osm data. Call {@link #getInstance()} to get the Model
 public class Model {
@@ -251,11 +247,41 @@ public class Model {
     private void loadAddressNodes() {
         trieCity = new TrieST<>(true);
         trieStreet = new TrieST<>(false);
+        Set<String> streets = new HashSet<>();
+        Set<String> cities = new HashSet<>();
+        HashMap<Node, String> node2street = new HashMap<>();
         int testCounter = 0;
         for (Node node : parser.getAddressNodes()) {
-            String[] address = node.getAddress();
+            testCounter++;
+            System.out.println(testCounter);
 
-            if (address[0] != null) trieCity.put(address[0],node);
+            String[] address = node.getAddress();
+            if (address[3].contains("Stampen Vej") || address[3].contains("é")) {
+                //TESTING
+            } else {
+
+                //Byer indsættes i trien til byer
+                if (address[0] != null && !cities.contains(address[0])) {
+                    System.out.println("problematisk bynavn: " + address[0]);
+                    trieCity.put(address[0], node);
+                    cities.add(address[0]);
+                }
+
+                if (address[3] != null) { //street
+                    if (streets.contains(address[3])) { //Hvis vejnavnet ALLEREDE ER TAGET: lav Linkedlist
+                    /*trieStreet.get(address[3]); //Får vejnavnets node
+                    Vi skal sørger for at det ikke overskrives!
+                     */
+
+                    } else {
+                        streets.add(address[3]);
+                        System.out.println("Problematisk vejnavn: " + address[3]);
+                        trieStreet.put(address[3], node);
+                    }
+                }
+
+                //
+            }
         }
 
     }

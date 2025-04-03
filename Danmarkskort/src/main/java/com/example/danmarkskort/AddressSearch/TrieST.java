@@ -168,7 +168,7 @@ public class TrieST<Item> {
     public boolean isCity() {
         return isCity;
     }
-
+    /*
     public static void main(String[] args) {
         TrieST<String> trieCity = new TrieST<>(true);
         TrieST<String> trieStreet = new TrieST<>(false);
@@ -188,5 +188,7 @@ public class TrieST<Item> {
         System.out.println(trieCity.keysThatMatch("vejle"));
         System.out.println(trieCity.keysThatMatch("København v"));
     }
+
+ */
 
 }

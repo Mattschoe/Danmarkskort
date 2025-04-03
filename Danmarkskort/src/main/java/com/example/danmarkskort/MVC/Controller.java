@@ -163,20 +163,15 @@ public class Controller implements Initializable {
 
     /// Methods runs upon typing in the search-bar
     @FXML protected void searchBarTyped(KeyEvent event) {
-        if (this.trieCity == null) {
+        if (this.trieCity == null) { //Skal på sigt bare gøres når loading baren er done.
             System.out.println("Trie loaded!");
             this.trieCity = model.getTrieCity();
             this.trieStreet = model.getTrieStreet();
-            System.out.println(trieCity.keys());
-            for (String s : trieCity.keys()) {
-                System.out.println(s);
-            }
         }
+
         listView.getItems().clear();
 
-            String input = searchBar.getText();
-            input = input.toLowerCase();
-
+        String input = searchBar.getText();
 
         System.out.println("input: " + input);
         listView.setVisible(searchBar.getText() != null);
