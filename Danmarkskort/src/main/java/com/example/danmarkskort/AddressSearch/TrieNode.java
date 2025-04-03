@@ -4,14 +4,14 @@ import com.sun.jdi.Value;
 
 
 public class TrieNode {
-    Object val;
-    TrieNode[] children = new TrieNode[30];
+    Node val;
+    TrieNode[] children = new TrieNode[35];
 
     /**
      * Returns value of TrieNode
-     * @return value of type Object
+     * @return value of type Node
      */
-    public Object getValue() {
+    public Node getValue() {
         return val;
     }
 
@@ -19,7 +19,7 @@ public class TrieNode {
      * Sets value of TrieNode
      * @param val value of type Object
      */
-    public void setValue(Object val) {
+    public void setValue(Node val) {
         this.val = val;
     }
 
@@ -30,4 +30,5 @@ public class TrieNode {
     public TrieNode[] getChildren() {
         return children;
     }
+
 }

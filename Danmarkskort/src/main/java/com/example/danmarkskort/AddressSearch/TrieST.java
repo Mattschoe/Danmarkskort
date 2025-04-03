@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 
 public class TrieST<Item> {
-    public int R = 29; // Størrelse på alfabet (Radix)
+    public int R = 34; // Størrelse på alfabet (Radix)
     private TrieNode root; // root of trie
     private final boolean isCity;
 
@@ -18,7 +18,7 @@ public class TrieST<Item> {
      * @param word key associated with value
      * @return the corresponding value
      */
-    public Object get(String word) {
+    public Node get(String word) {
         word = word.toLowerCase();
         TrieNode current = get(root, word, 0);
         if (current == null) return null;
@@ -48,13 +48,23 @@ public class TrieST<Item> {
             return get(current.getChildren()[28], word, depth + 1);
         } else if (c == ' ') {
             return get(current.getChildren()[29], word, depth + 1);
-        } else {
+        } else if (c == '.') {
+            return get(current.getChildren()[30], word, depth + 1);
+        } else if (c == 'ü') {
+            return get(current.getChildren()[31], word, depth + 1);
+        } else if (c == '-') {
+            return get(current.getChildren()[32], word, depth + 1);
+        }else if (c == '\'') {
+            return get(current.getChildren()[33], word, depth + 1);
+        } else if (c == 'é') {
+            return get(current.getChildren()[34], word, depth + 1);
+        }else {
             return get(current.getChildren()[c - 'a'], word, depth + 1);
         }
     }
 
     /**
-     * Inserts key and value into trie by calling {@link #put(TrieNode, String, Object, int)}
+     * Inserts key and value into trie by calling {@link #put(TrieNode, String, Node, int)}
      * @param word key of datatype String
      * @param val value of datatype Object
      */
@@ -74,7 +84,7 @@ public class TrieST<Item> {
      * @param depth depth of the trie
      * @return returns the TrieNode which the key is now associated to
      */
-    private TrieNode put(TrieNode current, String word, Object val, int depth) { // Change value associated with key if in subtrie rooted at x.
+    private TrieNode put(TrieNode current, String word, Node val, int depth) { // Change value associated with key if in subtrie rooted at x.
         if (current == null) current = new TrieNode(); //Hvis trienoden ikke eksistere allerede, skab den
         if (depth == word.length()) {
             current.setValue(val);
@@ -90,6 +100,16 @@ public class TrieST<Item> {
             current.getChildren()[28] = put(current.getChildren()[28], word, val, depth + 1);
         } else if (c == ' ') {
             current.getChildren()[29] = put(current.getChildren()[29], word, val, depth + 1);
+        } else if (c == '.') {
+            current.getChildren()[30] = put(current.getChildren()[30], word, val, depth + 1);
+        } else if (c == 'ü') {
+            current.getChildren()[31] = put(current.getChildren()[31], word, val, depth + 1);
+        }else if (c == '-') {
+            current.getChildren()[32] = put(current.getChildren()[32], word, val, depth + 1);
+        } else if (c == '\'') {
+            current.getChildren()[33] = put(current.getChildren()[33], word, val, depth + 1);
+        }else if (c == 'é') {
+            current.getChildren()[34] = put(current.getChildren()[34], word, val, depth + 1);
         }else {
             current.getChildren()[c - 'a'] = put(current.getChildren()[c - 'a'], word, val, depth + 1); //Sætter bogstav i arrayet
         }
@@ -159,36 +179,14 @@ public class TrieST<Item> {
 
         char next = pattern.charAt(d);
         for (int i = 0; i < R; i++) {
-            if (next == '.' || next == i + 'a') {
+            if (next == i + 'a') {
                 collect(current.getChildren()[i],prefix + next, pattern, queue);
             }
         }
     }
-
+    
     public boolean isCity() {
         return isCity;
     }
-    /*
-    public static void main(String[] args) {
-        TrieST<String> trieCity = new TrieST<>(true);
-        TrieST<String> trieStreet = new TrieST<>(false);
-
-        trieCity.put("København", new Node(10,3));
-        trieCity.put("København K", new Node(10,31));
-        trieCity.put("København V", new Node(10,32));
-        trieCity.put("København S", new Node(10,33));
-        trieCity.put("København V", new Node(10,36));
-        trieCity.put("Vejle", new Node(29,19));
-
-        trieStreet.put("Københavnsgade", new Node(10,7));
-
-        System.out.println(trieCity.keys());
-
-        System.out.println(trieCity.keysThatMatch("københavn"));
-        System.out.println(trieCity.keysThatMatch("vejle"));
-        System.out.println(trieCity.keysThatMatch("København v"));
-    }
-
- */
 
 }

@@ -1,5 +1,6 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.AddressSearch.Street;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import com.example.danmarkskort.Exceptions.ParserSavingException;
 import com.example.danmarkskort.MapObjects.Node;
@@ -249,33 +250,33 @@ public class Model {
         trieStreet = new TrieST<>(false);
         Set<String> streets = new HashSet<>();
         Set<String> cities = new HashSet<>();
-        HashMap<Node, String> node2street = new HashMap<>();
-        int testCounter = 0;
-        for (Node node : parser.getAddressNodes()) {
-            testCounter++;
-            System.out.println(testCounter);
-
+        int testCounter = 0; //TESTING
+        for (Node node : parser.getAddressNodes()) { //gennemgår alle address nodes
             String[] address = node.getAddress();
-            if (address[3].contains("Stampen Vej") || address[3].contains("é")) {
-                //TESTING
+            if (address[3].contains("Stampen Vej")) { //Skal fixes (lorte vej)
+                //TBC
             } else {
-
                 //Byer indsættes i trien til byer
                 if (address[0] != null && !cities.contains(address[0])) {
-                    System.out.println("problematisk bynavn: " + address[0]);
+                    System.out.println("problematisk bynavn: " + address[0]); //TESTING
                     trieCity.put(address[0], node);
                     cities.add(address[0]);
                 }
 
                 if (address[3] != null) { //street
-                    if (streets.contains(address[3])) { //Hvis vejnavnet ALLEREDE ER TAGET: lav Linkedlist
+                    if (streets.contains(address[3])) { //Hvis vejnavnet ALLEREDE ER TAGET
+                        if (!trieStreet.get(address[3]).getCity().equals(address[0])) { //Hvis den allerede indsatte vejnavn ikke deler by med ny by
+
+                        } else { //Vejen er allerede taget højde for og husnummeret skal indsættes
+
+                        }
                     /*trieStreet.get(address[3]); //Får vejnavnets node
                     Vi skal sørger for at det ikke overskrives!
                      */
 
                     } else {
-                        streets.add(address[3]);
-                        System.out.println("Problematisk vejnavn: " + address[3]);
+                        streets.add(address[3]); //Nu er vejnavnet indsat!
+                        System.out.println("Problematisk vejnavn: " + address[3]); //Testing
                         trieStreet.put(address[3], node);
                     }
                 }

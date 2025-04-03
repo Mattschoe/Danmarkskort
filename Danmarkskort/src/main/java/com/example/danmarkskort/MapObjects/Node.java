@@ -91,6 +91,10 @@ public class Node implements Serializable, MapObject {
      *  address[3] = street, fx: "Decembervej"
      */
     public String[] getAddress() { return address; }
+    public String getCity() { return address[0]; }
+    public String getHousenumber() { return address[1]; }
+    public String getPostcode() { return address[2]; }
+    public String getStreet() { return address[3]; }
     public double   getX()       { return x; }
     public double   getY()       { return y; }
 
