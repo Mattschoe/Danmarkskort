@@ -138,7 +138,7 @@ public class Model {
          }
 
          //Adds Nodes
-         for (Node node : parser.getNodes().values()) {
+         for (Node node : parser.getNodes().valueCollection()) {
              int tileX = (int) ((node.getX() - minX) / tileSize);
              int tileY = (int) ((node.getY() - minY) / tileSize);
 
@@ -213,7 +213,7 @@ public class Model {
         double maxY = Double.NEGATIVE_INFINITY;
 
         //Loops through each node and gets the minimum and maximum node
-        for (Node node : parser.getNodes().values()) {
+        for (Node node : parser.getNodes().valueCollection()) {
             double nodeX = node.getX();
             double nodeY = node.getY();
 

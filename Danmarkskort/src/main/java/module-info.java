@@ -6,6 +6,7 @@ module com.example.danmarkskort {
     requires java.desktop;
     requires itextpdf;
     requires jdk.jdi;
+    requires trove4j;
 
     opens com.example.danmarkskort to javafx.fxml;
     exports com.example.danmarkskort;

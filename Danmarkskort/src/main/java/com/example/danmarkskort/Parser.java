@@ -10,11 +10,14 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import gnu.trove.map.hash.TLongObjectHashMap;
+
 public class Parser implements Serializable {
     @Serial private static final long serialVersionUID = 8838055424703291984L;
 
     //region Fields
-    private final Map<Long, Node>    id2Node; //map for storing a Node and the id used to refer to it
+    private final TLongObjectHashMap<Node> id2Node;
+    //private final Map<Long, Node>    id2Node; //map for storing a Node and the id used to refer to it
     private final Map<Long, Road>    id2Road;
     private final Map<Long, Polygon> id2Polygon;
     private final File      file; //The file that's loaded in
@@ -29,7 +32,8 @@ public class Parser implements Serializable {
      */
     public Parser(File file) throws NullPointerException, IOException, XMLStreamException, FactoryConfigurationError {
         this.file = file;
-        id2Node = new HashMap<>(49_721_049);
+        id2Node = new TLongObjectHashMap<>(49_721_049);
+        //id2Node = new HashMap<>(49_721_049);
         id2Road = new HashMap<>(3_146_438);
         id2Polygon = new HashMap<>(3_146_438);
         bounds = new double[4];
@@ -93,6 +97,8 @@ public class Parser implements Serializable {
      * @throws XMLStreamException if an error with the reader occurs
      */
     public void parseOSM(File file) throws IOException, XMLStreamException {
+        List<Node> nodeList = new ArrayList<>();
+
         XMLStreamReader input = XMLInputFactory.newInstance().createXMLStreamReader(new FileReader(file)); //ny XMLStreamReader
         //Gennemgår hver tag og parser de tags vi bruger
         while (input.hasNext()) {
@@ -119,12 +125,66 @@ public class Parser implements Serializable {
         }
     }
 
+
     ///Saves the OSM-file's bounds-coordinates (so that View can zoom in to these on startup)
     private void parseBounds(XMLStreamReader input) {
         bounds[0] = Double.parseDouble(input.getAttributeValue(0)); //Min. latitude
         bounds[1] = Double.parseDouble(input.getAttributeValue(1)); //Min. longitude
         bounds[2] = Double.parseDouble(input.getAttributeValue(2)); //Max. latitude
         bounds[3] = Double.parseDouble(input.getAttributeValue(3)); //Max. longitude
+    }
+
+    /**
+     * Parses a {@link Node} from XMLStreamReader.next() and then adds it to id2Node
+     * @throws XMLStreamException if there is an error with the {@code XMLStreamReader}
+     */
+    private void parseNode(XMLStreamReader input) throws XMLStreamException {
+        //Saves the guaranteed values
+        long id = Long.parseLong(input.getAttributeValue(null, "id"));
+        double lat = Double.parseDouble(input.getAttributeValue(null, "lat"));
+        double lon = Double.parseDouble(input.getAttributeValue(null, "lon"));
+
+        int nextInput = input.next();
+        //If simple node, saves it and returns
+        if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("node")) {
+            id2Node.put(id, new Node(lat, lon)); //Instansierer new node (node containing no child-elements)
+            return;
+        }
+
+        //Complex node
+        String city = null;
+        String houseNumber = null;
+        int postcode = 0;
+        String street = null;
+        while (input.hasNext()) {
+            //End of Node
+            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("node")) {
+                break;
+            }
+
+            if (nextInput == XMLStreamConstants.START_ELEMENT && input.getLocalName().equals("tag")) {
+                String key = input.getAttributeValue(null, "k");
+                String value = input.getAttributeValue(null, "v");
+                if (key == null || value == null) continue;
+                if (key.equals("addr:city")) {
+                    city = value;
+                } else if (key.equals("addr:housenumber")) {
+                    houseNumber = value;
+                } else if (key.equals("addr:postcode")) {
+                    postcode = Integer.parseInt(value);
+                } else if (key.equals("addr:street")) {
+                    street = value;
+                }
+            }
+            nextInput = input.next();
+        }
+
+        //Creates a complex 'Node' unless it doesn't have any of the elements of a complex 'Node', then it just makes a simple one (Mayb change later)
+        if (city == null && houseNumber == null && postcode == 0 && street == null) {
+            id2Node.put(id, new Node(lat, lon)); //Instansierer new node (node containing no child-elements)
+        } else {
+            id2Node.put(id, new Node(lat, lon, city, houseNumber, postcode, street));
+        }
     }
 
     private void parseRelation(XMLStreamReader input) throws XMLStreamException {
@@ -326,65 +386,12 @@ public class Parser implements Serializable {
         bounds[2] = 56.145397;
         bounds[3] = 12.650371;
     }
-
-    /**
-     * Parses a {@link Node} from XMLStreamReader.next() and then adds it to id2Node
-     * @throws XMLStreamException if there is an error with the {@code XMLStreamReader}
-     */
-    private void parseNode(XMLStreamReader input) throws XMLStreamException {
-        //Saves the guaranteed values
-        long id = Long.parseLong(input.getAttributeValue(null, "id"));
-        double lat = Double.parseDouble(input.getAttributeValue(null, "lat"));
-        double lon = Double.parseDouble(input.getAttributeValue(null, "lon"));
-
-        int nextInput = input.next();
-        //If simple node, saves it and returns
-        if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("node")) {
-            id2Node.put(id, new Node(lat, lon)); //Instansierer new node (node containing no child-elements)
-            return;
-        }
-
-        //Complex node
-        String city = null;
-        String houseNumber = null;
-        int postcode = 0;
-        String street = null;
-        while (input.hasNext()) {
-            //End of Node
-            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("node")) {
-                break;
-            }
-
-            if (nextInput == XMLStreamConstants.START_ELEMENT && input.getLocalName().equals("tag")) {
-                String key = input.getAttributeValue(null, "k");
-                String value = input.getAttributeValue(null, "v");
-                if (key == null || value == null) continue;
-                if (key.equals("addr:city")) {
-                    city = value;
-                } else if (key.equals("addr:housenumber")) {
-                    houseNumber = value;
-                } else if (key.equals("addr:postcode")) {
-                    postcode = Integer.parseInt(value);
-                } else if (key.equals("addr:street")) {
-                    street = value;
-                }
-            }
-            nextInput = input.next();
-        }
-
-        //Creates a complex 'Node' unless it doesn't have any of the elements of a complex 'Node', then it just makes a simple one (Mayb change later)
-        if (city == null && houseNumber == null && postcode == 0 && street == null) {
-            id2Node.put(id, new Node(lat, lon)); //Instansierer new node (node containing no child-elements)
-        } else {
-            id2Node.put(id, new Node(lat, lon, city, houseNumber, postcode, street));
-        }
-    }
     //endregion
 
     //region GETTERS AND SETTERS
     public String getFileName() { return file.getName(); }
     public File getFile() { return file; }
-    public Map<Long, Node> getNodes() { return id2Node; }
+    public TLongObjectHashMap<Node> getNodes() { return id2Node; }
     public Map<Long, Road> getRoads() { return id2Road; }
     public Map<Long, Polygon> getPolygons() { return id2Polygon; }
     public double[] getBounds() { return bounds; }
