@@ -27,12 +27,8 @@ public class Polygon implements Serializable, MapObject{
     public Polygon(List<Node> nodes, String type) {
         assert nodes.size() != 1;
         this.nodes = nodes;
-
-        if (type == null) {
-            this.type = "";
-        } else {
-            this.type = type;
-        }
+        this.type = type;
+        if (type.isEmpty()) color = Color.BLUE;
 
         createArrays();
         determineColor();
@@ -58,15 +54,17 @@ public class Polygon implements Serializable, MapObject{
     @Override public void draw(GraphicsContext gc) { draw(gc, false); }
 
     public void draw(GraphicsContext gc, boolean drawLines) {
-        gc.setStroke(color.darker().darker());
-        gc.setFill(color);
+        if (drawLines) {
+            gc.setStroke(color.darker().darker());
+            gc.strokePolygon(xPoints, yPoints, nodesSize);
+        }
 
-        if (drawLines) gc.strokePolygon(xPoints, yPoints, nodesSize);
+        gc.setFill(color);
         gc.fillPolygon(xPoints, yPoints, nodesSize);
     }
 
     /// Enormous switch-statement determines the Polygon's color based off its 'type'-field
-    public void determineColor() {
+    private void determineColor() {
         color = switch(type) {
             //region landuse: developed-land
             case "commercial"    -> Color.rgb(242, 217, 216);
@@ -210,7 +208,7 @@ public class Polygon implements Serializable, MapObject{
             case "wildlife_hide"       -> Color.RED;
             //endregion
 
-            //region Other values
+            //region other values
             case "amenity"   -> Color.rgb(254, 254, 229);
             case "building"  -> Color.rgb(217, 208, 201);
             case "coastline" -> Color.PERU;
@@ -218,19 +216,19 @@ public class Polygon implements Serializable, MapObject{
             case "island"    -> Color.rgb(242, 239, 233);
             //endregion
 
-            //region Patches...
+            //region patches...
             case "Cityringen" -> Color.TRANSPARENT;
-            case "shrubbery" -> Color.RED;
-            case "flowerbed" -> Color.RED;
-            case "route"     -> Color.RED;
-            case "sport"     -> Color.RED;
-            case "yes"       -> Color.RED;
-            case "paved"     -> Color.RED;
+            case "shrubbery"  -> Color.RED;
+            case "flowerbed"  -> Color.RED;
+            case "route"      -> Color.RED;
+            case "sport"      -> Color.RED;
+            case "yes"        -> Color.RED;
+            case "paved"      -> Color.RED;
             case "forestØsterled" -> Color.RED;
-            case "stage"     -> Color.RED;
-            case "rock"      -> Color.RED;
+            case "stage"      -> Color.RED;
+            case "rock"       -> Color.RED;
             case "scrubStrandvejenStrandvejen" -> Color.RED;
-            case "stone"     -> Color.RED;
+            case "stone"      -> Color.RED;
             //endregion
             default -> Color.rgb(0, 74, 127, 0.1);
         };
@@ -260,8 +258,12 @@ public class Polygon implements Serializable, MapObject{
     //region Getters and setters
     public List<Node> getNodes()           { return nodes;           }
     public String     getType()            { return type;            }
-    public void       setType(String type) { this.type = type;       }
     public boolean    hasType()            { return !type.isEmpty(); }
+
+    public void setType(String type) {
+        this.type = type;
+        determineColor();
+    }
 
     @Override
     public double[] getBoundingBox() { return boundingBox; }
