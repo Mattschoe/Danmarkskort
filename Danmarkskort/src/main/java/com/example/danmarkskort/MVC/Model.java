@@ -150,7 +150,7 @@ public class Model {
          }
 
          //Adds Roads
-         for (Road road : parser.getRoads().values()) {
+         for (Road road : parser.getRoads().valueCollection()) {
              //Converts start- and endXY to tile sizes
              double[] boundingBox = road.getBoundingBox();
              int startTileX = (int) ((boundingBox[0] - minX) / tileSize);
@@ -173,7 +173,7 @@ public class Model {
          }
 
          //Adds Polygons
-         for (Polygon polygon : parser.getPolygons().values()) {
+         for (Polygon polygon : parser.getPolygons().valueCollection()) {
              //Converts start- and endXY to tile sizes
              double[] boundingBox = polygon.getBoundingBox();
              int startTileX = (int) ((boundingBox[0] - minX) / tileSize);

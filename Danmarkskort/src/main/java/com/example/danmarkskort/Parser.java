@@ -16,13 +16,11 @@ public class Parser implements Serializable {
     @Serial private static final long serialVersionUID = 8838055424703291984L;
 
     //region Fields
-    private final TLongObjectHashMap<Node> id2Node;
-    //private final Map<Long, Node>    id2Node; //map for storing a Node and the id used to refer to it
-    private final Map<Long, Road>    id2Road;
-    private final Map<Long, Polygon> id2Polygon;
+    private final TLongObjectHashMap<Node> id2Node; //map for storing a Node and the id used to refer to it
+    private final TLongObjectHashMap<Road>    id2Road;
+    private final TLongObjectHashMap<Polygon> id2Polygon;
     private final File      file; //The file that's loaded in
     private final double[]  bounds; //OSM-filens bounds, dvs. de længst væk koordinater hvor noget tegnes
-    private final Set<Road> significantHighways;
     //endregion
 
     //region Constructor(s)
@@ -34,10 +32,9 @@ public class Parser implements Serializable {
         this.file = file;
         id2Node = new TLongObjectHashMap<>(49_721_049);
         //id2Node = new HashMap<>(49_721_049);
-        id2Road = new HashMap<>(3_146_438);
-        id2Polygon = new HashMap<>(3_146_438);
+        id2Road = new TLongObjectHashMap<>(3_146_438);
+        id2Polygon = new TLongObjectHashMap<>(3_146_438);
         bounds = new double[4];
-        significantHighways = new HashSet<>();
 
         String filename = getFile().getName();
         //Switch case with what filetype the file is and call the appropriate method:
@@ -366,10 +363,8 @@ public class Parser implements Serializable {
         Road road;
         if (hasMaxSpeed){
             road = new Road(nodes, foot, bicycle, maxSpeed, roadType);
-            if (significantHighway) { significantHighways.add(road); }
         } else {
             road = new Road(nodes, foot, bicycle, roadType);
-            if(significantHighway) { significantHighways.add(road); }
         }
         return road;
     }
@@ -392,12 +387,8 @@ public class Parser implements Serializable {
     public String getFileName() { return file.getName(); }
     public File getFile() { return file; }
     public TLongObjectHashMap<Node> getNodes() { return id2Node; }
-    public Map<Long, Road> getRoads() { return id2Road; }
-    public Map<Long, Polygon> getPolygons() { return id2Polygon; }
+    public TLongObjectHashMap<Road> getRoads() { return id2Road; }
+    public TLongObjectHashMap<Polygon> getPolygons() { return id2Polygon; }
     public double[] getBounds() { return bounds; }
-    /**
-     * @return the set of significant highways, which will be the only roads drawn when the map is zoomed out a certain amount
-     */
-    public Set<Road> getSignificantHighways() { return significantHighways; }
     //endregion
 }
