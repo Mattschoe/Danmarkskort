@@ -167,7 +167,7 @@ public class Controller implements Initializable {
             System.out.println("Trie loaded!");
             this.trieCity = model.getTrieCity();
             this.trieStreet = model.getTrieStreet();
-
+            System.out.println(trieCity.keys());
             for (String s : trieCity.keys()) {
                 System.out.println(s);
             }
@@ -175,7 +175,8 @@ public class Controller implements Initializable {
         listView.getItems().clear();
 
             String input = searchBar.getText();
-        if (input == null) return;
+            input = input.toLowerCase();
+
 
         System.out.println("input: " + input);
         listView.setVisible(searchBar.getText() != null);
@@ -191,7 +192,7 @@ public class Controller implements Initializable {
     private void autoSuggest(KeyEvent event, String input, TrieST<String> trie) {
         if (event.getCharacter().equals("\r") && input != null) { // Hvis der trykkes enter og der er et input
             System.out.println("enter entered!");
-            if (!trie.keysThatMatch(input).isEmpty()) {
+            if (!trie.keysThatMatch(input).isEmpty()) { //Hvorfor når vi aldrig frem til dette
                 System.out.print("Found exact value: ");
                 System.out.println(trie.get(trie.keysThatMatch(input).getFirst())); //Kaster exception!
             } else {

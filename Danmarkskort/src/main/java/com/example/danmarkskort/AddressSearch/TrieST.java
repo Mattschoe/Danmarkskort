@@ -19,6 +19,7 @@ public class TrieST<Item> {
      * @return the corresponding value
      */
     public Object get(String word) {
+        word = word.toLowerCase();
         TrieNode current = get(root, word, 0);
         if (current == null) return null;
         return current.getValue(); //Dette skal ændres da det er goofy kode
@@ -152,7 +153,7 @@ public class TrieST<Item> {
      */
     public void collect(TrieNode current, String prefix, String pattern, LinkedList<String> queue) {
         int d = prefix.length();
-        if (current ==null) return;
+        if (current == null) return;
         if (d == pattern.length() && current.getValue() != null) queue.addFirst(prefix);
         if (d == pattern.length()) return;
 
@@ -167,4 +168,25 @@ public class TrieST<Item> {
     public boolean isCity() {
         return isCity;
     }
+
+    public static void main(String[] args) {
+        TrieST<String> trieCity = new TrieST<>(true);
+        TrieST<String> trieStreet = new TrieST<>(false);
+
+        trieCity.put("København", new Node(10,3));
+        trieCity.put("København K", new Node(10,31));
+        trieCity.put("København V", new Node(10,32));
+        trieCity.put("København S", new Node(10,33));
+        trieCity.put("København V", new Node(10,36));
+        trieCity.put("Vejle", new Node(29,19));
+
+        trieStreet.put("Københavnsgade", new Node(10,7));
+
+        System.out.println(trieCity.keys());
+
+        System.out.println(trieCity.keysThatMatch("københavn"));
+        System.out.println(trieCity.keysThatMatch("vejle"));
+        System.out.println(trieCity.keysThatMatch("København v"));
+    }
+
 }
