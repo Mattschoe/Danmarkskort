@@ -9,6 +9,7 @@
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Text?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.danmarkskort.MVC.Controller">
     <Canvas fx:id="canvas" height="400.0" onMouseClicked="#onCanvasClick" onMouseDragged="#onCanvasDragged" onMousePressed="#onCanvasPressed" onScroll="#onCanvasScroll" width="600.0" />
@@ -35,4 +36,6 @@
     <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onKeyTyped="#searchBarTyped" promptText="Søg efter adresse..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
 
     <ListView fx:id="listView" layoutX="15.0" layoutY="61.0" prefHeight="72.0" prefWidth="150.0" visible="false" />
+
+    <Text fx:id="fpsCount" layoutX="496.0" layoutY="52.0" strokeType="OUTSIDE" strokeWidth="0.0" text="FPS" AnchorPane.rightAnchor="85.044921875" AnchorPane.topAnchor="39.05078125" />
 </AnchorPane>
