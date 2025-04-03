@@ -1,5 +1,6 @@
 package com.example.danmarkskort;
 
+import com.example.danmarkskort.MapObjects.ComplexNode;
 import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.Polygon;
 import com.example.danmarkskort.MapObjects.Road;
@@ -178,9 +179,9 @@ public class Parser implements Serializable {
 
         //Creates a complex 'Node' unless it doesn't have any of the elements of a complex 'Node', then it just makes a simple one (Mayb change later)
         if (city == null && houseNumber == null && postcode == 0 && street == null) {
-            id2Node.put(id, new Node(lat, lon)); //Instansierer new node (node containing no child-elements)
+            id2Node.put(id, new Node(lat, lon)); //Instantiates a new node (node containing no child-elements)
         } else {
-            id2Node.put(id, new Node(lat, lon, city, houseNumber, postcode, street));
+            id2Node.put(id, new ComplexNode(lat, lon, city, houseNumber, postcode, street));
         }
     }
 
