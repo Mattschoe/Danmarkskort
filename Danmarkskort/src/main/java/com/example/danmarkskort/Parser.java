@@ -221,9 +221,6 @@ public class Parser implements Serializable {
                         Polygon member = id2Polygon.get(memberID);
                         if (member.getType().isEmpty()) {
                             member.setType(type);
-                            member.determineColor();
-                            //TODO %% testing ift. at tegne flere relations / relations rigtigt
-                            //System.out.println("Relation "+ memberID +" updated with type: "+ type +"!");
                         }
                     }
                     else if (id2Road.containsKey(memberID)) {
@@ -308,7 +305,7 @@ public class Parser implements Serializable {
                 if (value.equals("Cityringen")) return new Polygon(nodesInPolygon, value); //TODO %% Find en bedre måde at IKKE tegne Cityringen
             }
         }
-        return new Polygon(nodesInPolygon, null);
+        return new Polygon(nodesInPolygon, "");
     }
 
     /**

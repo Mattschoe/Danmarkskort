@@ -13,6 +13,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -26,21 +27,26 @@ public class Controller implements Initializable {
     //region Fields
     private View view;
     private Model model;
-    private double lastX, lastY;
-    private boolean panRequest, zoomRequest;
+    private double lastX, lastY; //Used to pan
+    private boolean panRequest, zoomRequest; //Used by AnimationTimer
     private ScrollEvent scrollEvent;
     private TrieST<String> trieCity; //part of test
     private TrieST<String> trieStreet;
     private MouseEvent mouseEvent;
 
+    private long lastTime;  //Used to calculate FPS
+    private int frameCount; //Used to calculate FPS
+    private double fps;     //Used to calculate FPS
+
     @FXML private Canvas canvas;
     @FXML private ListView<String> listView;
     @FXML private Slider zoomBar;
+    @FXML private Text fpsCount;
     @FXML private TextField searchBar;
     //endregion
 
     /** View-konstruktøren skaber/kører en instans af
-     * konstruktøren her, når den loader en FXML-scene
+     *  konstruktøren her, når den loader en FXML-scene
      */
     public Controller() {
         canvas = new Canvas(400, 600);
@@ -51,19 +57,19 @@ public class Controller implements Initializable {
         listView = new ListView<>();
 
         //Det her er cooked -MN
-        try {
-            model = Model.getInstance();
-        } catch (IllegalStateException _) {} //Model not loaded yet, so we wait
-
+        try { model = Model.getInstance(); }
+        catch (IllegalStateException _) {} //Model not loaded yet, so we wait
 
         //region AnimationTimer
-        //TODO: Fix, this doesnt work og tror det er fordi den lægger i konstruktøren men idk -MN
-        //OBS JEG MISTÆNKER DET HER FOR IKKE AT VIRKE -MN
-        //UPDATE: Jeg tror endnu mindre på det nu -MN
-        //UPDATE: Jeg tror en lille smule på det, men jeg har ikke læst op på AnimationTimer-klassen endnu -OFS
+        //TODO %% OBS VI ER RET SIKRE PÅ DET HER VIRKER (??) -OFS OG MN
+        lastTime = 0;
+        frameCount = 0;
+        fps = 0;
+
         AnimationTimer fpsTimer = new AnimationTimer() {
-            @Override
-            public void handle(long now) {
+            @Override public void handle(long now) {
+                if (fpsCount != null) displayFPS(now);
+
                 if (panRequest) {
                     double dx = mouseEvent.getX() - lastX;
                     double dy = mouseEvent.getY() - lastY;
@@ -85,6 +91,22 @@ public class Controller implements Initializable {
     //endregion
 
     //region Methods
+    /// Calculates current FPS and displays it
+    private void displayFPS(long now) {
+        if (lastTime != 0) {
+            long elapsedNanos = now - lastTime;
+            frameCount++;
+            if (elapsedNanos >= 1_000_000_000) {
+                fps = frameCount / (elapsedNanos / 1_000_000_000.0);
+                frameCount = 0;
+                lastTime = now;
+            }
+        } else {
+            lastTime = now;
+        }
+        fpsCount.setText(String.format("FPS: %.0f", fps));
+    }
+
     /** Passes the given file into a Model class that starts parsing it
      *  @param mapFile the file which the map is contained. Given by user when choosing file
      */

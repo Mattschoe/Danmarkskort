@@ -21,43 +21,49 @@ public class Road implements Serializable, MapObject {
     private int maxSpeed;
     private String roadType;
     private double[] boundingBox;
+    private Color color;
+    private double lineWidth;
     //endregion
 
     //region Constructor(s)
-    /**
-     * ROAD WITH MAXSPEED. A {@link Road} is a collection of {@link Node}'s without the same start and end node.
-     * @param nodes the collection of nodes
-     * @param foot if the road is walkable or not Should be true by default
-     * @param bicycle if road the is rideable on bike. Should be true by default
-     * @param maxSpeed the max speed on the road
-     * @param roadType the type of road
+    /** ROAD WITH MAXSPEED. A {@link Road} is a collection of {@link Node}'s without the same start and end node.
+     *  @param nodes the collection of nodes
+     *  @param foot if the road is walkable or not Should be true by default
+     *  @param bicycle if road the is rideable on bike. Should be true by default
+     *  @param maxSpeed the max speed on the road
+     *  @param roadType the type of road
      */
     public Road(List<Node> nodes, boolean foot, boolean bicycle, int maxSpeed, String roadType) {
         this.nodes = nodes;
-        lines = new HashSet<>();
+        this.lines = new HashSet<>();
+        createLines();
+
         this.foot = foot;
         this.bicycle = bicycle;
         this.maxSpeed = maxSpeed;
         this.roadType = roadType;
-        createLines();
+
         calculateBoundingBox();
+        determineVisuals();
     }
 
-    /**
-     * ROAD WITHOUT MAXSPEED. A {@link Road} is a collection of {@link Node}'s without the same start and end node.
-     * @param nodes the collection of nodes
-     * @param foot if the road is walkable or not Should be true by default
-     * @param bicycle if road the is rideable on bike. Should be true by default
-     * @param roadType the type of road
+    /** ROAD WITHOUT MAXSPEED. A {@link Road} is a collection of {@link Node}'s without the same start and end node.
+     *  @param nodes the collection of nodes
+     *  @param foot if the road is walkable or not Should be true by default
+     *  @param bicycle if road the is rideable on bike. Should be true by default
+     *  @param roadType the type of road
      */
     public Road(List<Node> nodes, boolean foot, boolean bicycle, String roadType) {
         this.nodes = nodes;
-        lines = new HashSet<>();
+        this.lines = new HashSet<>();
+        createLines();
+
         this.foot = foot;
         this.bicycle = bicycle;
         this.roadType = roadType;
-        createLines();
+
         calculateBoundingBox();
+        determineVisuals();
     }
     //endregion
 
@@ -73,26 +79,33 @@ public class Road implements Serializable, MapObject {
         //lines.add(new Line(currentNode, nodes.getLast())); //Tror ikke det her skal bruges i Roads
     }
 
-    /**
-     * Draws the road on a given canvas. This method excludes roads like metro's which are underground. See {@link #drawMetro(Canvas)} for the ability to draw the metro
-     * @param graphicsContext the graphicsContext where the road will be drawn on
+    /** Draws the road. This method excludes roads like metros which are underground. See {@link #drawMetro(Canvas)} for the ability to draw the metro
+     *  @param gc the GraphicsContext in which the road will be drawn
      */
-    public void draw(GraphicsContext graphicsContext) {
-        assert graphicsContext != null;
-        switch (roadType) {
-            case "route":
-                graphicsContext.setStroke(Color.TRANSPARENT);
-                graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant())); break;
-            case "coastline":
-                graphicsContext.setStroke(Color.BLACK);
-                graphicsContext.setLineWidth(1.5/Math.sqrt(graphicsContext.getTransform().determinant())); break;
-            default:
-                graphicsContext.setStroke(Color.rgb(100, 100, 100));
-                graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant())); break;
-        }
+    public void draw(GraphicsContext gc) {
+        assert gc != null;
+
+        gc.setStroke(color);
+        gc.setLineWidth(lineWidth/Math.sqrt(gc.getTransform().determinant()));
 
         for (Line line : lines) {
-            line.draw(graphicsContext);
+            line.draw(gc);
+        }
+    }
+
+    /// Determines the Road's color and line-width
+    private void determineVisuals() {
+        if (roadType.equals("route")) {
+            color = Color.TRANSPARENT;
+            lineWidth = 1;
+        }
+        else if (roadType.equals("coastline")) {
+            color = Color.BLACK;
+            lineWidth = 1.5;
+        }
+        else {
+            color = Color.rgb(100, 100, 100);
+            lineWidth = 1;
         }
     }
 
@@ -129,8 +142,12 @@ public class Road implements Serializable, MapObject {
     public int        getMaxSpeed()        { return maxSpeed; }
     public List<Node> getNodes()           { return nodes;    }
     public String     getType()            { return roadType; }
-    public void       setType(String type) { roadType = type; }
     public boolean    hasRoadType()        { return !roadType.isEmpty(); }
+
+    public void setType(String type) {
+        roadType = type;
+        determineVisuals();
+    }
 
     @Override
     public double[] getBoundingBox() { return boundingBox; }
