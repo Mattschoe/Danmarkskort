@@ -358,7 +358,7 @@ public class Parser implements Serializable {
                 } else if (key.equals("foot")) {
                     foot = value.equals("yes");
                 } else if (key.equals("route")) {
-                    roadType = key;
+                    roadType = value;
                 }
             }
             nextInput = input.next(); //Moves on to the next "tag" element
