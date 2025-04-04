@@ -69,7 +69,7 @@ public class Model {
 
         //region Tilegrid
         //Converts into tilegrid
-        int tileSize = 10;
+        int tileSize = 3;
         double[] tileGridBounds = getMinMaxCoords();
         Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 

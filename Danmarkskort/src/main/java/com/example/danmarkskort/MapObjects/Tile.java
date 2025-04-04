@@ -198,6 +198,6 @@ public class Tile implements MapObject{
 
     @Override
     public double[] getBoundingBox() { return bounds; }
-    public boolean isEmpty() { return objectsInTile.isEmpty(); }
+    public boolean isEmpty() { return objectsInTile.size() < 2; }
     //endregion
 }
