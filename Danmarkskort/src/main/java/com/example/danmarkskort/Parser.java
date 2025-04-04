@@ -22,6 +22,10 @@ public class Parser implements Serializable {
     private final File      file; //The file that's loaded in
     ///\[0] = minLat <br> \[1] = minLong <br> \[2] = maxLat <br> \[3] = maxLong
     private final double[]  bounds;
+
+    private int failedWays;
+    private int failedRelations;
+    private int failedNodes;
     //endregion
 
     //region Constructor(s)
@@ -37,6 +41,8 @@ public class Parser implements Serializable {
         id2Polygon = new TLongObjectHashMap<>(3_146_438);
         bounds = new double[4];
 
+        failedWays = 0; failedNodes = 0; failedRelations = 0;
+
         String filename = getFile().getName();
         //Switch case with what filetype the file is and call the appropriate method:
         if (filename.endsWith(".zip")) {
@@ -47,6 +53,7 @@ public class Parser implements Serializable {
                 setStandardBounds();
             }
         }
+        System.out.println("Finished parsing file. With: " + failedNodes + " nodes | " + failedWays + " ways | " + failedRelations + " relations, that failed!");
     }
     //endregion
 
@@ -108,15 +115,15 @@ public class Parser implements Serializable {
                 if (tagName.equals("bounds")) parseBounds(input);
                 else if (tagName.equals("node")) {
                     try { parseNode(input); } catch (Exception e) {
-                        System.out.println("Failed creating Node! with input: " + input);
+                        failedNodes++;
                     }
                 } else if (tagName.equals("way")) {
                     try { parseWay(input); } catch (Exception e) {
-                        System.out.println("Failed creating Way! with input: " + input);
+                        failedWays++;
                     }
                 } else if (tagName.equals("relation")) {
                     try { parseRelation(input); } catch (Exception e) {
-                        System.out.println("Failed creating Relation! " + e.getMessage());
+                        failedRelations++;
                     }
                 }
             }
@@ -140,7 +147,6 @@ public class Parser implements Serializable {
      * Parses a {@link Node} from XMLStreamReader.next() and then adds it to id2Node
      * @throws XMLStreamException if there is an error with the {@code XMLStreamReader}
      */
-    int count = 0;
     private void parseNode(XMLStreamReader input) throws XMLStreamException {
         //Saves the guaranteed values
         long id = Long.parseLong(input.getAttributeValue(null, "id"));
@@ -358,7 +364,7 @@ public class Parser implements Serializable {
                 } else if (key.equals("foot")) {
                     foot = value.equals("yes");
                 } else if (key.equals("route")) {
-                    roadType = value;
+                    roadType = key;
                 }
             }
             nextInput = input.next(); //Moves on to the next "tag" element

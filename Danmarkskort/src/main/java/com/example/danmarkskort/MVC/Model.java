@@ -77,6 +77,7 @@ public class Model {
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
         long result = System.currentTimeMillis() - start;
         System.out.println(result + "ms");
+        System.out.println("Finished creating Tilegrid!");
         //endregion
     }
     //endregion
