@@ -1,5 +1,6 @@
 package com.example.danmarkskort;
 
+import com.example.danmarkskort.Exceptions.MapObjectOutOfBoundsException;
 import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.Polygon;
 import com.example.danmarkskort.MapObjects.Road;
@@ -49,9 +50,6 @@ public class Parser implements Serializable {
             parseZIP(filename);
         } else if (filename.endsWith(".osm")) {
             parseOSM(file);
-            if (isBoundsIncomplete()) {
-                setStandardBounds();
-            }
         }
         System.out.println("Finished parsing file. With: " + failedNodes + " nodes | " + failedWays + " ways | " + failedRelations + " relations, that failed!");
     }
@@ -102,8 +100,7 @@ public class Parser implements Serializable {
      * @throws XMLStreamException if an error with the reader occurs
      */
     public void parseOSM(File file) throws IOException, XMLStreamException {
-        List<Node> nodeList = new ArrayList<>();
-
+        setStandardBounds(); //This has to be called first so we can check if nodes are in DKK
         XMLStreamReader input = XMLInputFactory.newInstance().createXMLStreamReader(new FileReader(file)); //ny XMLStreamReader
         //Gennemgår hver tag og parser de tags vi bruger
         while (input.hasNext()) {
@@ -151,7 +148,7 @@ public class Parser implements Serializable {
         long id = Long.parseLong(input.getAttributeValue(null, "id"));
         double lat = Double.parseDouble(input.getAttributeValue(null, "lat"));
         double lon = Double.parseDouble(input.getAttributeValue(null, "lon"));
-        if (lat < bounds[0] || lat > bounds[2] || lon < bounds[1] || lon > bounds[3]) return;
+        if (lat < bounds[0] || lat > bounds[2] || lon < bounds[1] || lon > bounds[3]) throw new MapObjectOutOfBoundsException("Node is out of bounds!");
 
 
         int nextInput = input.next();
@@ -386,10 +383,10 @@ public class Parser implements Serializable {
 
     /// Sets the standard bounds to the middle of DK
     private void setStandardBounds() {
-        bounds[0] = 55.893642;
-        bounds[1] = 11.809332;
-        bounds[2] = 56.145397;
-        bounds[3] = 12.650371;
+        bounds[0] = 54.481528;
+        bounds[1] = 7.679673;
+        bounds[2] = 57.995290;
+        bounds[3] = 15.708697; //Bornholm gør at DK er mega lang :(, once again et giga Bornholm L
     }
     //endregion
 
