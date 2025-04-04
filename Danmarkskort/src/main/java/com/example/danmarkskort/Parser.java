@@ -20,7 +20,8 @@ public class Parser implements Serializable {
     private final TLongObjectHashMap<Road>    id2Road;
     private final TLongObjectHashMap<Polygon> id2Polygon;
     private final File      file; //The file that's loaded in
-    private final double[]  bounds; //OSM-filens bounds, dvs. de længst væk koordinater hvor noget tegnes
+    ///\[0] = minLat <br> \[1] = minLong <br> \[2] = maxLat <br> \[3] = maxLong
+    private final double[]  bounds;
     //endregion
 
     //region Constructor(s)
@@ -120,11 +121,14 @@ public class Parser implements Serializable {
                 }
             }
         }
-        System.out.println(maxLat + " " + maxLon);
+        System.out.println(count);
     }
 
 
-    ///Saves the OSM-file's bounds-coordinates (so that View can zoom in to these on startup)
+    /**
+     * Saves the OSM-file's bounds-coordinates (so that View can zoom in to these on startup) <br>
+     * [0] = minLat <br> [1] = minLong <br> [2] = maxLat <br> [3] = maxLong
+     */
     private void parseBounds(XMLStreamReader input) {
         bounds[0] = Double.parseDouble(input.getAttributeValue(0)); //Min. latitude
         bounds[1] = Double.parseDouble(input.getAttributeValue(1)); //Min. longitude
@@ -136,15 +140,14 @@ public class Parser implements Serializable {
      * Parses a {@link Node} from XMLStreamReader.next() and then adds it to id2Node
      * @throws XMLStreamException if there is an error with the {@code XMLStreamReader}
      */
-    static double maxLat = 0;
-    static double maxLon = 0;
+    int count = 0;
     private void parseNode(XMLStreamReader input) throws XMLStreamException {
         //Saves the guaranteed values
         long id = Long.parseLong(input.getAttributeValue(null, "id"));
         double lat = Double.parseDouble(input.getAttributeValue(null, "lat"));
         double lon = Double.parseDouble(input.getAttributeValue(null, "lon"));
-        if (lat > maxLat) maxLat = lat;
-        if (lon > maxLon) maxLon = lon;
+        if (lat < bounds[0] || lat > bounds[2] || lon < bounds[1] || lon > bounds[3]) return;
+
 
         int nextInput = input.next();
         //If simple node, saves it and returns

@@ -64,10 +64,8 @@ public class Tile implements MapObject{
      */
     public void draw(GraphicsContext graphicsContext, int levelOfDetail) {
         //Tegner tilet
-        if (objectsInTile.size() > 5) {
-            graphicsContext.setStroke(Color.DARKORANGE);
-            graphicsContext.strokeRect(bounds[0],bounds[1], tileSize, tileSize);
-        }
+        graphicsContext.setStroke(Color.DARKORANGE);
+        graphicsContext.strokeRect(bounds[0],bounds[1], tileSize, tileSize);
 
         //HUSK: Altid tegn farve/baggrund før du tegner road på hvert level
         drawMotorway(graphicsContext);
@@ -200,5 +198,6 @@ public class Tile implements MapObject{
 
     @Override
     public double[] getBoundingBox() { return bounds; }
+    public boolean isEmpty() { return objectsInTile.isEmpty(); }
     //endregion
 }

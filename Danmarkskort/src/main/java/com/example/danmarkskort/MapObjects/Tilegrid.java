@@ -45,6 +45,7 @@ public class Tilegrid {
         // drawPredefinedRelations(); //OBS det her betyder at vi tegner selvom det ikke kan ses, skal måske ændres senere
         visibleTiles = getTilesInView(viewport);
         for (Tile tile : visibleTiles) {
+            if (tile.isEmpty()) continue;
             tile.draw(graphicsContext, levelOfDetail);
         }
     }

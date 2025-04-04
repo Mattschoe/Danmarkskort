@@ -124,10 +124,8 @@ public class Model {
     /// Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile
     private Tile[][] initializeTileGrid(double minX, double minY, double maxX, double maxY, int tileSize) {
         //Calculates number of tiles along each axis
-        System.out.println(maxX + " " + maxY + " | " + minX + " " + minY);
         numberOfTilesX = (int) Math.ceil((maxX - minX) / tileSize);
         numberOfTilesY = (int) Math.ceil((maxY - minY) / tileSize);
-        System.out.println(numberOfTilesX + " " + numberOfTilesY);
 
         //Initializes the Tile objects inside the grid variable
          Tile[][] tileGrid = new Tile[numberOfTilesX][numberOfTilesY];
