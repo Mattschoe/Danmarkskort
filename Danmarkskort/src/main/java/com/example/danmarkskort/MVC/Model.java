@@ -69,11 +69,12 @@ public class Model {
 
         //region Tilegrid
         //Converts into tilegrid
-        int tileSize = 10;
+        int tileSize = 5;
         double[] tileGridBounds = getMinMaxCoords();
         Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
+        System.out.println("Finished creating Tilegrid!");
         //endregion
     }
     //endregion
