@@ -60,6 +60,7 @@ sourceSets {
 }
 
 test {
+    jvmArgs = ['-Xmx8g']
     useJUnitPlatform()
 }
 
