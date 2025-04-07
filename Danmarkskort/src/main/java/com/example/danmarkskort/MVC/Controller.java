@@ -173,6 +173,17 @@ public class Controller implements Initializable {
             System.out.println("Trie loaded!");
             this.trieCity = model.getTrieCity();
             this.trieStreet = model.getTrieStreet();
+
+            System.out.println("Byer:");
+            for (String s :trieCity.keys()) {
+                System.out.println(s);
+            }
+
+            System.out.println("Veje:");
+            for (String s : trieStreet.keys()) {
+                System.out.println(s);
+            }
+
         }
 
         listView.getItems().clear();

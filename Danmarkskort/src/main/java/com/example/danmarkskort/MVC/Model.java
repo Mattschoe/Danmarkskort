@@ -260,38 +260,32 @@ public class Model {
         int testCounter = 0; //TESTING
         for (Node node : parser.getAddressNodes()) { //gennemgår alle address nodes
             String[] address = node.getAddress();
-            if (address[3].contains("Stampen Vej")) { //Skal fixes (lorte vej)
-                //TBC
-            } else {
-                //Byer indsættes i trien til byer
-                if (address[0] != null && !cities.contains(address[0])) { //Hvis byen ikke allerede er indlæst
-                    trieCity.put(address[0], node);
-                    cities.add(address[0]);
-                }
 
-                if (address[3] != null) { //street
-                    if (streets.contains(address[3])) { //Hvis vejnavnet ALLEREDE ER TAGET
-                        /* if (!trieStreet.get(address[3]).getCity().equals(address[0])) { //Hvis den allerede indsatte vejnavn ikke deler by med ny by
+            //Byer indsættes i trien til byer
+            if (address[0] != null && !cities.contains(address[0])) { //Hvis byen ikke allerede er indlæst
+                trieCity.put(address[0], node);
+                cities.add(address[0]);
+            }
 
-                        } else { //Vejen er allerede taget højde for og husnummeret skal indsættes
-
-                        } */
-                    /*trieStreet.get(address[3]); //Får vejnavnets node
-                    Vi skal sørger for at det ikke overskrives!
-                     */
-
-                    } else {
-                        streets.add(address[3]); //Nu er vejnavnet indsat!
-                        System.out.println("Problematisk vejnavn: " + address[3]); //Testing
-                        trieStreet.put(address[3], node);
+            if (address[3] != null) { //street NOGET GÅR GALT I STREET
+                if (streets.contains(address[3])) { //Hvis vejnavnet ALLEREDE ER TAGET
+                    for (Node street : trieCity.getList(address[3])) { //Skal virkelig ikke være triecity her
+                        if (!street.getCity().equals(address[0])) {
+                            trieStreet.put(address[3], street);
+                        }
                     }
-                }
-
-                //
+                } else {
+                streets.add(address[3]); //Nu er vejnavnet indsat!
+                trieStreet.put(address[3], node);
+            }
             }
         }
 
-    }
+                //
+
+        }
+
+
 
     //endregion
 

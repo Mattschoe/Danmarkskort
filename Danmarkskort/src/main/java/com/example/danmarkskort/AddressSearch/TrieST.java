@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 
 public class TrieST<Item> {
-    public int R = 34; // Størrelse på alfabet (Radix)
+    public int R = 43; // Størrelse på alfabet (Radix)
     private TrieNode root; // root of trie
     private final boolean isCity;
 
@@ -25,7 +25,6 @@ public class TrieST<Item> {
         return current.getValues(); //Dette skal ændres da det er goofy kode
     }
 
-    @Deprecated
     public Node get(String word) {
         word = word.toLowerCase();
         TrieNode current = get(root, word, 0);
@@ -167,6 +166,16 @@ public class TrieST<Item> {
             case '-' -> 32;
             case '\'' -> 33;
             case 'é' -> 34;
+            case '0' -> 41;
+            case '1' -> 35;
+            case '2' -> 36;
+            case '3' -> 37;
+            case '4' -> 38;
+            case '5' -> 39;
+            case '6' -> 40;
+            case '7' -> 41;
+            case '8' -> 42;
+            case '9' -> 43;
             default -> c - 'a';
         };
     }
@@ -175,7 +184,7 @@ public class TrieST<Item> {
         return isCity;
     }
 
-    //Midlertidig!
+    /*Midlertidig!
     public static void main(String[] args) {
         TrieST<String> trie = new TrieST<>(false);
 
@@ -204,6 +213,8 @@ public class TrieST<Item> {
         }
 
     }
+
+     */
 
 
 }

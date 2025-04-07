@@ -7,7 +7,7 @@ import java.util.LinkedList;
 public class TrieNode {
     Node val;
     LinkedList<Node> values;
-    TrieNode[] children = new TrieNode[35];
+    TrieNode[] children = new TrieNode[44];
 
     TrieNode() {
         values = new LinkedList<>();
@@ -29,7 +29,9 @@ public class TrieNode {
      * @param val of type Node
      */
     public void setValue(Node val) {
-        this.val = val;
+        if (this.val == null) {
+            this.val = val;
+        }
         values.add(val);
 
     }
