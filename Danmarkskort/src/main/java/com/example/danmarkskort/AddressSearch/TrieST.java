@@ -18,6 +18,14 @@ public class TrieST<Item> {
      * @param word key associated with value
      * @return the corresponding value
      */
+    public LinkedList<Node> getList(String word) {
+        word = word.toLowerCase();
+        TrieNode current = get(root, word, 0);
+        if (current == null) return null;
+        return current.getValues(); //Dette skal ændres da det er goofy kode
+    }
+
+    @Deprecated
     public Node get(String word) {
         word = word.toLowerCase();
         TrieNode current = get(root, word, 0);
@@ -40,27 +48,7 @@ public class TrieST<Item> {
             return current; //Hvis dybden af træet passer med ordlængde har man fundet den korrekte subtrie
         }
         char c = word.charAt(depth); // Use dth key char to identify subtrie.
-        if (c == 'æ') {
-            return get(current.getChildren()[26], word, depth + 1);
-        } else if (c == 'ø') {
-            return get(current.getChildren()[27], word, depth + 1);
-        } else if (c == 'å') {
-            return get(current.getChildren()[28], word, depth + 1);
-        } else if (c == ' ') {
-            return get(current.getChildren()[29], word, depth + 1);
-        } else if (c == '.') {
-            return get(current.getChildren()[30], word, depth + 1);
-        } else if (c == 'ü') {
-            return get(current.getChildren()[31], word, depth + 1);
-        } else if (c == '-') {
-            return get(current.getChildren()[32], word, depth + 1);
-        }else if (c == '\'') {
-            return get(current.getChildren()[33], word, depth + 1);
-        } else if (c == 'é') {
-            return get(current.getChildren()[34], word, depth + 1);
-        }else {
-            return get(current.getChildren()[c - 'a'], word, depth + 1);
-        }
+        return get(current.getChildren()[charToIndex(c)], word, depth + 1);
     }
 
     /**
@@ -87,33 +75,16 @@ public class TrieST<Item> {
     private TrieNode put(TrieNode current, String word, Node val, int depth) { // Change value associated with key if in subtrie rooted at x.
         if (current == null) current = new TrieNode(); //Hvis trienoden ikke eksistere allerede, skab den
         if (depth == word.length()) {
-            current.setValue(val);
+            if (current.getValue() == null) {
+                current.setValue(val);
+            } else {
+                current.setValue(val);
+
+            }
             return current;
-        } //Returnere hvilken Trie hele ordet gemmes i
-
-        char c = word.charAt(depth); // Traversere ned af træet med hvert bogstav indtil der enten ikke er flere eller
-        if (c == 'æ') {
-            current.getChildren()[26] = put(current.getChildren()[26], word, val, depth + 1);
-        } else if (c == 'ø') {
-            current.getChildren()[27] = put(current.getChildren()[27], word, val, depth + 1);
-        } else if (c == 'å') {
-            current.getChildren()[28] = put(current.getChildren()[28], word, val, depth + 1);
-        } else if (c == ' ') {
-            current.getChildren()[29] = put(current.getChildren()[29], word, val, depth + 1);
-        } else if (c == '.') {
-            current.getChildren()[30] = put(current.getChildren()[30], word, val, depth + 1);
-        } else if (c == 'ü') {
-            current.getChildren()[31] = put(current.getChildren()[31], word, val, depth + 1);
-        }else if (c == '-') {
-            current.getChildren()[32] = put(current.getChildren()[32], word, val, depth + 1);
-        } else if (c == '\'') {
-            current.getChildren()[33] = put(current.getChildren()[33], word, val, depth + 1);
-        }else if (c == 'é') {
-            current.getChildren()[34] = put(current.getChildren()[34], word, val, depth + 1);
-        }else {
-            current.getChildren()[c - 'a'] = put(current.getChildren()[c - 'a'], word, val, depth + 1); //Sætter bogstav i arrayet
         }
-
+        char c = word.charAt(depth); // Traversere ned af træet med hvert bogstav indtil der enten ikke er flere eller
+        current.getChildren()[charToIndex(c)] = put(current.getChildren()[charToIndex(c)], word, val, depth + 1);
         return current;
     }
 
@@ -148,7 +119,7 @@ public class TrieST<Item> {
         if (current == null) return;
         if (current.getValue() != null) queue.addFirst(prefix);
         for (char c = 'a' ; c < R + 'a'; c++) {
-            collect(current.getChildren()[c - 'a'],prefix + c, queue);
+            collect(current.getChildren()[charToIndex(c)],prefix + c, queue); //what the hell er dette
         }
     }
 
@@ -184,9 +155,55 @@ public class TrieST<Item> {
             }
         }
     }
+
+    private int charToIndex(char c) {
+        return switch (c) {
+            case 'æ' -> 26;
+            case 'ø' -> 27;
+            case 'å' -> 28;
+            case ' ' -> 29;
+            case '.' -> 30;
+            case 'ü' -> 31;
+            case '-' -> 32;
+            case '\'' -> 33;
+            case 'é' -> 34;
+            default -> c - 'a';
+        };
+    }
     
     public boolean isCity() {
         return isCity;
     }
+
+    //Midlertidig!
+    public static void main(String[] args) {
+        TrieST<String> trie = new TrieST<>(false);
+
+        trie.put("Ødense",new Node(20,29));
+        trie.put("Ødense",new Node(20,28));
+        trie.put("Æjby",new Node(20,27));
+        trie.put("Æjby",new Node(20,26));
+        trie.put("Æjby",new Node(20,25));
+        trie.put("üjsti",new Node(20,24));
+        trie.put("Ejnej",new Node(20,23));
+        trie.put("Odensi",new Node(20,22));
+
+        for (Node node : trie.getList("Æjby")) {
+            System.out.print("Æjby indsat: ");
+            System.out.println(node);
+        }
+
+        System.out.print("Dette er Ejenj: ");
+        System.out.println(trie.get("Ejnej"));
+
+        trie.put("Ejnej", new Node(34,20));
+
+        for (Node node : trie.getList("Ejnej")) {
+            System.out.print("Dette er nye Ejnejs");
+            System.out.println(node);
+        }
+
+    }
+
 
 }

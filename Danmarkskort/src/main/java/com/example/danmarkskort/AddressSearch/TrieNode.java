@@ -1,26 +1,37 @@
 package com.example.danmarkskort.AddressSearch;
 import com.example.danmarkskort.MapObjects.Node;
-import com.sun.jdi.Value;
+
+import java.util.LinkedList;
 
 
 public class TrieNode {
     Node val;
+    LinkedList<Node> values;
     TrieNode[] children = new TrieNode[35];
 
+    TrieNode() {
+        values = new LinkedList<>();
+    }
     /**
      * Returns value of TrieNode
      * @return value of type Node
      */
+    public LinkedList<Node> getValues() {
+        return values;
+    }
+
     public Node getValue() {
         return val;
     }
 
     /**
      * Sets value of TrieNode
-     * @param val value of type Object
+     * @param val of type Node
      */
     public void setValue(Node val) {
         this.val = val;
+        values.add(val);
+
     }
 
     /**

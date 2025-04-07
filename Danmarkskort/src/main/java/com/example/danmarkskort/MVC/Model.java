@@ -264,19 +264,18 @@ public class Model {
                 //TBC
             } else {
                 //Byer indsættes i trien til byer
-                if (address[0] != null && !cities.contains(address[0])) {
-                    System.out.println("problematisk bynavn: " + address[0]); //TESTING
+                if (address[0] != null && !cities.contains(address[0])) { //Hvis byen ikke allerede er indlæst
                     trieCity.put(address[0], node);
                     cities.add(address[0]);
                 }
 
                 if (address[3] != null) { //street
                     if (streets.contains(address[3])) { //Hvis vejnavnet ALLEREDE ER TAGET
-                        if (!trieStreet.get(address[3]).getCity().equals(address[0])) { //Hvis den allerede indsatte vejnavn ikke deler by med ny by
+                        /* if (!trieStreet.get(address[3]).getCity().equals(address[0])) { //Hvis den allerede indsatte vejnavn ikke deler by med ny by
 
                         } else { //Vejen er allerede taget højde for og husnummeret skal indsættes
 
-                        }
+                        } */
                     /*trieStreet.get(address[3]); //Får vejnavnets node
                     Vi skal sørger for at det ikke overskrives!
                      */
