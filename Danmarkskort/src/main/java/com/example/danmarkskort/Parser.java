@@ -27,6 +27,7 @@ public class Parser implements Serializable {
     private int failedWays;
     private int failedRelations;
     private int failedNodes;
+    private int outOfBoundsNodes;
     //endregion
 
     //region Constructor(s)
@@ -42,7 +43,7 @@ public class Parser implements Serializable {
         id2Polygon = new TLongObjectHashMap<>(3_146_438);
         bounds = new double[4];
 
-        failedWays = 0; failedNodes = 0; failedRelations = 0;
+        failedWays = 0; failedNodes = 0; failedRelations = 0; outOfBoundsNodes = 0;
 
         String filename = getFile().getName();
         //Switch case with what filetype the file is and call the appropriate method:
@@ -52,6 +53,7 @@ public class Parser implements Serializable {
             parseOSM(file);
         }
         System.out.println("Finished parsing file. With: " + failedNodes + " nodes | " + failedWays + " ways | " + failedRelations + " relations, that failed!");
+        System.out.println("And with + " + outOfBoundsNodes + " nodes out of bounds!");
     }
     //endregion
 
@@ -111,7 +113,9 @@ public class Parser implements Serializable {
                 //End of OSM
                 if (tagName.equals("bounds")) parseBounds(input);
                 else if (tagName.equals("node")) {
-                    try { parseNode(input); } catch (Exception e) {
+                    try { parseNode(input); } catch (MapObjectOutOfBoundsException e) {
+                        outOfBoundsNodes++;
+                    } catch (Exception e) {
                         failedNodes++;
                     }
                 } else if (tagName.equals("way")) {
@@ -332,8 +336,6 @@ public class Parser implements Serializable {
         int maxSpeed = 0;
         String roadType = "";
         boolean hasMaxSpeed = false;
-        boolean significantHighway = false;
-
         //endregion
 
         //Loops through tags and saves them
@@ -350,7 +352,6 @@ public class Parser implements Serializable {
                 String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
                 if (key.equals("highway") || key.equals("natural") || key.equals("area:highway")){     //find ud af typen af highway
-                    significantHighway = value.equals("motorway") || value.equals("trunk") || value.equals("primary") || value.equals("secondary") || value.equals("primary_link") || value.equals("secondary_link");
                     roadType = value;
                 } else if (key.equals("maxspeed")) {
                     maxSpeed = Integer.parseInt(value);
