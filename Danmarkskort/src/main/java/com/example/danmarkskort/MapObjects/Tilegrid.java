@@ -36,7 +36,7 @@ public class Tilegrid {
      * @param levelOfDetail ranging from 0 to 4, where 0 being the minimum amount and 4 being the maximum amount of details.
      */
     public void drawVisibleTiles(GraphicsContext graphicsContext, double[] viewport, int levelOfDetail) {
-        if (levelOfDetail < 1) zoomedOutTile.draw(graphicsContext);
+        if (levelOfDetail < 1) zoomedOutTile.draw(graphicsContext, levelOfDetail);
         else {
             // drawPredefinedRelations(); //OBS det her betyder at vi tegner selvom det ikke kan ses, skal måske ændres senere
             visibleTiles = getTilesInView(viewport);
