@@ -3,12 +3,14 @@ package com.example.danmarkskort.MapObjects;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class Tile implements MapObject{
+public class Tile implements MapObject, Serializable {
     List<MapObject> objectsInTile;
     double[] bounds;
     int tileSize;

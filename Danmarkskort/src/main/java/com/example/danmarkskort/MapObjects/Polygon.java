@@ -1,5 +1,6 @@
 package com.example.danmarkskort.MapObjects;
 
+import com.example.danmarkskort.SerializeableColor;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 

@@ -57,7 +57,7 @@ public class Model {
             //If anything else it creates a new parser and tries saves it as .obj
             try {
                 parser = new Parser(file);
-                saveParserToOBJ();
+                //saveParserToOBJ();
             } catch (ParserSavingException e) {
                 System.out.println(e.getMessage());
             } catch (Exception e) {
@@ -75,6 +75,8 @@ public class Model {
 
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
         System.out.println("Finished creating Tilegrid!");
+
+        saveTileGridToOBJ();
         //endregion
     }
     //endregion
@@ -243,7 +245,14 @@ public class Model {
 
     /// Saves the Tile gid to a OBJ file so we cant fast load it later
     private void saveTileGridToOBJ() {
-        //TODO MAKE THIS WORK ???
+        outputFile = new File(file+".obj");
+        try {
+            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(outputFile));
+            outputStream.writeObject(tilegrid);
+            outputStream.close();
+        } catch (IOException e) {
+            throw new ParserSavingException("Error saving Tilegrid as .obj! Error Message: " + e.getMessage());
+        }
     }
     //endregion
 

@@ -2,13 +2,14 @@ package com.example.danmarkskort.MapObjects;
 
 import javafx.scene.canvas.GraphicsContext;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 ///A Tile-grid stores the relevant tile-grid and a bunch of draw methods.
-public class Tilegrid {
+public class Tilegrid implements Serializable {
     //region Fields
     private final Tile[][] grid;
     ///The bounds of the tile-grid map (aka the coordinate of the first and last grid) <br> \[0] = minX <br> \[1] = minY <br> \[2] = maxX <br> \[3] = maxY
