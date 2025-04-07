@@ -69,14 +69,13 @@ public class Model {
 
         //region Tilegrid
         //Converts into tilegrid if we haven't loaded a tilegrid in via OBJ
-        if (tilegrid == null) {
-            int tileSize = 11;
-            double[] tileGridBounds = getMinMaxCoords();
-            Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
+        System.out.println("Starting on tilegrid!");
+        int tileSize = 11;
+        double[] tileGridBounds = getMinMaxCoords();
+        Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 
-            tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
-            System.out.println("Finished creating Tilegrid!");
-        }
+        tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
+        System.out.println("Finished creating Tilegrid!");
         //endregion
     }
     //endregion
@@ -116,7 +115,7 @@ public class Model {
     }
 
     /// Saves the parser to a .obj file so it can be called later. Method is called in {@link #Model} if the file isn't a .obj
-    private void saveParserToOBJ() {
+    public void saveParserToOBJ() {
         outputFile = new File(file+".obj");
         try {
             ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(outputFile));

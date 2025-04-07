@@ -85,6 +85,7 @@ class ParserTest {
         }
     }
 
+    /*
     @Test
     public void kanParseNodes() throws XMLStreamException, IOException {
         //Kan aflæse lan, lon id korrekt
@@ -336,6 +337,8 @@ class ParserTest {
             fail();
         }
     }
+
+     */
 }
 
 

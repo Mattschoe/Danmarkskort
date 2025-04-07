@@ -176,7 +176,7 @@ public class Controller implements Initializable {
 
     /// Method runs upon clicking the "Run standard"-button in the start-up scene
     @FXML protected void standardInputButton() throws IOException {
-        File standardMapFile = new File("./data/small.osm.obj"); //TODO skal ændres senere
+        File standardMapFile = new File("./data/mapOfDenmark.osm.obj"); //TODO skal ændres senere
         assert standardMapFile.exists();
 
         view = new View(view.getStage(), "mapOverlay.fxml");
