@@ -21,7 +21,7 @@ public class Road implements Serializable, MapObject {
     private int maxSpeed;
     private String roadType;
     private double[] boundingBox;
-    private Color color;
+    private transient Color color;
     private double lineWidth;
     //endregion
 

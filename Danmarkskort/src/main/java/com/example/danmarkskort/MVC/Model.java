@@ -30,7 +30,7 @@ public class Model {
     private Parser parser;
     private File outputFile; //The output .obj file
     private int numberOfTilesX, numberOfTilesY;
-    private final Tilegrid tilegrid;
+    private Tilegrid tilegrid;
     //endregion
 
     //region Constructor(s)
@@ -57,7 +57,7 @@ public class Model {
             //If anything else it creates a new parser and tries saves it as .obj
             try {
                 parser = new Parser(file);
-                //saveParserToOBJ();
+                saveParserToOBJ();
             } catch (ParserSavingException e) {
                 System.out.println(e.getMessage());
             } catch (Exception e) {
@@ -68,15 +68,15 @@ public class Model {
         //endregion
 
         //region Tilegrid
-        //Converts into tilegrid
-        int tileSize = 11;
-        double[] tileGridBounds = getMinMaxCoords();
-        Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
+        //Converts into tilegrid if we haven't loaded a tilegrid in via OBJ
+        if (tilegrid == null) {
+            int tileSize = 11;
+            double[] tileGridBounds = getMinMaxCoords();
+            Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 
-        tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
-        System.out.println("Finished creating Tilegrid!");
-
-        saveTileGridToOBJ();
+            tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
+            System.out.println("Finished creating Tilegrid!");
+        }
         //endregion
     }
     //endregion
@@ -110,6 +110,9 @@ public class Model {
         ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
         parser = (Parser) input.readObject();
         input.close();
+        for (Polygon polygon : parser.getPolygons().valueCollection()) {
+            polygon.determineColor();
+        }
     }
 
     /// Saves the parser to a .obj file so it can be called later. Method is called in {@link #Model} if the file isn't a .obj
@@ -241,18 +244,6 @@ public class Model {
         minMaxCoords[2] = maxX;
         minMaxCoords[3] = maxY;
         return minMaxCoords;
-    }
-
-    /// Saves the Tile gid to a OBJ file so we cant fast load it later
-    private void saveTileGridToOBJ() {
-        outputFile = new File(file+".obj");
-        try {
-            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(outputFile));
-            outputStream.writeObject(tilegrid);
-            outputStream.close();
-        } catch (IOException e) {
-            throw new ParserSavingException("Error saving Tilegrid as .obj! Error Message: " + e.getMessage());
-        }
     }
     //endregion
 

@@ -1,6 +1,5 @@
 package com.example.danmarkskort.MapObjects;
 
-import com.example.danmarkskort.SerializeableColor;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -17,7 +16,7 @@ public class Polygon implements Serializable, MapObject{
     private double[] yPoints;
     private int nodesSize;
     private String type; //The type of polygon, fx: "Building", "Coastline", etc.
-    private Color color;
+    private transient Color color;
     private double[] boundingBox;
     //endregion
 
@@ -65,7 +64,7 @@ public class Polygon implements Serializable, MapObject{
     }
 
     /// Enormous switch-statement determines the Polygon's color based off its 'type'-field
-    private void determineColor() {
+    public void determineColor() {
         color = switch(type) {
             //region landuse: developed-land
             case "commercial"    -> Color.rgb(242, 217, 216);

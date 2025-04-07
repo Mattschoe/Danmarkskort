@@ -63,8 +63,7 @@ public class Node implements Serializable, MapObject {
     }
 
     public void draw(GraphicsContext graphicsContext) {
-        graphicsContext.setStroke(Color.RED);
-        graphicsContext.strokeLine(x, y, x, y);
+
     }
 
     /** Parses address, checks its correct and saves it in a 4 size array
