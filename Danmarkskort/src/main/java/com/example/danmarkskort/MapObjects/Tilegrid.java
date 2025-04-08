@@ -15,6 +15,7 @@ public class Tilegrid {
     private final double[] tileGridBounds;
     int tileSize;
     int numberOfTilesX, numberOfTilesY;
+    Tile zoomedOutTile;
 
     List<Tile> visibleTiles;
     //endregion
@@ -27,14 +28,7 @@ public class Tilegrid {
         this.numberOfTilesY = numberOfTilesY;
 
         initializePredefinedRelations();
-    }
-
-    public void drawAllTiles(GraphicsContext graphicsContext, int levelOfDetail) {
-        for (int x = 0; x < grid.length; x++) {
-            for (int y = 0; y < grid[0].length; y++) {
-                grid[0][0].draw(graphicsContext, levelOfDetail);
-            }
-        }
+        initializeZoomedOutTile();
     }
 
     /**
@@ -42,12 +36,34 @@ public class Tilegrid {
      * @param levelOfDetail ranging from 0 to 4, where 0 being the minimum amount and 4 being the maximum amount of details.
      */
     public void drawVisibleTiles(GraphicsContext graphicsContext, double[] viewport, int levelOfDetail) {
-        // drawPredefinedRelations(); //OBS det her betyder at vi tegner selvom det ikke kan ses, skal måske ændres senere
-        visibleTiles = getTilesInView(viewport);
-        for (Tile tile : visibleTiles) {
-            if (tile.isEmpty()) continue;
-            tile.draw(graphicsContext, levelOfDetail);
+        if (levelOfDetail < 1) zoomedOutTile.draw(graphicsContext, levelOfDetail);
+        else {
+            // drawPredefinedRelations(); //OBS det her betyder at vi tegner selvom det ikke kan ses, skal måske ændres senere
+            visibleTiles = getTilesInView(viewport);
+            for (Tile tile : visibleTiles) {
+                if (tile.isEmpty()) continue;
+                tile.draw(graphicsContext, levelOfDetail);
+            }
         }
+    }
+
+    ///Initializes the tile that's drawn when were zoomed all the way out
+    private void initializeZoomedOutTile() {
+        Set<MapObject> motorway = new HashSet<>();
+        Set<MapObject> trunk = new HashSet<>();
+        Set<MapObject> coastline = new HashSet<>();
+
+        for (int x = 0; x < grid.length; x++) {
+            for (int y = 0; y < grid[0].length; y++) {
+                motorway.addAll(grid[x][y].getMotorway());
+                trunk.addAll(grid[x][y].getTrunk());
+                coastline.addAll(grid[x][y].getCoastline());
+            }
+        }
+        zoomedOutTile = new Tile(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
+        zoomedOutTile.setMotorway(motorway);
+        zoomedOutTile.setTrunk(trunk);
+        zoomedOutTile.setCoastline(coastline);
     }
 
     ///All big relations (Predifined in parser, fx: Sjælland, Jylland, osv.)
