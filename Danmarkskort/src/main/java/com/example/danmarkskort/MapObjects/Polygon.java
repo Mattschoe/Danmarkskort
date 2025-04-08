@@ -30,8 +30,7 @@ public class Polygon implements Serializable, MapObject{
         this.type = type;
 
         createArrays();
-        if (type.isEmpty()) color = Color.RED;
-        else determineColor();
+        determineColor();
         calculateBoundingBox();
     }
     //endregion
@@ -54,6 +53,8 @@ public class Polygon implements Serializable, MapObject{
     @Override public void draw(GraphicsContext gc) { draw(gc, false); }
 
     public void draw(GraphicsContext gc, boolean drawLines) {
+        //if (color.equals(Color.rgb(0, 74, 127, 0.1))) System.out.println(" -def- " + type);
+        //if (color.equals(Color.RED)) System.out.println(" -red- " + type);
         if (drawLines) {
             gc.setStroke(color.darker().darker());
             gc.strokePolygon(xPoints, yPoints, nodesSize);
@@ -61,6 +62,14 @@ public class Polygon implements Serializable, MapObject{
 
         gc.setFill(color);
         gc.fillPolygon(xPoints, yPoints, nodesSize);
+
+        //TODO %% FARVER KANTEN RUNDT OM COAST-POLYGONER PÅ SAMME MÅDE SOM COAST-ROAD; might be labour intensive??
+        if (type.equals("coastline")) {
+            gc.setStroke(Color.BLACK);
+            gc.setLineWidth(1.5/Math.sqrt(gc.getTransform().determinant()));
+            gc.strokePolygon(xPoints, yPoints, nodesSize);
+            gc.setLineWidth(1/Math.sqrt(gc.getTransform().determinant()));
+        }
     }
 
     /// Enormous switch-statement determines the Polygon's color based off its 'type'-field
@@ -192,10 +201,10 @@ public class Polygon implements Serializable, MapObject{
             case "picnic_table"        -> Color.rgb(115, 74, 8);
             case "pitch"               -> Color.rgb(136, 224, 190);
             case "playground"          -> Color.rgb(14, 133, 23);
-            case "resort"              -> Color.RED;
+            case "resort"              -> Color.rgb(140, 220, 255, 0.3);
             case "sauna"               -> Color.rgb(14, 133, 23);
             case "slipway"             -> Color.rgb(0, 146, 128);
-            case "sports_centre"       -> Color.rgb(161, 219, 166, 0.3);
+            case "sports_centre"       -> Color.rgb(223, 252, 226);
             case "sports_hall"         -> Color.RED;
             case "stadium"             -> Color.rgb(161, 219, 166, 0.3);
             case "summer_camp"         -> Color.RED;
@@ -208,27 +217,66 @@ public class Polygon implements Serializable, MapObject{
             case "wildlife_hide"       -> Color.RED;
             //endregion
 
-            //region other values
-            case "amenity"   -> Color.rgb(254, 254, 229);
-            case "building"  -> Color.rgb(217, 208, 201);
-            case "coastline" -> Color.PERU;
-            case "surface"   -> Color.DARKGREY;
-            case "island"    -> Color.rgb(242, 239, 233);
+            //region man_made
+            case "breakwater"       -> Color.rgb(184, 184, 184);
+            case "bridge"           -> Color.rgb(184, 184, 184);
+            case "groyne"           -> Color.rgb(153, 153, 153);
+            case "pier"             -> Color.rgb(243, 239, 233);
+            case "wastewater_plant" -> Color.rgb(235, 219, 233);
+            case "waterworks"       -> Color.rgb(235, 219, 233);
             //endregion
 
-            //region patches...
+            //region aeroway
+            case "aerodrome" -> Color.rgb(233, 231, 226);
+            case "apron"     -> Color.rgb(218, 218, 224);
+            case "runway"    -> Color.rgb(187, 187, 204);
+            case "terminal"  -> Color.rgb(196, 182, 171);
+            //endregion
+
+            //region place
+            case "island" -> Color.rgb(242, 239, 233);
+            case "isolated_dwelling" -> Color.rgb(242, 239, 233);
+            //endregion
+
+            //region other
+            case "amenity"        -> Color.rgb(196, 182, 171);
+            case "area:highway"   -> Color.rgb(50, 50, 50, 0.3);
+            case "attraction"     -> Color.rgb(239, 213, 179, 0.3);
+            case "barrier"        -> Color.rgb(111, 111, 111, 0.3);
+            case "boundary"       -> Color.rgb(207, 155, 203, 0.3);
+            case "bridge:support" -> Color.rgb(111, 111, 111, 0.3);
+            case "building"       -> Color.rgb(217, 208, 201);
+            case "cairn"          -> Color.TAN;
+            case "coastline"      -> Color.rgb(242, 239, 233);
+            case "embankment"     -> Color.rgb(91, 127, 0, 0.3);
+            case "ferry"          -> Color.rgb(125, 138, 245, 0.3);
+            case "highway"        -> Color.rgb(50, 50, 50, 0.3);
+            case "historic"       -> Color.rgb(115, 74, 8, 0.3);
+            case "indoor"         -> Color.rgb(158, 148, 140);
+            case "mast"           -> Color.WHITE;
+            case "power"          -> Color.rgb(227, 204, 223);
+            case "rock"           -> Color.GREY;
+            case "silo"           -> Color.STEELBLUE;
+            case "stage"          -> Color.STEELBLUE;
+            case "stone"          -> Color.DARKGREY;
+            case "storage_tank"   -> Color.STEELBLUE;
+            case "surface"        -> Color.DARKGREY;
+            case "square"         -> Color.STEELBLUE;
+            case "tourism"        -> Color.rgb(222, 246, 192);
+            case "waterway"       -> Color.TRANSPARENT;
+            //endregion
+
+            //region patches
             case "Cityringen" -> Color.TRANSPARENT;
-            case "shrubbery"  -> Color.RED;
+            case "shrubbery"  -> Color.rgb(199, 199, 180);
+            case "fence_type" -> Color.rgb(158, 148, 140, 0.3);
             case "flowerbed"  -> Color.RED;
             case "route"      -> Color.RED;
             case "sport"      -> Color.RED;
-            case "yes"        -> Color.RED;
+            case "yes"        -> Color.TRANSPARENT;
             case "paved"      -> Color.RED;
             case "forestØsterled" -> Color.RED;
-            case "stage"      -> Color.RED;
-            case "rock"       -> Color.RED;
             case "scrubStrandvejenStrandvejen" -> Color.RED;
-            case "stone"      -> Color.RED;
             //endregion
             default -> Color.rgb(0, 74, 127, 0.1);
         };
