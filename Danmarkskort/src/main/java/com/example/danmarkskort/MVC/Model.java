@@ -122,7 +122,7 @@ public class Model {
         }
 
         //Nodes
-        /* try {
+        try {
             ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream("data/StandardMap/nodes.obj")));
             int totalNodes = input.readInt();
 
@@ -135,7 +135,7 @@ public class Model {
             input.close();
         } catch (Exception e) {
             System.out.println("Error reading nodes!: " + e.getMessage());
-        } */
+        }
 
         //Roads
         try {
