@@ -7,6 +7,7 @@ import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.MapObjects.Tilegrid;
 import com.example.danmarkskort.Parser;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import javafx.scene.canvas.Canvas;
 
 import java.io.BufferedInputStream;
@@ -35,7 +36,7 @@ public class Model {
 
     //region Constructor(s)
     /** Checks what filetype the filepath parameter is.
-     *  Calls {@link #parseOBJ()} if it's an OBJ-file, if not, creates a new {@link Parser} class and propagates the responsibility
+     *  Calls {@link #parseOBJToParser()} if it's an OBJ-file, if not, creates a new {@link Parser} class and propagates the responsibility
      */
     private Model(String filePath, Canvas canvas) {
         assert canvas != null;
@@ -47,7 +48,8 @@ public class Model {
         //If .obj file
         if (filePath.endsWith(".obj")) {
             try {
-                parseOBJ();
+                parseOBJToParser();
+                System.out.println("Finished deserializing parser!");
             } catch (Exception e) {
                 System.out.println("Error loading .obj!: " + e.getMessage());
                 System.out.println("Stacktrace:");
@@ -57,7 +59,6 @@ public class Model {
             //If anything else it creates a new parser and tries saves it as .obj
             try {
                 parser = new Parser(file);
-                saveParserToOBJ();
             } catch (ParserSavingException e) {
                 System.out.println(e.getMessage());
             } catch (Exception e) {
@@ -105,10 +106,77 @@ public class Model {
     }
 
     /// Parses a .obj file. This method is called in the Parser constructor if the given filepath ends with .obj
-    private void parseOBJ() throws IOException, ClassNotFoundException {
-        ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
-        parser = (Parser) input.readObject();
-        input.close();
+    private void parseOBJToParser() {
+        TLongObjectHashMap<Node> id2Node = new TLongObjectHashMap<>(66_289_558);
+        TLongObjectHashMap<Road> id2Road = new TLongObjectHashMap<>(2_214_235);
+        TLongObjectHashMap<Polygon> id2Polygon = new TLongObjectHashMap<>(6_168_995);
+
+        //region Reading .obj files
+        //Parser
+        try {
+            ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
+            parser = (Parser) input.readObject();
+            input.close();
+        } catch (Exception e) {
+            System.out.println("Error reading parser!: " + e.getMessage());
+        }
+
+        //Nodes
+        /* try {
+            ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream("data/StandardMap/nodes.obj")));
+            int totalNodes = input.readInt();
+
+            for (int i = 0; i < totalNodes; i++) {
+                long id = input.readLong();
+                Node node = (Node) input.readObject();
+                id2Node.put(id, node);
+
+            }
+            input.close();
+        } catch (Exception e) {
+            System.out.println("Error reading nodes!: " + e.getMessage());
+        } */
+
+        //Roads
+        try {
+            ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream("data/StandardMap/roads.obj")));
+            int totalRoads = input.readInt();
+            for (int i = 0; i < totalRoads; i++) {
+                long id = input.readLong();
+                Road road = (Road) input.readObject();
+                id2Road.put(id, road);
+            }
+            input.close();
+        } catch (Exception e) {
+            System.out.println("Error reading roads!: " + e.getMessage());
+        }
+
+        //Polygons
+        try {
+            ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream("data/StandardMap/polygons.obj")));
+            int totalPolygons = input.readInt();
+
+            for (int i = 0; i < totalPolygons; i++) {
+                long id = input.readLong();
+                Polygon polygon = (Polygon) input.readObject();
+                id2Polygon.put(id, polygon);
+            }
+            input.close();
+        } catch (Exception e) {
+            System.out.println("Error reading nodes!: " + e.getMessage());
+        }
+        //endregion
+
+
+        //Inserts into parser
+        parser.setNodes(id2Node);
+        parser.setRoads(id2Road);
+        parser.setPolygons(id2Polygon);
+
+        //Closes input and checks for errors
+        assert parser != null && parser.getNodes() != null && parser.getRoads() != null && parser.getPolygons() != null;
+
+        //Loads polygons colors after serialization
         for (Polygon polygon : parser.getPolygons().valueCollection()) {
             polygon.determineColor();
         }
@@ -116,14 +184,86 @@ public class Model {
 
     /// Saves the parser to a .obj file so it can be called later. Method is called in {@link #Model} if the file isn't a .obj
     public void saveParserToOBJ() {
-        outputFile = new File(file+".obj");
+        //Saves parser
         try {
-            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(outputFile));
+            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/parser.obj"));
+            System.out.println("Saving parser...");
             outputStream.writeObject(parser);
+            System.out.println("Finished saving parser!");
+            System.out.println();
             outputStream.close();
-        } catch (IOException e) {
-            throw new ParserSavingException("Error saving parser as .obj! Error Message: " + e.getMessage());
+        } catch (Exception e) {
+            throw new ParserSavingException("Error saving parser to OBJ!: " + e.getMessage());
         }
+
+        //Saves nodes
+        try {
+            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/nodes.obj"));
+            outputStream.writeInt( parser.getNodes().size());
+            System.out.println("Processing ~" + ((double) parser.getNodes().size()/1_000_000) + " million nodes...");
+            int resetCounter = 0;
+            for (Long id : parser.getNodes().keys()) {
+                outputStream.writeLong(id);
+                outputStream.writeObject(parser.getNodes().get(id));
+                resetCounter++;
+                if (resetCounter % 1_000_000 == 0) {
+                    outputStream.reset();
+                    System.out.println("Processed: " + (resetCounter/1_000_000) + " million nodes so far!");
+                }
+            }
+            parser.getNodes().clear(); //Clears them so they can be GC'ed
+            System.out.println("Finished with nodes!");
+            System.out.println();
+            outputStream.close();
+        } catch (Exception e) {
+            throw new ParserSavingException("Error saving nodes as .obj! Error Message: " + e.getMessage());
+        }
+
+        //Saves Roads
+        try {
+            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/roads.obj"));
+            outputStream.writeInt(parser.getRoads().size());
+            System.out.println("Processing ~" + ((double) parser.getRoads().size()/1_000_000) + " million roads...");
+            int resetCounter = 0;
+            for (Long id : parser.getRoads().keys()) {
+                outputStream.writeLong(id);
+                outputStream.writeObject(parser.getRoads().get(id));
+                resetCounter++;
+                if (resetCounter % 1_000_000 == 0) {
+                    outputStream.reset();
+                    System.out.println("Processed: " + (resetCounter/1_000_000) + " million roads so far!");
+                }
+            }
+            System.out.println("Finished with roads!");
+            System.out.println();
+            outputStream.close();
+        } catch (Exception e) {
+            throw new ParserSavingException("Error saving roads as .obj! Error Message: " + e.getMessage());
+        }
+
+
+        //Saves Polygons
+        try {
+            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/polygons.obj"));
+            outputStream.writeInt(parser.getPolygons().size());
+            System.out.println("Processing ~" + ((double) parser.getPolygons().size()/1_000_000) + " million polygons...");
+            int resetCounter = 0;
+            for (Long id : parser.getPolygons().keys()) {
+                outputStream.writeLong(id);
+                outputStream.writeObject(parser.getPolygons().get(id));
+                resetCounter++;
+                if (resetCounter % 1_000_000 == 0) {
+                    outputStream.reset();
+                    System.out.println("Processed: " + (resetCounter/1_000_000) + " million polygons so far!");
+                }
+            }
+            System.out.println("Finished with polygons!");
+            System.out.println();
+            outputStream.close();
+        } catch (Exception e) {
+            throw new ParserSavingException("Error saving polygon as .obj! Error Message: " + e.getMessage());
+        }
+        System.exit(0);
     }
 
     /// Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile
@@ -238,6 +378,7 @@ public class Model {
                 maxY = nodeY;
             }
         }
+        assert minX != Double.POSITIVE_INFINITY && minY != Double.POSITIVE_INFINITY && maxX != Double.NEGATIVE_INFINITY && maxY != Double.NEGATIVE_INFINITY;
         minMaxCoords[0] = minX;
         minMaxCoords[1] = minY;
         minMaxCoords[2] = maxX;

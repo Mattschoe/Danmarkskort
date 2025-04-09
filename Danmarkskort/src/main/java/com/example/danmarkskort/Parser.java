@@ -17,12 +17,12 @@ public class Parser implements Serializable {
     @Serial private static final long serialVersionUID = 8838055424703291984L;
 
     //region Fields
-    private final TLongObjectHashMap<Node> id2Node; //map for storing a Node and the id used to refer to it
-    private final TLongObjectHashMap<Road>    id2Road;
-    private final TLongObjectHashMap<Polygon> id2Polygon;
-    private final File      file; //The file that's loaded in
+    private transient TLongObjectHashMap<Node> id2Node; //map for storing a Node and the id used to refer to it
+    private transient TLongObjectHashMap<Road>    id2Road;
+    private transient TLongObjectHashMap<Polygon> id2Polygon;
+    private final File file; //The file that's loaded in
     ///\[0] = minLat <br> \[1] = minLong <br> \[2] = maxLat <br> \[3] = maxLong
-    private final double[]  bounds;
+    private final double[] bounds;
 
     private int failedWays;
     private int failedRelations;
@@ -37,10 +37,10 @@ public class Parser implements Serializable {
      */
     public Parser(File file) throws NullPointerException, IOException, XMLStreamException, FactoryConfigurationError {
         this.file = file;
-        id2Node = new TLongObjectHashMap<>(49_721_049);
+        id2Node = new TLongObjectHashMap<>(66_289_558);
         //id2Node = new HashMap<>(49_721_049);
-        id2Road = new TLongObjectHashMap<>(3_146_438);
-        id2Polygon = new TLongObjectHashMap<>(3_146_438);
+        id2Road = new TLongObjectHashMap<>(2_214_235);
+        id2Polygon = new TLongObjectHashMap<>(6_168_995);
         bounds = new double[4];
 
         failedWays = 0; failedNodes = 0; failedRelations = 0; outOfBoundsNodes = 0;
@@ -397,6 +397,9 @@ public class Parser implements Serializable {
     public TLongObjectHashMap<Node> getNodes() { return id2Node; }
     public TLongObjectHashMap<Road> getRoads() { return id2Road; }
     public TLongObjectHashMap<Polygon> getPolygons() { return id2Polygon; }
+    public void setNodes(TLongObjectHashMap<Node> nodes) { id2Node = nodes; }
+    public void setRoads(TLongObjectHashMap<Road> roads) { id2Road = roads; }
+    public void setPolygons(TLongObjectHashMap<Polygon> polygons) { id2Polygon = polygons; }
     public double[] getBounds() { return bounds; }
     //endregion
 }
