@@ -21,7 +21,7 @@ public class ModelTest {
 
     @Test
     public void saveParserAsOBJ() {
-        Model model = new Model("./data/small.osm", canvas);
+        Model model = Model.getInstance("./data/small.osm", canvas);
         File file = new File("./data/small.osm.obj");
         assertTrue(file.exists());
         file.delete();
@@ -34,19 +34,20 @@ public class ModelTest {
     public void loadParserAsOBJ() {
         File objFile = new File("./data/small.osm.obj");
 
-        Model createObjFileModel = new Model("./data/small.osm", canvas);
-        Model createParserFromObjModel = new Model(objFile.getPath(), canvas);
+        Model createObjFileModel = Model.getInstance("./data/small.osm", canvas);
+        Model createParserFromObjModel = Model.getInstance(objFile.getPath(), canvas);
         assertNotNull(createParserFromObjModel.getParser());
     }
 
     /**
      * Same as {@link #saveParserAsOBJ()} just doesnt delete the OBJ file again. Should be marked @Disabled as standard since it doesn't dele the file again
      */
-    @Disabled
+    //@Disabled
     @Test
     public void createOBJFile() {
-        Model model = new Model("./data/small.osm", canvas);
-        File file = new File("./data/small.osm.obj");
+        Model model = Model.getInstance("./data/mapOfDenmark.osm", canvas);
+        model.saveParserToOBJ();
+        File file = new File("./data/mapOfDenmark.osm.obj");
         assertTrue(file.exists());
     }
 

@@ -24,15 +24,25 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
+tasks.withType(JavaExec) {
+    jvmArgs('-Xmx16g')
+}
+
+tasks.withType(Test) {
+    jvmArgs('-Xmx16g')
+}
+
 application {
     mainModule = 'com.example.danmarkskort'
-    mainClass = 'com.example.danmarkskort.Application'
+    mainClass = 'com.example.danmarkskort.App'
+    applicationDefaultJvmArgs = ['-Dstdout.encoding=UTF-8', '-Dstderr.encoding=UTF-8']
 }
 
 javafx {
     version = '23.0.1'
     modules = ['javafx.controls', 'javafx.fxml']
 }
+ 
 
 dependencies {
     implementation('org.controlsfx:controlsfx:11.2.1')
@@ -43,6 +53,7 @@ dependencies {
 
 
     implementation 'com.itextpdf:itextpdf:5.5.13.3'
+    implementation 'net.sf.trove4j:trove4j:3.0.3'
 }
 
 run {

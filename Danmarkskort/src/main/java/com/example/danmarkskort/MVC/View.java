@@ -1,42 +1,47 @@
 package com.example.danmarkskort.MVC;
 
-import com.example.danmarkskort.MapObjects.Polygon;
-import com.example.danmarkskort.MapObjects.Road;
+import com.example.danmarkskort.MapObjects.Tile;
+import com.example.danmarkskort.MapObjects.Tilegrid;
 import com.example.danmarkskort.Parser;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
+import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 
 public class View {
-    //region fields
-    Affine trans;
-    Affine background;
-    Canvas canvas;
-    Controller controller;
-    FXMLLoader root;
-    String fxmlLocation; //The standard location for fxml. Needs to be added to every filepath
-    GraphicsContext graphicsContext;
-    Parser parser;
-    Scene scene;
-    Stage stage;
-    boolean firstTimeDrawingMap;
-    int currentZoom, minZoom, maxZoom;
+    //region Fields
+    private Affine trans;
+    private Affine bgTrans;
+    private Canvas canvas;
+    private final Controller controller;
+    private GraphicsContext graphicsContext;
+    private Parser parser;
+    private final Scene scene;
+    private final Stage stage;
+    private boolean firstTimeDrawingMap;
+    private int currentZoom, minZoom, maxZoom;
+    private List<Tile> visibleTiles;
+    private Tilegrid tilegrid;
     //endregion
 
-    /** View-konstruktøren skifter scene ud fra en given stage og filstien til en FXML-fil
-     * @param stage givne stage ved start-up fås denne af Application's start-metode, ellers genbruger Controlleren Stage'en der allerede vises
-     * @param filename givne filsti f.eks. "startup.fxml" til start-scenen
-     * @throws IOException kastes hvis programmet fejler i at loade FXML-filen
+    //region Constructor(s)
+    /** The View-constructor switches the scene from a given stage and a filepath to an FXML-file
+     *  @param stage the given stage -- usually coming from the window we're in, as to not open a new window
+     *  @param filename the given filepath -- fx. "startup.fxml" for the start-up scene
+     *  @throws IOException thrown if the program fails to load the FXML-file
      */
     public View(Stage stage, String filename) throws IOException {
-        fxmlLocation = "/com/example/danmarkskort/" + filename;
+        //The standard location for fxml. Needs to be added to every filepath
+        String fxmlLocation = "/com/example/danmarkskort/" + filename;
         firstTimeDrawingMap = true;
 
         //Gemmer Stage'en
@@ -45,7 +50,7 @@ public class View {
         //Skaber en FXMLLoader, klar til at loade den specificerede FXML-fil
         URL url = getClass().getResource(fxmlLocation);
         assert url != null;
-        root = new FXMLLoader(url);
+        FXMLLoader root = new FXMLLoader(url);
 
         //Hvis det er start-scenen, får vinduet en forudbestemt størrelse, ellers sættes den dynamisk
         double width, height;
@@ -67,22 +72,25 @@ public class View {
         stage.setScene(scene);
         stage.show();
 
-        //Hvis vi laver en scene med et Canvas initialiseres og tegnes det
-        if (controller.getCanvas() != null) initializeCanvas();
+        /* Her plejede at være et if-statement ift. hvorvidt controller.getCanvas() var null, men dette
+         * blev redundant efter Matthias tilføjede instansiering af canvas i Controller's konstruktør */
+        initializeCanvas();
 
         //Sets up the Zoom levels
-        currentZoom = 7;
         minZoom = 1;
-        maxZoom = 6;
+        maxZoom = 15;
+        currentZoom = maxZoom;
     }
+    //endregion
 
-    ///Giver Canvas en Transform og bunden højde/bredde
+    //region Methods
+    /// Sets the canvas' transform, and binds its height and width
     private void initializeCanvas() {
         //Canvas'et og dets GraphicsContext gemmes
         canvas = controller.getCanvas();
         graphicsContext = canvas.getGraphicsContext2D();
-        trans = new Affine();
-        background = new Affine();
+        trans   = new Affine();
+        bgTrans = new Affine();
         graphicsContext.setTransform(trans);
 
         //Canvas højde og bredde bindes til vinduets
@@ -104,86 +112,83 @@ public class View {
         this.parser = parser;
 
         //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
-        graphicsContext.setTransform(background);
-        graphicsContext.setFill(Color.ANTIQUEWHITE);
+        graphicsContext.setTransform(bgTrans);
+        graphicsContext.setFill(Color.LIGHTBLUE);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
-        int zoomPercentage = (int) (((double) currentZoom/maxZoom) * 100);
-        int fullDetails = 40; //% when all details should be drawn
-        int mediumDetails = 70; //% when a balanced amount of details should be drawn
-        if (zoomPercentage < fullDetails && zoomPercentage < mediumDetails) { //Draws with all details
-
-        } else if (zoomPercentage < mediumDetails) { //Draws with some details
-
-        } else { //Draws the map with least amount of details
-
+        //Draws map
+        //region TESTING
+        //Tegner kun tiles inde for viewport
+        if (tilegrid != null) {
+            try {
+                tilegrid.drawVisibleTiles(graphicsContext, getViewport(), getLOD());
+                //tilegrid.drawVisibleTiles(graphicsContext, getViewport(), 4);
+            } catch (NonInvertibleTransformException e) {
+                System.out.println("Error getting viewport! Error: " + e.getMessage());
+            }
         }
+        //endregion
 
-        drawRoads();
-        drawPolygons();
 
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
             firstTimeDrawingMap = false;
-
-            pan(-0.5599 * parser.getBounds()[1], parser.getBounds()[2]);
-            zoom(0, 0, 0.95 * canvas.getHeight() / (parser.getBounds()[2] - parser.getBounds()[0]));
         }
-
     }
 
-
-
-
-    ///STJÅLET FRA NUTAN
+    /// Method pans on the canvas -- STOLEN FROM NUTAN
     public void pan(double dx, double dy) {
+        //Moves the map
         trans.prependTranslation(dx, dy);
         drawMap(parser);
     }
 
-    /**
-     * Zooms in and out, zoom level is limited by {@code minZoom} and {@code maxZoom} which can be changed in the constructor
-     * @param dx deltaX
-     * @param dy deltaY
-     * @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
+    /** Zooms in and out, zoom level is limited by {@code minZoom} and {@code maxZoom} which can be changed in the constructor
+     *  @param dx deltaX
+     *  @param dy deltaY
+     *  @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
      */
-    public void zoom(double dx, double dy, double factor) {
-        if (factor >= 1 && currentZoom > minZoom) { //Zoom ind
-            currentZoom--;
-            trans.prependTranslation(-dx, -dy);
-            trans.prependScale(factor, factor);
-            trans.prependTranslation(dx, dy);
-            drawMap(parser);
-        } else if (factor <= 1 && currentZoom < maxZoom) { //Zoom out
-            currentZoom++;
-            trans.prependTranslation(-dx, -dy);
-            trans.prependScale(factor, factor);
-            trans.prependTranslation(dx, dy);
-            drawMap(parser);
-        }
+    public void zoom(double dx, double dy, double factor, boolean ignoreMinMax) {
+        /*if (factor >= 1 && currentZoom > minZoom) currentZoom--; //Zoom ind
+        else if (factor <= 1 && currentZoom < maxZoom) currentZoom++; //Zoom out
+        else if (ignoreMinMax) {
+            //Needs to be changed
+        } else {
+            //If we are not allowed to zoom
+            System.out.println("Nuhu");
+            return;
+        }*/
+
+        //Zooms
+        trans.prependTranslation(-dx, -dy);
+        trans.prependScale(factor, factor);
+        trans.prependTranslation(dx, dy);
+        drawMap(parser);
     }
 
-    ///Draws all roads. Method is called in {@link #drawMap(Parser)}
-    private void drawRoads() {
-        Road road;
-        for (long id : parser.getRoads().keySet()) {
-            road = parser.getRoads().get(id);
-            if (road.getRoadType().equals("route")) continue;
-            road.drawRoad(canvas);
-        }
+    /// Changes the current zoom level to a range from 0 to 4 (needed for the LOD). 0 is minimum amount of details, 4 is maximum
+    private int getLOD() {
+        if (trans.getMxx() > 65) return 4;
+        if (trans.getMxx() > 40) return 3;
+        if (trans.getMxx() > 8)  return 2;
+        if (trans.getMxx() > 4)  return 1;
+        else return 0;
     }
+    //endregion
 
-    ///Draws all polygons (buildings etc.). Method is called in {@link #drawMap(Parser)}
-    private void drawPolygons() {
-        Polygon polygon;
-        for (long id : parser.getPolygons().keySet()) {
-            polygon = parser.getPolygons().get(id);
-            polygon.drawPolygon(graphicsContext);
-        }
+    //region Getters and setters
+    public Stage getStage() { return stage; }
+    public Affine getTrans() { return trans; }
+    public void setVisibleTiles(List<Tile> visibleTiles) {
+        this.visibleTiles = visibleTiles;
     }
-
-    //GETTERS AND SETTERS
-    Stage getStage() { return stage; }
+    public double[] getViewport() throws NonInvertibleTransformException {
+        Point2D minXY = trans.inverseTransform(0, 0);
+        Point2D maxXY = trans.inverseTransform(canvas.getWidth(), canvas.getHeight());
+        return new double[]{minXY.getX(), minXY.getY(), maxXY.getX(), maxXY.getY()};
+    }
+    public void setTilegrid(Tilegrid tilegrid) { this.tilegrid = tilegrid; }
+    //endregion
 }

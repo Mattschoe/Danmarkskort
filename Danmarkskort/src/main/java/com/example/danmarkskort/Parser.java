@@ -1,8 +1,9 @@
 package com.example.danmarkskort;
 
+import com.example.danmarkskort.Exceptions.MapObjectOutOfBoundsException;
 import com.example.danmarkskort.MapObjects.Node;
-import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Polygon;
+import com.example.danmarkskort.MapObjects.Road;
 
 import javax.xml.stream.*;
 import java.io.*;
@@ -10,39 +11,53 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import gnu.trove.map.hash.TLongObjectHashMap;
+
 public class Parser implements Serializable {
-    //region fields
     @Serial private static final long serialVersionUID = 8838055424703291984L;
-   private Map<Long, Node> id2Node; //map for storing a Node and the id used to refer to it
-    private Map<Long, Road> id2Road;
-    private Map<Long, Polygon> id2Polygon;
-    private File file; //The file that's loaded in
-    private double[] bounds; //OSM-filens bounds, dvs. de længst væk koordinater hvor noget tegnes
-    private Set<Road> significantHighways;
+
+    //region Fields
+    private transient TLongObjectHashMap<Node> id2Node; //map for storing a Node and the id used to refer to it
+    private transient TLongObjectHashMap<Road>    id2Road;
+    private transient TLongObjectHashMap<Polygon> id2Polygon;
+    private final File file; //The file that's loaded in
+    ///\[0] = minLat <br> \[1] = minLong <br> \[2] = maxLat <br> \[3] = maxLong
+    private final double[] bounds;
+
+    private int failedWays;
+    private int failedRelations;
+    private int failedNodes;
+    private int outOfBoundsNodes;
     //endregion
 
+    //region Constructor(s)
     /**
      * Checks what filetype the filepath parameter is and calls the appropriate method
      * @param file the file that needs to be processed.
      */
     public Parser(File file) throws NullPointerException, IOException, XMLStreamException, FactoryConfigurationError {
         this.file = file;
-        id2Node = new HashMap<>(7285439);
-        id2Road = new HashMap<>(489884);
-        id2Polygon = new HashMap<>(489884);
+        id2Node = new TLongObjectHashMap<>(66_289_558);
+        //id2Node = new HashMap<>(49_721_049);
+        id2Road = new TLongObjectHashMap<>(2_214_235);
+        id2Polygon = new TLongObjectHashMap<>(6_168_995);
         bounds = new double[4];
-        significantHighways = new HashSet<>();
 
-        String filename = getFileName();
+        failedWays = 0; failedNodes = 0; failedRelations = 0; outOfBoundsNodes = 0;
+
+        String filename = getFile().getName();
         //Switch case with what filetype the file is and call the appropriate method:
         if (filename.endsWith(".zip")) {
             parseZIP(filename);
         } else if (filename.endsWith(".osm")) {
             parseOSM(file);
         }
+        System.out.println("Finished parsing file. With: " + failedNodes + " nodes | " + failedWays + " ways | " + failedRelations + " relations, that failed!");
+        System.out.println("And with + " + outOfBoundsNodes + " nodes out of bounds!");
     }
+    //endregion
 
-
+    //region Methods
     /**
      * Creates zipInputStream to read .osm.ZIP-file. Gets ZIP-entry in String format to use in
      * parseOSM().
@@ -87,6 +102,7 @@ public class Parser implements Serializable {
      * @throws XMLStreamException if an error with the reader occurs
      */
     public void parseOSM(File file) throws IOException, XMLStreamException {
+        setStandardBounds(); //This has to be called first so we can check if nodes are in DKK
         XMLStreamReader input = XMLInputFactory.newInstance().createXMLStreamReader(new FileReader(file)); //ny XMLStreamReader
         //Gennemgår hver tag og parser de tags vi bruger
         while (input.hasNext()) {
@@ -95,32 +111,139 @@ public class Parser implements Serializable {
                 String tagName = input.getLocalName();
 
                 //End of OSM
-                if (tagName.equals("relation")) return;
                 if (tagName.equals("bounds")) parseBounds(input);
-                if (tagName.equals("node")) {
-                    try {
-                        parseNode(input);
+                else if (tagName.equals("node")) {
+                    try { parseNode(input); } catch (MapObjectOutOfBoundsException e) {
+                        outOfBoundsNodes++;
                     } catch (Exception e) {
-                        System.out.println("Failed creating Node! with input: " + input);
+                        failedNodes++;
                     }
                 } else if (tagName.equals("way")) {
-                    try {
-                        parseWay(input);
-                    } catch (Exception e) {
-                        System.out.println("Failed creating Way! with input: " + input);
+                    try { parseWay(input); } catch (Exception e) {
+                        failedWays++;
+                    }
+                } else if (tagName.equals("relation")) {
+                    try { parseRelation(input); } catch (Exception e) {
+                        failedRelations++;
                     }
                 }
             }
-            //System.out.println("Node count: " + id2Node.size() + " | Way count: " + (id2Road.size() + id2Polygon.size()));
         }
     }
 
-    ///Saves the OSM-file's bounds-coordinates (so that View can zoom in to these on startup)
+
+    /**
+     * Saves the OSM-file's bounds-coordinates (so that View can zoom in to these on startup) <br>
+     * [0] = minLat <br> [1] = minLong <br> [2] = maxLat <br> [3] = maxLong
+     */
     private void parseBounds(XMLStreamReader input) {
         bounds[0] = Double.parseDouble(input.getAttributeValue(0)); //Min. latitude
         bounds[1] = Double.parseDouble(input.getAttributeValue(1)); //Min. longitude
         bounds[2] = Double.parseDouble(input.getAttributeValue(2)); //Max. latitude
         bounds[3] = Double.parseDouble(input.getAttributeValue(3)); //Max. longitude
+    }
+
+    /**
+     * Parses a {@link Node} from XMLStreamReader.next() and then adds it to id2Node
+     * @throws XMLStreamException if there is an error with the {@code XMLStreamReader}
+     */
+    private void parseNode(XMLStreamReader input) throws XMLStreamException {
+        //Saves the guaranteed values
+        long id = Long.parseLong(input.getAttributeValue(null, "id"));
+        double lat = Double.parseDouble(input.getAttributeValue(null, "lat"));
+        double lon = Double.parseDouble(input.getAttributeValue(null, "lon"));
+        if (lat < bounds[0] || lat > bounds[2] || lon < bounds[1] || lon > bounds[3]) throw new MapObjectOutOfBoundsException("Node is out of bounds!");
+
+
+        int nextInput = input.next();
+        //If simple node, saves it and returns
+        if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("node")) {
+            id2Node.put(id, new Node(lat, lon)); //Instansierer new node (node containing no child-elements)
+            return;
+        }
+
+        //Complex node
+        String city = null;
+        String houseNumber = null;
+        int postcode = 0;
+        String street = null;
+        while (input.hasNext()) {
+            //End of Node
+            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("node")) {
+                break;
+            }
+
+            if (nextInput == XMLStreamConstants.START_ELEMENT && input.getLocalName().equals("tag")) {
+                String key = input.getAttributeValue(null, "k");
+                String value = input.getAttributeValue(null, "v");
+                if (key == null || value == null) continue;
+                if (key.equals("addr:city")) {
+                    city = value;
+                } else if (key.equals("addr:housenumber")) {
+                    houseNumber = value;
+                } else if (key.equals("addr:postcode")) {
+                    postcode = Integer.parseInt(value);
+                } else if (key.equals("addr:street")) {
+                    street = value;
+                }
+            }
+            nextInput = input.next();
+        }
+
+        //Creates a complex 'Node' unless it doesn't have any of the elements of a complex 'Node', then it just makes a simple one (Mayb change later)
+        if (city == null && houseNumber == null && postcode == 0 && street == null) {
+            id2Node.put(id, new Node(lat, lon)); //Instantiates a new node (node containing no child-elements)
+        } else {
+            id2Node.put(id, new Node(lat, lon, city, houseNumber, postcode, street));
+        }
+    }
+
+    private void parseRelation(XMLStreamReader input) throws XMLStreamException {
+        //The relation's "fields"
+        List<Long> members = new ArrayList<>();
+        String type = "";
+
+        //Runs through every child of the relation until a relation end-element is encountered
+        while (input.hasNext()) {
+            int nextInput = input.next();
+
+            //Checks whether we've found the end element and terminates the while-loop if so
+            if (nextInput == XMLStreamConstants.END_ELEMENT
+                    && input.getLocalName().equals("relation")) { break; }
+
+            //Handles the relation's children
+            if (nextInput == XMLStreamConstants.START_ELEMENT) {
+                //All 'member'-tags are added to the list of the Relation's members
+                if (input.getLocalName().equals("member")) {
+                    members.add(Long.valueOf(input.getAttributeValue(null, "ref")));
+                }
+                //For all 'tag'-tags temporarily save key and value, and do certain things in certain cases...
+                else if (input.getLocalName().equals("tag")) {
+                    String key = input.getAttributeValue(null, "k");
+                    String val = input.getAttributeValue(null, "v");
+                    if (key == null || val == null) continue; //If k or v are null we skip the element
+                    else if (key.equals("amenity") || key.equals("building") || key.equals("surface")) {
+                        type = key;
+                    }
+                    else if (key.equals("landuse") || key.equals("leisure") || key.equals("natural") || key.equals("route")) {
+                        type = val;
+                    }
+                }
+
+                for (long memberID : members) {
+                    if (id2Polygon.containsKey(memberID)) {
+                        Polygon member = id2Polygon.get(memberID);
+                        if (member.getType().isEmpty()) {
+                            member.setType(type);
+                        }
+                    }
+                    else if (id2Road.containsKey(memberID)) {
+                        Road member = id2Road.get(memberID);
+                        if (member.getType().isEmpty()) member.setType(type);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -185,13 +308,12 @@ public class Parser implements Serializable {
                 String value = input.getAttributeValue(null, "v"); // får fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
                 switch (key) {
-                    case "natural", "landuse":
+                    case "aeroway", "disused:landuse", "landuse", "leisure", "man_made", "natural", "place":
                         return new Polygon(nodesInPolygon, value);
-                    case "building":
-                        return new Polygon(nodesInPolygon, "building");
-                    case "place":
-                        if(value.equals("island")) { return new Polygon(nodesInPolygon, value); }
-                        break;
+                    case "amenity", "area:highway", "attraction", "barrier", "boundary", "bridge:support", "building",
+                         "fence_type", "highway", "historic", "indoor", "military", "playground", "power",
+                         "surface", "tourism", "waterway":
+                        return new Polygon(nodesInPolygon, key);
                 }
                 if (value.equals("Cityringen")) return new Polygon(nodesInPolygon, value); //TODO %% Find en bedre måde at IKKE tegne Cityringen
             }
@@ -213,8 +335,6 @@ public class Parser implements Serializable {
         int maxSpeed = 0;
         String roadType = "";
         boolean hasMaxSpeed = false;
-        boolean significantHighway = false;
-
         //endregion
 
         //Loops through tags and saves them
@@ -231,7 +351,6 @@ public class Parser implements Serializable {
                 String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
                 if (key.equals("highway") || key.equals("natural") || key.equals("area:highway")){     //find ud af typen af highway
-                    significantHighway = value.equals("motorway") || value.equals("trunk") || value.equals("primary") || value.equals("secondary") || value.equals("primary_link") || value.equals("secondary_link");
                     roadType = value;
                 } else if (key.equals("maxspeed")) {
                     maxSpeed = Integer.parseInt(value);
@@ -240,14 +359,8 @@ public class Parser implements Serializable {
                     bicycle = value.equals("true");
                 } else if (key.equals("foot")) {
                     foot = value.equals("yes");
-                } else if (key.equals("railway")) {
-                    if (value.equals("subway")) roadType = value;
-                }
-                //Value
-                if (value.equals("subway")) roadType = value;
-
-                if (key.equals("natural")){
-                    if (value.equals("coastline")) roadType = value;
+                } else if (key.equals("route")) {
+                    roadType = key;
                 }
             }
             nextInput = input.next(); //Moves on to the next "tag" element
@@ -257,82 +370,41 @@ public class Parser implements Serializable {
         Road road;
         if (hasMaxSpeed){
             road = new Road(nodes, foot, bicycle, maxSpeed, roadType);
-            if(significantHighway) {
-             significantHighways.add(road);
-            }
         } else {
             road = new Road(nodes, foot, bicycle, roadType);
-            if(significantHighway) {
-                significantHighways.add(road);
-            }
         }
         return road;
     }
 
-    /**
-     * Parses a {@link Node} from XMLStreamReader.next() and then adds it to id2Node
-     * @throws XMLStreamException if there is a error with the {@code XMLStreamReader}
-     */
-    private void parseNode(XMLStreamReader input) throws XMLStreamException {
-        //Saves the guaranteed values
-        long id = Long.parseLong(input.getAttributeValue(null, "id"));
-        double lat = Double.parseDouble(input.getAttributeValue(null, "lat"));
-        double lon = Double.parseDouble(input.getAttributeValue(null, "lon"));
-
-        int nextInput = input.next();
-        //If simple node, saves it and returns
-        if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("node")) {
-            id2Node.put(id, new Node(lat, lon)); //Instantierer new node (node containing no child-elements)
-            return;
-        }
-
-        //Complex node
-        String city = null;
-        String houseNumber = null;
-        int postcode = 0;
-        String street = null;
-        while (input.hasNext()) {
-            //End of Node
-            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("node")) {
-                break;
-            }
-
-            if (nextInput == XMLStreamConstants.START_ELEMENT && input.getLocalName().equals("tag")) {
-                String key = input.getAttributeValue(null, "k");
-                String value = input.getAttributeValue(null, "v");
-                if (key == null || value == null) continue;
-                if (key.equals("addr:city")) {
-                    city = value;
-                } else if (key.equals("addr:housenumber")) {
-                    houseNumber = value;
-                } else if (key.equals("addr:postcode")) {
-                    postcode = Integer.parseInt(value);
-                } else if (key.equals("addr:street")) {
-                    street = value;
-                }
-            }
-            nextInput = input.next();
-        }
-
-        //Creates a complex 'Node' unless it doesn't have any of the elements of a complex 'Node', then it just makes a simple one (Mayb change later)
-        if (city == null && houseNumber == null && postcode == 0 && street == null) {
-            id2Node.put(id, new Node(lat, lon)); //Instantierer new node (node containing no child-elements)
-        } else {
-            id2Node.put(id, new Node(lat, lon, city, houseNumber, postcode, street));
-        }
+    /// @return true if bounds is incomplete, else false
+    private boolean isBoundsIncomplete() {
+        return bounds[0] == 0 || bounds[1] == 0 || bounds[2] == 0 || bounds[3] == 0;
     }
 
-    //GETTERS AND SETTERS
+    /// Sets the standard bounds to the middle of DK
+    private void setStandardBounds() {
+        bounds[0] = 54.481528;
+        bounds[1] = 7.679673;
+        bounds[2] = 57.995290;
+        bounds[3] = 15.708697; //Bornholm gør at DK er mega lang :(, once again et giga Bornholm L
+    }
+    //endregion
+
+    //region GETTERS AND SETTERS
     public String getFileName() { return file.getName(); }
     public File getFile() { return file; }
-    public Map<Long, Node> getNodes() { return id2Node; }
-    public Map<Long, Road> getRoads() { return id2Road; }
-    public Map<Long, Polygon> getPolygons() { return id2Polygon; }
+    public TLongObjectHashMap<Node> getNodes() { return id2Node; }
+    public TLongObjectHashMap<Road> getRoads() { return id2Road; }
+    public TLongObjectHashMap<Polygon> getPolygons() { return id2Polygon; }
+    public void setNodes(TLongObjectHashMap<Node> nodes) { id2Node = nodes; }
+    public void setRoads(TLongObjectHashMap<Road> roads) { id2Road = roads; }
+    public void setPolygons(TLongObjectHashMap<Polygon> polygons) { id2Polygon = polygons; }
+    ///Nulls the hashmaps to clear them from memory
+    public void clearParser() {
+        id2Node.clear();
+        id2Road.clear();
+        id2Polygon.clear();
+    }
     public double[] getBounds() { return bounds; }
-
-    /**
-     * @return the set of significant highways, which will be the only roads drawn when the map is zoomed out a certain amount
-     */
-    public Set<Road> getSignificantHighways() { return significantHighways; } //
-
+    //endregion
 }

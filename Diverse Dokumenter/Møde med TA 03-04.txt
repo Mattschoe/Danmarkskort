@@ -1,0 +1,5 @@
+Møde med TA 03/04
+Ideer:
+- Tricke GC til noder
+- Hashing af id'er til int
+- Hvordan gemmer vi vægten på graferne? 
