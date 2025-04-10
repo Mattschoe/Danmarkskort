@@ -8,12 +8,13 @@ import java.awt.*;
 import java.io.Serial;
 import java.io.Serializable;
 
-public class Node implements Serializable, MapObject {
+public class Node implements Serializable, MapObject, Comparable<Node> {
     @Serial private static final long serialVersionUID = 1444149606229887777L;
 
     //region Fields
     private double x, y;
     private String[] address;
+    private int distanceTo;
     //endregion
 
     //region Constructor(s)
@@ -21,6 +22,7 @@ public class Node implements Serializable, MapObject {
      *  itself in the {@link #calculateXY} method when being instantiated
      */
     public Node(double latitude, double longitude) {
+        distanceTo = Integer.MAX_VALUE;
         calculateXY(latitude, longitude);
     }
 
@@ -34,6 +36,7 @@ public class Node implements Serializable, MapObject {
      * @param street
      */
     public Node(double latitude, double longitude, String city, String houseNumber, int postcode, String street) {
+        distanceTo = Integer.MAX_VALUE;
         calculateXY(latitude, longitude);
         address = new String[4];
         saveAddress(city, houseNumber, postcode, street);
@@ -83,7 +86,15 @@ public class Node implements Serializable, MapObject {
             throw new InvalidAddressException(address);
         }
     }
+
+    @Override
+    public int compareTo(Node otherNode) {
+        return Integer.compare(this.distanceTo, otherNode.distanceTo);
+    }
+
     //endregion
+
+
 
     //region Getters and setters
     /** Address array where the Node stores the address (if it has one). Remember to check for null-errors! <br>
@@ -95,7 +106,7 @@ public class Node implements Serializable, MapObject {
     public String[] getAddress() { return address; }
     public double   getX()       { return x; }
     public double   getY()       { return y; }
-
+    public void setDistanceTo(int distanceTo) { this.distanceTo = distanceTo; }
     @Override
     public double[] getBoundingBox() {
         return new double[]{x, y, x, y};
