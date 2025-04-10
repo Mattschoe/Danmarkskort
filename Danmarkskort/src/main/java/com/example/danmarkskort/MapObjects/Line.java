@@ -42,21 +42,30 @@ public class Line implements Serializable {
         assert start != null && end != null;
         graphicsContext.strokeLine(start.getX(), start.getY(), end.getX(), end.getY());
     }
-    //endregion
 
-    //region Getters and setters
-    ///Maybe change to haversine later, i just didn't want to store a XY AND a lat/long in nodes since that would take quite a lot of space
+    public void drawAsRoute(GraphicsContext graphicsContext) {
+        assert start != null && end != null;
+        graphicsContext.setStroke(Color.RED);
+        graphicsContext.strokeLine(start.getX(), start.getY(), end.getX(), end.getY());
+    }
+
     public void calculateWeight() {
         double deltaX = end.getX() - start.getX();
         double deltaY = end.getY() - start.getY();
         weight = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     }
+    //endregion
 
-
+    //region Getters and setters
+    ///Maybe change to haversine later, i just didn't want to store a XY AND a lat/long in nodes since that would take quite a lot of space
 
     //region getters and setters
     public double getWeight() { return weight; }
-    public Node getStart() { return start; }
-    public Node getEnd() { return end; }
+    ///Returns the opposite of the node given as parameter. Will return null if it isn't a part of the line
+    public Node getOppositeNode(Node node) {
+        if (node == start) return end;
+        else if (node == end) return start;
+        else return null;
+    }
     //endregion
 }

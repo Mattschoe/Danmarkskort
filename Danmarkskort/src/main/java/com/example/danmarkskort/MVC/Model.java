@@ -7,6 +7,7 @@ import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.MapObjects.Tilegrid;
 import com.example.danmarkskort.Parser;
+import com.example.danmarkskort.Searching.Search;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import javafx.scene.canvas.Canvas;
 
@@ -18,11 +19,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.sql.Array;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -80,8 +77,18 @@ public class Model {
         Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
-        parser.clearParser();
         System.out.println("Finished creating Tilegrid!");
+
+        System.out.println("Starting search!");
+        Node startNode = parser.getNodes().get(6503281);
+        Node endNode = parser.getNodes().get(305563373);
+        assert startNode != null && endNode != null && canvas.getGraphicsContext2D() != null;
+
+        Search search = new Search(startNode, endNode, parser.getNodes().valueCollection(), canvas.getGraphicsContext2D());
+
+        System.out.println("Finished with searching!");
+
+        //parser.clearParser();
         //endregion
     }
     //endregion

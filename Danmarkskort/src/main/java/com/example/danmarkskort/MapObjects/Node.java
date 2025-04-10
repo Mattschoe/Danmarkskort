@@ -119,9 +119,6 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
      *  address[2] = postcode, fx: "2860" <br>
      *  address[3] = street, fx: "Decembervej"
      */
-    public void setPreviousNode(Node previousNode) { this.previousNode = previousNode; }
-    public Node getPreviousNode() { return previousNode; }
-    public LinkedList<Node> getShortestPath() {return shortestPath;}
     public LinkedList<Line> getLines() { return lines; }
     public double getX() { return x; }
     public double getY() { return y; }
