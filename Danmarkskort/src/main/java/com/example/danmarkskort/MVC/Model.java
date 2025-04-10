@@ -116,6 +116,7 @@ public class Model {
         TLongObjectHashMap<Road> id2Road = new TLongObjectHashMap<>(2_214_235);
         TLongObjectHashMap<Polygon> id2Polygon = new TLongObjectHashMap<>(6_168_995);
 
+        System.out.println("Deserializing parser...");
         //region Reading .obj files
         //Parser
         try {
@@ -159,7 +160,7 @@ public class Model {
                 id2Node.putAll(future.get());
             }
             executor.shutdown();
-            System.out.println("Finished reading nodes!");
+            System.out.println("- Finished reading nodes!");
         } catch (Exception e) {
             System.out.println("Error reading nodes!: " + e.getMessage());
         }
@@ -197,7 +198,7 @@ public class Model {
                 id2Road.putAll(future.get());
             }
             executor.shutdown();
-            System.out.println("Finished reading roads!");
+            System.out.println("- Finished reading roads!");
         } catch (Exception e) {
             System.out.println("Error reading roads!: " + e.getMessage());
         }
@@ -236,7 +237,7 @@ public class Model {
                 id2Polygon.putAll(future.get());
             }
             executor.shutdown();
-            System.out.println("Finished reading polygons!");
+            System.out.println("- Finished reading polygons!");
         } catch (Exception e) {
             System.out.println("Error reading polygons!: " + e.getMessage());
         }
