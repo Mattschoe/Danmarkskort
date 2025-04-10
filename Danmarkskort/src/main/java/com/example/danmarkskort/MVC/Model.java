@@ -79,7 +79,7 @@ public class Model {
 
         System.out.println("Finished creating Tilegrid!");
         //endregion
-        parser.clearParser();
+        parser = null; //Fjerner reference til parser så den bliver GC'et
     }
     //endregion
 
@@ -484,7 +484,6 @@ public class Model {
     //endregion
 
     //region Getters and setters
-    public Parser   getParser()   { return parser;   }
     public Tilegrid getTilegrid() { return tilegrid; }
     //endregion
 }
