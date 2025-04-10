@@ -197,9 +197,14 @@ public class Tile implements MapObject, Serializable {
 
     //region Getters and setters
     public List<MapObject> getObjectsInTile() { return objectsInTile; }
-
+    public Set<MapObject> getMotorway() { return motorway; }
+    public Set<MapObject> getTrunk() { return trunk; }
+    public Set<MapObject> getCoastline() { return coastline; }
     @Override
     public double[] getBoundingBox() { return bounds; }
     public boolean isEmpty() { return objectsInTile.isEmpty(); }
+    public void setMotorway(Set<MapObject> motorway) { this.motorway = motorway; }
+    public void setTrunk(Set<MapObject> trunk) { this.trunk = trunk; }
+    public void setCoastline(Set<MapObject> coastline) { this.coastline = coastline; }
     //endregion
 }

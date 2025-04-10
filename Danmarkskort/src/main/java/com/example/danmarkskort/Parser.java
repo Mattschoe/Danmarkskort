@@ -225,7 +225,7 @@ public class Parser implements Serializable {
                     else if (key.equals("amenity") || key.equals("building") || key.equals("surface")) {
                         type = key;
                     }
-                    else if (key.equals("landuse") || key.equals("leisure") || key.equals("natural") || val.equals("route")) {
+                    else if (key.equals("landuse") || key.equals("leisure") || key.equals("natural") || key.equals("route")) {
                         type = val;
                     }
                 }
@@ -308,18 +308,17 @@ public class Parser implements Serializable {
                 String value = input.getAttributeValue(null, "v"); // får fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
                 switch (key) {
-                    case "landuse", "leisure", "natural":
+                    case "aeroway", "disused:landuse", "landuse", "leisure", "man_made", "natural", "place":
                         return new Polygon(nodesInPolygon, value);
-                    case "amenity", "building", "surface":
+                    case "amenity", "area:highway", "attraction", "barrier", "boundary", "bridge:support", "building",
+                         "fence_type", "highway", "historic", "indoor", "military", "playground", "power",
+                         "surface", "tourism", "waterway":
                         return new Polygon(nodesInPolygon, key);
-                    case "place":
-                        if(value.equals("island")) { return new Polygon(nodesInPolygon, value); }
-                        break;
                 }
                 if (value.equals("Cityringen")) return new Polygon(nodesInPolygon, value); //TODO %% Find en bedre måde at IKKE tegne Cityringen
             }
         }
-        return new Polygon(nodesInPolygon, "");
+        return new Polygon(nodesInPolygon, null);
     }
 
     /**
