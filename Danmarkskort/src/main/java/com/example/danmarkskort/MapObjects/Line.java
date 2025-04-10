@@ -14,7 +14,6 @@ import java.util.Random;
 public class Line implements Serializable {
     @Serial private static final long serialVersionUID = -9178696453904098837L;
     private Node start, end;
-    private double length;
     private double weight;
     //endregion
 
@@ -30,7 +29,7 @@ public class Line implements Serializable {
 
         start.addLine(this);
         end.addLine(this);
-
+        calculateWeight();
     }
     //endregion
 
@@ -46,29 +45,17 @@ public class Line implements Serializable {
     //endregion
 
     //region Getters and setters
-    public void calcHaversineDistance() {
-        // distance between latitudes and longitudes
-        double dLon= Math.toRadians(end.getY() - start.getY());
-       double dLat= Math.toRadians(end.getX()- start.getX());
-
-        double lat1 = Math.toRadians(start.getX());
-        double lat2 = Math.toRadians(end.getX());
-
-        double a = Math.pow(Math.sin(dLat / 2), 2) +
-                Math.pow(Math.sin(dLon / 2), 2) *
-                        Math.cos(lat1) *
-                        Math.cos(lat2);
-        double rad = 6371; //jordens radius i km
-        double c = 2 * Math.asin(Math.sqrt(a));
-        weight= rad * c;
-
+    ///Maybe change to haversine later, i just didn't want to store a XY AND a lat/long in nodes since that would take quite a lot of space
+    public void calculateWeight() {
+        double deltaX = end.getX() - start.getX();
+        double deltaY = end.getY() - start.getY();
+        weight = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     }
 
-  public void assignWeight(){
-        this.weight= this.length;
-    }
+
 
     //region getters and setters
+    public double getWeight() { return weight; }
     public Node getStart() { return start; }
     public Node getEnd() { return end; }
     //endregion
