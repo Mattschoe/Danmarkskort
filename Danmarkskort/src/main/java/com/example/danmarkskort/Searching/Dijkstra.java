@@ -1,10 +1,23 @@
 package com.example.danmarkskort.Searching;
 
-public class Dijkstra {
-    private Set<Node> nodes = new HashSet<>();
+import com.example.danmarkskort.MapObjects.Node;
 
-    public void addNode(Node node){
-        nodes.add(node);
+import java.util.HashSet;
+import java.util.Set;
+
+public class Dijkstra{
+    private void calculateDistance (Node startNode){
+        PriorityQueue<Node> priorityQueue = new PriorityQueue<>();
+        startNode.setDistanceTo(0);
+
+        priorityQueue.add(startNode);
+
+
+
+        while (!priorityQueue.isEmpty()){
+            Node curretnNode = priorityQueue.poll();
+            
+        }
     }
 }
 
