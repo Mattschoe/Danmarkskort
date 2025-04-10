@@ -185,10 +185,10 @@ public class View {
     public void setVisibleTiles(List<Tile> visibleTiles) {
         this.visibleTiles = visibleTiles;
     }
-    public double[] getViewport() throws NonInvertibleTransformException {
+    public float[] getViewport() throws NonInvertibleTransformException {
         Point2D minXY = trans.inverseTransform(0, 0);
         Point2D maxXY = trans.inverseTransform(canvas.getWidth(), canvas.getHeight());
-        return new double[]{minXY.getX(), minXY.getY(), maxXY.getX(), maxXY.getY()};
+        return new float[]{(float) minXY.getX(), (float) minXY.getY(), (float) maxXY.getX(), (float) maxXY.getY()};
     }
     public void setTilegrid(Tilegrid tilegrid) { this.tilegrid = tilegrid; }
     //endregion

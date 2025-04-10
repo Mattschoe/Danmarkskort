@@ -12,7 +12,7 @@ public class Node implements Serializable, MapObject {
     @Serial private static final long serialVersionUID = 1444149606229887777L;
 
     //region Fields
-    private double x, y;
+    private float x, y;
     private String[] address;
     //endregion
 
@@ -56,8 +56,8 @@ public class Node implements Serializable, MapObject {
         int height = 600;
 
         //Calculates XY
-        double xNorm = ((longitude - minLon) / (maxLon - minLon));
-        double yNorm = ((latitude - minLat) / (maxLat - minLat));
+        float xNorm = (float) ((longitude - minLon) / (maxLon - minLon));
+        float yNorm = (float) ((latitude - minLat) / (maxLat - minLat));
         x = xNorm * width;
         y = (1 - yNorm) * height; //Makes sure Y isn't mirrored
     }
@@ -93,12 +93,12 @@ public class Node implements Serializable, MapObject {
      *  address[3] = street, fx: "Decembervej"
      */
     public String[] getAddress() { return address; }
-    public double   getX()       { return x; }
-    public double   getY()       { return y; }
+    public float   getX()       { return x; }
+    public float   getY()       { return y; }
 
     @Override
-    public double[] getBoundingBox() {
-        return new double[]{x, y, x, y};
+    public float[] getBoundingBox() {
+        return new float[]{x, y, x, y};
     }
     //endregion
 }
