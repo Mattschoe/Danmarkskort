@@ -28,6 +28,9 @@ public class Line implements Serializable {
         this.start = start;
         this.end = end;
 
+        start.addLine(this);
+        end.addLine(this);
+
     }
     //endregion
 

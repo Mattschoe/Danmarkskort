@@ -7,6 +7,8 @@ import javafx.scene.paint.Color;
 import java.awt.*;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 public class Node implements Serializable, MapObject, Comparable<Node> {
     @Serial private static final long serialVersionUID = 1444149606229887777L;
@@ -15,6 +17,9 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     private double x, y;
     private String[] address;
     private int distanceTo;
+    private HashMap<Node, Integer> adjacentNodes = new HashMap<>();
+    private LinkedList<Node> shortestPath = new LinkedList<>();
+    private LinkedList<Line> lines = new LinkedList<>();
     //endregion
 
     //region Constructor(s)
@@ -92,6 +97,19 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
         return Integer.compare(this.distanceTo, otherNode.distanceTo);
     }
 
+
+    public void addDestination(Node destination, int distance) {
+        adjacentNodes.put(destination, distance);
+    }
+
+    public void addAdjacentNode(Node node, int distance) {
+        adjacentNodes.put(node, distance);
+    }
+
+    public void addLine(Line line) {
+        lines.add(line);
+    }
+
     //endregion
 
 
@@ -103,7 +121,9 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
      *  address[2] = postcode, fx: "2860" <br>
      *  address[3] = street, fx: "Decembervej"
      */
+    public LinkedList<Line> getLines() { return lines; }
     public String[] getAddress() { return address; }
+    public HashMap<Node, Integer> getAdjacentNodes(){ return adjacentNodes; }
     public double   getX()       { return x; }
     public double   getY()       { return y; }
     public void setDistanceTo(int distanceTo) { this.distanceTo = distanceTo; }
