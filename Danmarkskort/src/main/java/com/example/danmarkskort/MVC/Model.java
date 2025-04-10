@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -199,25 +200,32 @@ public class Model {
 
         //Saves nodes
         try {
-            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/nodes.obj"));
-            outputStream.writeInt( parser.getNodes().size());
-            System.out.println("Processing ~" + ((double) parser.getNodes().size()/1_000_000) + " million nodes...");
-            int resetCounter = 0;
-            for (Long id : parser.getNodes().keys()) {
-                outputStream.writeLong(id);
-                outputStream.writeObject(parser.getNodes().get(id));
-                resetCounter++;
-                if (resetCounter % 1_000_000 == 0) {
-                    outputStream.reset();
-                    System.out.println("\rProcessed: " + (resetCounter/1_000_000) + " million nodes so far!");
+            int numberOfChunks = 8;
+            TLongObjectHashMap<Node> nodes = parser.getNodes();
+            long[] nodeIDs = nodes.keySet().toArray(); //Need this to split it into chunks
+            int amountOfNodes = nodes.size();
+            int chunkSize = (int) Math.ceil((double) amountOfNodes / numberOfChunks); //Splits all nodes into chunks
+
+            for (int i = 0; i < numberOfChunks; i++) {
+                //Determines the start and end indexes for each chunks
+                int start = i * chunkSize;
+                int end = Math.min(start + chunkSize, amountOfNodes);
+
+                ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/nodes_" + i + ".obj"));
+                outputStream.writeInt(end - start); //Amount of nodes in this chunk
+
+                //Saves all nodes that the chunk have space for
+                for (int j = start; j < end; j++) {
+                    long id = nodeIDs[j];
+                    outputStream.writeLong(id);
+                    outputStream.writeObject(nodes.get(id));
                 }
+                outputStream.close();
+                System.out.println("Saved chunk " + i + " with " + (end - start) + " amount of nodes");
             }
-            parser.getNodes().clear(); //Clears them so they can be GC'ed
-            System.out.println("Finished with nodes!");
-            System.out.println();
-            outputStream.close();
+
         } catch (Exception e) {
-            throw new ParserSavingException("Error saving nodes as .obj! Error Message: " + e.getMessage());
+            throw new ParserSavingException("Error saving parser to OBJ!: " + e.getMessage());
         }
 
         //Saves Roads
