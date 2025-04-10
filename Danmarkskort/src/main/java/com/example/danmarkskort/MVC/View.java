@@ -22,6 +22,7 @@ public class View {
     private Affine trans;
     private Affine bgTrans;
     private Canvas canvas;
+    private transient Color bgColor;
     private final Controller controller;
     private GraphicsContext graphicsContext;
     private Parser parser;
@@ -91,6 +92,7 @@ public class View {
         graphicsContext = canvas.getGraphicsContext2D();
         trans   = new Affine();
         bgTrans = new Affine();
+        bgColor = Color.LIGHTBLUE;
         graphicsContext.setTransform(trans);
         controller.bindZoomBar();
 
@@ -114,7 +116,7 @@ public class View {
 
         //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
         graphicsContext.setTransform(bgTrans);
-        graphicsContext.setFill(Color.LIGHTBLUE);
+        graphicsContext.setFill(bgColor);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
@@ -182,6 +184,9 @@ public class View {
     //region Getters and setters
     public Stage getStage() { return stage; }
     public Affine getTrans() { return trans; }
+    public void setBgColor(Color bgColor) {
+        this.bgColor = bgColor;
+    }
     public void setVisibleTiles(List<Tile> visibleTiles) {
         this.visibleTiles = visibleTiles;
     }

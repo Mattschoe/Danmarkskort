@@ -1,11 +1,14 @@
 package com.example.danmarkskort.MapObjects;
 
+import com.example.danmarkskort.ColorSheet;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
+
+import static com.example.danmarkskort.ColorSheet.DEFAULT;
 
 public class Polygon implements Serializable, MapObject{
     @Serial private static final long serialVersionUID = 1444149606229887777L;
@@ -16,6 +19,8 @@ public class Polygon implements Serializable, MapObject{
     private double[] yPoints;
     private int nodesSize;
     private String type; //The type of polygon, fx: "Building", "Coastline", etc.
+    private String palette;
+    private final ColorSheet cs;
     private transient Color color;
     private double[] boundingBox;
     //endregion
@@ -28,9 +33,12 @@ public class Polygon implements Serializable, MapObject{
         assert nodes.size() != 1;
         this.nodes = nodes;
         this.type = type;
+        this.palette = "default";
+        this.cs = DEFAULT;
 
         createArrays();
-        determineColor();
+        determineColor(); //TODO %% HER DEN ER FUNKY: ALT CRASHER HVIS MAN SLETTER KALDET TIL DETERMINECOLOR
+        determineColor2();
         calculateBoundingBox();
     }
     //endregion
@@ -53,8 +61,6 @@ public class Polygon implements Serializable, MapObject{
     @Override public void draw(GraphicsContext gc) { draw(gc, false); }
 
     public void draw(GraphicsContext gc, boolean drawLines) {
-        //if (color.equals(Color.rgb(0, 74, 127, 0.1))) System.out.println(" -def- " + type);
-        //if (color.equals(Color.RED)) System.out.println(" -red- " + type);
         if (drawLines) {
             gc.setStroke(color.darker().darker());
             gc.strokePolygon(xPoints, yPoints, nodesSize);
@@ -70,6 +76,10 @@ public class Polygon implements Serializable, MapObject{
             gc.strokePolygon(xPoints, yPoints, nodesSize);
             gc.setLineWidth(1/Math.sqrt(gc.getTransform().determinant()));
         }
+    }
+
+    public void determineColor2() {
+        color = cs.handlePalette(palette);
     }
 
     /// Enormous switch-statement determines the Polygon's color based off its 'type'-field
@@ -310,7 +320,12 @@ public class Polygon implements Serializable, MapObject{
 
     public void setType(String type) {
         this.type = type;
-        determineColor();
+        determineColor2();
+    }
+
+    public void setPalette(String palette) {
+        this.palette = palette;
+        determineColor2();
     }
 
     @Override

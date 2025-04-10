@@ -1,5 +1,9 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.MapObjects.MapObject;
+import com.example.danmarkskort.MapObjects.Polygon;
+import com.example.danmarkskort.MapObjects.Road;
+import com.example.danmarkskort.MapObjects.Tile;
 import javafx.animation.AnimationTimer;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import javafx.beans.value.ChangeListener;
@@ -14,6 +18,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -271,6 +276,32 @@ public class Controller implements Initializable {
         panRequest = true;
     }
     //endregion
+
+    //region ColorSheet toggles
+    @FXML private void paletteDefault() {
+        view.setBgColor(Color.LIGHTBLUE);
+
+        for (Tile tile : model.getTilegrid().getGridList()) {
+            for (MapObject mo : tile.getObjectsInTile()) {
+                if (mo instanceof Road road) road.setPalette("default");
+            }
+        }
+        view.drawMap(model.getParser());
+    }
+
+    @FXML private void paletteMidnight() {
+        view.setBgColor(Color.THISTLE);
+
+        for (Tile tile : model.getTilegrid().getGridList()) {
+            for (MapObject mo : tile.getObjectsInTile()) {
+                if (mo instanceof Road road) road.setPalette("midnight");
+                if (mo instanceof Polygon p) p.setPalette("midnight");
+            }
+        }
+        view.drawMap(model.getParser());
+    }
+    //endregion
+
     //endregion
 
     //region Getters and setters

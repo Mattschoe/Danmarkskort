@@ -1,5 +1,6 @@
 package com.example.danmarkskort.MapObjects;
 
+import com.example.danmarkskort.ColorSheet;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -9,6 +10,8 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static com.example.danmarkskort.ColorSheet.*;
 
 public class Road implements Serializable, MapObject {
     @Serial private static final long serialVersionUID = 2430026592275563830L;
@@ -21,6 +24,9 @@ public class Road implements Serializable, MapObject {
     private int maxSpeed;
     private String roadType;
     private double[] boundingBox;
+
+    private ColorSheet cs;
+    private String palette;
     private transient Color color;
     private double lineWidth;
     //endregion
@@ -42,8 +48,10 @@ public class Road implements Serializable, MapObject {
         this.bicycle = bicycle;
         this.maxSpeed = maxSpeed;
         this.roadType = roadType;
-
         calculateBoundingBox();
+
+        assignColorSheetProp();
+        this.palette = "default";
         determineVisuals();
     }
 
@@ -61,8 +69,10 @@ public class Road implements Serializable, MapObject {
         this.foot = foot;
         this.bicycle = bicycle;
         this.roadType = roadType;
-
         calculateBoundingBox();
+
+        assignColorSheetProp();
+        this.palette = "default";
         determineVisuals();
     }
     //endregion
@@ -93,43 +103,62 @@ public class Road implements Serializable, MapObject {
         }
     }
 
-    /// Determines the Road's color and line-width
+    private void assignColorSheetProp() {
+        cs = switch(roadType) {
+            case "coastline" -> ROAD_COASTLINE;
+            case "primary"   -> ROAD_PRIMARY;
+            case "secondary" -> ROAD_SECONDARY;
+            case "tertiary"  -> ROAD_TERTIARY;
+            case "cycleway"  -> ROAD_CYCLEWAY;
+            case "track", "path" -> ROAD_TRACK_PATH;
+            case "tree_row"  -> ROAD_TREE_ROW;
+            case "route"     -> ROAD_ROUTE;
+            default          -> ROAD_DEFAULT;
+        };
+    }
+
     private void determineVisuals() {
+        color = cs.handlePalette(palette);
+        lineWidth = 1;
+    }
+
+    /// Determines the Road's color and line-width
+    /*private void determineVisuals() {
         if (roadType.equals("coastline")) {
-            color = Color.BLACK;
+            color = cs.get(0);
             lineWidth = 1.5;
         }
         else if (roadType.equals("primary")) {
-            color = Color.DARKORANGE;
+            color = cs.get(1);
             lineWidth = 1.5;
         }
         else if (roadType.equals("secondary")) {
-            color = Color.DARKSLATEBLUE;
+            color = cs.get(2);
             lineWidth = 1.5;
         }
         else if (roadType.equals("tertiary")) {
-            color = Color.DARKGREEN;
+            color = cs.get(3);
             lineWidth = 1.5;
         }
         else if (roadType.equals("cycleway")) {
-            color = Color.DARKMAGENTA;
+            color = cs.get(4);
             lineWidth = 1.1;
         }
         else if (roadType.equals("track") || roadType.equals("path")) {
-            color = Color.SIENNA;
+            color = cs.get(5);
             lineWidth = 1;
         }
         else if (roadType.equals("tree_row")) {
-            color = Color.rgb(172, 210, 156);
+            color = cs.get(6);
             lineWidth = 1;
         }
         else if (roadType.equals("route")) {
-            color = Color.TRANSPARENT;
+            color = cs.get(7);
             lineWidth = 0;
         }
         else {
             //default
-            color = Color.rgb(100, 100, 100);
+            color = cs.get(8);
             lineWidth = 1;
         }
 
@@ -138,9 +167,9 @@ public class Road implements Serializable, MapObject {
          *      unclassified, residential, service, footway, power, cliff og proposed,
          * som jeg har valgt at bare ladet blive farvet default-grå. Så sker der ikke *alt*
          * for meget for øjnene :)
-         */
+         *
     }
-
+    */
     private void calculateBoundingBox() {
         boundingBox = new double[4];
         boundingBox[0] = Double.POSITIVE_INFINITY; //minX
@@ -178,6 +207,11 @@ public class Road implements Serializable, MapObject {
 
     public void setType(String type) {
         roadType = type;
+        determineVisuals();
+    }
+
+    public void setPalette(String palette) {
+        this.palette = palette;
         determineVisuals();
     }
 

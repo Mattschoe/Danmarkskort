@@ -4,6 +4,7 @@ import javafx.scene.canvas.GraphicsContext;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -112,8 +113,11 @@ public class Tilegrid implements Serializable {
     public void updateVisibleTiles(List<Tile> visibleTiles) { this.visibleTiles = visibleTiles; }
     public int getNumberOfTilesX() { return numberOfTilesX; }
     public int getNumberOfTilesY() { return numberOfTilesY; }
+
+    public List<Tile> getGridList() {
+        List<Tile> tiles = new ArrayList<>();
+        for (Tile[] tileRow : grid) { tiles.addAll(Arrays.asList(tileRow)); }
+        return tiles;
+    }
     //endregion
-
-
-
 }

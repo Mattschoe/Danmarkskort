@@ -43,10 +43,12 @@
         <Menu mnemonicParsing="false" text="Help">
             <MenuItem mnemonicParsing="false" text="About" />
         </Menu>
-      <Menu mnemonicParsing="false" text="Show">
-        <items>
-            <CheckMenuItem fx:id="fpsButton" mnemonicParsing="false" text="FPS" />
-        </items>
-      </Menu>
+        <Menu mnemonicParsing="false" text="Show">
+            <CheckMenuItem fx:id="fpsButton" mnemonicParsing="false" text="FPS"/>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Palette">
+            <MenuItem mnemonicParsing="false" onAction="#paletteDefault" text="Default"/>
+            <MenuItem mnemonicParsing="false" onAction="#paletteMidnight" text="Midnight"/>
+        </Menu>
     </MenuBar>
 </AnchorPane>
