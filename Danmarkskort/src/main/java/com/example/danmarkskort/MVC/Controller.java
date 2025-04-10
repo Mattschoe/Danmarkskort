@@ -29,10 +29,10 @@ public class Controller implements Initializable {
     private Model model;
     private double lastX, lastY; //Used to pan
     private boolean panRequest, zoomRequest; //Used by AnimationTimer
-    private ScrollEvent scrollEvent;
-    private TrieST<String> trieCity; //part of test
+    private ScrollEvent scrollEvent; //Used to zoom
+    private TrieST<String> trieCity; //Part of test
     private TrieST<String> trieStreet;
-    private MouseEvent mouseEvent;
+    private MouseEvent mouseEvent; //Used to pan
 
     private long lastTime;  //Used to calculate FPS
     private int frameCount; //Used to calculate FPS
@@ -42,9 +42,11 @@ public class Controller implements Initializable {
     @FXML private ListView<String> listView;
     @FXML private Slider zoomBar;
     @FXML private Text fpsCount;
+    @FXML private Text zoomText;
     @FXML private TextField searchBar;
     //endregion
 
+    //region Constructor(s)
     /** View-konstruktøren skaber/kører en instans af
      *  konstruktøren her, når den loader en FXML-scene
      */
@@ -68,7 +70,7 @@ public class Controller implements Initializable {
 
         AnimationTimer fpsTimer = new AnimationTimer() {
             @Override public void handle(long now) {
-                //if (fpsCount != null) displayFPS(now);
+                if (fpsCount != null) displayFPS(now);
 
                 if (panRequest) {
                     double dx = mouseEvent.getX() - lastX;
@@ -91,22 +93,6 @@ public class Controller implements Initializable {
     //endregion
 
     //region Methods
-    /// Calculates current FPS and displays it
-    private void displayFPS(long now) {
-        if (lastTime != 0) {
-            long elapsedNanos = now - lastTime;
-            frameCount++;
-            if (elapsedNanos >= 1_000_000_000) {
-                fps = frameCount / (elapsedNanos / 1_000_000_000.0);
-                frameCount = 0;
-                lastTime = now;
-            }
-        } else {
-            lastTime = now;
-        }
-        fpsCount.setText(String.format("FPS: %.0f", fps));
-    }
-
     /** Passes the given file into a Model class that starts parsing it
      *  @param mapFile the file which the map is contained. Given by user when choosing file
      */
@@ -116,18 +102,9 @@ public class Controller implements Initializable {
         assert model.getParser() != null;
     }
 
-    /** Method runs right after a Controller is created -- if we're in a scene with a zoomBar,
-     *  the zoomBar's slider is set to communicate with the zoom-level of the canvas/document
+    /** Runs right after a Controller is created --
+     *  configures something(???) for an object in the mapOverlay.fxml scene
      */
-    @Deprecated protected void initialize() {
-        if (zoomBar != null) {
-            zoomBar.valueProperty().addListener((_, _, _) -> {
-                //Functionality for the zoomBar Slider -- I (Olli) have given up for the time being
-                //TODO FIX/CHANGE/REMOVE ZOOMSLIDER
-            });
-        }
-    }
-
     @Override public void initialize(URL url, ResourceBundle resourceBundle) {
         listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
             @Override
@@ -138,6 +115,7 @@ public class Controller implements Initializable {
         });
     }
 
+    //region Start-up scene methods
     /** Method runs upon clicking the "Upload file"-button in the start-up scene.
      *  Lets the user pick a file and tries to parse it as a map. If successful,
      *  switches the scene to a canvas with the map drawn.
@@ -184,6 +162,42 @@ public class Controller implements Initializable {
 
         view.drawMap(model.getParser());
     }
+    //endregion
+
+    //region mapOverlay.fxml scene methods
+    /// Calculates FPS and displays it
+    private void displayFPS(long now) {
+        if (lastTime != 0) {
+            long elapsedNanos = now - lastTime;
+            frameCount++;
+            if (elapsedNanos >= 1_000_000_000) {
+                fps = frameCount / (elapsedNanos / 1_000_000_000.0);
+                frameCount = 0;
+                lastTime = now;
+            }
+        } else {
+            lastTime = now;
+        }
+        fpsCount.setText(String.format("FPS: %.0f", fps));
+    }
+
+    /// Adds a listener on View's Affine "trans" which updates the zoomBar based on trans' zoom-factor
+    public void bindZoomBar() {
+        if (zoomBar != null) {
+            view.getTrans().mxxProperty().addListener(_ -> {
+                double currentZoom = view.getTrans().getMxx();
+                if (currentZoom < 1) {
+                    zoomBar.setValue(0);
+                    zoomText.setText("Zoom-factor: >1");
+                }
+                else {
+                    if (currentZoom > 100) zoomBar.setValue(100);
+                    else zoomBar.setValue(currentZoom);
+                    zoomText.setText(String.format("Zoom-factor: %.0f", currentZoom));
+                }
+            });
+        }
+    }
 
     /// Methods runs upon typing in the search-bar
     @FXML protected void searchBarTyped(KeyEvent event) {
@@ -225,7 +239,9 @@ public class Controller implements Initializable {
             }
         }
     }
+    //endregion
 
+    //region Canvas methods
     /// Method runs upon zooming/scrolling on the Canvas
     @FXML protected void onCanvasScroll(ScrollEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked
@@ -250,6 +266,7 @@ public class Controller implements Initializable {
         mouseEvent = e;
         panRequest = true;
     }
+    //endregion
     //endregion
 
     //region Getters and setters

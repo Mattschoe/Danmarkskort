@@ -92,6 +92,7 @@ public class View {
         trans   = new Affine();
         bgTrans = new Affine();
         graphicsContext.setTransform(trans);
+        controller.bindZoomBar();
 
         //Canvas højde og bredde bindes til vinduets
         canvas.widthProperty().bind(scene.widthProperty());
