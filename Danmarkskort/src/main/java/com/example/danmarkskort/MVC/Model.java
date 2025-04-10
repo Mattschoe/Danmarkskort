@@ -23,6 +23,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 ///A Model is a Singleton class that stores the map in a tile-grid. It also stores the parser which parses the .osm data. Call {@link #getInstance()} to get the Model
 public class Model {
@@ -77,7 +80,7 @@ public class Model {
         Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
-        parser.clearParser();
+        //parser.clearParser();
         System.out.println("Finished creating Tilegrid!");
         //endregion
     }
@@ -125,16 +128,38 @@ public class Model {
 
         //Nodes
         try {
-            ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream("data/StandardMap/nodes.obj")));
-            int totalNodes = input.readInt();
+            File folder = new File("data/StandardMap");
+            File[] nodeFiles = folder.listFiles((dir, name) -> name.startsWith("nodes_") && name.endsWith(".obj"));
+            assert nodeFiles != null;
 
-            for (int i = 0; i < totalNodes; i++) {
-                long id = input.readLong();
-                Node node = (Node) input.readObject();
-                id2Node.put(id, node);
+            ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+            List<Future<TLongObjectHashMap<Node>>> futureMap = new ArrayList<>();
 
+            //Runs through each nodefile and makes a thread serialize it
+            for (File file : nodeFiles) {
+                futureMap.add(executor.submit(() -> {
+                    TLongObjectHashMap<Node> localMap = new TLongObjectHashMap<>();
+                    try {
+                        ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
+                        int chunkSize = input.readInt();
+                        for (int i = 0; i < chunkSize; i++) {
+                            long nodeID = input.readLong();
+                            Node node = (Node) input.readObject();
+                            localMap.put(nodeID, node);
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error reading file: " + file.getName() + ", with error: " + e.getMessage());
+                    }
+                    return localMap;
+                }));
             }
-            input.close();
+
+            //Adds each localMap from the threads into the collected map
+            for (Future<TLongObjectHashMap<Node>> future : futureMap) {
+                id2Node.putAll(future.get());
+            }
+            executor.shutdown();
+            System.out.println("Finished reading nodes!");
         } catch (Exception e) {
             System.out.println("Error reading nodes!: " + e.getMessage());
         }
@@ -200,6 +225,7 @@ public class Model {
 
         //Saves nodes
         try {
+            System.out.println("Saving nodes...");
             int numberOfChunks = 8;
             TLongObjectHashMap<Node> nodes = parser.getNodes();
             long[] nodeIDs = nodes.keySet().toArray(); //Need this to split it into chunks
@@ -240,7 +266,7 @@ public class Model {
                 resetCounter++;
                 if (resetCounter % 1_000_000 == 0) {
                     outputStream.reset();
-                    System.out.println("\rProcessed: " + (resetCounter/1_000_000) + " million roads so far!");
+                    System.out.println("Processed: " + (resetCounter/1_000_000) + " million roads so far!");
                 }
             }
             System.out.println("Finished with roads!");
@@ -263,7 +289,7 @@ public class Model {
                 resetCounter++;
                 if (resetCounter % 1_000_000 == 0) {
                     outputStream.reset();
-                    System.out.println("\rProcessed: " + (resetCounter/1_000_000) + " million polygons so far!");
+                    System.out.println("Processed: " + (resetCounter/1_000_000) + " million polygons so far!");
                 }
             }
             System.out.println("Finished with polygons!");
