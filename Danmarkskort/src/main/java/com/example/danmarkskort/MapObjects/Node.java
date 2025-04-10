@@ -19,6 +19,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     private int distanceTo;
     private HashMap<Node, Integer> adjacentNodes = new HashMap<>();
     private LinkedList<Node> shortestPath = new LinkedList<>();
+    private LinkedList<Line> lines = new LinkedList<>();
     //endregion
 
     //region Constructor(s)
@@ -105,6 +106,10 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
         adjacentNodes.put(node, distance);
     }
 
+    public void addLine(Line line) {
+        lines.add(line);
+    }
+
     //endregion
 
 
@@ -116,6 +121,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
      *  address[2] = postcode, fx: "2860" <br>
      *  address[3] = street, fx: "Decembervej"
      */
+    public LinkedList<Line> getLines() { return lines; }
     public String[] getAddress() { return address; }
     public HashMap<Node, Integer> getAdjacentNodes(){ return adjacentNodes; }
     public double   getX()       { return x; }
