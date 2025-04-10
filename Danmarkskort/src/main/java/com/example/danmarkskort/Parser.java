@@ -52,8 +52,7 @@ public class Parser implements Serializable {
         } else if (filename.endsWith(".osm")) {
             parseOSM(file);
         }
-        System.out.println("Finished parsing file. With: " + failedNodes + " nodes | " + failedWays + " ways | " + failedRelations + " relations, that failed!");
-        System.out.println("And with + " + outOfBoundsNodes + " nodes out of bounds!");
+        System.out.println("Finished parsing file. With: " + failedNodes + " nodes | " + failedWays + " ways | " + failedRelations + " relations, that failed! And with" + outOfBoundsNodes + " nodes out of bounds!");
     }
     //endregion
 

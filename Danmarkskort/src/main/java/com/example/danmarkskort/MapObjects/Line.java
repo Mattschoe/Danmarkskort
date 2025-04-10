@@ -15,6 +15,7 @@ public class Line implements Serializable {
     @Serial private static final long serialVersionUID = -9178696453904098837L;
     private Node start, end;
     private double weight;
+    private boolean partOfRoute;
     //endregion
 
     //region Constructor(s)
@@ -40,12 +41,10 @@ public class Line implements Serializable {
      */
     public void draw(GraphicsContext graphicsContext) {
         assert start != null && end != null;
-        graphicsContext.strokeLine(start.getX(), start.getY(), end.getX(), end.getY());
-    }
-
-    public void drawAsRoute(GraphicsContext graphicsContext) {
-        assert start != null && end != null;
-        graphicsContext.setStroke(Color.RED);
+        if (partOfRoute) {
+            graphicsContext.setLineWidth(0.01);
+            graphicsContext.setStroke(Color.RED);
+        }
         graphicsContext.strokeLine(start.getX(), start.getY(), end.getX(), end.getY());
     }
 
@@ -67,5 +66,6 @@ public class Line implements Serializable {
         else if (node == end) return start;
         else return null;
     }
+    public void setPartOfRoute(boolean partOfRoute) { this.partOfRoute = partOfRoute; }
     //endregion
 }

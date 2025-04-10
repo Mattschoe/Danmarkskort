@@ -1,15 +1,12 @@
 package com.example.danmarkskort.MVC;
 
 import com.example.danmarkskort.Exceptions.ParserSavingException;
-import com.example.danmarkskort.MapObjects.Node;
-import com.example.danmarkskort.MapObjects.Polygon;
-import com.example.danmarkskort.MapObjects.Road;
-import com.example.danmarkskort.MapObjects.Tile;
-import com.example.danmarkskort.MapObjects.Tilegrid;
+import com.example.danmarkskort.MapObjects.*;
 import com.example.danmarkskort.Parser;
 import com.example.danmarkskort.Searching.Search;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.paint.Color;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -79,15 +76,16 @@ public class Model {
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
         System.out.println("Finished creating Tilegrid!");
 
+        /*
         System.out.println("Starting search!");
-        Node startNode = parser.getNodes().get(6503281);
-        Node endNode = parser.getNodes().get(305563373);
+        Node startNode = parser.getNodes().get(698648);
+        Node endNode = parser.getNodes().get(18054778);
         assert startNode != null && endNode != null && canvas.getGraphicsContext2D() != null;
 
         Search search = new Search(startNode, endNode, parser.getNodes().valueCollection(), canvas.getGraphicsContext2D());
 
         System.out.println("Finished with searching!");
-
+        */
         //parser.clearParser();
         //endregion
     }
