@@ -166,31 +166,79 @@ public class Model {
 
         //Roads
         try {
-            ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream("data/StandardMap/roads.obj")));
-            int totalRoads = input.readInt();
-            for (int i = 0; i < totalRoads; i++) {
-                long id = input.readLong();
-                Road road = (Road) input.readObject();
-                id2Road.put(id, road);
+            File folder = new File("data/StandardMap");
+            File[] roadFiles = folder.listFiles((dir, name) -> name.startsWith("roads_") && name.endsWith(".obj"));
+            assert roadFiles != null;
+
+            ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+            List<Future<TLongObjectHashMap<Road>>> futureMap = new ArrayList<>();
+
+            //Runs through each nodefile and makes a thread serialize it
+            for (File file : roadFiles) {
+                futureMap.add(executor.submit(() -> {
+                    TLongObjectHashMap<Road> localMap = new TLongObjectHashMap<>();
+                    try {
+                        ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
+                        int chunkSize = input.readInt();
+                        for (int i = 0; i < chunkSize; i++) {
+                            long roadID = input.readLong();
+                            Road road = (Road) input.readObject();
+                            localMap.put(roadID, road);
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error reading file: " + file.getName() + ", with error: " + e.getMessage());
+                    }
+                    return localMap;
+                }));
             }
-            input.close();
+
+            //Adds each localMap from the threads into the collected map
+            for (Future<TLongObjectHashMap<Road>> future : futureMap) {
+                id2Road.putAll(future.get());
+            }
+            executor.shutdown();
+            System.out.println("Finished reading roads!");
         } catch (Exception e) {
             System.out.println("Error reading roads!: " + e.getMessage());
         }
 
         //Polygons
+        //Roads
         try {
-            ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream("data/StandardMap/polygons.obj")));
-            int totalPolygons = input.readInt();
+            File folder = new File("data/StandardMap");
+            File[] polygonFiles = folder.listFiles((dir, name) -> name.startsWith("polygons_") && name.endsWith(".obj"));
+            assert polygonFiles != null;
 
-            for (int i = 0; i < totalPolygons; i++) {
-                long id = input.readLong();
-                Polygon polygon = (Polygon) input.readObject();
-                id2Polygon.put(id, polygon);
+            ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+            List<Future<TLongObjectHashMap<Polygon>>> futureMap = new ArrayList<>();
+
+            //Runs through each nodefile and makes a thread serialize it
+            for (File file : polygonFiles) {
+                futureMap.add(executor.submit(() -> {
+                    TLongObjectHashMap<Polygon> localMap = new TLongObjectHashMap<>();
+                    try {
+                        ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
+                        int chunkSize = input.readInt();
+                        for (int i = 0; i < chunkSize; i++) {
+                            long polygonID = input.readLong();
+                            Polygon polygon = (Polygon) input.readObject();
+                            localMap.put(polygonID, polygon);
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error reading file: " + file.getName() + ", with error: " + e.getMessage());
+                    }
+                    return localMap;
+                }));
             }
-            input.close();
+
+            //Adds each localMap from the threads into the collected map
+            for (Future<TLongObjectHashMap<Polygon>> future : futureMap) {
+                id2Polygon.putAll(future.get());
+            }
+            executor.shutdown();
+            System.out.println("Finished reading polygons!");
         } catch (Exception e) {
-            System.out.println("Error reading nodes!: " + e.getMessage());
+            System.out.println("Error reading polygons!: " + e.getMessage());
         }
         //endregion
 
@@ -249,54 +297,69 @@ public class Model {
                 outputStream.close();
                 System.out.println("Saved chunk " + i + " with " + (end - start) + " amount of nodes");
             }
-
         } catch (Exception e) {
-            throw new ParserSavingException("Error saving parser to OBJ!: " + e.getMessage());
+            throw new ParserSavingException("Error saving nodes to OBJ!: " + e.getMessage());
         }
 
         //Saves Roads
         try {
-            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/roads.obj"));
-            outputStream.writeInt(parser.getRoads().size());
-            System.out.println("Processing ~" + ((double) parser.getRoads().size()/1_000_000) + " million roads...");
-            int resetCounter = 0;
-            for (Long id : parser.getRoads().keys()) {
-                outputStream.writeLong(id);
-                outputStream.writeObject(parser.getRoads().get(id));
-                resetCounter++;
-                if (resetCounter % 1_000_000 == 0) {
-                    outputStream.reset();
-                    System.out.println("Processed: " + (resetCounter/1_000_000) + " million roads so far!");
+            System.out.println("Saving roads...");
+            int numberOfChunks = 8;
+            TLongObjectHashMap<Road> roads = parser.getRoads();
+            long[] roadIDs = roads.keySet().toArray(); //Need this to split it into chunks
+            int amountOfRoads = roads.size();
+            int chunkSize = (int) Math.ceil((double) amountOfRoads / numberOfChunks); //Splits all nodes into chunks
+
+            for (int i = 0; i < numberOfChunks; i++) {
+                //Determines the start and end indexes for each chunks
+                int start = i * chunkSize;
+                int end = Math.min(start + chunkSize, amountOfRoads);
+
+                ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/roads_" + i + ".obj"));
+                outputStream.writeInt(end - start); //Amount of nodes in this chunk
+
+                //Saves all nodes that the chunk have space for
+                for (int j = start; j < end; j++) {
+                    long id = roadIDs[j];
+                    outputStream.writeLong(id);
+                    outputStream.writeObject(roads.get(id));
                 }
+                outputStream.close();
+                System.out.println("Saved chunk " + i + " with " + (end - start) + " amount of roads!");
             }
-            System.out.println("Finished with roads!");
-            System.out.println();
-            outputStream.close();
         } catch (Exception e) {
-            throw new ParserSavingException("Error saving roads as .obj! Error Message: " + e.getMessage());
+            throw new ParserSavingException("Error saving roads to OBJ!: " + e.getMessage());
         }
 
 
         //Saves Polygons
         try {
-            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/polygons.obj"));
-            outputStream.writeInt(parser.getPolygons().size());
-            System.out.println("Processing ~" + ((double) parser.getPolygons().size()/1_000_000) + " million polygons...");
-            int resetCounter = 0;
-            for (Long id : parser.getPolygons().keys()) {
-                outputStream.writeLong(id);
-                outputStream.writeObject(parser.getPolygons().get(id));
-                resetCounter++;
-                if (resetCounter % 1_000_000 == 0) {
-                    outputStream.reset();
-                    System.out.println("Processed: " + (resetCounter/1_000_000) + " million polygons so far!");
+            System.out.println("Saving polygons...");
+            int numberOfChunks = 8;
+            TLongObjectHashMap<Polygon> polygons = parser.getPolygons();
+            long[] polygonID = polygons.keySet().toArray(); //Need this to split it into chunks
+            int amountOfPolygons = polygons.size();
+            int chunkSize = (int) Math.ceil((double) amountOfPolygons / numberOfChunks); //Splits all nodes into chunks
+
+            for (int i = 0; i < numberOfChunks; i++) {
+                //Determines the start and end indexes for each chunks
+                int start = i * chunkSize;
+                int end = Math.min(start + chunkSize, amountOfPolygons);
+
+                ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/polygons_" + i + ".obj"));
+                outputStream.writeInt(end - start); //Amount of nodes in this chunk
+
+                //Saves all nodes that the chunk have space for
+                for (int j = start; j < end; j++) {
+                    long id = polygonID[j];
+                    outputStream.writeLong(id);
+                    outputStream.writeObject(polygons.get(id));
                 }
+                outputStream.close();
+                System.out.println("Saved chunk " + i + " with " + (end - start) + " amount of polygons!");
             }
-            System.out.println("Finished with polygons!");
-            System.out.println();
-            outputStream.close();
         } catch (Exception e) {
-            throw new ParserSavingException("Error saving polygon as .obj! Error Message: " + e.getMessage());
+            throw new ParserSavingException("Error saving polygons to OBJ!: " + e.getMessage());
         }
         System.exit(0);
     }
