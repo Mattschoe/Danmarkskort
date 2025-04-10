@@ -16,9 +16,6 @@ public class Line implements Serializable {
     private Node start, end;
     private double length;
     private double weight;
-
-    //region Fields
-    private final Node start, end;
     //endregion
 
     //region Constructor(s)
