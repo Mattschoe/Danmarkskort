@@ -107,6 +107,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     public double   getX()       { return x; }
     public double   getY()       { return y; }
     public void setDistanceTo(int distanceTo) { this.distanceTo = distanceTo; }
+    public int getDistanceTo() { return distanceTo; }
     @Override
     public double[] getBoundingBox() {
         return new double[]{x, y, x, y};

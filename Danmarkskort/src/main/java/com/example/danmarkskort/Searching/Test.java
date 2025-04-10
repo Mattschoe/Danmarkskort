@@ -4,7 +4,7 @@ import com.example.danmarkskort.MapObjects.Node;
 
 public class Test {
     public static void main(String[] args) {
-        PrioityQueue pq = new PrioityQueue(10);
+        PriorityQueue pq = new PriorityQueue(10);
 
         Node node1 = new Node(10, 10);
         Node node2 = new Node(20, 20);
@@ -14,13 +14,21 @@ public class Test {
 
         //Sourcenode
         node1.setDistanceTo(0);
+        node2.setDistanceTo(10);
+        node3.setDistanceTo(7);
+        node4.setDistanceTo(20);
+        node5.setDistanceTo(9);
 
         pq.insert(node1);
         pq.insert(node2);
         pq.insert(node3);
         pq.insert(node4);
         pq.insert(node5);
-        System.out.println(pq.getMin());
+        System.out.println(pq.getPriority().getDistanceTo());
+        System.out.println(pq.getPriority().getDistanceTo());
+        System.out.println(pq.getPriority().getDistanceTo());
+        System.out.println(pq.getPriority().getDistanceTo());
+        System.out.println(pq.getPriority().getDistanceTo());
     }
 
 }
