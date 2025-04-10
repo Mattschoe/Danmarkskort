@@ -7,6 +7,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
@@ -39,6 +40,7 @@ public class Controller implements Initializable {
     private double fps;     //Used to calculate FPS
 
     @FXML private Canvas canvas;
+    @FXML private CheckMenuItem fpsButton;
     @FXML private ListView<String> listView;
     @FXML private Slider zoomBar;
     @FXML private Text fpsCount;
@@ -63,14 +65,16 @@ public class Controller implements Initializable {
         catch (IllegalStateException _) {} //Model not loaded yet, so we wait
 
         //region AnimationTimer
-        //TODO %% OBS VI ER RET SIKRE PÅ DET HER VIRKER (??) -OFS OG MN
         lastTime = 0;
         frameCount = 0;
         fps = 0;
 
         AnimationTimer fpsTimer = new AnimationTimer() {
             @Override public void handle(long now) {
-                if (fpsCount != null) displayFPS(now);
+                if (fpsCount != null) {
+                    if (fpsButton.isSelected()) calculateFPS(now);
+                    else if (!fpsCount.getText().isEmpty()) fpsCount.setText("");
+                }
 
                 if (panRequest) {
                     double dx = mouseEvent.getX() - lastX;
@@ -165,8 +169,8 @@ public class Controller implements Initializable {
     //endregion
 
     //region mapOverlay.fxml scene methods
-    /// Calculates FPS and displays it
-    private void displayFPS(long now) {
+    /// Calculates FPS and adjusts the display-text
+    private void calculateFPS(long now) {
         if (lastTime != 0) {
             long elapsedNanos = now - lastTime;
             frameCount++;
