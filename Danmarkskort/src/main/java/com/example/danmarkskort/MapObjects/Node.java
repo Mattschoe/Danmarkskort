@@ -7,6 +7,8 @@ import javafx.scene.paint.Color;
 import java.awt.*;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 public class Node implements Serializable, MapObject {
     @Serial private static final long serialVersionUID = 1444149606229887777L;
@@ -14,6 +16,9 @@ public class Node implements Serializable, MapObject {
     //region Fields
     private double x, y;
     private String[] address;
+    private HashMap<Node, Integer> adjacentNodes = new HashMap<>();
+    private LinkedList<Node> shortestPath = new LinkedList<>();
+    private Integer distance = Integer.MAX_VALUE;
     //endregion
 
     //region Constructor(s)
@@ -83,6 +88,15 @@ public class Node implements Serializable, MapObject {
             throw new InvalidAddressException(address);
         }
     }
+
+    public void addDestination(Node destination, int distance) {
+        adjacentNodes.put(destination, distance);
+    }
+
+    public void addAdjacentNode(Node node, int distance) {
+        adjacentNodes.put(node, distance);
+    }
+
     //endregion
 
     //region Getters and setters
@@ -93,6 +107,7 @@ public class Node implements Serializable, MapObject {
      *  address[3] = street, fx: "Decembervej"
      */
     public String[] getAddress() { return address; }
+    public HashMap<Node, Integer> getAdjacentNodes(){ return adjacentNodes; }
     public double   getX()       { return x; }
     public double   getY()       { return y; }
 
