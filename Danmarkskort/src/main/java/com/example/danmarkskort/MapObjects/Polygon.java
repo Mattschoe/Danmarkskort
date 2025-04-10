@@ -313,9 +313,8 @@ public class Polygon implements Serializable, MapObject{
     //endregion
 
     //region Getters and setters
-    public List<Node> getNodes()           { return nodes;           }
-    public String     getType()            { return type;            }
-    public boolean    hasType()            { return !type.isEmpty(); }
+    public String getType() { return type;            }
+    public boolean hasType() { return !type.isEmpty(); }
     public void setType(String type) {
         this.type = type;
         determineColor();

@@ -10,14 +10,10 @@ import com.example.danmarkskort.Parser;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import javafx.scene.canvas.Canvas;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.sql.Array;
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -80,9 +76,10 @@ public class Model {
         Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
-        parser.clearParser();
+
         System.out.println("Finished creating Tilegrid!");
         //endregion
+        parser.clearParser();
     }
     //endregion
 
