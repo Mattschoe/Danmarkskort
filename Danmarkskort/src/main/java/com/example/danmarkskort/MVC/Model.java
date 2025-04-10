@@ -209,7 +209,7 @@ public class Model {
                 resetCounter++;
                 if (resetCounter % 1_000_000 == 0) {
                     outputStream.reset();
-                    System.out.println("Processed: " + (resetCounter/1_000_000) + " million nodes so far!");
+                    System.out.println("\rProcessed: " + (resetCounter/1_000_000) + " million nodes so far!");
                 }
             }
             parser.getNodes().clear(); //Clears them so they can be GC'ed
@@ -232,7 +232,7 @@ public class Model {
                 resetCounter++;
                 if (resetCounter % 1_000_000 == 0) {
                     outputStream.reset();
-                    System.out.println("Processed: " + (resetCounter/1_000_000) + " million roads so far!");
+                    System.out.println("\rProcessed: " + (resetCounter/1_000_000) + " million roads so far!");
                 }
             }
             System.out.println("Finished with roads!");
@@ -255,7 +255,7 @@ public class Model {
                 resetCounter++;
                 if (resetCounter % 1_000_000 == 0) {
                     outputStream.reset();
-                    System.out.println("Processed: " + (resetCounter/1_000_000) + " million polygons so far!");
+                    System.out.println("\rProcessed: " + (resetCounter/1_000_000) + " million polygons so far!");
                 }
             }
             System.out.println("Finished with polygons!");
