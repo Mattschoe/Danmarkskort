@@ -18,7 +18,6 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     private String[] address;
     private int distanceTo;
     private HashMap<Node, Integer> adjacentNodes = new HashMap<>();
-    private LinkedList<Node> shortestPath = new LinkedList<>();
     private LinkedList<Line> lines = new LinkedList<>();
     private Node previousNode;
     //endregion
@@ -113,8 +112,6 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
 
     //endregion
 
-
-
     //region Getters and setters
     /** Address array where the Node stores the address (if it has one). Remember to check for null-errors! <br>
      *  address[0] = City, fx: "København S"<br>
@@ -126,11 +123,10 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     public Node getPreviousNode() { return previousNode; }
     public LinkedList<Node> getShortestPath() {return shortestPath;}
     public LinkedList<Line> getLines() { return lines; }
-    public String[] getAddress() { return address; }
-    public HashMap<Node, Integer> getAdjacentNodes(){ return adjacentNodes; }
-    public double   getX()       { return x; }
-    public double   getY()       { return y; }
+    public double getX() { return x; }
+    public double getY() { return y; }
     public void setDistanceTo(int distanceTo) { this.distanceTo = distanceTo; }
+    public int getDistanceTo() { return distanceTo; }
     @Override
     public double[] getBoundingBox() {
         return new double[]{x, y, x, y};
