@@ -229,19 +229,19 @@ public class Parser implements Serializable {
                         type = val;
                     }
                 }
+            }
+        }
 
-                for (long memberID : members) {
-                    if (id2Polygon.containsKey(memberID)) {
-                        Polygon member = id2Polygon.get(memberID);
-                        if (member.getType().isEmpty()) {
-                            member.setType(type);
-                        }
-                    }
-                    else if (id2Road.containsKey(memberID)) {
-                        Road member = id2Road.get(memberID);
-                        if (member.getType().isEmpty()) member.setType(type);
-                    }
+        for (long memberID : members) {
+            if (id2Polygon.containsKey(memberID)) {
+                Polygon member = id2Polygon.get(memberID);
+                if (member.getType().isEmpty()) {
+                    member.setType(type);
                 }
+            }
+            else if (id2Road.containsKey(memberID)) {
+                Road member = id2Road.get(memberID);
+                if (member.getType().isEmpty()) member.setType(type);
             }
         }
     }
