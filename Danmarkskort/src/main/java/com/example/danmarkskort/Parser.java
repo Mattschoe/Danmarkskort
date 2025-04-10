@@ -400,6 +400,12 @@ public class Parser implements Serializable {
     public void setNodes(TLongObjectHashMap<Node> nodes) { id2Node = nodes; }
     public void setRoads(TLongObjectHashMap<Road> roads) { id2Road = roads; }
     public void setPolygons(TLongObjectHashMap<Polygon> polygons) { id2Polygon = polygons; }
+    ///Nulls the hashmaps to clear them from memory
+    public void clearParser() {
+        id2Node.clear();
+        id2Road.clear();
+        id2Polygon.clear();
+    }
     public double[] getBounds() { return bounds; }
     //endregion
 }

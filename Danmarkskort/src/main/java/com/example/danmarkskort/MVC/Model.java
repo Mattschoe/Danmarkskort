@@ -76,6 +76,7 @@ public class Model {
         Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
+        parser.clearParser();
         System.out.println("Finished creating Tilegrid!");
         //endregion
     }
