@@ -95,18 +95,50 @@ public class Road implements Serializable, MapObject {
 
     /// Determines the Road's color and line-width
     private void determineVisuals() {
-        if (roadType.equals("route")) {
-            color = Color.TRANSPARENT;
-            lineWidth = 1;
-        }
-        else if (roadType.equals("coastline")) {
+        if (roadType.equals("coastline")) {
             color = Color.BLACK;
             lineWidth = 1.5;
         }
+        else if (roadType.equals("primary")) {
+            color = Color.DARKORANGE;
+            lineWidth = 1.5;
+        }
+        else if (roadType.equals("secondary")) {
+            color = Color.DARKSLATEBLUE;
+            lineWidth = 1.5;
+        }
+        else if (roadType.equals("tertiary")) {
+            color = Color.DARKGREEN;
+            lineWidth = 1.5;
+        }
+        else if (roadType.equals("cycleway")) {
+            color = Color.DARKMAGENTA;
+            lineWidth = 1.1;
+        }
+        else if (roadType.equals("track") || roadType.equals("path")) {
+            color = Color.SIENNA;
+            lineWidth = 1;
+        }
+        else if (roadType.equals("tree_row")) {
+            color = Color.rgb(172, 210, 156);
+            lineWidth = 1;
+        }
+        else if (roadType.equals("route")) {
+            color = Color.TRANSPARENT;
+            lineWidth = 0;
+        }
         else {
+            //default
             color = Color.rgb(100, 100, 100);
             lineWidth = 1;
         }
+
+        /*
+         * Udover de roads vi farver, fandt jeg (Olli) en masse andre roadTypes, heriblandt
+         *      unclassified, residential, service, footway, power, cliff og proposed,
+         * som jeg har valgt at bare ladet blive farvet default-grå. Så sker der ikke *alt*
+         * for meget for øjnene :)
+         */
     }
 
     private void calculateBoundingBox() {

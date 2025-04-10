@@ -98,7 +98,7 @@ public class Polygon implements Serializable, MapObject{
             case "greenhouse_horticulture" -> Color.rgb(238, 240, 213);
             case "meadow"         -> Color.rgb(205, 235, 176);
             case "orchard"        -> Color.rgb(172, 224, 161);
-            case "plant_nursery"  -> Color.rgb(174, 223, 163);
+            case "plant_nursery"  -> Color.rgb(172, 224, 161);
             case "vineyard"       -> Color.rgb(172, 224, 161);
             //endregion
             //region landuse: water
@@ -243,7 +243,7 @@ public class Polygon implements Serializable, MapObject{
             case "area:highway"   -> Color.rgb(50, 50, 50, 0.3);
             case "attraction"     -> Color.rgb(239, 213, 179, 0.3);
             case "barrier"        -> Color.rgb(111, 111, 111, 0.3);
-            case "boundary"       -> Color.rgb(207, 155, 203, 0.3);
+            case "boundary"       -> Color.TRANSPARENT; /*Color.rgb(207, 155, 203, 0.3);*/
             case "bridge:support" -> Color.rgb(111, 111, 111, 0.3);
             case "building"       -> Color.rgb(217, 208, 201);
             case "cairn"          -> Color.TAN;
