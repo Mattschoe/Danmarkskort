@@ -75,8 +75,7 @@ public class Model {
 
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
         System.out.println("Finished creating Tilegrid!");
-
-        /*
+        
         System.out.println("Starting search!");
         Node startNode = parser.getNodes().get(698648);
         Node endNode = parser.getNodes().get(18054778);
@@ -85,7 +84,6 @@ public class Model {
         Search search = new Search(startNode, endNode, parser.getNodes().valueCollection(), canvas.getGraphicsContext2D());
 
         System.out.println("Finished with searching!");
-        */
         //parser.clearParser();
         //endregion
     }

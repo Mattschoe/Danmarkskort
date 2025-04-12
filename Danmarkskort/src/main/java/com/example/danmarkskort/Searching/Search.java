@@ -3,6 +3,7 @@ package com.example.danmarkskort.Searching;
 import com.example.danmarkskort.MapObjects.Line;
 import com.example.danmarkskort.MapObjects.Node;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 import java.util.*;
 
