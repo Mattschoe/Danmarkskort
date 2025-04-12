@@ -1,0 +1,10 @@
+InfO:
+- Eksamen: De kan se koden, de vil spørge om at forklare det ("På linje .. til .. kan du forklare hvad der sker her) ("space complexity her")
+- TST er nemmere at implementere men langsommere, bruger også mindre space. Kig på time complexity vs space online hvis det er. Radix trees er også gode at sætte i efter
+- Løft pennen når vi rammer trekanterne i relations. 
+- Forbered præsentation 2 så tænk på at formatte det som eksamensvideoen (Husk ikke at gøre det hyper teknisk)
+
+Biggest hurdles:
+- Relations
+- Djikstra
+- Overvej KD-træer eller r-træer i stedet for Grid. Tag kd-træer 
