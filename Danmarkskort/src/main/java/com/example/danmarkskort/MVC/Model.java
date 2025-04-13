@@ -272,7 +272,7 @@ public class Model {
         //Saves nodes
         try {
             System.out.println("Saving nodes...");
-            int numberOfChunks = 8;
+            int numberOfChunks = 16;
             TLongObjectHashMap<Node> nodes = parser.getNodes();
             long[] nodeIDs = nodes.keySet().toArray(); //Need this to split it into chunks
             int amountOfNodes = nodes.size();
@@ -302,7 +302,7 @@ public class Model {
         //Saves Roads
         try {
             System.out.println("Saving roads...");
-            int numberOfChunks = 8;
+            int numberOfChunks = 16;
             TLongObjectHashMap<Road> roads = parser.getRoads();
             long[] roadIDs = roads.keySet().toArray(); //Need this to split it into chunks
             int amountOfRoads = roads.size();
@@ -333,7 +333,7 @@ public class Model {
         //Saves Polygons
         try {
             System.out.println("Saving polygons...");
-            int numberOfChunks = 8;
+            int numberOfChunks = 16;
             TLongObjectHashMap<Polygon> polygons = parser.getPolygons();
             long[] polygonID = polygons.keySet().toArray(); //Need this to split it into chunks
             int amountOfPolygons = polygons.size();
