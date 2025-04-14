@@ -46,17 +46,18 @@ public class Search {
     }
 
     private void relax(Road road, Node currentNode) {
-        Node oppositeNode = road.getOppositeNode(currentNode);
+        /*Node oppositeNode = road.getOppositeNode(currentNode);
         int newDistanceTo = (int) (currentNode.getDistanceTo() + line.getWeight());
 
         if (oppositeNode.getDistanceTo() > newDistanceTo) {
             oppositeNode.setDistanceTo(newDistanceTo);
             cameFrom.put(oppositeNode, currentNode);
             priorityQueue.add(oppositeNode);
-        }
+        }*/
     }
 
     private void drawPath() {
+        /*
         List<Node> path = new ArrayList<>();
 
         Node currentNode = endNode;
@@ -76,7 +77,7 @@ public class Search {
         }
 
 
-        /* while (currentNode != null) {
+        while (currentNode != null) {
             Node currentCameFromNode = cameFrom.get(currentNode); //The node that currentNode came from
             //Finds the line that the currentCameFromNode is part of and draws it
             for (Line line : currentNode.getLines()) {

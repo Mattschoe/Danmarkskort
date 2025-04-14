@@ -7,6 +7,7 @@ import javafx.scene.paint.Color;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -15,7 +16,6 @@ public class Road implements Serializable, MapObject {
 
     //region Fields
     private final List<Node> nodes;
-    private final Set<Line> lines;
     private final boolean foot;
     private final boolean bicycle;
     private boolean isDrivable;
@@ -36,8 +36,6 @@ public class Road implements Serializable, MapObject {
      */
     public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDrivable, int maxSpeed, String roadType) {
         this.nodes = nodes;
-        this.lines = new HashSet<>();
-        createLines();
 
         this.foot = foot;
         this.bicycle = bicycle;
@@ -57,8 +55,6 @@ public class Road implements Serializable, MapObject {
      */
     public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDrivable, String roadType) {
         this.nodes = nodes;
-        this.lines = new HashSet<>();
-        createLines();
 
         this.foot = foot;
         this.bicycle = bicycle;
@@ -71,18 +67,7 @@ public class Road implements Serializable, MapObject {
     //endregion
 
     //region Methods
-    /// Creates the lines between the {@link Node}'s (Used later for drawing)
-    private void createLines() {
-        //Tegner en linje fra den første node til den sidste i rækkefølge. (No?) Slutter af med at lave en linje mellem den sidste og første
-        Node currentNode = nodes.getFirst();
-        for (int i = 1; i < nodes.size(); i++) {
-            lines.add(new Line(currentNode, nodes.get(i)));
-            currentNode = nodes.get(i);
-        }
-        //lines.add(new Line(currentNode, nodes.getLast())); //Tror ikke det her skal bruges i Roads
-    }
-
-    /** Draws the road. This method excludes roads like metros which are underground. See {@link #drawMetro(Canvas)} for the ability to draw the metro
+    /** Draws the road.
      *  @param gc the GraphicsContext in which the road will be drawn
      */
     public void draw(GraphicsContext gc) {
@@ -91,8 +76,12 @@ public class Road implements Serializable, MapObject {
         gc.setStroke(color);
         gc.setLineWidth(lineWidth/Math.sqrt(gc.getTransform().determinant()));
 
-        for (Line line : lines) {
-            line.draw(gc);
+        //Loops through the nodes drawing the lines between them
+        Node startNode = nodes.getFirst();
+        for (int i = 1; i < nodes.size(); i++) {
+            Node endNode = nodes.get(i);
+            gc.strokeLine(startNode.getX(), startNode.getY(), endNode.getX(), endNode.getY());
+            startNode = endNode;
         }
     }
 
@@ -171,7 +160,6 @@ public class Road implements Serializable, MapObject {
     //endregion
 
     //region Getters and setters
-    public Set<Line> getLines() { return lines;    }
     ///Returns whether this piece of road is drivable or not (not in this case means walkable/cyclable)
     public boolean isDrivable() { return isDrivable;  }
     public int getMaxSpeed() { return maxSpeed; }
