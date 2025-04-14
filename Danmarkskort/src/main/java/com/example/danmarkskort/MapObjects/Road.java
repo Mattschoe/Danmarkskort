@@ -24,6 +24,8 @@ public class Road implements Serializable, MapObject {
     private float[] boundingBox;
     private transient Color color;
     private float lineWidth;
+    private float weight;
+    private boolean partOfRoute;
     //endregion
 
     //region Constructor(s)
@@ -36,6 +38,7 @@ public class Road implements Serializable, MapObject {
      */
     public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDrivable, int maxSpeed, String roadType) {
         this.nodes = nodes;
+        calculateWeight();
 
         this.foot = foot;
         this.bicycle = bicycle;
@@ -43,6 +46,7 @@ public class Road implements Serializable, MapObject {
         this.maxSpeed = maxSpeed;
         this.roadType = roadType;
 
+        addRoadsToNodes();
         calculateBoundingBox();
         determineVisuals();
     }
@@ -55,26 +59,41 @@ public class Road implements Serializable, MapObject {
      */
     public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDrivable, String roadType) {
         this.nodes = nodes;
+        calculateWeight();
 
         this.foot = foot;
         this.bicycle = bicycle;
         this.isDrivable = isDrivable;
         this.roadType = roadType;
 
+        addRoadsToNodes();
         calculateBoundingBox();
         determineVisuals();
     }
     //endregion
 
     //region Methods
+    ///To Do. Er usikker på om det her fucker med running time, kan evt. være det skal ændres, men det adder denne vej her
+    private void addRoadsToNodes() {
+        for (Node node : nodes) {
+            node.addRoad(this);
+        }
+    }
+
     /** Draws the road.
      *  @param gc the GraphicsContext in which the road will be drawn
      */
     public void draw(GraphicsContext gc) {
         assert gc != null;
+        if (!isDrivable) return; //Skipper lige ikke-bil veje for nu
 
-        gc.setStroke(color);
+        if (partOfRoute) {
+            gc.setStroke(Color.RED);
+        } else {
+            gc.setStroke(color);
+        }
         gc.setLineWidth(lineWidth/Math.sqrt(gc.getTransform().determinant()));
+
 
         //Loops through the nodes drawing the lines between them
         Node startNode = nodes.getFirst();
@@ -152,11 +171,12 @@ public class Road implements Serializable, MapObject {
         }
     }
 
-    /// Draws the metro, bus-routes, etc.
-    @Deprecated public void drawMetro(Canvas mapCanvas) {}
-
     /// Calculates maxSpeed if the tag wasn't present in the OSM-file
-    @Deprecated private void calculateSpeed() {}
+    private void calculateWeight() {
+        float deltaX = nodes.getFirst().getX() - nodes.getLast().getX();
+        float deltaY = nodes.getFirst().getY() - nodes.getLast().getY();
+        weight = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    }
     //endregion
 
     //region Getters and setters
@@ -170,7 +190,14 @@ public class Road implements Serializable, MapObject {
         roadType = type;
         determineVisuals();
     }
+    public float getWeight() { return weight; }
     @Override
     public float[] getBoundingBox() { return boundingBox; }
+    ///Returns the next node following the provided node
+    public Node getNext(Node node) {
+        if (node.equals(nodes.getLast())) return null;
+        return nodes.get(nodes.indexOf(node) + 1);
+    }
+    public void setPartOfRoute(boolean partOfRoute) { this.partOfRoute = partOfRoute; }
     //endregion
 }

@@ -72,6 +72,8 @@ public class Model {
 
         System.out.println("Finished creating Tilegrid!");
 
+
+        //region Search
         System.out.println("Starting search!");
         Node startNode = parser.getNodes().get(698648);
         Node endNode = parser.getNodes().get(18054778);
@@ -81,6 +83,7 @@ public class Model {
 
         System.out.println("Finished with searching!");
         //endregion
+
         parser = null; //Fjerner reference til parser så den bliver GC'et
     }
     //endregion

@@ -20,6 +20,8 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     private short postcode;
     private String street;
     private int distanceTo;
+
+
     private List<Road> roads;
     private boolean partOfRoute;
     //endregion
@@ -97,6 +99,8 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     public void addRoad(Road road) {
         roads.add(road);
     }
+
+
 
     //endregion
 

@@ -1,6 +1,5 @@
 package com.example.danmarkskort.Searching;
 
-import com.example.danmarkskort.MapObjects.Line;
 import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.Road;
 import javafx.scene.canvas.GraphicsContext;
@@ -46,22 +45,22 @@ public class Search {
     }
 
     private void relax(Road road, Node currentNode) {
-        /*Node oppositeNode = road.getOppositeNode(currentNode);
-        int newDistanceTo = (int) (currentNode.getDistanceTo() + line.getWeight());
+        int newDistanceTo = (int) (currentNode.getDistanceTo() + road.getWeight());
 
-        if (oppositeNode.getDistanceTo() > newDistanceTo) {
-            oppositeNode.setDistanceTo(newDistanceTo);
-            cameFrom.put(oppositeNode, currentNode);
-            priorityQueue.add(oppositeNode);
-        }*/
+        Node nextNode = road.getNext(currentNode);
+        if (nextNode == null) return;
+        if (nextNode.getDistanceTo() > newDistanceTo) {
+            nextNode.setDistanceTo(newDistanceTo);
+            cameFrom.put(nextNode, currentNode);
+            priorityQueue.add(nextNode);
+        }
     }
 
     private void drawPath() {
-        /*
         List<Node> path = new ArrayList<>();
 
+        //Loops back through the map of nodes until we have a reverse list of route
         Node currentNode = endNode;
-
         while (cameFrom.containsKey(currentNode)) {
             path.add(currentNode);
             currentNode = cameFrom.get(currentNode);
@@ -69,21 +68,11 @@ public class Search {
         path.add(currentNode); //Adds the start node since it isn't included in the loop
         Collections.reverse(path);
 
-        for (Node node : path) {
-            node.setPartOfRoute(true);
-            for (Line line : node.getLines()) {
-                if (path.contains(line.getOppositeNode(node))) line.setPartOfRoute(true);
+        for (int i = 0; i < path.size(); i++) {
+            currentNode = path.get(i);
+            for (Road road : currentNode.getRoads())   {
+                if (path.contains(road.getNext(currentNode))) road.setPartOfRoute(true);
             }
         }
-
-
-        while (currentNode != null) {
-            Node currentCameFromNode = cameFrom.get(currentNode); //The node that currentNode came from
-            //Finds the line that the currentCameFromNode is part of and draws it
-            for (Line line : currentNode.getLines()) {
-                if (currentCameFromNode == line.getOppositeNode(currentNode)) line.setPartOfRoute(true);
-            }
-            currentNode = currentCameFromNode;
-        } */
     }
 }
