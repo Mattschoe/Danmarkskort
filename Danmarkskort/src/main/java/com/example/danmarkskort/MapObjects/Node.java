@@ -19,8 +19,6 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     private String houseNumber;
     private short postcode;
     private String street;
-    private double x, y;
-    private String[] address;
     private int distanceTo;
     private LinkedList<Line> lines;
     private boolean partOfRoute;
@@ -103,8 +101,8 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
 
     //region Getters and setters
     public LinkedList<Line> getLines() { return lines; }
-    public double getX() { return x; }
-    public double getY() { return y; }
+    public float getX() { return x; }
+    public float getY() { return y; }
     public void setDistanceTo(int distanceTo) { this.distanceTo = distanceTo; }
     public int getDistanceTo() { return distanceTo; }
     public String getCity() { return city; }
