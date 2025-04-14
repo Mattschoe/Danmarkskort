@@ -331,6 +331,7 @@ public class Parser implements Serializable {
         //region node parameters
         boolean foot = true;
         boolean bicycle = true;
+        boolean drivable = true;
         int maxSpeed = 0;
         String roadType = "";
         boolean hasMaxSpeed = false;
@@ -349,8 +350,9 @@ public class Parser implements Serializable {
                 String key = input.getAttributeValue(null, "k"); //for fat i "k" attribute som fx "maxSpeed"
                 String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
-                if (key.equals("highway") || key.equals("natural") || key.equals("area:highway")){     //find ud af typen af highway
+                if (key.equals("highway") || key.equals("natural") || key.equals("area:highway")) {     //find ud af typen af highway
                     roadType = value;
+                    if (value.equals("footway") || value.equals("bridleway") || value.equals("steps") || value.equals("corridor") || value.equals("path")) drivable = false;
                 } else if (key.equals("maxspeed")) {
                     maxSpeed = Integer.parseInt(value);
                     hasMaxSpeed = true;
@@ -368,16 +370,11 @@ public class Parser implements Serializable {
         //Instantierer en ny Road en road og tager stilling til om den har en maxSpeed eller ej.
         Road road;
         if (hasMaxSpeed){
-            road = new Road(nodes, foot, bicycle, maxSpeed, roadType);
+            road = new Road(nodes, foot, bicycle, drivable, maxSpeed, roadType);
         } else {
-            road = new Road(nodes, foot, bicycle, roadType);
+            road = new Road(nodes, foot, bicycle, drivable, roadType);
         }
         return road;
-    }
-
-    /// @return true if bounds is incomplete, else false
-    private boolean isBoundsIncomplete() {
-        return bounds[0] == 0 || bounds[1] == 0 || bounds[2] == 0 || bounds[3] == 0;
     }
 
     /// Sets the standard bounds to the middle of DK

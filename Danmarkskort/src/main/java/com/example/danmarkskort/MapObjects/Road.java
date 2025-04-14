@@ -18,6 +18,7 @@ public class Road implements Serializable, MapObject {
     private final Set<Line> lines;
     private final boolean foot;
     private final boolean bicycle;
+    private boolean isDrivable;
     private int maxSpeed;
     private String roadType;
     private float[] boundingBox;
@@ -33,13 +34,14 @@ public class Road implements Serializable, MapObject {
      *  @param maxSpeed the max speed on the road
      *  @param roadType the type of road
      */
-    public Road(List<Node> nodes, boolean foot, boolean bicycle, int maxSpeed, String roadType) {
+    public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDrivable, int maxSpeed, String roadType) {
         this.nodes = nodes;
         this.lines = new HashSet<>();
         createLines();
 
         this.foot = foot;
         this.bicycle = bicycle;
+        this.isDrivable = isDrivable;
         this.maxSpeed = maxSpeed;
         this.roadType = roadType;
 
@@ -53,13 +55,14 @@ public class Road implements Serializable, MapObject {
      *  @param bicycle if road the is rideable on bike. Should be true by default
      *  @param roadType the type of road
      */
-    public Road(List<Node> nodes, boolean foot, boolean bicycle, String roadType) {
+    public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDrivable, String roadType) {
         this.nodes = nodes;
         this.lines = new HashSet<>();
         createLines();
 
         this.foot = foot;
         this.bicycle = bicycle;
+        this.isDrivable = isDrivable;
         this.roadType = roadType;
 
         calculateBoundingBox();
@@ -168,13 +171,13 @@ public class Road implements Serializable, MapObject {
     //endregion
 
     //region Getters and setters
-    public Set<Line>  getLines()           { return lines;    }
-    public boolean    isWalkable()         { return foot;     }
-    public boolean    isCyclable()         { return bicycle;  }
-    public int        getMaxSpeed()        { return maxSpeed; }
-    public List<Node> getNodes()           { return nodes;    }
-    public String     getType()            { return roadType; }
-    public boolean    hasRoadType()        { return !roadType.isEmpty(); }
+    public Set<Line> getLines() { return lines;    }
+    ///Returns whether this piece of road is drivable or not (not in this case means walkable/cyclable)
+    public boolean isDrivable() { return isDrivable;  }
+    public int getMaxSpeed() { return maxSpeed; }
+    public List<Node> getNodes() { return nodes;    }
+    public String getType() { return roadType; }
+    public boolean hasRoadType() { return !roadType.isEmpty(); }
     public void setType(String type) {
         roadType = type;
         determineVisuals();

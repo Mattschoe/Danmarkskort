@@ -67,5 +67,6 @@ public class Line implements Serializable {
         else return null;
     }
     public void setPartOfRoute(boolean partOfRoute) { this.partOfRoute = partOfRoute; }
+
     //endregion
 }

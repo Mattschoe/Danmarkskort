@@ -2,6 +2,7 @@ package com.example.danmarkskort.Searching;
 
 import com.example.danmarkskort.MapObjects.Line;
 import com.example.danmarkskort.MapObjects.Node;
+import com.example.danmarkskort.MapObjects.Road;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -37,15 +38,15 @@ public class Search {
                 System.out.println("Reached endNode!");
                 break;
             }
-            for (Line line : currentNode.getLines()) {
-                relax(line, currentNode);
+            for (Road road : currentNode.getRoads()) {
+                relax(road, currentNode);
             }
         }
         drawPath();
     }
 
-    private void relax(Line line, Node currentNode) {
-        Node oppositeNode = line.getOppositeNode(currentNode);
+    private void relax(Road road, Node currentNode) {
+        Node oppositeNode = road.getOppositeNode(currentNode);
         int newDistanceTo = (int) (currentNode.getDistanceTo() + line.getWeight());
 
         if (oppositeNode.getDistanceTo() > newDistanceTo) {

@@ -1,14 +1,14 @@
 package com.example.danmarkskort.MapObjects;
 
-import com.example.danmarkskort.Exceptions.InvalidAddressException;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-import java.awt.*;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 public class Node implements Serializable, MapObject, Comparable<Node> {
     @Serial private static final long serialVersionUID = 1444149606229887777L;
@@ -20,7 +20,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     private short postcode;
     private String street;
     private int distanceTo;
-    private LinkedList<Line> lines;
+    private List<Road> roads;
     private boolean partOfRoute;
     //endregion
 
@@ -30,7 +30,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
      */
     public Node(double latitude, double longitude) {
         distanceTo = Integer.MAX_VALUE;
-        lines = new LinkedList<>();
+        roads = new ArrayList<>();
         calculateXY(latitude, longitude);
     }
 
@@ -45,7 +45,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
      */
     public Node(double latitude, double longitude, String city, String houseNumber, short postcode, String street) {
         distanceTo = Integer.MAX_VALUE;
-        lines = new LinkedList<>();
+        roads = new ArrayList<>();
         calculateXY(latitude, longitude);
         this.city = city;
         this.houseNumber = houseNumber;
@@ -93,14 +93,16 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
         return Integer.compare(this.distanceTo, otherNode.distanceTo);
     }
 
-    public void addLine(Line line) {
-        lines.add(line);
+    ///Adds a road to the roads that are connected to this node
+    public void addRoad(Road road) {
+        roads.add(road);
     }
 
     //endregion
 
     //region Getters and setters
-    public LinkedList<Line> getLines() { return lines; }
+    ///Returns a list of the roads that are connected to this node
+    public List<Road> getRoads() { return roads; }
     public float getX() { return x; }
     public float getY() { return y; }
     public void setDistanceTo(int distanceTo) { this.distanceTo = distanceTo; }
