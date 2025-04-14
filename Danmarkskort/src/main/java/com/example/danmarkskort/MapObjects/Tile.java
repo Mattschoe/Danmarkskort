@@ -14,7 +14,7 @@ public class Tile implements MapObject, Serializable {
     List<MapObject> objectsInTile;
     double[] bounds;
     int tileSize;
-    Set<MapObject> predefinedRelations, motorway, trunk, primary, secondary, tertiary, unclassified, residential, defaultRoad, buildings, area, coastline;
+    Set<MapObject> predefinedRelations, motorway, trunk, primary, secondary, tertiary, unclassified, residential, defaultRoad, buildings, area, coastline, nodes;
 
     //region Constructor(s)
     public Tile(double minX, double minY, double maxX, double maxY, int tileSize) {
@@ -39,6 +39,7 @@ public class Tile implements MapObject, Serializable {
         buildings = new HashSet<>();
         area = new HashSet<>();
         coastline = new HashSet<>();
+        nodes = new HashSet<>();
         //endregion
     }
     //endregion
@@ -50,14 +51,7 @@ public class Tile implements MapObject, Serializable {
 
     @Override
     public void draw(GraphicsContext graphicsContext) {
-        //Tegner tilet
-        //graphicsContext.setStroke(Color.DARKORANGE);
-        //graphicsContext.strokeRect(bounds[0],bounds[1], tileSize, tileSize);
-
-        //Tegner objekterne i tilet
-        for (MapObject mapObject : objectsInTile) {
-            mapObject.draw(graphicsContext);
-        }
+        draw(graphicsContext, 4);
     }
 
     /**
@@ -73,6 +67,7 @@ public class Tile implements MapObject, Serializable {
         drawMotorway(graphicsContext);
         drawTrunk(graphicsContext);
         drawCoastline(graphicsContext);
+        drawNodes(graphicsContext);
         if (levelOfDetail > 0) {
             drawPrimary(graphicsContext);
             if (levelOfDetail > 1) {
@@ -163,6 +158,12 @@ public class Tile implements MapObject, Serializable {
             mapObject.draw(graphicsContext);
         }
     }
+
+    private void drawNodes(GraphicsContext graphicsContext) {
+        for (MapObject mapObject : nodes) {
+            mapObject.draw(graphicsContext);
+        }
+    }
     //endregion
 
 
@@ -190,6 +191,8 @@ public class Tile implements MapObject, Serializable {
                     case "building" -> buildings.add(mapObject);
                     default -> area.add(mapObject);
                 }
+            } else {
+                nodes.add(mapObject);
             }
         }
     }

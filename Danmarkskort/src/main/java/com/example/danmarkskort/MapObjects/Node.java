@@ -17,9 +17,8 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     private double x, y;
     private String[] address;
     private int distanceTo;
-    private HashMap<Node, Integer> adjacentNodes = new HashMap<>();
-    private LinkedList<Line> lines = new LinkedList<>();
-    private Node previousNode;
+    private LinkedList<Line> lines;
+    private boolean partOfRoute;
     //endregion
 
     //region Constructor(s)
@@ -28,6 +27,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
      */
     public Node(double latitude, double longitude) {
         distanceTo = Integer.MAX_VALUE;
+        lines = new LinkedList<>();
         calculateXY(latitude, longitude);
     }
 
@@ -42,6 +42,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
      */
     public Node(double latitude, double longitude, String city, String houseNumber, int postcode, String street) {
         distanceTo = Integer.MAX_VALUE;
+        lines = new LinkedList<>();
         calculateXY(latitude, longitude);
         address = new String[4];
         saveAddress(city, houseNumber, postcode, street);
@@ -71,7 +72,11 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     }
 
     public void draw(GraphicsContext graphicsContext) {
-
+        if (partOfRoute) {
+            graphicsContext.setStroke(Color.ORANGE);
+            graphicsContext.setLineWidth(0.025);
+            graphicsContext.strokeLine(x, y, x, y);
+        }
     }
 
     /** Parses address, checks its correct and saves it in a 4 size array
@@ -92,18 +97,12 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
         }
     }
 
+    /**Compares the node given as parameter with this node.
+     * @return 0 if they have equal distance <br> a value less than zero if this node is less than the other node <br> a value more than zero if this node is greater than the other node
+     */
     @Override
     public int compareTo(Node otherNode) {
         return Integer.compare(this.distanceTo, otherNode.distanceTo);
-    }
-
-
-    public void addDestination(Node destination, int distance) {
-        adjacentNodes.put(destination, distance);
-    }
-
-    public void addAdjacentNode(Node node, int distance) {
-        adjacentNodes.put(node, distance);
     }
 
     public void addLine(Line line) {
@@ -128,5 +127,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     public double[] getBoundingBox() {
         return new double[]{x, y, x, y};
     }
+    public void setPartOfRoute(boolean partOfRoute) { this.partOfRoute = partOfRoute; }
+    public boolean isPartOfRoute() { return partOfRoute; }
     //endregion
 }
