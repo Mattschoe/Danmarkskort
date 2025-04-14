@@ -14,6 +14,11 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     @Serial private static final long serialVersionUID = 1444149606229887777L;
 
     //region Fields
+    private float x, y;
+    private String city;
+    private String houseNumber;
+    private short postcode;
+    private String street;
     private double x, y;
     private String[] address;
     private int distanceTo;
@@ -40,12 +45,14 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
      * @param postcode
      * @param street
      */
-    public Node(double latitude, double longitude, String city, String houseNumber, int postcode, String street) {
+    public Node(double latitude, double longitude, String city, String houseNumber, short postcode, String street) {
         distanceTo = Integer.MAX_VALUE;
         lines = new LinkedList<>();
         calculateXY(latitude, longitude);
-        address = new String[4];
-        saveAddress(city, houseNumber, postcode, street);
+        this.city = city;
+        this.houseNumber = houseNumber;
+        this.postcode = postcode;
+        this.street = street;
     }
     //endregion
 
@@ -65,8 +72,8 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
         int height = 600;
 
         //Calculates XY
-        double xNorm = ((longitude - minLon) / (maxLon - minLon));
-        double yNorm = ((latitude - minLat) / (maxLat - minLat));
+        float xNorm = (float) ((longitude - minLon) / (maxLon - minLon));
+        float yNorm = (float) ((latitude - minLat) / (maxLat - minLat));
         x = xNorm * width;
         y = (1 - yNorm) * height; //Makes sure Y isn't mirrored
     }
@@ -79,23 +86,6 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
         }
     }
 
-    /** Parses address, checks its correct and saves it in a 4 size array
-     *  @param city same as constructor
-     *  @param houseNumber same as constructor
-     *  @param postcode same as constructor
-     *  @param street same as constructor
-     */
-    private void saveAddress(String city, String houseNumber, int postcode, String street) {
-        address[0] = city;
-        address[1] = houseNumber;
-        address[2] = String.valueOf(postcode);
-        address[3] = street;
-
-        //If the address doesn't follow guidelines
-        if (address[2].length() > 4) {
-            throw new InvalidAddressException(address);
-        }
-    }
 
     /**Compares the node given as parameter with this node.
      * @return 0 if they have equal distance <br> a value less than zero if this node is less than the other node <br> a value more than zero if this node is greater than the other node
@@ -112,20 +102,16 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     //endregion
 
     //region Getters and setters
-    /** Address array where the Node stores the address (if it has one). Remember to check for null-errors! <br>
-     *  address[0] = City, fx: "København S"<br>
-     *  address[1] = House-number, fx: "2" <br>
-     *  address[2] = postcode, fx: "2860" <br>
-     *  address[3] = street, fx: "Decembervej"
-     */
     public LinkedList<Line> getLines() { return lines; }
     public double getX() { return x; }
     public double getY() { return y; }
     public void setDistanceTo(int distanceTo) { this.distanceTo = distanceTo; }
     public int getDistanceTo() { return distanceTo; }
+    public String getCity() { return city; }
+    public short getPostcode() { return postcode; }
     @Override
-    public double[] getBoundingBox() {
-        return new double[]{x, y, x, y};
+    public float[] getBoundingBox() {
+        return new float[]{x, y, x, y};
     }
     public void setPartOfRoute(boolean partOfRoute) { this.partOfRoute = partOfRoute; }
     public boolean isPartOfRoute() { return partOfRoute; }

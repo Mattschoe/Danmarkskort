@@ -41,7 +41,7 @@
             <graphic>
                <ImageView fitHeight="32.0" fitWidth="18.0" pickOnBounds="true" preserveRatio="true">
                   <image>
-                     <Image url="@Icon_bil.png" />
+                     <Image url="@icon_bil.png" />
                   </image>
                </ImageView>
             </graphic></Button>
@@ -49,7 +49,7 @@
             <graphic>
                <ImageView fitHeight="23.0" fitWidth="30.0" pickOnBounds="true" preserveRatio="true">
                   <image>
-                     <Image url="@Icon_cykel.png" />
+                     <Image url="@icon_cykel.png" />
                   </image>
                </ImageView>
             </graphic></Button>
@@ -57,7 +57,7 @@
             <graphic>
                <ImageView fitHeight="26.0" fitWidth="43.0" pickOnBounds="true" preserveRatio="true">
                   <image>
-                     <Image url="@Icon_gå.png" />
+                     <Image url="@icon_gå.png" />
                   </image>
                </ImageView>
             </graphic></Button>

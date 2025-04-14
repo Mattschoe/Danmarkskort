@@ -164,7 +164,7 @@ public class Parser implements Serializable {
         //Complex node
         String city = null;
         String houseNumber = null;
-        int postcode = 0;
+        short postcode = 0;
         String street = null;
         while (input.hasNext()) {
             //End of Node
@@ -181,7 +181,7 @@ public class Parser implements Serializable {
                 } else if (key.equals("addr:housenumber")) {
                     houseNumber = value;
                 } else if (key.equals("addr:postcode")) {
-                    postcode = Integer.parseInt(value);
+                    postcode = Short.parseShort(value);
                 } else if (key.equals("addr:street")) {
                     street = value;
                 }
@@ -228,19 +228,19 @@ public class Parser implements Serializable {
                         type = val;
                     }
                 }
+            }
+        }
 
-                for (long memberID : members) {
-                    if (id2Polygon.containsKey(memberID)) {
-                        Polygon member = id2Polygon.get(memberID);
-                        if (member.getType().isEmpty()) {
-                            member.setType(type);
-                        }
-                    }
-                    else if (id2Road.containsKey(memberID)) {
-                        Road member = id2Road.get(memberID);
-                        if (member.getType().isEmpty()) member.setType(type);
-                    }
+        for (long memberID : members) {
+            if (id2Polygon.containsKey(memberID)) {
+                Polygon member = id2Polygon.get(memberID);
+                if (member.getType().isEmpty()) {
+                    member.setType(type);
                 }
+            }
+            else if (id2Road.containsKey(memberID)) {
+                Road member = id2Road.get(memberID);
+                if (member.getType().isEmpty()) member.setType(type);
             }
         }
     }
@@ -317,7 +317,7 @@ public class Parser implements Serializable {
                 if (value.equals("Cityringen")) return new Polygon(nodesInPolygon, value); //TODO %% Find en bedre måde at IKKE tegne Cityringen
             }
         }
-        return new Polygon(nodesInPolygon, null);
+        return new Polygon(nodesInPolygon, "");
     }
 
     /**

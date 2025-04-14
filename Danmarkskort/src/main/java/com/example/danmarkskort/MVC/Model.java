@@ -8,13 +8,8 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.paint.Color;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.sql.Array;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -70,12 +65,13 @@ public class Model {
         //Converts into tilegrid if we haven't loaded a tilegrid in via OBJ
         System.out.println("Starting on tilegrid!");
         int tileSize = 11;
-        double[] tileGridBounds = getMinMaxCoords();
+        float[] tileGridBounds = getMinMaxCoords();
         Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
+
         System.out.println("Finished creating Tilegrid!");
-        
+
         System.out.println("Starting search!");
         Node startNode = parser.getNodes().get(698648);
         Node endNode = parser.getNodes().get(18054778);
@@ -84,8 +80,8 @@ public class Model {
         Search search = new Search(startNode, endNode, parser.getNodes().valueCollection(), canvas.getGraphicsContext2D());
 
         System.out.println("Finished with searching!");
-        //parser.clearParser();
         //endregion
+        parser = null; //Fjerner reference til parser så den bliver GC'et
     }
     //endregion
 
@@ -339,7 +335,7 @@ public class Model {
         //Saves Polygons
         try {
             System.out.println("Saving polygons...");
-            int numberOfChunks = 8;
+            int numberOfChunks = 16;
             TLongObjectHashMap<Polygon> polygons = parser.getPolygons();
             long[] polygonID = polygons.keySet().toArray(); //Need this to split it into chunks
             int amountOfPolygons = polygons.size();
@@ -369,7 +365,7 @@ public class Model {
     }
 
     /// Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile
-    private Tile[][] initializeTileGrid(double minX, double minY, double maxX, double maxY, int tileSize) {
+    private Tile[][] initializeTileGrid(float minX, float minY, float maxX, float maxY, int tileSize) {
         //Calculates number of tiles along each axis
         numberOfTilesX = (int) Math.ceil((maxX - minX) / tileSize);
         numberOfTilesY = (int) Math.ceil((maxY - minY) / tileSize);
@@ -378,8 +374,8 @@ public class Model {
          Tile[][] tileGrid = new Tile[numberOfTilesX][numberOfTilesY];
          for (int x = 0; x < numberOfTilesX; x++) {
              for (int y = 0; y < numberOfTilesY; y++) {
-                 double i = Math.min(minX + x * tileSize, maxX);
-                 double j = Math.min(minY + y * tileSize, maxY);
+                 float i = Math.min(minX + x * tileSize, maxX);
+                 float j = Math.min(minY + y * tileSize, maxY);
                  tileGrid[x][y] = new Tile(i, j, i + tileSize, j + tileSize, tileSize);
              }
          }
@@ -399,7 +395,7 @@ public class Model {
          //region Adds Roads
          for (Road road : parser.getRoads().valueCollection()) {
              //Converts start- and endXY to tile sizes
-             double[] boundingBox = road.getBoundingBox();
+             float[] boundingBox = road.getBoundingBox();
              int startTileX = (int) ((boundingBox[0] - minX) / tileSize);
              int startTileY = (int) ((boundingBox[1] - minY) / tileSize);
              int endTileX = (int) ((boundingBox[2] - minX) / tileSize);
@@ -423,7 +419,7 @@ public class Model {
          //region Adds Polygons
          for (Polygon polygon : parser.getPolygons().valueCollection()) {
              //Converts start- and endXY to tile sizes
-             double[] boundingBox = polygon.getBoundingBox();
+             float[] boundingBox = polygon.getBoundingBox();
              int startTileX = (int) ((boundingBox[0] - minX) / tileSize);
              int startTileY = (int) ((boundingBox[1] - minY) / tileSize);
              int endTileX = (int) ((boundingBox[2] - minX) / tileSize);
@@ -453,18 +449,18 @@ public class Model {
          return tileGrid;
     }
 
-    /// @return the minimum x and y coordinate and the maximum. Used for splitting that box into tiles in {@link #initializeTileGrid(double, double, double, double, int)}
-    private double[] getMinMaxCoords() {
-        double[] minMaxCoords = new double[4];
-        double minX = Double.POSITIVE_INFINITY;
-        double minY = Double.POSITIVE_INFINITY;
-        double maxX = Double.NEGATIVE_INFINITY;
-        double maxY = Double.NEGATIVE_INFINITY;
+    /// @return the minimum x and y coordinate and the maximum. Used for splitting that box into tiles}
+    private float[] getMinMaxCoords() {
+        float[] minMaxCoords = new float[4];
+        float minX = Float.POSITIVE_INFINITY;
+        float minY = Float.POSITIVE_INFINITY;
+        float maxX = Float.NEGATIVE_INFINITY;
+        float maxY = Float.NEGATIVE_INFINITY;
 
         //Loops through each node and gets the minimum and maximum node
         for (Node node : parser.getNodes().valueCollection()) {
-            double nodeX = node.getX();
-            double nodeY = node.getY();
+            float nodeX = node.getX();
+            float nodeY = node.getY();
 
             //X
             if (nodeX < minX ) {
@@ -490,7 +486,6 @@ public class Model {
     //endregion
 
     //region Getters and setters
-    public Parser   getParser()   { return parser;   }
     public Tilegrid getTilegrid() { return tilegrid; }
     //endregion
 }

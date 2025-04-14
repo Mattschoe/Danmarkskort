@@ -13,7 +13,7 @@ public class Tilegrid implements Serializable {
     //region Fields
     private final Tile[][] grid;
     ///The bounds of the tile-grid map (aka the coordinate of the first and last grid) <br> \[0] = minX <br> \[1] = minY <br> \[2] = maxX <br> \[3] = maxY
-    private final double[] tileGridBounds;
+    private final float[] tileGridBounds;
     int tileSize;
     int numberOfTilesX, numberOfTilesY;
     Tile zoomedOutTile;
@@ -21,7 +21,7 @@ public class Tilegrid implements Serializable {
     List<Tile> visibleTiles;
     //endregion
 
-    public Tilegrid(Tile[][] grid, double[] tileGridBounds, int tileSize, int numberOfTilesX, int numberOfTilesY) {
+    public Tilegrid(Tile[][] grid, float[] tileGridBounds, int tileSize, int numberOfTilesX, int numberOfTilesY) {
         this.grid = grid;
         this.tileGridBounds = tileGridBounds;
         this.tileSize = tileSize;
@@ -36,7 +36,7 @@ public class Tilegrid implements Serializable {
      * Draws the {@code visibleTiles} given the Level of detail
      * @param levelOfDetail ranging from 0 to 4, where 0 being the minimum amount and 4 being the maximum amount of details.
      */
-    public void drawVisibleTiles(GraphicsContext graphicsContext, double[] viewport, int levelOfDetail) {
+    public void drawVisibleTiles(GraphicsContext graphicsContext, float[] viewport, int levelOfDetail) {
         if (levelOfDetail < 1) zoomedOutTile.draw(graphicsContext, levelOfDetail);
         else {
             // drawPredefinedRelations(); //OBS det her betyder at vi tegner selvom det ikke kan ses, skal måske ændres senere
@@ -79,7 +79,7 @@ public class Tilegrid implements Serializable {
      * @param viewport an array of length 4 with the following specifics: <br> [0] = minX <br> [1] = minY <br> [2] = maxX <br> [3] = maxY
      * @return all the tiles that are visible given the {@code canvasBounds}
      */
-    private List<Tile> getTilesInView(double[] viewport) {
+    private List<Tile> getTilesInView(float[] viewport) {
         List<Tile> visibleTiles = new ArrayList<>();
 
         //Converts viewport's bounding box to tile indices
@@ -106,7 +106,7 @@ public class Tilegrid implements Serializable {
 
     //region getters and setters
     public Tile[][] getGrid() { return grid; }
-    public double[] getBoundingBox() { return tileGridBounds; }
+    public float[] getBoundingBox() { return tileGridBounds; }
     public int getTileSize() { return tileSize; }
     public List<Tile> getVisibleTiles() { return visibleTiles; }
     public void updateVisibleTiles(List<Tile> visibleTiles) { this.visibleTiles = visibleTiles; }

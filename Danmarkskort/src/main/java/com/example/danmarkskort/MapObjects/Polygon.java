@@ -12,12 +12,12 @@ public class Polygon implements Serializable, MapObject{
 
     //region Fields
     private final List<Node> nodes;
-    private double[] xPoints;
-    private double[] yPoints;
+    private float[] xPoints;
+    private float[] yPoints;
     private int nodesSize;
     private String type; //The type of polygon, fx: "Building", "Coastline", etc.
     private transient Color color;
-    private double[] boundingBox;
+    private float[] boundingBox;
     //endregion
 
     //region Constructor(s)
@@ -40,8 +40,8 @@ public class Polygon implements Serializable, MapObject{
     private void createArrays() {
         nodesSize = nodes.size();
 
-        xPoints = new double[nodesSize];
-        yPoints = new double[nodesSize];
+        xPoints = new float[nodesSize];
+        yPoints = new float[nodesSize];
 
         for (int i = 0; i < nodesSize; i++) {
             xPoints[i] = nodes.get(i).getX();
@@ -53,21 +53,30 @@ public class Polygon implements Serializable, MapObject{
     @Override public void draw(GraphicsContext gc) { draw(gc, false); }
 
     public void draw(GraphicsContext gc, boolean drawLines) {
+        //Converts our array into temporay double arrays to preserve space
+        double[] tempXPoints = new double[nodesSize];
+        double[] tempYPoints = new double[nodesSize];
+
+        for (int i = 0; i < nodesSize; i++) {
+            tempXPoints[i] = xPoints[i];
+            tempYPoints[i] = yPoints[i];
+        }
+
         //if (color.equals(Color.rgb(0, 74, 127, 0.1))) System.out.println(" -def- " + type);
         //if (color.equals(Color.RED)) System.out.println(" -red- " + type);
         if (drawLines) {
             gc.setStroke(color.darker().darker());
-            gc.strokePolygon(xPoints, yPoints, nodesSize);
+            gc.strokePolygon(tempXPoints, tempYPoints, nodesSize);
         }
 
         gc.setFill(color);
-        gc.fillPolygon(xPoints, yPoints, nodesSize);
+        gc.fillPolygon(tempXPoints, tempYPoints, nodesSize);
 
         //TODO %% FARVER KANTEN RUNDT OM COAST-POLYGONER PÅ SAMME MÅDE SOM COAST-ROAD; might be labour intensive??
         if (type.equals("coastline")) {
             gc.setStroke(Color.BLACK);
             gc.setLineWidth(1.5/Math.sqrt(gc.getTransform().determinant()));
-            gc.strokePolygon(xPoints, yPoints, nodesSize);
+            gc.strokePolygon(tempXPoints, tempYPoints, nodesSize);
             gc.setLineWidth(1/Math.sqrt(gc.getTransform().determinant()));
         }
     }
@@ -98,7 +107,7 @@ public class Polygon implements Serializable, MapObject{
             case "greenhouse_horticulture" -> Color.rgb(238, 240, 213);
             case "meadow"         -> Color.rgb(205, 235, 176);
             case "orchard"        -> Color.rgb(172, 224, 161);
-            case "plant_nursery"  -> Color.rgb(174, 223, 163);
+            case "plant_nursery"  -> Color.rgb(172, 224, 161);
             case "vineyard"       -> Color.rgb(172, 224, 161);
             //endregion
             //region landuse: water
@@ -243,7 +252,7 @@ public class Polygon implements Serializable, MapObject{
             case "area:highway"   -> Color.rgb(50, 50, 50, 0.3);
             case "attraction"     -> Color.rgb(239, 213, 179, 0.3);
             case "barrier"        -> Color.rgb(111, 111, 111, 0.3);
-            case "boundary"       -> Color.rgb(207, 155, 203, 0.3);
+            case "boundary"       -> Color.TRANSPARENT; /*Color.rgb(207, 155, 203, 0.3);*/
             case "bridge:support" -> Color.rgb(111, 111, 111, 0.3);
             case "building"       -> Color.rgb(217, 208, 201);
             case "cairn"          -> Color.TAN;
@@ -283,20 +292,20 @@ public class Polygon implements Serializable, MapObject{
     }
 
     private void calculateBoundingBox() {
-        boundingBox = new double[4];
-        boundingBox[0] = Double.POSITIVE_INFINITY; //minX
-        boundingBox[1] = Double.POSITIVE_INFINITY; //minY
-        boundingBox[2] = Double.NEGATIVE_INFINITY; //maxX
-        boundingBox[3]= Double.NEGATIVE_INFINITY; //maxY
+        boundingBox = new float[4];
+        boundingBox[0] = Float.POSITIVE_INFINITY; //minX
+        boundingBox[1] = Float.POSITIVE_INFINITY; //minY
+        boundingBox[2] = Float.NEGATIVE_INFINITY; //maxX
+        boundingBox[3]= Float.NEGATIVE_INFINITY; //maxY
 
         //Finds the lowest and highest X
-        for (double x : xPoints) {
+        for (float x : xPoints) {
             if (x < boundingBox[0]) boundingBox[0] = x;
             if (x > boundingBox[2]) boundingBox[2] = x;
         }
 
         //Finds the lowest and highest Y
-        for (double y : yPoints) {
+        for (float y : yPoints) {
             if (y < boundingBox[1]) boundingBox[1] = y;
             if (y > boundingBox[3]) boundingBox[3] = y;
         }
@@ -304,16 +313,13 @@ public class Polygon implements Serializable, MapObject{
     //endregion
 
     //region Getters and setters
-    public List<Node> getNodes()           { return nodes;           }
-    public String     getType()            { return type;            }
-    public boolean    hasType()            { return !type.isEmpty(); }
-
+    public String getType() { return type;            }
+    public boolean hasType() { return !type.isEmpty(); }
     public void setType(String type) {
         this.type = type;
         determineColor();
     }
-
     @Override
-    public double[] getBoundingBox() { return boundingBox; }
+    public float[] getBoundingBox() { return boundingBox; }
     //endregion
 }

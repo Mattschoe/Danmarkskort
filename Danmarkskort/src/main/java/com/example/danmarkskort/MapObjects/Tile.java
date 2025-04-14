@@ -12,15 +12,15 @@ import java.util.Set;
 
 public class Tile implements MapObject, Serializable {
     List<MapObject> objectsInTile;
-    double[] bounds;
+    float[] bounds;
     int tileSize;
     Set<MapObject> predefinedRelations, motorway, trunk, primary, secondary, tertiary, unclassified, residential, defaultRoad, buildings, area, coastline, nodes;
 
     //region Constructor(s)
-    public Tile(double minX, double minY, double maxX, double maxY, int tileSize) {
+    public Tile(float minX, float minY, float maxX, float maxY, int tileSize) {
         objectsInTile = new ArrayList<>();
         this.tileSize = tileSize;
-        bounds = new double[4];
+        bounds = new float[4];
         bounds[0] = minX;
         bounds[1] = minY;
         bounds[2] = maxX;
@@ -204,7 +204,7 @@ public class Tile implements MapObject, Serializable {
     public Set<MapObject> getTrunk() { return trunk; }
     public Set<MapObject> getCoastline() { return coastline; }
     @Override
-    public double[] getBoundingBox() { return bounds; }
+    public float[] getBoundingBox() { return bounds; }
     public boolean isEmpty() { return objectsInTile.isEmpty(); }
     public void setMotorway(Set<MapObject> motorway) { this.motorway = motorway; }
     public void setTrunk(Set<MapObject> trunk) { this.trunk = trunk; }

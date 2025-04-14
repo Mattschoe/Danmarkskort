@@ -2,7 +2,6 @@ package com.example.danmarkskort.MVC;
 
 import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.MapObjects.Tilegrid;
-import com.example.danmarkskort.Parser;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
 import javafx.scene.Scene;
@@ -24,7 +23,6 @@ public class View {
     private Canvas canvas;
     private final Controller controller;
     private GraphicsContext graphicsContext;
-    private Parser parser;
     private final Scene scene;
     private final Stage stage;
     private boolean firstTimeDrawingMap;
@@ -92,24 +90,22 @@ public class View {
         trans   = new Affine();
         bgTrans = new Affine();
         graphicsContext.setTransform(trans);
+        controller.bindZoomBar();
 
         //Canvas højde og bredde bindes til vinduets
         canvas.widthProperty().bind(scene.widthProperty());
         canvas.heightProperty().bind(scene.heightProperty());
 
         //Listeners tilføjes, der redrawer Canvas'et når vinduet skifter størrelse
-        scene.widthProperty().addListener(_ -> drawMap(parser));
-        scene.heightProperty().addListener(_ -> drawMap(parser));
+        scene.widthProperty().addListener(_ -> drawMap());
+        scene.heightProperty().addListener(_ -> drawMap());
     }
 
     /**
-     * Draws the whole map given a parser.
-     * @param parser the parser that model has stored
+     * Draws the whole map in the tiles visible.
      */
-    public void drawMap(Parser parser) {
-        if (parser == null) return; //TODO %% Evt. find en bedre måde at sørge for at initializeCanvas IKKE køres før kortet loades
+    public void drawMap() {
         assert graphicsContext != null && canvas != null;
-        this.parser = parser;
 
         //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
         graphicsContext.setTransform(bgTrans);
@@ -131,7 +127,6 @@ public class View {
         }
         //endregion
 
-
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
             firstTimeDrawingMap = false;
@@ -142,7 +137,7 @@ public class View {
     public void pan(double dx, double dy) {
         //Moves the map
         trans.prependTranslation(dx, dy);
-        drawMap(parser);
+        drawMap();
     }
 
     /** Zooms in and out, zoom level is limited by {@code minZoom} and {@code maxZoom} which can be changed in the constructor
@@ -165,7 +160,7 @@ public class View {
         trans.prependTranslation(-dx, -dy);
         trans.prependScale(factor, factor);
         trans.prependTranslation(dx, dy);
-        drawMap(parser);
+        drawMap();
     }
 
     /// Changes the current zoom level to a range from 0 to 4 (needed for the LOD). 0 is minimum amount of details, 4 is maximum
@@ -181,13 +176,10 @@ public class View {
     //region Getters and setters
     public Stage getStage() { return stage; }
     public Affine getTrans() { return trans; }
-    public void setVisibleTiles(List<Tile> visibleTiles) {
-        this.visibleTiles = visibleTiles;
-    }
-    public double[] getViewport() throws NonInvertibleTransformException {
+    public float[] getViewport() throws NonInvertibleTransformException {
         Point2D minXY = trans.inverseTransform(0, 0);
         Point2D maxXY = trans.inverseTransform(canvas.getWidth(), canvas.getHeight());
-        return new double[]{minXY.getX(), minXY.getY(), maxXY.getX(), maxXY.getY()};
+        return new float[]{(float) minXY.getX(), (float) minXY.getY(), (float) maxXY.getX(), (float) maxXY.getY()};
     }
     public void setTilegrid(Tilegrid tilegrid) { this.tilegrid = tilegrid; }
     //endregion
