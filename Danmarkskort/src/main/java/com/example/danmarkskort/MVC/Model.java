@@ -367,7 +367,9 @@ public class Model {
     ///Creates a POI and stores it into its given Tile
     public void createPOI(float localX, float localY, String name) {
         Tile tile = tilegrid.getTileFromXY(localX, localY);
+        if (tile == null) return; //No tile within point
         POI POI = new POI(localX, localY, name, tile);
+        tile.addPOI(POI);
     }
 
     /// Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile
@@ -489,8 +491,6 @@ public class Model {
         minMaxCoords[3] = maxY;
         return minMaxCoords;
     }
-
-
     //endregion
 
     //region Getters and setters

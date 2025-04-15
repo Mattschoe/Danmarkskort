@@ -58,7 +58,7 @@ public class Tilegrid implements Serializable {
                 }
             }
         }
-        throw new MapObjectOutOfBoundsException("Intet Tile fundet inden for givet XY");
+        return null;
     }
 
     ///Initializes the tile that's drawn when were zoomed all the way out

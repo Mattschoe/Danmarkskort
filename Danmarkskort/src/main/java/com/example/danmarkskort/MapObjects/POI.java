@@ -52,5 +52,7 @@ public class POI implements MapObject {
         return closestNode;
     }
 
-
+    //region getters and setters
+    public String getName() { return name;}
+    //endregion
 }

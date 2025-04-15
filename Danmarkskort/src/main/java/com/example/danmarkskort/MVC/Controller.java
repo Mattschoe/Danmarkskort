@@ -260,19 +260,17 @@ public class Controller implements Initializable {
 
     /** Metode køres når man slipper sit klik på Canvas'et */
     @FXML protected void onCanvasClick(MouseEvent e) {
-        /*
-        Affine transform = view.getTrans();
-        try {
-            Point2D point = transform.inverseTransform(e.getX(), e.getY());
-            model.createPOI((float) point.getX(), (float) point.getY(), "Test");
-        } catch (NonInvertibleTransformException exception) {
-            System.out.println("Error inversion mouseclick coords!" + exception.getMessage());
-        }
-        System.out.println("Clicked at ("+ e.getX() +", "+ e.getY() +")!"); */
 
         //region DOUBLE CLICK
         if (e.getClickCount() == 2) {
-            System.out.println("Double click!");
+            Affine transform = view.getTrans();
+            try {
+                Point2D point = transform.inverseTransform(e.getX(), e.getY());
+                model.createPOI((float) point.getX(), (float) point.getY(), "Test");
+            } catch (NonInvertibleTransformException exception) {
+                System.out.println("Error inversion mouseclick coords!" + exception.getMessage());
+            }
+            view.drawMap(); //Makes sure that the POI is shown instantly
         }
         //endregion
     }

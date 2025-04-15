@@ -14,6 +14,7 @@ public class Tile implements MapObject, Serializable {
     int tileSize;
     Set<MapObject> predefinedRelations, motorway, trunk, primary, secondary, tertiary, unclassified, residential, defaultRoad, buildings, area, coastline;
     Set<Node> nodes;
+    Set<POI> POIs;
 
     //region Constructor(s)
     public Tile(float minX, float minY, float maxX, float maxY, int tileSize) {
@@ -39,6 +40,7 @@ public class Tile implements MapObject, Serializable {
         area = new HashSet<>();
         coastline = new HashSet<>();
         nodes = new HashSet<>();
+        POIs = new HashSet<>();
         //endregion
     }
     //endregion
@@ -47,6 +49,8 @@ public class Tile implements MapObject, Serializable {
     public void addMapObject(MapObject object) {
         objectsInTile.add(object);
     }
+
+    public void addPOI(POI POI) { POIs.add(POI); }
 
     @Override
     public void draw(GraphicsContext graphicsContext) {
@@ -79,6 +83,7 @@ public class Tile implements MapObject, Serializable {
                     if (levelOfDetail > 3) {
                         drawArea(graphicsContext);
                         drawBuildings(graphicsContext);
+                        drawPOIs(graphicsContext);
                         draw(graphicsContext, levelOfDetail - 1);
                     }
                 }
@@ -161,6 +166,12 @@ public class Tile implements MapObject, Serializable {
     private void drawNodes(GraphicsContext graphicsContext) {
         for (MapObject mapObject : nodes) {
             mapObject.draw(graphicsContext);
+        }
+    }
+
+    private void drawPOIs(GraphicsContext graphicsContext) {
+        for (POI POI : POIs) {
+            POI.draw(graphicsContext);
         }
     }
     //endregion
