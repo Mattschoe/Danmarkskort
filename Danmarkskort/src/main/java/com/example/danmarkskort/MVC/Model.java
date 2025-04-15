@@ -6,11 +6,8 @@ import com.example.danmarkskort.Parser;
 import com.example.danmarkskort.Searching.Search;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.paint.Color;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.sql.Array;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -367,6 +364,12 @@ public class Model {
         System.exit(0);
     }
 
+    ///Creates a POI and stores it into its given Tile
+    public void createPOI(float localX, float localY, String name) {
+        Tile tile = tilegrid.getTileFromXY(localX, localY);
+        POI POI = new POI(localX, localY, name, tile);
+    }
+
     /// Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile
     private Tile[][] initializeTileGrid(float minX, float minY, float maxX, float maxY, int tileSize) {
         //Calculates number of tiles along each axis
@@ -486,6 +489,8 @@ public class Model {
         minMaxCoords[3] = maxY;
         return minMaxCoords;
     }
+
+
     //endregion
 
     //region Getters and setters

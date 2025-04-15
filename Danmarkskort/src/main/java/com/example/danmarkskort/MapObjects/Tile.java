@@ -5,16 +5,15 @@ import javafx.scene.paint.Color;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Tile implements MapObject, Serializable {
     List<MapObject> objectsInTile;
+    ///\[0] = minX <br> \[1] = minY <br> \[2] = maxX <br> \[3] = maxY <br>
     float[] bounds;
     int tileSize;
-    Set<MapObject> predefinedRelations, motorway, trunk, primary, secondary, tertiary, unclassified, residential, defaultRoad, buildings, area, coastline, nodes;
+    Set<MapObject> predefinedRelations, motorway, trunk, primary, secondary, tertiary, unclassified, residential, defaultRoad, buildings, area, coastline;
+    Set<Node> nodes;
 
     //region Constructor(s)
     public Tile(float minX, float minY, float maxX, float maxY, int tileSize) {
@@ -191,15 +190,21 @@ public class Tile implements MapObject, Serializable {
                     case "building" -> buildings.add(mapObject);
                     default -> area.add(mapObject);
                 }
-            } else {
-                nodes.add(mapObject);
+            } else if (mapObject instanceof Node node) {
+                nodes.add(node);
             }
         }
+    }
+
+    ///Returns whether a given point is within this tile
+    public boolean contains(float x, float y) {
+        return x >= bounds[0] && x <= bounds[2] && y >= bounds[1] && y <= bounds[3];
     }
     //endregion
 
     //region Getters and setters
     public List<MapObject> getObjectsInTile() { return objectsInTile; }
+    public Set<Node> getNodesInTile() { return nodes; }
     public Set<MapObject> getMotorway() { return motorway; }
     public Set<MapObject> getTrunk() { return trunk; }
     public Set<MapObject> getCoastline() { return coastline; }

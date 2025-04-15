@@ -6,6 +6,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ListView;
@@ -15,6 +16,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.text.Text;
+import javafx.scene.transform.Affine;
+import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -35,10 +38,13 @@ public class Controller implements Initializable {
     private TrieST<String> trieStreet;
     private MouseEvent mouseEvent; //Used to pan
 
-    private long lastTime;  //Used to calculate FPS
-    private int frameCount; //Used to calculate FPS
-    private double fps;     //Used to calculate FPS
+    //region FPS
+    private long lastTime;
+    private int frameCount;
+    private double fps;
+    //endregion
 
+    //region FXML
     @FXML private Canvas canvas;
     @FXML private CheckMenuItem fpsButton;
     @FXML private ListView<String> listView;
@@ -254,8 +260,24 @@ public class Controller implements Initializable {
 
     /** Metode køres når man slipper sit klik på Canvas'et */
     @FXML protected void onCanvasClick(MouseEvent e) {
-        System.out.println("Clicked at ("+ e.getX() +", "+ e.getY() +")!");
+        /*
+        Affine transform = view.getTrans();
+        try {
+            Point2D point = transform.inverseTransform(e.getX(), e.getY());
+            model.createPOI((float) point.getX(), (float) point.getY(), "Test");
+        } catch (NonInvertibleTransformException exception) {
+            System.out.println("Error inversion mouseclick coords!" + exception.getMessage());
+        }
+        System.out.println("Clicked at ("+ e.getX() +", "+ e.getY() +")!"); */
+
+        //region DOUBLE CLICK
+        if (e.getClickCount() == 2) {
+            System.out.println("Double click!");
+        }
+        //endregion
     }
+
+
 
     /** Metode køres idet man klikker ned på Canvas'et */
     @FXML protected  void onCanvasPressed(MouseEvent e) {
@@ -278,7 +300,6 @@ public class Controller implements Initializable {
      *  @param view View'et som Controllerens view-felt sættes til
      */
     public void setView(View view) { this.view = view; }
-
     /** Returnerer Controllerens canvas-felt, der "populates" direkte idet en scene FXML-loades
      *  (Denne metode bruges kun af View-klassen en enkelt gang, så View kan få Canvas'et af Controlleren)
      *  @return Controllerens canvas-felt

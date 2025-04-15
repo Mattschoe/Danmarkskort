@@ -1,5 +1,6 @@
 package com.example.danmarkskort.MapObjects;
 
+import com.example.danmarkskort.Exceptions.MapObjectOutOfBoundsException;
 import javafx.scene.canvas.GraphicsContext;
 
 import java.io.Serializable;
@@ -46,6 +47,18 @@ public class Tilegrid implements Serializable {
                 tile.draw(graphicsContext, levelOfDetail);
             }
         }
+    }
+
+    ///Adds the given mapObject to the tile that fits the given x, y coordinate. x, y should be the coordinate of the mapObject
+    public Tile getTileFromXY(float x, float y) {
+        for (int i = 0; i < numberOfTilesX; i++) {
+            for (int j = 0; j < numberOfTilesY; j++) {
+                if (grid[i][j].contains(x, y)) {
+                    return grid[i][j];
+                }
+            }
+        }
+        throw new MapObjectOutOfBoundsException("Intet Tile fundet inden for givet XY");
     }
 
     ///Initializes the tile that's drawn when were zoomed all the way out
