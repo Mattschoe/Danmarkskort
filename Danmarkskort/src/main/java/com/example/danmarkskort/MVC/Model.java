@@ -66,21 +66,9 @@ public class Model {
         Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
-
         System.out.println("Finished creating Tilegrid!");
 
-
-        //region Search
-        System.out.println("Starting search!");
-        Node startNode = parser.getNodes().get(698648);
-        Node endNode = parser.getNodes().get(18054778);
-        assert startNode != null && endNode != null && canvas.getGraphicsContext2D() != null;
-
-        Search search = new Search(startNode, endNode, parser.getNodes().valueCollection(), canvas.getGraphicsContext2D());
-
-        System.out.println("Finished with searching!");
-        //endregion
-
+        Search search = new Search(parser.getNodes().valueCollection());
         parser = null; //Fjerner reference til parser så den bliver GC'et
     }
     //endregion

@@ -3,7 +3,6 @@ package com.example.danmarkskort.Searching;
 import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.Road;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 import java.util.*;
 import java.util.PriorityQueue;
@@ -11,20 +10,22 @@ import java.util.PriorityQueue;
 public class Search {
     Node startNode;
     Node endNode;
-    GraphicsContext graphicsContext;
     PriorityQueue<Node> priorityQueue;
     private Map<Node, Node> cameFrom;
 
-    public Search(Node startNode, Node endNode, Collection<Node> nodes, GraphicsContext graphicsContext) {
-        this.startNode = startNode;
-        this.endNode = endNode;
-        this.graphicsContext = graphicsContext;
-        assert startNode != null && endNode != null && !nodes.isEmpty() && graphicsContext != null;
+    public Search(Collection<Node> nodes) {
+        assert !nodes.isEmpty();
 
-        startNode.setPartOfRoute(true);
-        endNode.setPartOfRoute(true);
         priorityQueue = new java.util.PriorityQueue<>();
         cameFrom = new HashMap<>();
+    }
+
+    ///Start a route from the Node {@code from} to the Node {@code to}
+    public void route(Node from, Node to) {
+        startNode = from;
+        endNode = to;
+        assert startNode != null && endNode != null;
+
         startNode.setDistanceTo(0);
         findPath();
     }
