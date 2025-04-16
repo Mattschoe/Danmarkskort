@@ -36,10 +36,12 @@ public class POI implements MapObject {
         return new float[]{x, y, x, y};
     }
 
+    ///Finds the Node closest to the POI. The Node HAS to have a full address to be accepted
     private Node findClosestNode(Tile tile) {
         double closestDistance = Double.MAX_VALUE;
         Node closestNode = null;
         for (Node node : tile.getNodesInTile()) {
+            if (!node.hasFullAddress()) continue; //Skips if node doesn't have full address
             float nodeX = node.getX();
             float nodeY = node.getY();
             double distance = Math.sqrt(Math.pow((nodeX - x), 2) + Math.pow((nodeY - x), 2)); //Afstandsformlen ser cooked ud i Java wth -MN
@@ -53,6 +55,14 @@ public class POI implements MapObject {
     }
 
     //region getters and setters
+    ///Returns the name of this POI
     public String getName() { return name;}
+    ///Returns the POIs closest Node
+    public Node getNode() { return closestNodeToPOI; }
+    ///Returns the Node's address as a full string. Used for showing to user on UI. If the Node doesn't have a full address, we return the XY
+    public String getNodeAddress() {
+        return closestNodeToPOI.getAddress();
+    }
+
     //endregion
 }

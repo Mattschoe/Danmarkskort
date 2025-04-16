@@ -111,8 +111,17 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     public float getY() { return y; }
     public void setDistanceTo(int distanceTo) { this.distanceTo = distanceTo; }
     public int getDistanceTo() { return distanceTo; }
+
+    //region Address
     public String getCity() { return city; }
     public short getPostcode() { return postcode; }
+    public String getStreet() { return street; }
+    public String getHouseNumber() { return houseNumber; }
+    ///Combines all other getAddress getters together to one whole string. Useful for UI
+    public String getAddress() { return (street + " " + houseNumber + ", " + postcode + " " + city); }
+    public boolean hasFullAddress()  { return street != null && houseNumber != null && postcode != 0 && city != null; }
+    //Endregion
+
     @Override
     public float[] getBoundingBox() {
         return new float[]{x, y, x, y};

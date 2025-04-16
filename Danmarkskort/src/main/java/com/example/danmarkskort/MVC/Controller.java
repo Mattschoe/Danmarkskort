@@ -1,5 +1,6 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.MapObjects.POI;
 import javafx.animation.AnimationTimer;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import javafx.beans.value.ChangeListener;
@@ -262,16 +263,21 @@ public class Controller implements Initializable {
     /** Metode køres når man slipper sit klik på Canvas'et */
     @FXML protected void onCanvasClick(MouseEvent e) {
 
-        //region DOUBLE CLICK
+        //region DOUBLE CLICK (Searching)
         if (e.getClickCount() == 2) {
             Affine transform = view.getTrans();
+            POI POI = null;
             try {
                 Point2D point = transform.inverseTransform(e.getX(), e.getY());
-                model.createPOI((float) point.getX(), (float) point.getY(), "Test");
+                POI = model.createPOI((float) point.getX(), (float) point.getY(), "Test");
             } catch (NonInvertibleTransformException exception) {
                 System.out.println("Error inversion mouseclick coords!" + exception.getMessage());
             }
             view.drawMap(); //Makes sure that the POI is shown instantly
+
+            if (POI != null) {
+                searchBar.setText(POI.getNodeAddress());
+            }
         }
         //endregion
     }
