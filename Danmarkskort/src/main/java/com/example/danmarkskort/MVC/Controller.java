@@ -10,10 +10,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -30,6 +27,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
+
     //region Fields
     private View view;
     private Model model;
@@ -39,6 +37,8 @@ public class Controller implements Initializable {
     private TrieST<String> trieCity; //Part of test
     private TrieST<String> trieStreet;
     private MouseEvent mouseEvent; //Used to pan
+    private POI startPOI;
+    private POI endPOI;
 
     //region FPS
     private long lastTime;
@@ -54,6 +54,9 @@ public class Controller implements Initializable {
     @FXML private Text fpsCount;
     @FXML private Text zoomText;
     @FXML private TextField searchBar;
+    @FXML private Button switchSearch;
+    @FXML private Button findRoute;
+    @FXML private TextField destination;
     //endregion
 
     //region Constructor(s)
@@ -265,6 +268,7 @@ public class Controller implements Initializable {
 
         //region DOUBLE CLICK (Searching)
         if (e.getClickCount() == 2) {
+            //Makes POI
             Affine transform = view.getTrans();
             POI POI = null;
             try {
@@ -275,12 +279,43 @@ public class Controller implements Initializable {
             }
             view.drawMap(); //Makes sure that the POI is shown instantly
 
+            //Assigns spot for POI. Sets as start if empty or if "find route" has not been activated, if else, else we set it as the destination
             if (POI != null) {
-                searchBar.clear();
-                searchBar.setText(POI.getNodeAddress());
+                onActivateSearch();
+                if (searchBar.getText().trim().isEmpty() || !destination.isVisible()) {
+                    startPOI = POI;
+                } else {
+                    endPOI = POI;
+                }
+                updateSearchText();
             }
         }
         //endregion
+    }
+
+    @FXML public void onActivateSearch() {
+        findRoute.setVisible(true);
+    }
+
+    @FXML public void onRouteSearchStart() {
+        switchSearch.setVisible(true);
+        destination.setVisible(true);
+    }
+
+    @FXML public void switchDestinationAndStart() {
+        POI temp = startPOI;
+        startPOI = endPOI;
+        endPOI = temp;
+        updateSearchText();
+    }
+
+    ///Updates the text in the search. Call this after changing the POI responsible for the text
+    private void updateSearchText() {
+        searchBar.clear();
+        destination.clear();
+
+        if (startPOI != null) searchBar.setText(startPOI.getNodeAddress());
+        if (endPOI != null) destination.setText(endPOI.getNodeAddress());
     }
 
     /** Metode køres idet man klikker ned på Canvas'et */
@@ -309,15 +344,5 @@ public class Controller implements Initializable {
      *  @return Controllerens canvas-felt
      */
     public Canvas getCanvas() { return canvas; }
-
-    public void onRouteSearch(ActionEvent actionEvent) {
-        try {
-            view = new View(view.getStage(), "routeplanning.fxml");
-            view.setTilegrid(model.getTilegrid());
-            view.drawMap();
-        } catch (Exception e) {
-            System.out.println("Error creating new view! " + e.getMessage());
-        }
-    }
     //endregion
 }
