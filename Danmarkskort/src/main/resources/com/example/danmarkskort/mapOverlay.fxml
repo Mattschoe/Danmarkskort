@@ -46,6 +46,7 @@
       <Menu mnemonicParsing="false" text="Show">
         <items>
             <CheckMenuItem fx:id="fpsButton" mnemonicParsing="false" text="FPS" />
+            <CheckMenuItem text="Rutesøgning" onAction="#onRouteSearch"/>
         </items>
       </Menu>
     </MenuBar>

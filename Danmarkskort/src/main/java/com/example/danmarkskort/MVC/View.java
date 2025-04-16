@@ -23,7 +23,7 @@ public class View {
     private Canvas canvas;
     private final Controller controller;
     private GraphicsContext graphicsContext;
-    private final Scene scene;
+    private Scene scene;
     private final Stage stage;
     private boolean firstTimeDrawingMap;
     private int maxZoom;
@@ -154,6 +154,7 @@ public class View {
         if (trans.getMxx() > 4)  return 1;
         else return 0;
     }
+
     //endregion
 
     //region Getters and setters

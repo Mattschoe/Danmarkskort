@@ -4,6 +4,7 @@ import javafx.animation.AnimationTimer;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
@@ -275,8 +276,6 @@ public class Controller implements Initializable {
         //endregion
     }
 
-
-
     /** Metode køres idet man klikker ned på Canvas'et */
     @FXML protected  void onCanvasPressed(MouseEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked xd
@@ -303,5 +302,15 @@ public class Controller implements Initializable {
      *  @return Controllerens canvas-felt
      */
     public Canvas getCanvas() { return canvas; }
+
+    public void onRouteSearch(ActionEvent actionEvent) {
+        try {
+            view = new View(view.getStage(), "routeplanning.fxml");
+            view.setTilegrid(model.getTilegrid());
+            view.drawMap();
+        } catch (Exception e) {
+            System.out.println("Error creating new view! " + e.getMessage());
+        }
+    }
     //endregion
 }
