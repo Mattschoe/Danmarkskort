@@ -22,6 +22,7 @@ public class Model {
     private File outputFile; //The output .obj file
     private int numberOfTilesX, numberOfTilesY;
     private Tilegrid tilegrid;
+    private Search search;
     //endregion
 
     //region Constructor(s)
@@ -67,8 +68,9 @@ public class Model {
 
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
         System.out.println("Finished creating Tilegrid!");
+        //endregion
 
-        Search search = new Search(parser.getNodes().valueCollection());
+        search = new Search(parser.getNodes().valueCollection());
         parser = null; //Fjerner reference til parser så den bliver GC'et
     }
     //endregion
@@ -359,6 +361,11 @@ public class Model {
         POI POI = new POI(localX, localY, name, tile);
         tile.addPOI(POI);
         return POI;
+    }
+
+    ///Starts a search from {@code startNode} to {@code endNode}
+    public void search(Node startNode, Node endNode) {
+        search.route(startNode, endNode);
     }
 
     /// Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile

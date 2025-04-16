@@ -34,10 +34,7 @@ public class Search {
         priorityQueue.add(startNode);
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
-            if (currentNode == endNode) {
-                System.out.println("Reached endNode!");
-                break;
-            }
+            if (currentNode == endNode) break; //Reached endNode
             for (Road road : currentNode.getRoads()) {
                 relax(road, currentNode);
             }

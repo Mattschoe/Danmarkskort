@@ -255,7 +255,9 @@ public class Controller implements Initializable {
     }
 
     private void startSearch() {
-        System.out.println("HII");
+        System.out.println("Starting search...");
+        model.search(startPOI.getNode(), endPOI.getNode());
+        System.out.println("Finished search!");
     }
     //endregion
 
@@ -299,13 +301,17 @@ public class Controller implements Initializable {
 
     ///Opens the search menu when activated. If both start- and endPOI are initialized, this button is used for activating the route finding between the two POI's.
     @FXML public void onActivateSearch() {
-        if (startPOI != null && endPOI != null) startSearch();
-        else findRoute.setVisible(true);
+        findRoute.setVisible(true);
     }
 
+    ///"Find Route" button on UI
     @FXML public void onRouteSearchStart() {
-        switchSearch.setVisible(true);
-        destination.setVisible(true);
+        if (startPOI != null && endPOI != null && !searchBar.getText().trim().isEmpty() && !destination.getText().trim().isEmpty()) {
+            startSearch();
+        } else {
+            switchSearch.setVisible(true);
+            destination.setVisible(true);
+        }
     }
 
     @FXML public void switchDestinationAndStart() {
