@@ -45,9 +45,9 @@ public class POI implements MapObject {
             if (!node.hasFullAddress()) continue; //Skips if node doesn't have full address
             double nodeX = node.getX();
             double nodeY = node.getY();
-            double distance = Math.sqrt((nodeX - (double) x) + (nodeY - (double) y)); //Afstandsformlen ser cooked ud i Java wth -MN
+            double distance = Math.sqrt(Math.pow((nodeX - (double) x), 2) + Math.pow((nodeY - (double) y), 2)); //Afstandsformlen ser cooked ud i Java wth -MN
             if (distance < closestDistance) {
-                closestDistance = distance;14
+                closestDistance = distance;
                 closestNode = node;
             }
         }
