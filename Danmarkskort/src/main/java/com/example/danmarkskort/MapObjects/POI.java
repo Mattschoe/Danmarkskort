@@ -20,7 +20,6 @@ public class POI implements MapObject {
     public POI(float x, float y, String name, Tile tile) {
         this.x = x;
         this.y = y;
-        System.out.println("POI: " + x + ", " + y);
         this.name = name;
         closestNodeToPOI = findClosestNode(tile);
     }
@@ -51,7 +50,6 @@ public class POI implements MapObject {
                 closestNode = node;
             }
         }
-        System.out.println("Closest Distance: " + closestDistance);
         assert closestNode != null;
         return closestNode;
     }

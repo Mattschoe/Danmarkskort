@@ -53,8 +53,6 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
         this.houseNumber = houseNumber;
         this.postcode = postcode;
         this.street = street;
-        if (city.equals("København K") && houseNumber.equals("5") && postcode == 1411 && street.equals("Langebrogade")) System.out.println("Korrekte: " + x + ", " + y);
-        if (city.equals("København S") && houseNumber.equals("64") && postcode == 2300 && street.equals("Artillerivej")) System.out.println("Forkerte: " + x + ", " + y);
     }
     //endregion
 

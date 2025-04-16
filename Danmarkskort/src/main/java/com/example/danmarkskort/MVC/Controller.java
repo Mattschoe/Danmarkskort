@@ -253,6 +253,10 @@ public class Controller implements Initializable {
             }
         }
     }
+
+    private void startSearch() {
+        System.out.println("HII");
+    }
     //endregion
 
     //region Canvas methods
@@ -293,8 +297,10 @@ public class Controller implements Initializable {
         //endregion
     }
 
+    ///Opens the search menu when activated. If both start- and endPOI are initialized, this button is used for activating the route finding between the two POI's.
     @FXML public void onActivateSearch() {
-        findRoute.setVisible(true);
+        if (startPOI != null && endPOI != null) startSearch();
+        else findRoute.setVisible(true);
     }
 
     @FXML public void onRouteSearchStart() {
