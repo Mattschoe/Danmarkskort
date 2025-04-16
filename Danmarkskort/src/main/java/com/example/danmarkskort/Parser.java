@@ -153,7 +153,6 @@ public class Parser implements Serializable {
         double lon = Double.parseDouble(input.getAttributeValue(null, "lon"));
         if (lat < bounds[0] || lat > bounds[2] || lon < bounds[1] || lon > bounds[3]) throw new MapObjectOutOfBoundsException("Node is out of bounds!");
 
-
         int nextInput = input.next();
         //If simple node, saves it and returns
         if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("node")) {
