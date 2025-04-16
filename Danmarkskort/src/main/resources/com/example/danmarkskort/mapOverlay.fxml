@@ -30,7 +30,7 @@
 
     <ListView fx:id="listView" layoutX="15.0" layoutY="61.0" prefHeight="72.0" prefWidth="150.0" visible="false" />
 
-    <Text fx:id="fpsCount" layoutX="495.0" layoutY="52.0" strokeType="OUTSIDE" strokeWidth="0.0" text="FPS" AnchorPane.rightAnchor="88.0" AnchorPane.topAnchor="39.05078125" />
+    <Text fx:id="fpsText" layoutX="495.0" layoutY="52.0" strokeType="OUTSIDE" strokeWidth="0.0" text="FPS" AnchorPane.rightAnchor="88.0" AnchorPane.topAnchor="39.05078125" />
 
     <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onKeyTyped="#searchBarTyped" promptText="Søg efter adresse..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
     <MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">

@@ -35,15 +35,14 @@ public class Controller implements Initializable {
     private TrieST<String> trieStreet;
     private MouseEvent mouseEvent; //Used to pan
 
-    private long lastTime;  //Used to calculate FPS
-    private int frameCount; //Used to calculate FPS
-    private double fps;     //Used to calculate FPS
+    private long lastSystemTime; //Used to calculate FPS
+    private int framesThisSec;   //Used to calculate FPS
 
     @FXML private Canvas canvas;
     @FXML private CheckMenuItem fpsButton;
     @FXML private ListView<String> listView;
     @FXML private Slider zoomBar;
-    @FXML private Text fpsCount;
+    @FXML private Text fpsText;
     @FXML private Text zoomText;
     @FXML private TextField searchBar;
     //endregion
@@ -65,15 +64,11 @@ public class Controller implements Initializable {
         catch (IllegalStateException _) {} //Model not loaded yet, so we wait
 
         //region AnimationTimer
-        lastTime = 0;
-        frameCount = 0;
-        fps = 0;
-
         AnimationTimer fpsTimer = new AnimationTimer() {
             @Override public void handle(long now) {
-                if (fpsCount != null) {
+                if (fpsText != null) {
                     if (fpsButton.isSelected()) calculateFPS(now);
-                    else if (!fpsCount.getText().isEmpty()) fpsCount.setText("");
+                    else if (!fpsText.getText().isEmpty()) fpsText.setText("");
                 }
 
                 if (panRequest) {
@@ -170,19 +165,17 @@ public class Controller implements Initializable {
 
     //region mapOverlay.fxml scene methods
     /// Calculates FPS and adjusts the display-text
-    private void calculateFPS(long now) {
-        if (lastTime != 0) {
-            long elapsedNanos = now - lastTime;
-            frameCount++;
-            if (elapsedNanos >= 1_000_000_000) {
-                fps = frameCount / (elapsedNanos / 1_000_000_000.0);
-                frameCount = 0;
-                lastTime = now;
-            }
-        } else {
-            lastTime = now;
+    private void calculateFPS(long systemTime) {
+        long deltaSystemTime = systemTime - lastSystemTime;
+        ++framesThisSec;
+
+        if (deltaSystemTime >= 1_000_000_000) {
+            double fps = framesThisSec / (deltaSystemTime / 1_000_000_000.0);
+            fpsText.setText(String.format("FPS: %.0f", fps));
+
+            framesThisSec = 0;
+            lastSystemTime = systemTime;
         }
-        fpsCount.setText(String.format("FPS: %.0f", fps));
     }
 
     /// Adds a listener on View's Affine "trans" which updates the zoomBar based on trans' zoom-factor
