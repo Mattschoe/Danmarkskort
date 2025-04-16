@@ -12,8 +12,11 @@ public class Node implements Serializable, MapObject {
     @Serial private static final long serialVersionUID = 1444149606229887777L;
 
     //region Fields
-    private double x, y;
-    private String[] address;
+    private float x, y;
+    private String city;
+    private String houseNumber;
+    private short postcode;
+    private String street;
     //endregion
 
     //region Constructor(s)
@@ -33,10 +36,12 @@ public class Node implements Serializable, MapObject {
      * @param postcode
      * @param street
      */
-    public Node(double latitude, double longitude, String city, String houseNumber, int postcode, String street) {
+    public Node(double latitude, double longitude, String city, String houseNumber, short postcode, String street) {
         calculateXY(latitude, longitude);
-        address = new String[4];
-        saveAddress(city, houseNumber, postcode, street);
+        this.city = city;
+        this.houseNumber = houseNumber;
+        this.postcode = postcode;
+        this.street = street;
     }
     //endregion
 
@@ -56,32 +61,14 @@ public class Node implements Serializable, MapObject {
         int height = 600;
 
         //Calculates XY
-        double xNorm = ((longitude - minLon) / (maxLon - minLon));
-        double yNorm = ((latitude - minLat) / (maxLat - minLat));
+        float xNorm = (float) ((longitude - minLon) / (maxLon - minLon));
+        float yNorm = (float) ((latitude - minLat) / (maxLat - minLat));
         x = xNorm * width;
         y = (1 - yNorm) * height; //Makes sure Y isn't mirrored
     }
 
     public void draw(GraphicsContext graphicsContext) {
 
-    }
-
-    /** Parses address, checks its correct and saves it in a 4 size array
-     *  @param city same as constructor
-     *  @param houseNumber same as constructor
-     *  @param postcode same as constructor
-     *  @param street same as constructor
-     */
-    private void saveAddress(String city, String houseNumber, int postcode, String street) {
-        address[0] = city;
-        address[1] = houseNumber;
-        address[2] = String.valueOf(postcode);
-        address[3] = street;
-
-        //If the address doesn't follow guidelines
-        if (address[2].length() > 4) {
-            throw new InvalidAddressException(address);
-        }
     }
     //endregion
 
@@ -92,13 +79,13 @@ public class Node implements Serializable, MapObject {
      *  address[2] = postcode, fx: "2860" <br>
      *  address[3] = street, fx: "Decembervej"
      */
-    public String[] getAddress() { return address; }
-    public double   getX()       { return x; }
-    public double   getY()       { return y; }
-
+    public String getCity() { return city; }
+    public short getPostcode() { return postcode; }
+    public float getX() { return x; }
+    public float getY() { return y; }
     @Override
-    public double[] getBoundingBox() {
-        return new double[]{x, y, x, y};
+    public float[] getBoundingBox() {
+        return new float[]{x, y, x, y};
     }
     //endregion
 }

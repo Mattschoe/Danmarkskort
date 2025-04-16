@@ -20,9 +20,9 @@ public class Road implements Serializable, MapObject {
     private final boolean bicycle;
     private int maxSpeed;
     private String roadType;
-    private double[] boundingBox;
+    private float[] boundingBox;
     private transient Color color;
-    private double lineWidth;
+    private float lineWidth;
     //endregion
 
     //region Constructor(s)
@@ -97,40 +97,40 @@ public class Road implements Serializable, MapObject {
     private void determineVisuals() {
         if (roadType.equals("coastline")) {
             color = Color.BLACK;
-            lineWidth = 1.5;
+            lineWidth = 1.5f;
         }
         else if (roadType.equals("primary")) {
             color = Color.DARKORANGE;
-            lineWidth = 1.5;
+            lineWidth = 1.5f;
         }
         else if (roadType.equals("secondary")) {
             color = Color.DARKSLATEBLUE;
-            lineWidth = 1.5;
+            lineWidth = 1.5f;
         }
         else if (roadType.equals("tertiary")) {
             color = Color.DARKGREEN;
-            lineWidth = 1.5;
+            lineWidth = 1.5f;
         }
         else if (roadType.equals("cycleway")) {
             color = Color.DARKMAGENTA;
-            lineWidth = 1.1;
+            lineWidth = 1.1f;
         }
         else if (roadType.equals("track") || roadType.equals("path")) {
             color = Color.SIENNA;
-            lineWidth = 1;
+            lineWidth = 1f;
         }
         else if (roadType.equals("tree_row")) {
             color = Color.rgb(172, 210, 156);
-            lineWidth = 1;
+            lineWidth = 1f;
         }
         else if (roadType.equals("route")) {
             color = Color.TRANSPARENT;
-            lineWidth = 0;
+            lineWidth = 0f;
         }
         else {
             //default
             color = Color.rgb(100, 100, 100);
-            lineWidth = 1;
+            lineWidth = 1f;
         }
 
         /*
@@ -142,11 +142,11 @@ public class Road implements Serializable, MapObject {
     }
 
     private void calculateBoundingBox() {
-        boundingBox = new double[4];
-        boundingBox[0] = Double.POSITIVE_INFINITY; //minX
-        boundingBox[1] = Double.POSITIVE_INFINITY; //minY
-        boundingBox[2] = Double.NEGATIVE_INFINITY; //maxX
-        boundingBox[3]= Double.NEGATIVE_INFINITY; //maxY
+        boundingBox = new float[4];
+        boundingBox[0] = Float.POSITIVE_INFINITY; //minX
+        boundingBox[1] = Float.POSITIVE_INFINITY; //minY
+        boundingBox[2] = Float.NEGATIVE_INFINITY; //maxX
+        boundingBox[3]= Float.NEGATIVE_INFINITY; //maxY
 
         //Finds the lowest and highest XY
         for (Node node : nodes) {
@@ -175,13 +175,11 @@ public class Road implements Serializable, MapObject {
     public List<Node> getNodes()           { return nodes;    }
     public String     getType()            { return roadType; }
     public boolean    hasRoadType()        { return !roadType.isEmpty(); }
-
     public void setType(String type) {
         roadType = type;
         determineVisuals();
     }
-
     @Override
-    public double[] getBoundingBox() { return boundingBox; }
+    public float[] getBoundingBox() { return boundingBox; }
     //endregion
 }

@@ -98,7 +98,6 @@ public class Controller implements Initializable {
     private void loadFile(File mapFile) {
         model = Model.getInstance(mapFile.getPath(), canvas);
         view.setTilegrid(model.getTilegrid());
-        assert model.getParser() != null;
     }
 
     /** Runs right after a Controller is created --
@@ -147,7 +146,7 @@ public class Controller implements Initializable {
             assert view != null;
 
             //Starts up the map
-            view.drawMap(model.getParser());
+            view.drawMap();
         }
     }
 
@@ -159,7 +158,7 @@ public class Controller implements Initializable {
         view = new View(view.getStage(), "mapOverlay.fxml");
         loadFile(standardMapFile);
 
-        view.drawMap(model.getParser());
+        view.drawMap();
     }
     //endregion
 

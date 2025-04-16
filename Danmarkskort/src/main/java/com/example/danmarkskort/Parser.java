@@ -165,7 +165,7 @@ public class Parser implements Serializable {
         //Complex node
         String city = null;
         String houseNumber = null;
-        int postcode = 0;
+        short postcode = 0;
         String street = null;
         while (input.hasNext()) {
             //End of Node
@@ -182,7 +182,7 @@ public class Parser implements Serializable {
                 } else if (key.equals("addr:housenumber")) {
                     houseNumber = value;
                 } else if (key.equals("addr:postcode")) {
-                    postcode = Integer.parseInt(value);
+                    postcode = Short.parseShort(value);
                 } else if (key.equals("addr:street")) {
                     street = value;
                 }
