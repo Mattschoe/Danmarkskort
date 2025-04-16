@@ -27,7 +27,7 @@ public class POI implements MapObject {
     @Override
     public void draw(GraphicsContext graphicsContext) {
         graphicsContext.setStroke(Color.RED);
-        graphicsContext.setLineWidth(0.025);
+        graphicsContext.setLineWidth(0.01);
         graphicsContext.strokeLine(x, y, x, y);
     }
 

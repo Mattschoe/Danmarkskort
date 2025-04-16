@@ -276,6 +276,7 @@ public class Controller implements Initializable {
             view.drawMap(); //Makes sure that the POI is shown instantly
 
             if (POI != null) {
+                searchBar.clear();
                 searchBar.setText(POI.getNodeAddress());
             }
         }
