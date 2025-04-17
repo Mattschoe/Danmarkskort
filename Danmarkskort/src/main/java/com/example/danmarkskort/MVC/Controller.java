@@ -256,7 +256,7 @@ public class Controller implements Initializable {
 
     private void startSearch() {
         System.out.println("Starting search...");
-        model.search(startPOI.getNode(), endPOI.getNode());
+        model.search(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
         System.out.println("Finished search!");
     }
     //endregion

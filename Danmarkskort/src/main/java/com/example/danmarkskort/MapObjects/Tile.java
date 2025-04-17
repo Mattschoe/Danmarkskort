@@ -14,6 +14,7 @@ public class Tile implements MapObject, Serializable {
     int tileSize;
     Set<MapObject> predefinedRelations, motorway, trunk, primary, secondary, tertiary, unclassified, residential, defaultRoad, buildings, area, coastline;
     Set<Node> nodes;
+    Set<Road> roads;
     Set<POI> POIs;
 
     //region Constructor(s)
@@ -41,6 +42,7 @@ public class Tile implements MapObject, Serializable {
         coastline = new HashSet<>();
         nodes = new HashSet<>();
         POIs = new HashSet<>();
+        roads = new HashSet<>();
         //endregion
     }
     //endregion
@@ -184,6 +186,7 @@ public class Tile implements MapObject, Serializable {
         for (MapObject mapObject : objectsInTile) {
             if (mapObject instanceof Road road) {
                 String roadType = road.getType();
+                roads.add(road);
                 switch (roadType) {
                     case "motorway" -> motorway.add(mapObject);
                     case "trunk" -> trunk.add(mapObject);
@@ -219,6 +222,7 @@ public class Tile implements MapObject, Serializable {
     public Set<MapObject> getMotorway() { return motorway; }
     public Set<MapObject> getTrunk() { return trunk; }
     public Set<MapObject> getCoastline() { return coastline; }
+    public Set<Road> getRoads() { return roads; }
     @Override
     public float[] getBoundingBox() { return bounds; }
     public boolean isEmpty() { return objectsInTile.isEmpty(); }
