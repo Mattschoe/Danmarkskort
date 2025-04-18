@@ -383,6 +383,16 @@ public class Parser implements Serializable {
         bounds[2] = 57.995290;
         bounds[3] = 15.708697; //Bornholm gør at DK er mega lang :(, once again et giga Bornholm L
     }
+
+    ///Splits all roads into multiple each time there is intersection
+    private void splitRoads() {
+        for (Road road : id2Road.valueCollection()) {
+            List<Node> nodes = road.getNodes();
+            for (int i = 0; i < nodes.size(); i++) {
+                
+            }
+        }
+    }
     //endregion
 
     //region GETTERS AND SETTERS
