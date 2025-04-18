@@ -31,7 +31,7 @@ public class Search {
     }
 
     private void findPath() {
-        priorityQueue.add(startNode);
+        /*priorityQueue.add(startNode);
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
             if (currentNode == endNode) break; //Reached endNode
@@ -39,7 +39,7 @@ public class Search {
                 relax(road, currentNode);
             }
         }
-        drawPath();
+        drawPath(); */
     }
 
     private void relax(Road road, Node currentNode) {
@@ -55,6 +55,7 @@ public class Search {
     }
 
     private void drawPath() {
+        /*
         List<Node> path = new ArrayList<>();
 
         //Loops back through the map of nodes until we have a reverse list of route
@@ -72,5 +73,7 @@ public class Search {
                 if (path.contains(road.getNext(currentNode))) road.setPartOfRoute(true);
             }
         }
+
+         */
     }
 }

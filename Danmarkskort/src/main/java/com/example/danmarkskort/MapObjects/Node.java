@@ -17,7 +17,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     private short postcode;
     private String street;
     private int distanceTo;
-    private Set<Road> edges;
+    private int edges;
 
     //endregion
 
@@ -27,7 +27,6 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
      */
     public Node(double latitude, double longitude) {
         distanceTo = Integer.MAX_VALUE;
-        edges = new HashSet<>();
         calculateXY(latitude, longitude);
     }
 
@@ -42,7 +41,6 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
      */
     public Node(double latitude, double longitude, String city, String houseNumber, short postcode, String street) {
         distanceTo = Integer.MAX_VALUE;
-        edges = new HashSet<>();
         this.city = city;
         this.houseNumber = houseNumber;
         this.postcode = postcode;
@@ -90,11 +88,10 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     public float getY() { return y; }
     public void setDistanceTo(int distanceTo) { this.distanceTo = distanceTo; }
     public int getDistanceTo() { return distanceTo; }
-    ///Adds the Road as an edge to this node
-    public void addEdge(Road road) { edges.add(road); }
-    public Set<Road> getEdges() { return edges; }
+    ///Adds 1 to the edge counter
+    public void addEdge() { edges++; }
     ///Returns whether this node is an intersection or not
-    public boolean isIntersection() { return edges.size() > 1; }
+    public boolean isIntersection() { return edges > 1; }
 
     //region Address
     public String getCity() { return city; }

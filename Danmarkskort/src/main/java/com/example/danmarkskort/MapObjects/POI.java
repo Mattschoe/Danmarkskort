@@ -58,6 +58,7 @@ public class POI implements MapObject {
 
     ///Also finds the closest Node that has a Road.
     private Node findClosestNodeWithRoad(Tile tile) {
+        /*
         double closestDistance = Double.MAX_VALUE;
         Node closestNode = null;
         for (Node node : tile.getNodesInTile()) {
@@ -72,6 +73,8 @@ public class POI implements MapObject {
         }
         assert closestNode != null;
         return closestNode;
+        */
+        return null;
     }
 
     //region getters and setters

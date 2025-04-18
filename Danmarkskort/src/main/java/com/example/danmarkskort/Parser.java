@@ -18,7 +18,7 @@ public class Parser implements Serializable {
 
     //region Fields
     private transient TLongObjectHashMap<Node> id2Node; //map for storing a Node and the id used to refer to it
-    private transient TLongObjectHashMap<Road>    id2Road;
+    private transient TLongObjectHashMap<Road> id2Road;
     private transient TLongObjectHashMap<Polygon> id2Polygon;
     private transient Set<Road> roads;
     private final File file; //The file that's loaded in
@@ -399,10 +399,11 @@ public class Parser implements Serializable {
                 Node node = nodes.get(i);
                 currentRoad.add(node);
 
-                if (node.isIntersection()) {
-                    //We hit an intersection so we make a road
+                if (node.isIntersection() || i == nodes.size() - 1) {
+                    //We hit an intersection, or the end, so we make a road
+                    System.out.println(currentRoad.size());
                     if (road.hasMaxSpeed()) roads.add(new Road(currentRoad, road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getMaxSpeed(), road.getType()));
-                    else roads.add(new Road(currentRoad, road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getType()));
+                    else roads.add(new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getType()));
 
                     //Starts a new segment from the intersection
                     currentRoad.clear();
@@ -416,7 +417,7 @@ public class Parser implements Serializable {
     ///Adds the road as an edge to every node in the road
     private void addEdgeToNode(Road road)  {
         for (Node node : road.getNodes()) {
-            node.addEdge(road);
+            node.addEdge();
         }
     }
     //endregion

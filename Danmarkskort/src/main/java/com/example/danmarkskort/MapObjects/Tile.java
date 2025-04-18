@@ -72,7 +72,6 @@ public class Tile implements MapObject, Serializable {
         drawMotorway(graphicsContext);
         drawTrunk(graphicsContext);
         drawCoastline(graphicsContext);
-        drawNodes(graphicsContext);
         if (levelOfDetail > 0) {
             drawPrimary(graphicsContext);
             if (levelOfDetail > 1) {

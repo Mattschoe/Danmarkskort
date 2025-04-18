@@ -46,7 +46,6 @@ public class Road implements Serializable, MapObject {
         this.maxSpeed = maxSpeed;
         this.roadType = roadType;
 
-        addRoadsToNodes();
         calculateBoundingBox();
         determineVisuals();
     }
@@ -66,26 +65,18 @@ public class Road implements Serializable, MapObject {
         this.isDrivable = isDrivable;
         this.roadType = roadType;
 
-        addRoadsToNodes();
         calculateBoundingBox();
         determineVisuals();
     }
     //endregion
 
     //region Methods
-    ///To Do. Er usikker på om det her fucker med running time, kan evt. være det skal ændres, men det adder denne vej her
-    private void addRoadsToNodes() {
-        for (Node node : nodes) {
-            node.addEdge(this);
-        }
-    }
-
     /** Draws the road.
      *  @param gc the GraphicsContext in which the road will be drawn
      */
     public void draw(GraphicsContext gc) {
         assert gc != null;
-        if (!isDrivable) return; //Skipper lige ikke-bil veje for nu
+        //if (!isDrivable) return; //Skipper lige ikke-bil veje for nu
 
         if (partOfRoute) {
             gc.setStroke(Color.RED);
