@@ -20,6 +20,7 @@ public class Parser implements Serializable {
     private transient TLongObjectHashMap<Node> id2Node; //map for storing a Node and the id used to refer to it
     private transient TLongObjectHashMap<Road>    id2Road;
     private transient TLongObjectHashMap<Polygon> id2Polygon;
+    private transient Set<Road> roads;
     private final File file; //The file that's loaded in
     ///\[0] = minLat <br> \[1] = minLong <br> \[2] = maxLat <br> \[3] = maxLong
     private final double[] bounds;
@@ -128,6 +129,7 @@ public class Parser implements Serializable {
                 }
             }
         }
+        splitRoads();
     }
 
 
@@ -267,20 +269,24 @@ public class Parser implements Serializable {
                 if (input.getLocalName().equals("nd")) {
                     long nodeReference = Long.parseLong(input.getAttributeValue(null, "ref"));
 
+                    Node node = id2Node.get(nodeReference);
+
                     //Makes sure that it doesn't point towards a null Node
-                    if (id2Node.get(nodeReference) == null) break;
+                    if (node == null) break;
 
                     //If same node is referenced twice, parses 'Way' as 'Polygon'
-                    if (nodesInWay.contains(id2Node.get(nodeReference))) {
-                        nodesInWay.add(id2Node.get(nodeReference));
+                    if (nodesInWay.contains(node)) {
+                        nodesInWay.add(node);
                         id2Polygon.put(wayID, parsePolygon(input, nodesInWay));
                         return;
                     } else {
-                        nodesInWay.add(id2Node.get(nodeReference)); //Adding node to currently looked at nodes
+                        nodesInWay.add(node); //Adding node to currently looked at nodes
                     }
                 } else if (input.getLocalName().equals("tag")) {
                     //When reaching "tag" elements, we know it isn't a Polygon (no "Node" is mentioned twice), and therefore we parse it as a Road
-                    id2Road.put(wayID, parseRoad(input, nextInput, nodesInWay));
+                    Road road = parseRoad(input, nextInput, nodesInWay);
+                    id2Road.put(wayID, road);
+                    addEdgeToNode(road);
                     return;
                 }
             }
@@ -340,9 +346,7 @@ public class Parser implements Serializable {
         int nextInput = firstTag;
         while (input.hasNext()) {
             //End of Road
-            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) {
-                break;
-            }
+            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) break;
 
             //Tries and saves the important tags
             if (nextInput == XMLStreamConstants.START_ELEMENT && input.getLocalName().equals("tag"))  {
@@ -368,11 +372,8 @@ public class Parser implements Serializable {
 
         //Instantierer en ny Road en road og tager stilling til om den har en maxSpeed eller ej.
         Road road;
-        if (hasMaxSpeed){
-            road = new Road(nodes, foot, bicycle, drivable, maxSpeed, roadType);
-        } else {
-            road = new Road(nodes, foot, bicycle, drivable, roadType);
-        }
+        if (hasMaxSpeed) road = new Road(nodes, foot, bicycle, drivable, maxSpeed, roadType);
+        else road = new Road(nodes, foot, bicycle, drivable, roadType);
         return road;
     }
 
@@ -386,30 +387,49 @@ public class Parser implements Serializable {
 
     ///Splits all roads into multiple each time there is intersection
     private void splitRoads() {
-        for (Road road : id2Road.valueCollection()) {
+        roads = new HashSet<>(id2Road.size());
+        for (long ID : id2Road.keys()) {
+            Road road = id2Road.get(ID);
             List<Node> nodes = road.getNodes();
-            for (int i = 0; i < nodes.size(); i++) {
-                
+            List<Node> currentRoad = new ArrayList<>();
+
+            //Runs through every node, checks if intersection, and makes a road on every intersection. Road 'ABCDE' therefore becomes 'ABC' & 'CDE' if 'C' is an intersection
+            currentRoad.add(nodes.getFirst()); //Adds first node to avoid edgecase where start node is an intersection
+            for (int i = 1; i < nodes.size(); i++) {
+                Node node = nodes.get(i);
+                currentRoad.add(node);
+
+                if (node.isIntersection()) {
+                    //We hit an intersection so we make a road
+                    if (road.hasMaxSpeed()) roads.add(new Road(currentRoad, road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getMaxSpeed(), road.getType()));
+                    else roads.add(new Road(currentRoad, road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getType()));
+
+                    //Starts a new segment from the intersection
+                    currentRoad.clear();
+                    currentRoad.add(node);
+                }
             }
+            id2Road.remove(ID);
+        }
+    }
+
+    ///Adds the road as an edge to every node in the road
+    private void addEdgeToNode(Road road)  {
+        for (Node node : road.getNodes()) {
+            node.addEdge(road);
         }
     }
     //endregion
 
+
     //region GETTERS AND SETTERS
-    public String getFileName() { return file.getName(); }
     public File getFile() { return file; }
     public TLongObjectHashMap<Node> getNodes() { return id2Node; }
-    public TLongObjectHashMap<Road> getRoads() { return id2Road; }
+    public Set<Road> getRoads() { return roads; }
     public TLongObjectHashMap<Polygon> getPolygons() { return id2Polygon; }
     public void setNodes(TLongObjectHashMap<Node> nodes) { id2Node = nodes; }
     public void setRoads(TLongObjectHashMap<Road> roads) { id2Road = roads; }
     public void setPolygons(TLongObjectHashMap<Polygon> polygons) { id2Polygon = polygons; }
-    ///Nulls the hashmaps to clear them from memory
-    public void clearParser() {
-        id2Node.clear();
-        id2Road.clear();
-        id2Polygon.clear();
-    }
     public double[] getBounds() { return bounds; }
     //endregion
 }

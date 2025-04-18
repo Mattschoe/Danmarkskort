@@ -76,7 +76,7 @@ public class Road implements Serializable, MapObject {
     ///To Do. Er usikker på om det her fucker med running time, kan evt. være det skal ændres, men det adder denne vej her
     private void addRoadsToNodes() {
         for (Node node : nodes) {
-            node.addRoad(this);
+            node.addEdge(this);
         }
     }
 
@@ -186,6 +186,10 @@ public class Road implements Serializable, MapObject {
     public List<Node> getNodes() { return nodes;    }
     public String getType() { return roadType; }
     public boolean hasRoadType() { return !roadType.isEmpty(); }
+    public boolean hasMaxSpeed() { return maxSpeed != 0; }
+    public boolean isWalkable() { return foot; }
+    public boolean isBicycle() { return bicycle; }
+
     public void setType(String type) {
         roadType = type;
         determineVisuals();

@@ -5,10 +5,7 @@ import javafx.scene.paint.Color;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class Node implements Serializable, MapObject, Comparable<Node> {
     @Serial private static final long serialVersionUID = 1444149606229887777L;
@@ -20,10 +17,8 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     private short postcode;
     private String street;
     private int distanceTo;
+    private Set<Road> edges;
 
-
-    private List<Road> roads;
-    private boolean partOfRoute;
     //endregion
 
     //region Constructor(s)
@@ -32,7 +27,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
      */
     public Node(double latitude, double longitude) {
         distanceTo = Integer.MAX_VALUE;
-        roads = new ArrayList<>();
+        edges = new HashSet<>();
         calculateXY(latitude, longitude);
     }
 
@@ -47,12 +42,12 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
      */
     public Node(double latitude, double longitude, String city, String houseNumber, short postcode, String street) {
         distanceTo = Integer.MAX_VALUE;
-        roads = new ArrayList<>();
-        calculateXY(latitude, longitude);
+        edges = new HashSet<>();
         this.city = city;
         this.houseNumber = houseNumber;
         this.postcode = postcode;
         this.street = street;
+        calculateXY(latitude, longitude);
     }
     //endregion
 
@@ -79,13 +74,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     }
 
     public void draw(GraphicsContext graphicsContext) {
-        if (partOfRoute) {
-            graphicsContext.setStroke(Color.ORANGE);
-            graphicsContext.setLineWidth(0.025);
-            graphicsContext.strokeLine(x, y, x, y);
-        }
     }
-
 
     /**Compares the node given as parameter with this node.
      * @return 0 if they have equal distance <br> a value less than zero if this node is less than the other node <br> a value more than zero if this node is greater than the other node
@@ -94,20 +83,18 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     public int compareTo(Node otherNode) {
         return Integer.compare(this.distanceTo, otherNode.distanceTo);
     }
-
-    ///Adds a road to the roads that are connected to this node
-    public void addRoad(Road road) {
-        roads.add(road);
-    }
     //endregion
 
     //region Getters and setters
-    ///Returns a list of the roads that are connected to this node
-    public List<Road> getRoads() { return roads; }
     public float getX() { return x; }
     public float getY() { return y; }
     public void setDistanceTo(int distanceTo) { this.distanceTo = distanceTo; }
     public int getDistanceTo() { return distanceTo; }
+    ///Adds the Road as an edge to this node
+    public void addEdge(Road road) { edges.add(road); }
+    public Set<Road> getEdges() { return edges; }
+    ///Returns whether this node is an intersection or not
+    public boolean isIntersection() { return edges.size() > 1; }
 
     //region Address
     public String getCity() { return city; }
@@ -117,13 +104,11 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     ///Combines all other getAddress getters together to one whole string. Useful for UI
     public String getAddress() { return (street + " " + houseNumber + ", " + postcode + " " + city); }
     public boolean hasFullAddress()  { return street != null && houseNumber != null && postcode != 0 && city != null; }
-    //Endregion
+    //endregion
 
     @Override
     public float[] getBoundingBox() {
         return new float[]{x, y, x, y};
     }
-    public void setPartOfRoute(boolean partOfRoute) { this.partOfRoute = partOfRoute; }
-    public boolean isPartOfRoute() { return partOfRoute; }
     //endregion
 }

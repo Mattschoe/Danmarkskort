@@ -35,7 +35,7 @@ public class Search {
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
             if (currentNode == endNode) break; //Reached endNode
-            for (Road road : currentNode.getRoads()) {
+            for (Road road : currentNode.getEdges()) {
                 relax(road, currentNode);
             }
         }
@@ -68,7 +68,7 @@ public class Search {
 
         for (int i = 0; i < path.size(); i++) {
             currentNode = path.get(i);
-            for (Road road : currentNode.getRoads())   {
+            for (Road road : currentNode.getEdges())   {
                 if (path.contains(road.getNext(currentNode))) road.setPartOfRoute(true);
             }
         }

@@ -292,7 +292,7 @@ public class Model {
         }
 
         //Saves Roads
-        try {
+        /* try {
             System.out.println("Saving roads...");
             int numberOfChunks = 8;
             TLongObjectHashMap<Road> roads = parser.getRoads();
@@ -320,6 +320,8 @@ public class Model {
         } catch (Exception e) {
             throw new ParserSavingException("Error saving roads to OBJ!: " + e.getMessage());
         }
+
+         */
 
 
         //Saves Polygons
@@ -397,7 +399,7 @@ public class Model {
          }
 
          //region Adds Roads
-         for (Road road : parser.getRoads().valueCollection()) {
+         for (Road road : parser.getRoads()) {
              //Converts start- and endXY to tile sizes
              float[] boundingBox = road.getBoundingBox();
              int startTileX = (int) ((boundingBox[0] - minX) / tileSize);

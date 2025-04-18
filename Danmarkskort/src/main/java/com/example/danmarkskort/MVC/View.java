@@ -107,18 +107,14 @@ public class View {
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
-        //Draws map
-        //region TESTING
-        //Tegner kun tiles inde for viewport
+        //Draws map. Tegner kun tiles inde for viewport
         if (tilegrid != null) {
             try {
                 tilegrid.drawVisibleTiles(graphicsContext, getViewport(), getLOD());
-                //tilegrid.drawVisibleTiles(graphicsContext, getViewport(), 4);
             } catch (NonInvertibleTransformException e) {
                 System.out.println("Error getting viewport! Error: " + e.getMessage());
             }
         }
-        //endregion
 
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
@@ -126,7 +122,7 @@ public class View {
         }
     }
 
-    /// Method pans on the canvas -- STOLEN FROM NUTAN
+    /// Method pans on the canvas
     public void pan(double dx, double dy) {
         //Moves the map
         trans.prependTranslation(dx, dy);
@@ -154,7 +150,6 @@ public class View {
         if (trans.getMxx() > 4)  return 1;
         else return 0;
     }
-
     //endregion
 
     //region Getters and setters
