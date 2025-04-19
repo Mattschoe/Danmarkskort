@@ -284,9 +284,7 @@ public class Parser implements Serializable {
                     }
                 } else if (input.getLocalName().equals("tag")) {
                     //When reaching "tag" elements, we know it isn't a Polygon (no "Node" is mentioned twice), and therefore we parse it as a Road
-                    Road road = parseRoad(input, nextInput, nodesInWay);
-                    id2Road.put(wayID, road);
-                    addEdgeToNode(road);
+                    id2Road.put(wayID, parseRoad(input, nextInput, nodesInWay));
                     return;
                 }
             }
@@ -411,13 +409,6 @@ public class Parser implements Serializable {
                 }
             }
             id2Road.remove(ID);
-        }
-    }
-
-    ///Adds the road as an edge to every node in the road
-    private void addEdgeToNode(Road road)  {
-        for (Node node : road.getNodes()) {
-            node.addEdge();
         }
     }
     //endregion

@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+///A Road is a way that doesn't contain the same start and endNode. A Road is marked if it's drivable. Formally a Road consists of a list of Nodes that represent this Roads place in XY space
 public class Road implements Serializable, MapObject {
     @Serial private static final long serialVersionUID = 2430026592275563830L;
 
@@ -38,14 +39,17 @@ public class Road implements Serializable, MapObject {
      */
     public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDrivable, int maxSpeed, String roadType) {
         this.nodes = nodes;
-        calculateWeight();
-
         this.foot = foot;
         this.bicycle = bicycle;
         this.isDrivable = isDrivable;
         this.maxSpeed = maxSpeed;
         this.roadType = roadType;
 
+
+        for (Node node : nodes) {
+            node.addEdge(this);
+        }
+        calculateWeight();
         calculateBoundingBox();
         determineVisuals();
     }
