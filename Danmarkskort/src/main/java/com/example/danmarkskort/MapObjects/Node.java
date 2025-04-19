@@ -91,7 +91,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     ///Adds 1 to the edge counter
     public void addEdge() { edges++; }
     ///Returns whether this node is an intersection or not
-    public boolean isIntersection() { return edges > 1; }
+    public boolean isIntersection() {  return edges > 1; }
 
     //region Address
     public String getCity() { return city; }

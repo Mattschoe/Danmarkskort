@@ -336,7 +336,7 @@ public class Parser implements Serializable {
         //region node parameters
         boolean foot = true;
         boolean bicycle = true;
-        boolean drivable = true;
+        boolean drivable = false;
         int maxSpeed = 0;
         String roadType = "";
         boolean hasMaxSpeed = false;
@@ -355,7 +355,8 @@ public class Parser implements Serializable {
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
                 if (key.equals("highway") || key.equals("natural") || key.equals("area:highway")) {     //find ud af typen af highway
                     roadType = value;
-                    if (value.equals("footway") || value.equals("bridleway") || value.equals("steps") || value.equals("corridor") || value.equals("path")) drivable = false;
+                    if (value.equals("footway") || value.equals("bridleway") || value.equals("steps") || value.equals("corridor") || value.equals("path") || value.equals("cycleway")) drivable = false;
+                    else drivable = true;
                 } else if (key.equals("maxspeed")) {
                     maxSpeed = Integer.parseInt(value);
                     hasMaxSpeed = true;
@@ -401,8 +402,7 @@ public class Parser implements Serializable {
 
                 if (node.isIntersection() || i == nodes.size() - 1) {
                     //We hit an intersection, or the end, so we make a road
-                    System.out.println(currentRoad.size());
-                    if (road.hasMaxSpeed()) roads.add(new Road(currentRoad, road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getMaxSpeed(), road.getType()));
+                    if (road.hasMaxSpeed()) roads.add(new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getMaxSpeed(), road.getType()));
                     else roads.add(new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getType()));
 
                     //Starts a new segment from the intersection

@@ -76,7 +76,7 @@ public class Road implements Serializable, MapObject {
      */
     public void draw(GraphicsContext gc) {
         assert gc != null;
-        //if (!isDrivable) return; //Skipper lige ikke-bil veje for nu
+        if (!isDrivable) return; //Skipper lige ikke-bil veje for nu
 
         if (partOfRoute) {
             gc.setStroke(Color.RED);

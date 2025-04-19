@@ -38,13 +38,7 @@ public class Tilegrid implements Serializable {
      * @param levelOfDetail ranging from 0 to 4, where 0 being the minimum amount and 4 being the maximum amount of details.
      */
     public void drawVisibleTiles(GraphicsContext graphicsContext, float[] viewport, int levelOfDetail) {
-        for (int x = 0; x < numberOfTilesX; x++) {
-            for (int y = 0; y < numberOfTilesY; y++) {
-                grid[x][y].draw(graphicsContext);
-            }
-        }
-        
-        /* if (levelOfDetail < 1) zoomedOutTile.draw(graphicsContext, levelOfDetail);
+        if (levelOfDetail < 1) zoomedOutTile.draw(graphicsContext, levelOfDetail);
         else {
             // drawPredefinedRelations(); //OBS det her betyder at vi tegner selvom det ikke kan ses, skal måske ændres senere
             visibleTiles = getTilesInView(viewport);
@@ -52,7 +46,7 @@ public class Tilegrid implements Serializable {
                 if (tile.isEmpty()) continue;
                 tile.draw(graphicsContext, levelOfDetail);
             }
-        } */
+        }
     }
 
     ///Adds the given mapObject to the tile that fits the given x, y coordinate. x, y should be the coordinate of the mapObject
