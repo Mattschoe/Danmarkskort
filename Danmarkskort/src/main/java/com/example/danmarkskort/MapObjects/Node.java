@@ -2,6 +2,7 @@ package com.example.danmarkskort.MapObjects;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,7 +17,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     private String houseNumber;
     private short postcode;
     private String street;
-    private int distanceTo;
+    private double distanceTo;
     private int edges;
     private List<Road> roadEdges;
     //endregion
@@ -74,6 +75,11 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     }
 
     public void draw(GraphicsContext graphicsContext) {
+        if (!roadEdges.isEmpty()) {
+            graphicsContext.setStroke(Color.ORANGE);
+            graphicsContext.setLineWidth(0.01);
+            graphicsContext.strokeLine(x, y, x, y);
+        }
     }
 
     /**Compares the node given as parameter with this node.
@@ -81,15 +87,15 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
      */
     @Override
     public int compareTo(Node otherNode) {
-        return Integer.compare(this.distanceTo, otherNode.distanceTo);
+        return Double.compare(this.distanceTo, otherNode.distanceTo);
     }
     //endregion
 
     //region Getters and setters
     public float getX() { return x; }
     public float getY() { return y; }
-    public void setDistanceTo(int distanceTo) { this.distanceTo = distanceTo; }
-    public int getDistanceTo() { return distanceTo; }
+    public void setDistanceTo(double distanceTo) { this.distanceTo = distanceTo; }
+    public double getDistanceTo() { return distanceTo; }
     ///Adds 1 to the edge counter
     public void addEdge() { edges++; }
     ///Adds the given Road to the list of connected Roads to this Node

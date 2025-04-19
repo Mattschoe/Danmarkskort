@@ -86,6 +86,7 @@ public class Tile implements MapObject, Serializable {
                         drawBuildings(graphicsContext);
                         drawPOIs(graphicsContext);
                         draw(graphicsContext, levelOfDetail - 1);
+                        drawNodes(graphicsContext);
                     }
                 }
             }

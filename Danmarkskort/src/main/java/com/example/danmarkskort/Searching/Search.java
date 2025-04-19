@@ -34,7 +34,10 @@ public class Search {
         priorityQueue.add(startNode);
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
-            if (currentNode == endNode) break; //Reached endNode
+            if (currentNode == endNode) {
+                System.out.println("Reached EndNode!");
+                break; //Reached endNode
+            }
             for (Road road : currentNode.getEdges()) {
                 relax(road, currentNode);
             }
@@ -43,10 +46,9 @@ public class Search {
     }
 
     private void relax(Road road, Node currentNode) {
-        int newDistanceTo = (int) (currentNode.getDistanceTo() + road.getWeight());
+        double newDistanceTo = currentNode.getDistanceTo() + road.getWeight();
 
-        Node nextNode = road.getNext(currentNode);
-        if (nextNode == null) return;
+        Node nextNode = road.getEnd();
         if (nextNode.getDistanceTo() > newDistanceTo) {
             nextNode.setDistanceTo(newDistanceTo);
             cameFrom.put(nextNode, currentNode);
@@ -69,7 +71,8 @@ public class Search {
         for (int i = 0; i < path.size(); i++) {
             currentNode = path.get(i);
             for (Road road : currentNode.getEdges())   {
-                if (path.contains(road.getNext(currentNode))) road.setPartOfRoute(true);
+                if (road.getStart().equals(currentNode) && path.contains(road.getEnd())) road.setPartOfRoute(true);
+                else if (road.getEnd().equals(currentNode) && path.contains(road.getStart())) road.setPartOfRoute(true);
             }
         }
     }

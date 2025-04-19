@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-///A Road is a way that doesn't contain the same start and endNode. A Road is marked if it's drivable. Formally a Road consists of a list of Nodes that represent this Roads place in XY space
+///A Road is a way that doesn't contain the same start and endNode. A Road is marked if it's drivable. Formally a Road consists of a list of Nodes that represent this Roads place in XY space. A Road is also used as an edge in a graph, where the list of nodes are condensed into a start- and endNode
 public class Road implements Serializable, MapObject {
     @Serial private static final long serialVersionUID = 2430026592275563830L;
 
@@ -166,7 +166,7 @@ public class Road implements Serializable, MapObject {
         }
     }
 
-    /// Calculates maxSpeed if the tag wasn't present in the OSM-file
+    ///TO DO: THIS METHOD NEEDS TO BE FIXED TO ADJUST FOR SPEEDLIMIT
     private void calculateWeight() {
         float deltaX = nodes.getFirst().getX() - nodes.getLast().getX();
         float deltaY = nodes.getFirst().getY() - nodes.getLast().getY();
@@ -192,11 +192,8 @@ public class Road implements Serializable, MapObject {
     public float getWeight() { return weight; }
     @Override
     public float[] getBoundingBox() { return boundingBox; }
-    ///Returns the next node following the provided node
-    public Node getNext(Node node) {
-        if (node.equals(nodes.getLast())) return null;
-        return nodes.get(nodes.indexOf(node) + 1);
-    }
+    public Node getStart() { return nodes.getFirst(); }
+    public Node getEnd() { return nodes.getLast(); }
     public void setPartOfRoute(boolean partOfRoute) { this.partOfRoute = partOfRoute; }
     //endregion
 }
