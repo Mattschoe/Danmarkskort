@@ -192,8 +192,15 @@ public class Road implements Serializable, MapObject {
     public float getWeight() { return weight; }
     @Override
     public float[] getBoundingBox() { return boundingBox; }
-    public Node getStart() { return nodes.getFirst(); }
-    public Node getEnd() { return nodes.getLast(); }
+    /**
+     * Returns the opposite of the Node given. So if given the roads startNode it will return the roads endNode (and reverse).
+     * @param node HAS TO BE EITHER THE ROADS START- OR END-NODE. WILL RETURN NULL ELSE
+     */
+    public Node getOppositeNode(Node node) {
+        if (node.equals(nodes.getFirst())) return nodes.getLast();
+        if (node.equals(nodes.getLast())) return nodes.getFirst();
+        return null;
+    }
     public void setPartOfRoute(boolean partOfRoute) { this.partOfRoute = partOfRoute; }
     //endregion
 }

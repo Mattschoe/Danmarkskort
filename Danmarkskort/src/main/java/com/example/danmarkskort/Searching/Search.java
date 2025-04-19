@@ -15,9 +15,6 @@ public class Search {
 
     public Search(Collection<Node> nodes) {
         assert !nodes.isEmpty();
-
-        priorityQueue = new java.util.PriorityQueue<>();
-        cameFrom = new HashMap<>();
     }
 
     ///Start a route from the Node {@code from} to the Node {@code to}
@@ -31,6 +28,9 @@ public class Search {
     }
 
     private void findPath() {
+        priorityQueue = new java.util.PriorityQueue<>();
+        cameFrom = new HashMap<>();
+
         priorityQueue.add(startNode);
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
@@ -48,7 +48,7 @@ public class Search {
     private void relax(Road road, Node currentNode) {
         double newDistanceTo = currentNode.getDistanceTo() + road.getWeight();
 
-        Node nextNode = road.getEnd();
+        Node nextNode = road.getOppositeNode(currentNode);
         if (nextNode.getDistanceTo() > newDistanceTo) {
             nextNode.setDistanceTo(newDistanceTo);
             cameFrom.put(nextNode, currentNode);
@@ -68,11 +68,11 @@ public class Search {
         path.add(currentNode); //Adds the start node since it isn't included in the loop
         Collections.reverse(path);
 
+        //Runs through every node in path. For every node it checks if the road is fully represented in the path, and if yes, it sets it as part of the route.
         for (int i = 0; i < path.size(); i++) {
             currentNode = path.get(i);
             for (Road road : currentNode.getEdges())   {
-                if (road.getStart().equals(currentNode) && path.contains(road.getEnd())) road.setPartOfRoute(true);
-                else if (road.getEnd().equals(currentNode) && path.contains(road.getStart())) road.setPartOfRoute(true);
+                if (path.contains(road.getOppositeNode(currentNode))) road.setPartOfRoute(true);
             }
         }
     }

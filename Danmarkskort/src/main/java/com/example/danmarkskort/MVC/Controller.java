@@ -1,6 +1,8 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.POI;
+import com.example.danmarkskort.MapObjects.Tile;
 import javafx.animation.AnimationTimer;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import javafx.beans.value.ChangeListener;
@@ -271,6 +273,37 @@ public class Controller implements Initializable {
 
     /** Metode køres når man slipper sit klik på Canvas'et */
     @FXML protected void onCanvasClick(MouseEvent e) {
+        //region SINGLE CLICK
+        if (e.getClickCount() == 1) {
+            double x, y;
+
+            try {
+                Point2D point = view.getTrans().inverseTransform(e.getX(), e.getY());
+                x = point.getX();
+                y = point.getY();
+            } catch (Exception exception) {
+                return;
+            }
+
+            Tile tile = model.getTilegrid().getTileFromXY((float) x, (float) y);
+            if (tile == null) return;
+            double closestDistance = Double.MAX_VALUE;
+            Node closestNode = null;
+            for (Node node : tile.getNodesInTile()) {
+                if (node.getEdges().isEmpty()) continue;
+                double nodeX = node.getX();
+                double nodeY = node.getY();
+                double distance = Math.sqrt(Math.pow((nodeX - x), 2) + Math.pow((nodeY - y), 2)); //Afstandsformlen ser cooked ud i Java wth -MN
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestNode = node;
+                }
+            }
+            assert closestNode != null;
+            System.out.println(closestNode);
+        }
+        //endregion
+
 
         //region DOUBLE CLICK (Searching)
         if (e.getClickCount() == 2) {
