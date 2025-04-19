@@ -56,18 +56,20 @@ public class POI implements MapObject {
         return closestNode;
     }
 
-    ///Also finds the closest Node that has a Road.
+    ///Also finds the closest Node that has a Road and is either the roads start or endNode. TO DO: Mayb change this to finding roads not nodes
     private Node findClosestNodeWithRoad(Tile tile) {
         double closestDistance = Double.MAX_VALUE;
         Node closestNode = null;
         for (Node node : tile.getNodesInTile()) {
-            if (node.getEdges().isEmpty()) continue;
-            double nodeX = node.getX();
-            double nodeY = node.getY();
-            double distance = Math.sqrt(Math.pow((nodeX - (double) x), 2) + Math.pow((nodeY - (double) y), 2)); //Afstandsformlen ser cooked ud i Java wth -MN
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                closestNode = node;
+            for (Road road : node.getEdges()) {
+                if (!road.isStartOrEndNode(node)) continue;
+                double nodeX = node.getX();
+                double nodeY = node.getY();
+                double distance = Math.sqrt(Math.pow((nodeX - (double) x), 2) + Math.pow((nodeY - (double) y), 2)); //Afstandsformlen ser cooked ud i Java wth -MN
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestNode = node;
+                }
             }
         }
         assert closestNode != null;

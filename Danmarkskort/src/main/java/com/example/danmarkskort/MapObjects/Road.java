@@ -64,11 +64,13 @@ public class Road implements Serializable, MapObject {
         this.nodes = nodes;
         calculateWeight();
 
+        for (Node node : nodes) {
+            node.addEdge(this);
+        }
         this.foot = foot;
         this.bicycle = bicycle;
         this.isDrivable = isDrivable;
         this.roadType = roadType;
-
         calculateBoundingBox();
         determineVisuals();
     }
@@ -166,7 +168,7 @@ public class Road implements Serializable, MapObject {
         }
     }
 
-    ///TO DO: THIS METHOD NEEDS TO BE FIXED TO ADJUST FOR SPEEDLIMIT
+    ///TO DO: THIS METHOD NEEDS TO BE FIXED TO ADJUST FOR SPEEDLIMIT BUT IT HASS TO ACCOUNT FOR WHERE THE NODES ARE LOCATED IN XY SPACE}
     private void calculateWeight() {
         float deltaX = nodes.getFirst().getX() - nodes.getLast().getX();
         float deltaY = nodes.getFirst().getY() - nodes.getLast().getY();
@@ -184,14 +186,9 @@ public class Road implements Serializable, MapObject {
     public boolean hasMaxSpeed() { return maxSpeed != 0; }
     public boolean isWalkable() { return foot; }
     public boolean isBicycle() { return bicycle; }
+    ///Returns whether the given node is either the start or the endNode of this road
+    public boolean isStartOrEndNode(Node node) { return nodes.getFirst().equals(node) || nodes.getLast().equals(node); }
 
-    public void setType(String type) {
-        roadType = type;
-        determineVisuals();
-    }
-    public float getWeight() { return weight; }
-    @Override
-    public float[] getBoundingBox() { return boundingBox; }
     /**
      * Returns the opposite of the Node given. So if given the roads startNode it will return the roads endNode (and reverse).
      * @param node HAS TO BE EITHER THE ROADS START- OR END-NODE. WILL RETURN NULL ELSE
@@ -201,6 +198,15 @@ public class Road implements Serializable, MapObject {
         if (node.equals(nodes.getLast())) return nodes.getFirst();
         return null;
     }
+
+    public void setType(String type) {
+        roadType = type;
+        determineVisuals();
+    }
+    public float getWeight() { return weight; }
+    @Override
+    public float[] getBoundingBox() { return boundingBox; }
+
     public void setPartOfRoute(boolean partOfRoute) { this.partOfRoute = partOfRoute; }
     //endregion
 }
