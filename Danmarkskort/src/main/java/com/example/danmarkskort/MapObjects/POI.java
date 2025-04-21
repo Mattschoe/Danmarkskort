@@ -61,6 +61,7 @@ public class POI implements MapObject {
         double closestDistance = Double.MAX_VALUE;
         Road closestRoad = null;
         for (Road road : tile.getRoads()) {
+            if (!road.isDrivable()) continue;
             float[] roadBounds = road.getBoundingBox();
             //Distance from POI to roads boundingBox
             double deltaX = Math.max(Math.max(roadBounds[0] - x, 0), x - roadBounds[2]);
@@ -69,6 +70,10 @@ public class POI implements MapObject {
             if (distance < closestDistance) {
                 closestDistance = distance;
                 closestRoad = road;
+                if (closestDistance == 0) {
+                    System.out.println("BREAK");
+                    break;
+                }
             }
         }
         assert closestRoad != null;
