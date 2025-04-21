@@ -2,6 +2,7 @@ package com.example.danmarkskort.MVC;
 
 import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.POI;
+import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Tile;
 import javafx.animation.AnimationTimer;
 import com.example.danmarkskort.AddressSearch.TrieST;
@@ -257,8 +258,21 @@ public class Controller implements Initializable {
 
     private void startSearch() {
         System.out.println("Starting search...");
-        model.search(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
+        model.search(getStartOrEndNodeFromRoad(startPOI.getClosestRoadToPOI(), startPOI.getClosestNodeToPOI()), getStartOrEndNodeFromRoad(endPOI.getClosestRoadToPOI(), endPOI.getClosestNodeToPOI()));
         System.out.println("Finished search!");
+    }
+
+    ///Returns either the given {@code Road}'s start- or endNode. Which one is determined by the given {@code Node}
+    private Node getStartOrEndNodeFromRoad(Road road, Node node) {
+        double nodeX = node.getX();
+        double nodeY = node.getY();
+
+        double distanceToStart = Math.sqrt(Math.pow((road.getStart().getX() - nodeX), 2) + Math.pow((road.getStart().getY() - nodeY), 2));
+        double distanceToEnd = Math.sqrt(Math.pow((road.getEnd().getX() - nodeX), 2) + Math.pow((road.getEnd().getY() - nodeY), 2));
+
+        //Returns the closest one
+        if (distanceToStart < distanceToEnd) return road.getStart();
+        return road.getEnd();
     }
     //endregion
 

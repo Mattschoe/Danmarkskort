@@ -22,6 +22,7 @@ public class Road implements Serializable, MapObject {
     private boolean isDrivable;
     private int maxSpeed;
     private String roadType;
+    private String roadName;
     private float[] boundingBox;
     private transient Color color;
     private float lineWidth;
@@ -37,14 +38,14 @@ public class Road implements Serializable, MapObject {
      *  @param maxSpeed the max speed on the road
      *  @param roadType the type of road
      */
-    public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDrivable, int maxSpeed, String roadType) {
+    public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDrivable, int maxSpeed, String roadType, String roadName) {
         this.nodes = nodes;
         this.foot = foot;
         this.bicycle = bicycle;
         this.isDrivable = isDrivable;
         this.maxSpeed = maxSpeed;
         this.roadType = roadType;
-
+        this.roadName = roadName;
 
         for (Node node : nodes) {
             node.addEdge(this);
@@ -60,17 +61,17 @@ public class Road implements Serializable, MapObject {
      *  @param bicycle if road the is rideable on bike. Should be true by default
      *  @param roadType the type of road
      */
-    public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDrivable, String roadType) {
+    public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDrivable, String roadType, String roadName) {
         this.nodes = nodes;
-        calculateWeight();
-
-        for (Node node : nodes) {
-            node.addEdge(this);
-        }
         this.foot = foot;
         this.bicycle = bicycle;
         this.isDrivable = isDrivable;
         this.roadType = roadType;
+        this.roadName = roadName;
+        for (Node node : nodes) {
+            node.addEdge(this);
+        }
+        calculateWeight();
         calculateBoundingBox();
         determineVisuals();
     }
@@ -182,6 +183,7 @@ public class Road implements Serializable, MapObject {
     public int getMaxSpeed() { return maxSpeed; }
     public List<Node> getNodes() { return nodes;    }
     public String getType() { return roadType; }
+    public String getRoadName() { return roadName; }
     public boolean hasRoadType() { return !roadType.isEmpty(); }
     public boolean hasMaxSpeed() { return maxSpeed != 0; }
     public boolean isWalkable() { return foot; }
@@ -194,10 +196,14 @@ public class Road implements Serializable, MapObject {
      * @param node HAS TO BE EITHER THE ROADS START- OR END-NODE. WILL RETURN NULL ELSE
      */
     public Node getOppositeNode(Node node) {
+        assert isStartOrEndNode(node);
         if (node.equals(nodes.getFirst())) return nodes.getLast();
         if (node.equals(nodes.getLast())) return nodes.getFirst();
         return null;
     }
+
+    public Node getStart() { return nodes.getFirst(); }
+    public Node getEnd() { return nodes.getLast(); }
 
     public void setType(String type) {
         roadType = type;

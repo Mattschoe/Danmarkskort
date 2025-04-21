@@ -337,6 +337,7 @@ public class Parser implements Serializable {
         boolean drivable = false;
         int maxSpeed = 0;
         String roadType = "";
+        String roadName = "";
         boolean hasMaxSpeed = false;
         //endregion
 
@@ -364,6 +365,8 @@ public class Parser implements Serializable {
                     foot = value.equals("yes");
                 } else if (key.equals("route")) {
                     roadType = key;
+                } else if (key.equals("name")) {
+                    roadName = value;
                 }
             }
             nextInput = input.next(); //Moves on to the next "tag" element
@@ -371,8 +374,8 @@ public class Parser implements Serializable {
 
         //Instantierer en ny Road en road og tager stilling til om den har en maxSpeed eller ej.
         Road road;
-        if (hasMaxSpeed) road = new Road(nodes, foot, bicycle, drivable, maxSpeed, roadType);
-        else road = new Road(nodes, foot, bicycle, drivable, roadType);
+        if (hasMaxSpeed) road = new Road(nodes, foot, bicycle, drivable, maxSpeed, roadType, roadName);
+        else road = new Road(nodes, foot, bicycle, drivable, roadType, roadName);
         return road;
     }
 
@@ -400,8 +403,8 @@ public class Parser implements Serializable {
 
                 if (node.isIntersection() || i == nodes.size() - 1) {
                     //We hit an intersection, or the end, so we make a road
-                    if (road.hasMaxSpeed()) roads.add(new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getMaxSpeed(), road.getType()));
-                    else roads.add(new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getType()));
+                    if (road.hasMaxSpeed()) roads.add(new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getMaxSpeed(), road.getType(), road.getRoadName()));
+                    else roads.add(new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getType(), road.getRoadName()));
 
                     //Starts a new segment from the intersection
                     currentRoad.clear();
