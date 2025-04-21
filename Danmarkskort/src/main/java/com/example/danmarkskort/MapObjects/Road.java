@@ -211,11 +211,14 @@ public class Road implements Serializable, MapObject {
     public float[] getBoundingBox() { return boundingBox; }
     ///Returns either the start- or endNode. Which one is decided from the given {@code node}'s XY
     public Node getStartOrEndNodeFromRoad(Node node) {
-        float nodeX = node.getX();
-        float nodeY = node.getY();
-
         Node startNode = nodes.getFirst();
         Node endNode = nodes.getLast();
+
+        if (node.equals(startNode)) return startNode;
+        if (node.equals(endNode)) return endNode;
+
+        float nodeX = node.getX();
+        float nodeY = node.getY();
 
         double distanceToStart = Math.sqrt(Math.pow(startNode.getX() - nodeX, 2) + Math.pow(startNode.getY() - nodeY, 2));
         double distanceToEnd = Math.sqrt(Math.pow(endNode.getX() - nodeX, 2) + Math.pow(endNode.getY() - nodeY, 2));

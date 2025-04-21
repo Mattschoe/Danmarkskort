@@ -4,6 +4,7 @@ import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.Road;
 import javafx.scene.canvas.GraphicsContext;
 
+import java.sql.SQLOutput;
 import java.util.*;
 import java.util.PriorityQueue;
 
@@ -37,6 +38,7 @@ public class Search {
         priorityQueue.add(startNode);
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
+            System.out.println("Is at: " + currentNode);
             if (currentNode == endNode) {
                 System.out.println("Reached EndNode!");
                 break; //Reached endNode
@@ -51,7 +53,6 @@ public class Search {
     ///Relaxes the edge. {@code currentNode} HAS to be either the roads start- or endNode, otherwise an error will be thrown.
     private void relax(Road road, Node currentNode) {
         double newDistanceTo = currentNode.getDistanceTo() + road.getWeight();
-
         Node nextNode = road.getOppositeNode(currentNode);
         if (nextNode.getDistanceTo() > newDistanceTo) {
             nextNode.setDistanceTo(newDistanceTo);
@@ -61,6 +62,7 @@ public class Search {
     }
 
     private void drawPath() {
+        /*
         List<Node> path = new ArrayList<>();
 
         //Loops back through the map of nodes until we have a reverse list of route
@@ -81,5 +83,6 @@ public class Search {
                 if (path.contains(road.getOppositeNode(currentNode))) road.setPartOfRoute(true);
             }
         }
+        */
     }
 }
