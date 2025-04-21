@@ -80,6 +80,11 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
             graphicsContext.setLineWidth(0.01);
             graphicsContext.strokeLine(x, y, x, y);
         }
+        if (partOfRoute) {
+            graphicsContext.setStroke(Color.RED);
+            graphicsContext.setLineWidth(0.01);
+            graphicsContext.strokeLine(x, y, x, y);
+        }
     }
 
     /**Compares the node given as parameter with this node.
@@ -118,5 +123,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     public float[] getBoundingBox() {
         return new float[]{x, y, x, y};
     }
+    boolean partOfRoute;
+    public void setPartOfRoute(boolean value) { partOfRoute = value; }
     //endregion
 }

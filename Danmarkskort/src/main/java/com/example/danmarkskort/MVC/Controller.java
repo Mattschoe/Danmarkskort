@@ -258,22 +258,10 @@ public class Controller implements Initializable {
 
     private void startSearch() {
         System.out.println("Starting search...");
-        model.search(getStartOrEndNodeFromRoad(startPOI.getClosestRoadToPOI(), startPOI.getClosestNodeToPOI()), getStartOrEndNodeFromRoad(endPOI.getClosestRoadToPOI(), endPOI.getClosestNodeToPOI()));
+        model.search(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
         System.out.println("Finished search!");
     }
 
-    ///Returns either the given {@code Road}'s start- or endNode. Which one is determined by the given {@code Node}
-    private Node getStartOrEndNodeFromRoad(Road road, Node node) {
-        double nodeX = node.getX();
-        double nodeY = node.getY();
-
-        double distanceToStart = Math.sqrt(Math.pow((road.getStart().getX() - nodeX), 2) + Math.pow((road.getStart().getY() - nodeY), 2));
-        double distanceToEnd = Math.sqrt(Math.pow((road.getEnd().getX() - nodeX), 2) + Math.pow((road.getEnd().getY() - nodeY), 2));
-
-        //Returns the closest one
-        if (distanceToStart < distanceToEnd) return road.getStart();
-        return road.getEnd();
-    }
     //endregion
 
     //region Canvas methods
@@ -286,6 +274,36 @@ public class Controller implements Initializable {
 
     /** Metode køres når man slipper sit klik på Canvas'et */
     @FXML protected void onCanvasClick(MouseEvent e) {
+        if (e.getClickCount() == 1) {
+            double x, y;
+
+            try {
+                Point2D point = view.getTrans().inverseTransform(e.getX(), e.getY());
+                x = point.getX();
+                y = point.getY();
+            } catch (Exception exception) {
+                return;
+            }
+
+            Tile tile = model.getTilegrid().getTileFromXY((float) x, (float) y);
+            if (tile == null) return;
+            double closestDistance = Double.MAX_VALUE;
+            Node closestNode = null;
+            for (Node node : tile.getNodesInTile()) {
+                if (node.getEdges().isEmpty()) continue;
+                double nodeX = node.getX();
+                double nodeY = node.getY();
+                double distance = Math.sqrt(Math.pow((nodeX - x), 2) + Math.pow((nodeY - y), 2)); //Afstandsformlen ser cooked ud i Java wth -MN
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestNode = node;
+                }
+            }
+            assert closestNode != null;
+            System.out.println(closestNode);
+        }
+        //endregion
+
         //region DOUBLE CLICK (Searching)
         if (e.getClickCount() == 2) {
             //Makes POI
@@ -356,7 +374,6 @@ public class Controller implements Initializable {
         mouseEvent = e;
         panRequest = true;
     }
-    //endregion
     //endregion
 
     //region Getters and setters

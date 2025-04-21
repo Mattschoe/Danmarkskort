@@ -23,6 +23,9 @@ public class Search {
         endNode = to;
         assert startNode != null && endNode != null;
 
+        startNode.setPartOfRoute(true);
+        endNode.setPartOfRoute(true);
+
         startNode.setDistanceTo(0);
         findPath();
     }
@@ -39,12 +42,13 @@ public class Search {
                 break; //Reached endNode
             }
             for (Road road : currentNode.getEdges()) {
-                relax(road, currentNode);
+                relax(road, road.getStartOrEndNodeFromRoad(currentNode));
             }
         }
         drawPath();
     }
 
+    ///Relaxes the edge. {@code currentNode} HAS to be either the roads start- or endNode, otherwise an error will be thrown.
     private void relax(Road road, Node currentNode) {
         double newDistanceTo = currentNode.getDistanceTo() + road.getWeight();
 
@@ -69,8 +73,10 @@ public class Search {
         Collections.reverse(path);
 
         //Runs through every node in path. For every node it checks if the road is fully represented in the path, and if yes, it sets it as part of the route.
+        System.out.print("Path: ");
         for (int i = 0; i < path.size(); i++) {
             currentNode = path.get(i);
+            System.out.print(currentNode + " -> ");
             for (Road road : currentNode.getEdges())   {
                 if (path.contains(road.getOppositeNode(currentNode))) road.setPartOfRoute(true);
             }

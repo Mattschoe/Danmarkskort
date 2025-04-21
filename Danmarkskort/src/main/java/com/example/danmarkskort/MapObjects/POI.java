@@ -9,7 +9,7 @@ import javafx.scene.transform.NonInvertibleTransformException;
 ///A Point Of Interest (POI) is a specific point made by the user. It contains the node that's closest to that POI, a coordinate, and a name
 public class POI implements MapObject {
     Node closestNodeToPOI;
-    Road closestRoadToPOI;
+    Node closestNodeWithRoad;
     float x, y;
     String name;
 
@@ -23,7 +23,7 @@ public class POI implements MapObject {
         this.y = y;
         this.name = name;
         closestNodeToPOI = findClosestNode(tile);
-        closestRoadToPOI = findClosestRoad(tile);
+        closestNodeWithRoad = findClosestNodeWithRoad(tile);
     }
 
     @Override
@@ -56,29 +56,22 @@ public class POI implements MapObject {
         return closestNode;
     }
 
-    ///Finds the road closest to the POI
-    private Road findClosestRoad(Tile tile) {
+    ///Finds the closest Node that has a Road connected to it
+    private Node findClosestNodeWithRoad(Tile tile) {
         double closestDistance = Double.MAX_VALUE;
-        Road closestRoad = null;
-        for (Road road : tile.getRoads()) {
-            if (!road.isDrivable()) continue;
-            float[] roadBounds = road.getBoundingBox();
-            //Distance from POI to roads boundingBox
-            double deltaX = Math.max(Math.max(roadBounds[0] - x, 0), x - roadBounds[2]);
-            double deltaY = Math.max(Math.max(roadBounds[1] - y, 0), y - roadBounds[2]);
-            double distance = Math.hypot(deltaX, deltaY);
+        Node closestNode = null;
+        for (Node node : tile.getNodesInTile()) {
+            if (node.getEdges().isEmpty()) continue; //Skips if node doesnt have any edges.
+            double nodeX = node.getX();
+            double nodeY = node.getY();
+            double distance = Math.sqrt(Math.pow((nodeX - (double) x), 2) + Math.pow((nodeY - (double) y), 2)); //Afstandsformlen ser cooked ud i Java wth -MN
             if (distance < closestDistance) {
                 closestDistance = distance;
-                closestRoad = road;
-                if (closestDistance == 0) {
-                    System.out.println("BREAK");
-                    break;
-                }
+                closestNode = node;
             }
         }
-        assert closestRoad != null;
-        System.out.println(closestRoad.getRoadName());
-        return closestRoad;
+        assert closestNode != null;
+        return closestNode;
     }
 
     //region getters and setters
@@ -86,7 +79,7 @@ public class POI implements MapObject {
     public String getName() { return name;}
     ///Returns the POIs closest Node
     public Node getClosestNodeToPOI() { return closestNodeToPOI; }
-    public Road getClosestRoadToPOI() { return closestRoadToPOI; }
+    public Node getClosestNodeWithRoad() { return closestNodeWithRoad; }
     ///Returns the Node's address as a full string. Used for showing to user on UI. If the Node doesn't have a full address, we return the XY
     public String getNodeAddress() {
         return closestNodeToPOI.getAddress();

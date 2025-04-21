@@ -85,11 +85,8 @@ public class Road implements Serializable, MapObject {
         assert gc != null;
         if (!isDrivable) return; //Skipper lige ikke-bil veje for nu
 
-        if (partOfRoute) {
-            gc.setStroke(Color.RED);
-        } else {
-            gc.setStroke(color);
-        }
+        if (partOfRoute) gc.setStroke(Color.RED);
+        else gc.setStroke(color);
         gc.setLineWidth(lineWidth/Math.sqrt(gc.getTransform().determinant()));
 
 
@@ -212,6 +209,20 @@ public class Road implements Serializable, MapObject {
     public float getWeight() { return weight; }
     @Override
     public float[] getBoundingBox() { return boundingBox; }
+    ///Returns either the start- or endNode. Which one is decided from the given {@code node}'s XY
+    public Node getStartOrEndNodeFromRoad(Node node) {
+        float nodeX = node.getX();
+        float nodeY = node.getY();
+
+        Node startNode = nodes.getFirst();
+        Node endNode = nodes.getLast();
+
+        double distanceToStart = Math.sqrt(Math.pow(startNode.getX() - nodeX, 2) + Math.pow(startNode.getY() - nodeY, 2));
+        double distanceToEnd = Math.sqrt(Math.pow(endNode.getX() - nodeX, 2) + Math.pow(endNode.getY() - nodeY, 2));
+
+        if (distanceToStart < distanceToEnd) return startNode;
+        else return endNode;
+    }
 
     public void setPartOfRoute(boolean partOfRoute) { this.partOfRoute = partOfRoute; }
     //endregion
