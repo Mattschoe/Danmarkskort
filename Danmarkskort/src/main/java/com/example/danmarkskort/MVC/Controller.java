@@ -31,7 +31,6 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
-
     //region Fields
     private View view;
     private Model model;
@@ -47,7 +46,7 @@ public class Controller implements Initializable {
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
 
-    //region FXML
+    //region FXML fields
     @FXML private Canvas canvas;
     @FXML private CheckMenuItem fpsButton;
     @FXML private ListView<String> listView;
@@ -59,10 +58,12 @@ public class Controller implements Initializable {
     @FXML private Button findRoute;
     @FXML private TextField destination;
     //endregion
+    //endregion
 
     //region Constructor(s)
-    /** View-konstruktøren skaber/kører en instans af
-     *  konstruktøren her, når den loader en FXML-scene
+    /**
+     * View-konstruktøren skaber/kører en instans af
+     * konstruktøren her, når den loader en FXML-scene
      */
     public Controller() {
         canvas = new Canvas(400, 600);
@@ -71,10 +72,6 @@ public class Controller implements Initializable {
         this.trieCity = new TrieST<>(true);
         this.trieStreet = new TrieST<>(false);
         listView = new ListView<>();
-
-        //Det her er cooked -MN
-        try { model = Model.getInstance(); }
-        catch (IllegalStateException _) {} //Model not loaded yet, so we wait
 
         //region AnimationTimer
         AnimationTimer fpsTimer = new AnimationTimer() {
@@ -371,19 +368,26 @@ public class Controller implements Initializable {
 
     //region ColorSheet toggles
     @FXML private void paletteDefault() {
-        view.setBgColor(Color.LIGHTBLUE);
+        if (model == null) model = Model.getInstance();
 
+        view.setBgColor(Color.LIGHTBLUE);
+        fpsText.setFill(Color.BLACK);
+        zoomText.setFill(Color.BLACK);
         for (Tile tile : model.getTilegrid().getGridList()) {
             for (MapObject mo : tile.getObjectsInTile()) {
                 if (mo instanceof Road road) road.setPalette("default");
+                if (mo instanceof Polygon p) p.setPalette("default");
             }
         }
         view.drawMap();
     }
 
     @FXML private void paletteMidnight() {
-        view.setBgColor(Color.THISTLE);
+        if (model == null) model = Model.getInstance();
 
+        view.setBgColor(Color.rgb(23, 3, 63));
+        fpsText.setFill(Color.WHITE);
+        zoomText.setFill(Color.WHITE);
         for (Tile tile : model.getTilegrid().getGridList()) {
             for (MapObject mo : tile.getObjectsInTile()) {
                 if (mo instanceof Road road) road.setPalette("midnight");

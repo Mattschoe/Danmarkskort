@@ -243,7 +243,7 @@ public class Model {
 
         //Loads polygons colors after serialization
         for (Polygon polygon : parser.getPolygons().valueCollection()) {
-            polygon.determineColor2();
+            polygon.determineColor();
         }
     }
 
