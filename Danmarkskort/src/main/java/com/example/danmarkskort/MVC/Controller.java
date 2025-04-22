@@ -396,6 +396,21 @@ public class Controller implements Initializable {
         }
         view.drawMap();
     }
+
+    @FXML private void paletteBasic() {
+        if (model == null) model = Model.getInstance();
+
+        view.setBgColor(Color.GHOSTWHITE);
+        fpsText.setFill(Color.INDIGO);
+        zoomText.setFill(Color.INDIGO);
+        for (Tile tile : model.getTilegrid().getGridList()) {
+            for (MapObject mo : tile.getObjectsInTile()) {
+                if (mo instanceof Road road) road.setPalette("basic");
+                if (mo instanceof Polygon p) p.setPalette("basic");
+            }
+        }
+        view.drawMap();
+    }
     //endregion
 
     //endregion
