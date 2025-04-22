@@ -75,11 +75,6 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     }
 
     public void draw(GraphicsContext graphicsContext) {
-        if (!roadEdges.isEmpty()) {
-            graphicsContext.setStroke(Color.ORANGE);
-            graphicsContext.setLineWidth(0.01);
-            graphicsContext.strokeLine(x, y, x, y);
-        }
         if (partOfRoute) {
             graphicsContext.setStroke(Color.RED);
             graphicsContext.setLineWidth(0.01);

@@ -11,7 +11,8 @@ import java.util.PriorityQueue;
 public class Search {
     Node startNode;
     Node endNode;
-    Road route;
+    List<Road> route;
+    private boolean foundRoute;
     PriorityQueue<Node> priorityQueue;
     private Map<Node, Node> cameFrom;
 
@@ -23,6 +24,7 @@ public class Search {
      * Start a route from the Node {@code from} to the Node {@code to}.
      */
     public void route(Node from, Node to) {
+        route = new ArrayList<>();
         startNode = from;
         endNode = to;
         assert startNode != null && endNode != null;
@@ -41,15 +43,19 @@ public class Search {
         priorityQueue.add(startNode);
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
-            System.out.println("Is at: " + currentNode);
             if (currentNode == endNode) { //Reached endNode
                 System.out.println("Reached EndNode!");
-                drawPath(); //Only draws path if we actually found a path.
+                foundRoute = true;
                 break;
             }
             for (Road road : currentNode.getEdges()) {
                 relax(road, road.getStartOrEndNodeFromRoad(currentNode));
             }
+        }
+        if (foundRoute) {
+            drawPath(); //Only draws path if we actually found a path.
+        } else {
+            System.out.println("No path found!");
         }
     }
 
@@ -80,11 +86,16 @@ public class Search {
         Node current = path.getFirst();
         for (int i = 1; i < path.size(); i++) {
             Node next = path.get(i);
-            for (Road road : next.getEdges()) {
-                if (road.getOppositeNode(next).equals(next)) {
+            for (Road road : current.getEdges()) {
+                if (road.getNodes().contains(next)) {
+                    route.add(road);
                     road.setPartOfRoute(true);
                 }
             }
+            current = next;
         }
     }
+
+    ///Returns route, returns null if haven't found route
+    public List<Road> getRoute() { return route; }
 }

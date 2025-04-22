@@ -395,6 +395,7 @@ public class Parser implements Serializable {
         roads = new HashSet<>(id2Road.size());
         for (long ID : id2Road.keys()) {
             Road road = id2Road.get(ID);
+
             List<Node> nodes = road.getNodes();
             List<Node> currentRoad = new ArrayList<>();
 

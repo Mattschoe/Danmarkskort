@@ -367,9 +367,11 @@ public class Model {
 
     /**
      * Starts a search from {@code startNode} to {@code endNode}
+     * @return A structured list of all roads in the route. Returns null if route not found
      */
-    public void search(Node startNode, Node endNode) {
+    public List<Road> search(Node startNode, Node endNode) {
         search.route(startNode, endNode);
+        return search.getRoute();
     }
 
     /// Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile
