@@ -11,6 +11,7 @@ import java.util.PriorityQueue;
 public class Search {
     Node startNode;
     Node endNode;
+    Road route;
     PriorityQueue<Node> priorityQueue;
     private Map<Node, Node> cameFrom;
 
@@ -18,8 +19,11 @@ public class Search {
         assert !nodes.isEmpty();
     }
 
-    ///Start a route from the Node {@code from} to the Node {@code to}
-    public void route(Node from, Node to) {
+    /**
+     * Start a route from the Node {@code from} to the Node {@code to}.
+     * @return Road that is the route between the Node {@code from} and {@code to}
+     */
+    public Road route(Node from, Node to) {
         startNode = from;
         endNode = to;
         assert startNode != null && endNode != null;
@@ -29,6 +33,9 @@ public class Search {
 
         startNode.setDistanceTo(0);
         findPath();
+
+        if (route == null) throw new RuntimeException("Couldn't find a route!");
+        else return route;
     }
 
     private void findPath() {
@@ -39,15 +46,15 @@ public class Search {
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
             System.out.println("Is at: " + currentNode);
-            if (currentNode == endNode) {
+            if (currentNode == endNode) { //Reached endNode
                 System.out.println("Reached EndNode!");
-                break; //Reached endNode
+                drawPath(); //Only draws path if we actually found a path.
+                break;
             }
-            /* for (Road road : currentNode.getEdges()) {
+            for (Road road : currentNode.getEdges()) {
                 relax(road, road.getStartOrEndNodeFromRoad(currentNode));
-            } */
+            }
         }
-        drawPath();
     }
 
     ///Relaxes the edge. {@code currentNode} HAS to be either the roads start- or endNode, otherwise an error will be thrown.
@@ -62,7 +69,6 @@ public class Search {
     }
 
     private void drawPath() {
-        /*
         List<Node> path = new ArrayList<>();
 
         //Loops back through the map of nodes until we have a reverse list of route
@@ -74,15 +80,6 @@ public class Search {
         path.add(currentNode); //Adds the start node since it isn't included in the loop
         Collections.reverse(path);
 
-        //Runs through every node in path. For every node it checks if the road is fully represented in the path, and if yes, it sets it as part of the route.
-        System.out.print("Path: ");
-        for (int i = 0; i < path.size(); i++) {
-            currentNode = path.get(i);
-            System.out.print(currentNode + " -> ");
-            for (Road road : currentNode.getEdges())   {
-                if (path.contains(road.getOppositeNode(currentNode))) road.setPartOfRoute(true);
-            }
-        }
-        */
+        route = new Road(path, false, false, true, "Route", "Route");
     }
 }

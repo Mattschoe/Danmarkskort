@@ -1,5 +1,6 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.MapObjects.MapObject;
 import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.MapObjects.Tilegrid;
 import javafx.fxml.FXMLLoader;
@@ -120,6 +121,11 @@ public class View {
             System.out.println("Finished first time drawing!");
             firstTimeDrawingMap = false;
         }
+    }
+
+    ///Draws the specified {@code mapObject} and only that
+    public void drawObject(MapObject mapObject) {
+        mapObject.draw(graphicsContext);
     }
 
     /// Method pans on the canvas
