@@ -16,10 +16,20 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.danmarkskort.MVC.Controller">
     <Canvas fx:id="canvas" height="400.0" layoutY="-10.0" onMouseClicked="#onCanvasClick" onMouseDragged="#onCanvasDragged" onMousePressed="#onCanvasPressed" onScroll="#onCanvasScroll" width="600.0" />
-    <MenuButton layoutX="527.0" layoutY="35.0" mnemonicParsing="false" text="Filters" AnchorPane.rightAnchor="15.0">
+    <MenuButton layoutX="527.0" layoutY="35.0" mnemonicParsing="false" text="Filter" AnchorPane.rightAnchor="15.0">
       <items>
-          <MenuItem mnemonicParsing="false" text="Action 1" />
-          <MenuItem mnemonicParsing="false" text="Action 2" />
+          <Menu text="Color Scheme">
+              <items>
+                  <MenuItem mnemonicParsing="false" text="Color-blind" />
+                  <MenuItem mnemonicParsing="false" text="another one!" />
+              </items>
+          </Menu>
+          <Menu text="Filter road">
+              <items>
+                  <MenuItem mnemonicParsing="false" text="Walkable" />
+                  <MenuItem mnemonicParsing="false" text="Highways" />
+              </items>
+          </Menu>
       </items>
     </MenuButton>
    <Text fx:id="zoomText" layoutX="484.0" layoutY="363.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Zoom-factor: 1" AnchorPane.bottomAnchor="36.0" AnchorPane.rightAnchor="42.0">
@@ -31,27 +41,24 @@
 
     <ListView fx:id="listView" layoutX="15.0" layoutY="61.0" prefHeight="72.0" prefWidth="150.0" visible="false" />
 
-    <Text fx:id="fpsText" layoutX="495.0" layoutY="52.0" strokeType="OUTSIDE" strokeWidth="0.0" text="FPS" AnchorPane.rightAnchor="88.0" AnchorPane.topAnchor="39.05078125" />
+    <Text fx:id="fpsText" layoutX="497.00000000000006" layoutY="52.14921875" strokeType="OUTSIDE" strokeWidth="0.0" text="FPS" AnchorPane.rightAnchor="84.044921875" AnchorPane.topAnchor="39.2" />
 
     <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onKeyPressed="#onActivateSearch" onKeyTyped="#searchBarTyped" promptText="Search..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
    <TextField fx:id="destination" layoutX="15.0" layoutY="71.0" onKeyTyped="#searchBarTyped" promptText="Choose Destination..." visible="false" />
     <MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <Menu mnemonicParsing="false" text="File">
-            <MenuItem mnemonicParsing="false" text="Close" />
+            <MenuItem mnemonicParsing="false" onAction="#standardInputButton" text="Load Standard" />
+            <MenuItem mnemonicParsing="false" onAction="#exportAsPDF" text="Export as PDF" />
         </Menu>
         <Menu mnemonicParsing="false" text="Edit">
-            <MenuItem mnemonicParsing="false" text="Delete" />
+            <MenuItem fx:id="POIMenuButton" mnemonicParsing="false" onAction="#POIMenu" text="Points of interest" />
         </Menu>
         <Menu mnemonicParsing="false" text="Help">
-            <MenuItem mnemonicParsing="false" text="About" />
+            <CheckMenuItem fx:id="guideButton" mnemonicParsing="false" text="Guide" />
         </Menu>
-        <Menu mnemonicParsing="false" text="Show">
-            <CheckMenuItem fx:id="fpsButton" mnemonicParsing="false" text="FPS"/>
-        </Menu>
-        <Menu mnemonicParsing="false" text="Palette">
-            <MenuItem mnemonicParsing="false" onAction="#paletteDefault" text="Default"/>
-            <MenuItem mnemonicParsing="false" onAction="#paletteMidnight" text="Midnight"/>
-        </Menu>
+      <Menu mnemonicParsing="false" text="Show">
+            <CheckMenuItem fx:id="fpsButton" mnemonicParsing="false" text="FPS" />
+      </Menu>
     </MenuBar>
    <Button fx:id="findRoute" layoutX="172.0" layoutY="35.0" mnemonicParsing="false" onMouseClicked="#onRouteSearchStart" text="Find Route" visible="false" />
    <Button fx:id="switchSearch" layoutX="172.0" layoutY="71.0" mnemonicParsing="false" onMouseClicked="#switchDestinationAndStart" text="Switch" visible="false" />

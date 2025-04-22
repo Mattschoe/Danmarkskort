@@ -28,8 +28,18 @@
     </MenuBar>
     <MenuButton layoutX="527.0" layoutY="35.0" mnemonicParsing="false" text="Filtre" AnchorPane.rightAnchor="15.0">
         <items>
-            <MenuItem mnemonicParsing="false" text="Action 1" />
-            <MenuItem mnemonicParsing="false" text="Action 2" />
+            <Menu text="Color Scheme???">
+                <items>
+                    <MenuItem mnemonicParsing="false" text="Color-blind" />
+                    <MenuItem mnemonicParsing="false" text="another one!" />
+                </items>
+            </Menu>
+            <Menu text="Filter road">
+                <items>
+                    <MenuItem mnemonicParsing="false" text="Walkable" />
+                    <MenuItem mnemonicParsing="false" text="Highways" />
+                </items>
+            </Menu>
         </items>
     </MenuButton>
     <Slider layoutX="445.0" layoutY="348.0" showTickLabels="true" showTickMarks="true" value="50.0" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="15.0" />

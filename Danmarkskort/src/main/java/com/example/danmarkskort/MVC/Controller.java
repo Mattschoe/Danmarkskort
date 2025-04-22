@@ -9,11 +9,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -28,6 +24,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -43,6 +40,7 @@ public class Controller implements Initializable {
     private MouseEvent mouseEvent; //Used to pan
     private POI startPOI;
     private POI endPOI;
+    private List<String> POIList = List.of("En", "TO", "Tre");
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
@@ -50,6 +48,7 @@ public class Controller implements Initializable {
     //region FXML
     @FXML private Canvas canvas;
     @FXML private CheckMenuItem fpsButton;
+    @FXML private CheckMenuItem guideButton;
     @FXML private ListView<String> listView;
     @FXML private Slider zoomBar;
     @FXML private Text fpsText;
@@ -58,6 +57,9 @@ public class Controller implements Initializable {
     @FXML private Button switchSearch;
     @FXML private Button findRoute;
     @FXML private TextField destination;
+    @FXML private MenuItem POIMenuButton;
+
+
     //endregion
 
     //region Constructor(s)
@@ -173,6 +175,7 @@ public class Controller implements Initializable {
 
         view.drawMap();
     }
+
     //endregion
 
     //region mapOverlay.fxml scene methods
@@ -254,6 +257,19 @@ public class Controller implements Initializable {
         model.search(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
         System.out.println("Finished search!");
     }
+
+    /// Method opens af list of points of interests so the user can edit it.
+    @FXML protected void POIMenu(){
+        //der skal være en liste der bliver opdateret når man tilføjer og fjerne POI's som bliver vist når man klikker på menuen
+        System.out.println("Så skal man kunne skfite her");
+        System.out.println(POIList);
+    }
+    /// Method to export a route as PDF
+    @FXML protected void exportAsPDF(){
+        System.out.println("exporting as PDF");
+    }
+
+
 
     //endregion
 
