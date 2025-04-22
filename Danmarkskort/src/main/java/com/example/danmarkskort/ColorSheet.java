@@ -442,7 +442,7 @@ public enum ColorSheet {
             case ROAD_TREE_ROW   -> Color.LIGHTGREEN;
             case ROAD_ROUTE      -> Color.rgb(255, 255, 255, 0.3);
             case ROAD_DEFAULT    -> Color.DIMGREY;
-            default -> Color.LAVENDER;
+            default -> Color.rgb(147, 112, 219, 0.4);
         };
     }
     //endregion
