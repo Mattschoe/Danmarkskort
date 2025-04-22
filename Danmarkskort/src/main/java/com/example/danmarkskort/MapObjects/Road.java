@@ -127,54 +127,6 @@ public class Road implements Serializable, MapObject {
         lineWidth = 1;
     }
 
-    /// Determines the Road's color and line-width
-    /*private void determineVisuals() {
-        if (roadType.equals("coastline")) {
-            color = cs.get(0);
-            lineWidth = 1.5f;
-        }
-        else if (roadType.equals("primary")) {
-            color = cs.get(1);
-            lineWidth = 1.5f;
-        }
-        else if (roadType.equals("secondary")) {
-            color = cs.get(2);
-            lineWidth = 1.5f;
-        }
-        else if (roadType.equals("tertiary")) {
-            color = cs.get(3);
-            lineWidth = 1.5f;
-        }
-        else if (roadType.equals("cycleway")) {
-            color = cs.get(4);
-            lineWidth = 1.1f;
-        }
-        else if (roadType.equals("track") || roadType.equals("path")) {
-            color = cs.get(5);
-            lineWidth = 1f;
-        }
-        else if (roadType.equals("tree_row")) {
-            color = cs.get(6);
-            lineWidth = 1f;
-        }
-        else if (roadType.equals("route")) {
-            color = cs.get(7);
-            lineWidth = 0f;
-        }
-        else {
-            //default
-            color = cs.get(8);
-            lineWidth = 1f;
-        }
-
-        /*
-         * Udover de roads vi farver, fandt jeg (Olli) en masse andre roadTypes, heriblandt
-         *      unclassified, residential, service, footway, power, cliff og proposed,
-         * som jeg har valgt at bare ladet blive farvet default-grå. Så sker der ikke *alt*
-         * for meget for øjnene :)
-         *
-    }
-    */
     private void calculateBoundingBox() {
         boundingBox = new float[4];
         boundingBox[0] = Float.POSITIVE_INFINITY; //minX
