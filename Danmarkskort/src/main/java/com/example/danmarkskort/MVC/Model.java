@@ -367,10 +367,9 @@ public class Model {
 
     /**
      * Starts a search from {@code startNode} to {@code endNode}
-     * @return Road the route between the two nodes
      */
-    public Road search(Node startNode, Node endNode) {
-        return search.route(startNode, endNode);
+    public void search(Node startNode, Node endNode) {
+        search.route(startNode, endNode);
     }
 
     /// Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile

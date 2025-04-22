@@ -123,11 +123,6 @@ public class View {
         }
     }
 
-    ///Draws the specified {@code mapObject} and only that
-    public void drawObject(MapObject mapObject) {
-        mapObject.draw(graphicsContext);
-    }
-
     /// Method pans on the canvas
     public void pan(double dx, double dy) {
         //Moves the map

@@ -21,9 +21,8 @@ public class Search {
 
     /**
      * Start a route from the Node {@code from} to the Node {@code to}.
-     * @return Road that is the route between the Node {@code from} and {@code to}
      */
-    public Road route(Node from, Node to) {
+    public void route(Node from, Node to) {
         startNode = from;
         endNode = to;
         assert startNode != null && endNode != null;
@@ -33,9 +32,6 @@ public class Search {
 
         startNode.setDistanceTo(0);
         findPath();
-
-        if (route == null) throw new RuntimeException("Couldn't find a route!");
-        else return route;
     }
 
     private void findPath() {
@@ -80,7 +76,15 @@ public class Search {
         path.add(currentNode); //Adds the start node since it isn't included in the loop
         Collections.reverse(path);
 
-        route = new Road(path, false, false, true, "Route", "Route");
-        route.setPartOfRoute(true);
+        //Runs through the path. If the current node and the next node in line is equal to the start and endNode of a Road, we set it as part of the route
+        Node current = path.getFirst();
+        for (int i = 1; i < path.size(); i++) {
+            Node next = path.get(i);
+            for (Road road : next.getEdges()) {
+                if (road.getOppositeNode(next).equals(next)) {
+                    road.setPartOfRoute(true);
+                }
+            }
+        }
     }
 }

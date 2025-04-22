@@ -249,7 +249,7 @@ public class Controller implements Initializable {
 
     private void startSearch() {
         System.out.println("Starting search...");
-        view.drawObject(model.search(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad()));
+        model.search(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
         System.out.println("Finished search!");
     }
 
