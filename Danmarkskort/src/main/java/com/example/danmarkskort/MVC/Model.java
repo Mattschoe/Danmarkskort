@@ -31,6 +31,8 @@ public class Model {
     private final Tilegrid tilegrid;
     private TrieST<String> trieCity;
     private TrieST<String> trieStreet;
+    Set<String> streets;
+    Set<String> cities; //Do we need?
     //endregion
 
     //region Constructor(s)
@@ -250,13 +252,14 @@ public class Model {
      */
     private void loadAddressNodes() {
         //TODO
+        //Man skal panne for at skabe en instans af model??
         //æøå issues
         //Hvis man trykker på forslag og derfor enter = null
-        //HÅNDTERING AF VEJE MED SAMME VEJNAVN
+        //HÅNDTERING AF VEJE MED SAMME VEJNAVN men nu at den skal finde den nøjagtige
         trieCity = new TrieST<>(true);
         trieStreet = new TrieST<>(false);
-        Set<String> streets = new HashSet<>();
-        Set<String> cities = new HashSet<>();
+        streets = new HashSet<>();
+        cities = new HashSet<>();
         int testCounter = 0; //TESTING
         for (Node node : parser.getAddressNodes()) { //gennemgår alle address nodes
             String[] address = node.getAddress();
@@ -277,9 +280,6 @@ public class Model {
                     }
                     if (streetCounter == trieStreet.getList(address[3]).size()) { //Hvis navnet er unikt!
                         trieStreet.put(address[3], node);
-                        for (Node nnode : trieStreet.getList(address[3])) { //Test condition
-                            System.out.println(address[3] + " i byen " + nnode.getCity());
-                        }
                     }
                 } else {
                 streets.add(address[3]); //Nu er vejnavnet indsat!
@@ -305,5 +305,12 @@ public class Model {
     public TrieST<String> getTrieStreet() {
         return trieStreet;
     }
+    public Set<String> getStreets() {
+        return streets;
+    }
+    public Set<String> getCities() {
+        return cities;
+    }
+
     //endregion
 }

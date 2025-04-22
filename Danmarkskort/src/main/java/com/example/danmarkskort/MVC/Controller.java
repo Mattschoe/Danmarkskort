@@ -1,5 +1,7 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.AddressParser;
+import com.example.danmarkskort.MapObjects.Node;
 import javafx.animation.AnimationTimer;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import javafx.beans.value.ChangeListener;
@@ -32,6 +34,7 @@ public class Controller implements Initializable {
     private TrieST<String> trieCity; //part of test
     private TrieST<String> trieStreet;
     private MouseEvent mouseEvent;
+    private AddressParser addressParser;
 
     @FXML private Canvas canvas;
     @FXML private ListView<String> listView;
@@ -45,6 +48,8 @@ public class Controller implements Initializable {
     public Controller() {
         canvas = new Canvas(400, 600);
         System.out.println("Controller created!");
+        addressParser = new AddressParser();
+        System.out.println("AddressParser created!");
         listView = new ListView<>();
 
         //Det her er cooked -MN
@@ -193,24 +198,46 @@ public class Controller implements Initializable {
     private void autoSuggest(String eventCharacter, String input, TrieST<String> trie) {
         if (eventCharacter.equals("\r") && input != null) { // Hvis der trykkes enter og der er et input
             System.out.println("enter entered!");
-            if (!trie.keysThatMatch(input).isEmpty()) {
-                System.out.print("Found exact value: ");
-                System.out.println(trie.get(trie.keysThatMatch(input).getFirst()));
-            } else {
-                System.out.println("Didnt find exact key");
-                System.out.println("value of closest key: " + trie.get(trie.keysWithPrefix(input).getFirst()));
+            //SKAL FINDE UD AF HVOR SPECIFIKT DER ER SØGT (splitter input op!)
+            input = input.replaceAll("([()])","");
+            String[] inputArr = input.split(" ");
+            System.out.println(inputArr.length);
+            if (inputArr.length == 1) { //HVis der kun søges på vej eller by
+                if (!trie.keysThatMatch(input).isEmpty()) {
+                    System.out.print("Found exact value: ");
+                    System.out.println(trie.get(trie.keysThatMatch(input).getFirst()));
+                } else {
+                    System.out.println("Didnt find exact key");
+                    System.out.println("value of closest key: " + trie.get(trie.keysWithPrefix(input).getFirst()));
+                }
+            } else if (inputArr.length == 2) { //Start med at kunne søge efter vej + by (skal på sigt også kunne finde vej + husnummer)
+                for (Node node : trie.getList(inputArr[0])) {
+                    if (node.getCity().equals(inputArr[1])) {
+                        System.out.println("dette er vejen: " + node.getStreet() + " i byen: " + node.getCity()); //TESTING
+                    }
+                }
             }
+
         } else {
-            if (eventCharacter.equals("\b")) { //hvis der trykkes backspace eller
-                System.out.println("Backspace pressed.");
+            if (eventCharacter.equals("\b") || eventCharacter.equals(" ")) { //hvis der trykkes backspace eller
+                System.out.println("Backspace or space pressed.");
                 //event.consume(); hvad gør vi her
             }
-            //Finder de 3 første relevante adresser.
-            for (int i = 0; i < trie.keysWithPrefix(input).size(); i++) {
-                listView.getItems().add(trie.keysWithPrefix(input).get(i));
 
-                if (i >= 2) { return; }
-            }
+                if (trie.getList(trie.keysWithPrefix(input).getFirst()).size() > 1) { //Finder vejen i forskellige byer.
+                    for (int i = 0; i < trie.getList(trie.keysWithPrefix(input).getFirst()).size(); i++) {
+                        listView.getItems().add(trie.getList(trie.keysWithPrefix(input).getFirst()).get(i).getStreet() + " (" + trie.getList(trie.keysWithPrefix(input).getFirst()).get(i).getCity() + ")");
+                        if (i >= 2) { return; }
+                    }
+                } else {
+                    for (int i = 0; i < trie.keysWithPrefix(input).size(); i++) { //Finder de 3 første relevante adresser.
+                        listView.getItems().add(trie.keysWithPrefix(input).get(i));
+
+                        if (i >= 2) {
+                            return;
+                        }
+                    }
+                }
         }
     }
 

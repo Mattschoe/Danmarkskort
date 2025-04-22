@@ -361,13 +361,13 @@ public class Parser implements Serializable {
                 String value = input.getAttributeValue(null, "v");
                 if (key == null || value == null) continue;
                 if (key.equals("addr:city")) {
-                    city = value;
+                    city = value.toLowerCase();
                 } else if (key.equals("addr:housenumber")) {
-                    houseNumber = value;
+                    houseNumber = value.toLowerCase();
                 } else if (key.equals("addr:postcode")) {
                     postcode = Integer.parseInt(value);
                 } else if (key.equals("addr:street")) {
-                    street = value;
+                    street = value.toLowerCase();
                 }
             }
             nextInput = input.next();
