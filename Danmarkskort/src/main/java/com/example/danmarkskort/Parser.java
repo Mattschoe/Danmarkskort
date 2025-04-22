@@ -271,19 +271,24 @@ public class Parser implements Serializable {
             if (nextInput == XMLStreamConstants.START_ELEMENT) {
                 if (input.getLocalName().equals("nd")) {
                     long nodeReference = Long.parseLong(input.getAttributeValue(null, "ref"));
-
                     Node node = id2Node.get(nodeReference);
 
                     //Makes sure that it doesn't point towards a null Node
                     if (node == null) break;
 
-                    //If same node is referenced twice, parses 'Way' as 'Polygon'
-                    if (nodesInWay.contains(node)) {
+                    //Adds first node and then skips rest to avoid false positive in next check
+                    if (nodesInWay.isEmpty()) {
+                        nodesInWay.add(node);
+                        continue;
+                    }
+
+                    //If node is same as start (A cycle), parses 'Way' as 'Polygon'
+                    if (nodesInWay.getFirst().equals(node)) {
                         nodesInWay.add(node);
                         id2Polygon.put(wayID, parsePolygon(input, nodesInWay));
                         return;
                     } else {
-                        nodesInWay.add(node); //Adding node to currently looked at nodes
+                        nodesInWay.add(node); //Otherwise adds node to currently looked at nodes
                     }
                 } else if (input.getLocalName().equals("tag")) {
                     //When reaching "tag" elements, we know it isn't a Polygon (no "Node" is mentioned twice), and therefore we parse it as a Road
