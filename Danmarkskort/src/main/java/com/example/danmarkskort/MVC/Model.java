@@ -271,14 +271,15 @@ public class Model {
                 if (streets.contains(address[3])) {//Hvis vejnavnet ALLEREDE ER TAGET
                     int streetCounter = 0;
                     for (Node streetNode : trieStreet.getList(address[3])) { //Kører gennem listen af noder med samme vejnavn
-                            if (!streetNode.getCity().equals(address[0])) { // flawed logik.
+                            if (!streetNode.getCity().equals(address[0])) {
                             streetCounter++;
                             }
                     }
                     if (streetCounter == trieStreet.getList(address[3]).size()) { //Hvis navnet er unikt!
                         trieStreet.put(address[3], node);
-                        System.out.println("dobbeltby: " + address[3]);
-                        System.out.println(trieStreet.getList(address[3]).size());
+                        for (Node nnode : trieStreet.getList(address[3])) { //Test condition
+                            System.out.println(address[3] + " i byen " + nnode.getCity());
+                        }
                     }
                 } else {
                 streets.add(address[3]); //Nu er vejnavnet indsat!

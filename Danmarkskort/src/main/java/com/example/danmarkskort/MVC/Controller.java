@@ -173,17 +173,6 @@ public class Controller implements Initializable {
             System.out.println("Trie loaded!");
             this.trieCity = model.getTrieCity();
             this.trieStreet = model.getTrieStreet();
-
-            System.out.println("Byer:");
-            for (String s :trieCity.keys()) {
-                System.out.println(s);
-            }
-
-            System.out.println("Veje:");
-            for (String s : trieStreet.keys()) {
-                System.out.println(s);
-            }
-
         }
 
         listView.getItems().clear();
@@ -204,9 +193,9 @@ public class Controller implements Initializable {
     private void autoSuggest(String eventCharacter, String input, TrieST<String> trie) {
         if (eventCharacter.equals("\r") && input != null) { // Hvis der trykkes enter og der er et input
             System.out.println("enter entered!");
-            if (!trie.keysThatMatch(input).isEmpty()) { //Hvorfor når vi aldrig frem til dette
+            if (!trie.keysThatMatch(input).isEmpty()) {
                 System.out.print("Found exact value: ");
-                System.out.println(trie.get(trie.keysThatMatch(input).getFirst())); //Kaster exception!
+                System.out.println(trie.get(trie.keysThatMatch(input).getFirst()));
             } else {
                 System.out.println("Didnt find exact key");
                 System.out.println("value of closest key: " + trie.get(trie.keysWithPrefix(input).getFirst()));
@@ -219,6 +208,7 @@ public class Controller implements Initializable {
             //Finder de 3 første relevante adresser.
             for (int i = 0; i < trie.keysWithPrefix(input).size(); i++) {
                 listView.getItems().add(trie.keysWithPrefix(input).get(i));
+
                 if (i >= 2) { return; }
             }
         }

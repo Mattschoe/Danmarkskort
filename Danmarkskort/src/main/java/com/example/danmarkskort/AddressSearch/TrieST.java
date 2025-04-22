@@ -184,7 +184,7 @@ public class TrieST<Item> {
         return isCity;
     }
 
-
+/*
     public static void main(String[] args) {
         TrieST<String> trie = new TrieST<>(false);
 
@@ -213,6 +213,8 @@ public class TrieST<Item> {
         }
 
     }
+
+ */
 
 
 
