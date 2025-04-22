@@ -47,9 +47,6 @@ public class Road implements Serializable, MapObject {
         this.roadType = roadType;
         this.roadName = roadName;
 
-        for (Node node : nodes) {
-            node.addEdge(this);
-        }
         calculateWeight();
         calculateBoundingBox();
         determineVisuals();
@@ -68,9 +65,7 @@ public class Road implements Serializable, MapObject {
         this.isDrivable = isDrivable;
         this.roadType = roadType;
         this.roadName = roadName;
-        for (Node node : nodes) {
-            node.addEdge(this);
-        }
+
         calculateWeight();
         calculateBoundingBox();
         determineVisuals();

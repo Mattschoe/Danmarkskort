@@ -27,7 +27,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
      *  itself in the {@link #calculateXY} method when being instantiated
      */
     public Node(double latitude, double longitude) {
-        distanceTo = Integer.MAX_VALUE;
+        distanceTo = Double.MAX_VALUE;
         roadEdges = new ArrayList<>();
         calculateXY(latitude, longitude);
     }
@@ -42,7 +42,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
      * @param street
      */
     public Node(double latitude, double longitude, String city, String houseNumber, short postcode, String street) {
-        distanceTo = Integer.MAX_VALUE;
+        distanceTo = Double.MAX_VALUE;
         roadEdges = new ArrayList<>();
         this.city = city;
         this.houseNumber = houseNumber;

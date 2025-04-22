@@ -81,5 +81,6 @@ public class Search {
         Collections.reverse(path);
 
         route = new Road(path, false, false, true, "Route", "Route");
+        route.setPartOfRoute(true);
     }
 }
