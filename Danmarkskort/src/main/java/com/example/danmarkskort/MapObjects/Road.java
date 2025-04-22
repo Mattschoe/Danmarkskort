@@ -6,7 +6,10 @@ import javafx.scene.paint.Color;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import static com.example.danmarkskort.ColorSheet.*;
 
@@ -53,9 +56,6 @@ public class Road implements Serializable, MapObject {
         this.roadType = roadType;
         this.roadName = roadName;
 
-        for (Node node : nodes) {
-            node.addEdge(this);
-        }
         calculateWeight();
         calculateBoundingBox();
 
@@ -77,9 +77,7 @@ public class Road implements Serializable, MapObject {
         this.isDrivable = isDrivable;
         this.roadType = roadType;
         this.roadName = roadName;
-        for (Node node : nodes) {
-            node.addEdge(this);
-        }
+
         calculateWeight();
         calculateBoundingBox();
 
@@ -94,8 +92,7 @@ public class Road implements Serializable, MapObject {
      *  @param gc the GraphicsContext in which the road will be drawn
      */
     public void draw(GraphicsContext gc) {
-        assert gc != null;
-        if (!isDrivable) return; //TODO %% Skipper lige ikke-bil veje for nu
+        if (!isDrivable) return; //Skipper lige ikke-bil veje for nu
 
         if (partOfRoute) gc.setStroke(Color.RED);
         else gc.setStroke(color);
@@ -212,7 +209,6 @@ public class Road implements Serializable, MapObject {
     public List<Node> getNodes() { return nodes;    }
     public String getType() { return roadType; }
     public String getRoadName() { return roadName; }
-    public boolean hasRoadType() { return !roadType.isEmpty(); }
     public boolean hasMaxSpeed() { return maxSpeed != 0; }
     public boolean isWalkable() { return foot; }
     public boolean isBicycle() { return bicycle; }
@@ -224,14 +220,10 @@ public class Road implements Serializable, MapObject {
      * @param node HAS TO BE EITHER THE ROADS START- OR END-NODE. WILL RETURN NULL ELSE
      */
     public Node getOppositeNode(Node node) {
-        assert isStartOrEndNode(node);
         if (node.equals(nodes.getFirst())) return nodes.getLast();
         if (node.equals(nodes.getLast())) return nodes.getFirst();
         return null;
     }
-
-    public Node getStart() { return nodes.getFirst(); }
-    public Node getEnd() { return nodes.getLast(); }
 
     public void setType(String type) {
         roadType = type;
