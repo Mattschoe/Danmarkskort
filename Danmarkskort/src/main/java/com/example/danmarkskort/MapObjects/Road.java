@@ -1,17 +1,20 @@
 package com.example.danmarkskort.MapObjects;
 
-import javafx.scene.canvas.Canvas;
+import com.example.danmarkskort.ColorSheet;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
-///A Road is a way that doesn't contain the same start and endNode. A Road is marked if it's drivable. Formally a Road consists of a list of Nodes that represent this Roads place in XY space. A Road is also used as an edge in a graph, where the list of nodes are condensed into a start- and endNode
+import static com.example.danmarkskort.ColorSheet.*;
+
+/**
+ * A Road is a way that doesn't contain the same start and endNode. A Road is marked if it's drivable.
+ * Formally a Road consists of a list of Nodes that represent this Roads place in XY space.
+ * A Road is also used as an edge in a graph, where the list of nodes are condensed into a start- and endNode
+ */
 public class Road implements Serializable, MapObject {
     @Serial private static final long serialVersionUID = 2430026592275563830L;
 
@@ -24,6 +27,9 @@ public class Road implements Serializable, MapObject {
     private String roadType;
     private String roadName;
     private float[] boundingBox;
+
+    private ColorSheet cs;
+    private String palette;
     private transient Color color;
     private float lineWidth;
     private float weight;
@@ -52,6 +58,9 @@ public class Road implements Serializable, MapObject {
         }
         calculateWeight();
         calculateBoundingBox();
+
+        assignColorSheetProp();
+        this.palette = "default";
         determineVisuals();
     }
 
@@ -73,6 +82,9 @@ public class Road implements Serializable, MapObject {
         }
         calculateWeight();
         calculateBoundingBox();
+
+        assignColorSheetProp();
+        this.palette = "default";
         determineVisuals();
     }
     //endregion
@@ -83,7 +95,7 @@ public class Road implements Serializable, MapObject {
      */
     public void draw(GraphicsContext gc) {
         assert gc != null;
-        if (!isDrivable) return; //Skipper lige ikke-bil veje for nu
+        if (!isDrivable) return; //TODO %% Skipper lige ikke-bil veje for nu
 
         if (partOfRoute) gc.setStroke(Color.RED);
         else gc.setStroke(color);
@@ -99,43 +111,62 @@ public class Road implements Serializable, MapObject {
         }
     }
 
-    /// Determines the Road's color and line-width
+    private void assignColorSheetProp() {
+        cs = switch(roadType) {
+            case "coastline" -> ROAD_COASTLINE;
+            case "primary"   -> ROAD_PRIMARY;
+            case "secondary" -> ROAD_SECONDARY;
+            case "tertiary"  -> ROAD_TERTIARY;
+            case "cycleway"  -> ROAD_CYCLEWAY;
+            case "track", "path" -> ROAD_TRACK_PATH;
+            case "tree_row"  -> ROAD_TREE_ROW;
+            case "route"     -> ROAD_ROUTE;
+            default          -> ROAD_DEFAULT;
+        };
+    }
+
     private void determineVisuals() {
+        color = cs.handlePalette(palette);
+        lineWidth = 1;
+    }
+
+    /// Determines the Road's color and line-width
+    /*private void determineVisuals() {
         if (roadType.equals("coastline")) {
-            color = Color.BLACK;
+            color = cs.get(0);
             lineWidth = 1.5f;
         }
         else if (roadType.equals("primary")) {
-            color = Color.DARKORANGE;
+            color = cs.get(1);
             lineWidth = 1.5f;
         }
         else if (roadType.equals("secondary")) {
-            color = Color.DARKSLATEBLUE;
+            color = cs.get(2);
             lineWidth = 1.5f;
         }
         else if (roadType.equals("tertiary")) {
-            color = Color.DARKGREEN;
+            color = cs.get(3);
             lineWidth = 1.5f;
         }
         else if (roadType.equals("cycleway")) {
-            color = Color.DARKMAGENTA;
+            color = cs.get(4);
             lineWidth = 1.1f;
         }
         else if (roadType.equals("track") || roadType.equals("path")) {
-            color = Color.SIENNA;
+            color = cs.get(5);
             lineWidth = 1f;
         }
         else if (roadType.equals("tree_row")) {
-            color = Color.rgb(172, 210, 156);
+            color = cs.get(6);
             lineWidth = 1f;
         }
         else if (roadType.equals("route")) {
-            color = Color.TRANSPARENT;
+            color = cs.get(7);
             lineWidth = 0f;
         }
         else {
             //default
-            color = Color.rgb(100, 100, 100);
+            color = cs.get(8);
             lineWidth = 1f;
         }
 
@@ -144,9 +175,9 @@ public class Road implements Serializable, MapObject {
          *      unclassified, residential, service, footway, power, cliff og proposed,
          * som jeg har valgt at bare ladet blive farvet default-grå. Så sker der ikke *alt*
          * for meget for øjnene :)
-         */
+         *
     }
-
+    */
     private void calculateBoundingBox() {
         boundingBox = new float[4];
         boundingBox[0] = Float.POSITIVE_INFINITY; //minX
@@ -228,5 +259,10 @@ public class Road implements Serializable, MapObject {
     }
 
     public void setPartOfRoute(boolean partOfRoute) { this.partOfRoute = partOfRoute; }
+
+    public void setPalette(String palette) {
+        this.palette = palette;
+        determineVisuals();
+    }
     //endregion
 }

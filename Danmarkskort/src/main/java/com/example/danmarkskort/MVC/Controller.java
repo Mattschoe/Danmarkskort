@@ -1,9 +1,6 @@
 package com.example.danmarkskort.MVC;
 
-import com.example.danmarkskort.MapObjects.Node;
-import com.example.danmarkskort.MapObjects.POI;
-import com.example.danmarkskort.MapObjects.Road;
-import com.example.danmarkskort.MapObjects.Tile;
+import com.example.danmarkskort.MapObjects.*;
 import javafx.animation.AnimationTimer;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import javafx.beans.value.ChangeListener;
@@ -12,10 +9,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
@@ -365,6 +367,33 @@ public class Controller implements Initializable {
         mouseEvent = e;
         panRequest = true;
     }
+    //endregion
+
+    //region ColorSheet toggles
+    @FXML private void paletteDefault() {
+        view.setBgColor(Color.LIGHTBLUE);
+
+        for (Tile tile : model.getTilegrid().getGridList()) {
+            for (MapObject mo : tile.getObjectsInTile()) {
+                if (mo instanceof Road road) road.setPalette("default");
+            }
+        }
+        view.drawMap();
+    }
+
+    @FXML private void paletteMidnight() {
+        view.setBgColor(Color.THISTLE);
+
+        for (Tile tile : model.getTilegrid().getGridList()) {
+            for (MapObject mo : tile.getObjectsInTile()) {
+                if (mo instanceof Road road) road.setPalette("midnight");
+                if (mo instanceof Polygon p) p.setPalette("midnight");
+            }
+        }
+        view.drawMap();
+    }
+    //endregion
+
     //endregion
 
     //region Getters and setters

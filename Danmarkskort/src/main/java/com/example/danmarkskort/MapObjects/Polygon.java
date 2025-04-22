@@ -1,11 +1,14 @@
 package com.example.danmarkskort.MapObjects;
 
+import com.example.danmarkskort.ColorSheet;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
+
+import static com.example.danmarkskort.ColorSheet.DEFAULT;
 
 public class Polygon implements Serializable, MapObject{
     @Serial private static final long serialVersionUID = 1444149606229887777L;
@@ -16,6 +19,8 @@ public class Polygon implements Serializable, MapObject{
     private float[] yPoints;
     private int nodesSize;
     private String type; //The type of polygon, fx: "Building", "Coastline", etc.
+    private String palette;
+    private final ColorSheet cs;
     private transient Color color;
     private float[] boundingBox;
     //endregion
@@ -28,9 +33,12 @@ public class Polygon implements Serializable, MapObject{
         assert nodes.size() != 1;
         this.nodes = nodes;
         this.type = type;
+        this.palette = "default";
+        this.cs = DEFAULT;
 
         createArrays();
-        determineColor();
+        determineColor(); //TODO %% HER DEN ER FUNKY: ALT CRASHER HVIS MAN SLETTER KALDET TIL DETERMINECOLOR
+        determineColor2();
         calculateBoundingBox();
     }
     //endregion
@@ -53,7 +61,7 @@ public class Polygon implements Serializable, MapObject{
     @Override public void draw(GraphicsContext gc) { draw(gc, false); }
 
     public void draw(GraphicsContext gc, boolean drawLines) {
-        //Converts our array into temporay double arrays to preserve space
+        //Converts our array into temporary double arrays to preserve space
         double[] tempXPoints = new double[nodesSize];
         double[] tempYPoints = new double[nodesSize];
 
@@ -62,8 +70,6 @@ public class Polygon implements Serializable, MapObject{
             tempYPoints[i] = yPoints[i];
         }
 
-        //if (color.equals(Color.rgb(0, 74, 127, 0.1))) System.out.println(" -def- " + type);
-        //if (color.equals(Color.RED)) System.out.println(" -red- " + type);
         if (drawLines) {
             gc.setStroke(color.darker().darker());
             gc.strokePolygon(tempXPoints, tempYPoints, nodesSize);
@@ -79,6 +85,10 @@ public class Polygon implements Serializable, MapObject{
             gc.strokePolygon(tempXPoints, tempYPoints, nodesSize);
             gc.setLineWidth(1/Math.sqrt(gc.getTransform().determinant()));
         }
+    }
+
+    public void determineColor2() {
+        color = cs.handlePalette(palette);
     }
 
     /// Enormous switch-statement determines the Polygon's color based off its 'type'-field
@@ -317,8 +327,14 @@ public class Polygon implements Serializable, MapObject{
     public boolean hasType() { return !type.isEmpty(); }
     public void setType(String type) {
         this.type = type;
-        determineColor();
+        determineColor2();
     }
+
+    public void setPalette(String palette) {
+        this.palette = palette;
+        determineColor2();
+    }
+
     @Override
     public float[] getBoundingBox() { return boundingBox; }
     //endregion

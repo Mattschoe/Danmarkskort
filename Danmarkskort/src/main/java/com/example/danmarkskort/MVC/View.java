@@ -1,6 +1,5 @@
 package com.example.danmarkskort.MVC;
 
-import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.MapObjects.Tilegrid;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
@@ -14,13 +13,13 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
 
 public class View {
     //region Fields
     private Affine trans;
     private Affine bgTrans;
     private Canvas canvas;
+    private transient Color bgColor;
     private final Controller controller;
     private GraphicsContext graphicsContext;
     private Scene scene;
@@ -82,6 +81,7 @@ public class View {
         graphicsContext = canvas.getGraphicsContext2D();
         trans = new Affine();
         bgTrans = new Affine();
+        bgColor = Color.LIGHTBLUE;
         graphicsContext.setTransform(trans);
         controller.bindZoomBar();
 
@@ -102,7 +102,7 @@ public class View {
 
         //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
         graphicsContext.setTransform(bgTrans);
-        graphicsContext.setFill(Color.LIGHTBLUE);
+        graphicsContext.setFill(bgColor);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
@@ -161,5 +161,6 @@ public class View {
         return new float[]{(float) minXY.getX(), (float) minXY.getY(), (float) maxXY.getX(), (float) maxXY.getY()};
     }
     public void setTilegrid(Tilegrid tilegrid) { this.tilegrid = tilegrid; }
+    public void setBgColor(Color bgColor) { this.bgColor = bgColor; }
     //endregion
 }
