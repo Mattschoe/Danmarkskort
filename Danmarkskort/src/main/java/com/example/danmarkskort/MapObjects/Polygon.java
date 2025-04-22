@@ -37,7 +37,6 @@ public class Polygon implements Serializable, MapObject{
         this.cs = DEFAULT;
 
         createArrays();
-        determineColor(); //TODO %% HER DEN ER FUNKY: ALT CRASHER HVIS MAN SLETTER KALDET TIL DETERMINECOLOR
         determineColor2();
         calculateBoundingBox();
     }
