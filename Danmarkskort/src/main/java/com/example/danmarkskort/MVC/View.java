@@ -23,11 +23,10 @@ public class View {
     private Canvas canvas;
     private final Controller controller;
     private GraphicsContext graphicsContext;
-    private final Scene scene;
+    private Scene scene;
     private final Stage stage;
     private boolean firstTimeDrawingMap;
-    private int currentZoom, minZoom, maxZoom;
-    private List<Tile> visibleTiles;
+    private int maxZoom;
     private Tilegrid tilegrid;
     //endregion
 
@@ -69,15 +68,9 @@ public class View {
         //Sætter scenen og fremviser
         stage.setScene(scene);
         stage.show();
-
-        /* Her plejede at være et if-statement ift. hvorvidt controller.getCanvas() var null, men dette
-         * blev redundant efter Matthias tilføjede instansiering af canvas i Controller's konstruktør */
         initializeCanvas();
 
-        //Sets up the Zoom levels
-        minZoom = 1;
-        maxZoom = 15;
-        currentZoom = maxZoom;
+        maxZoom = 15; //Sets up the Zoom levels
     }
     //endregion
 
@@ -87,7 +80,7 @@ public class View {
         //Canvas'et og dets GraphicsContext gemmes
         canvas = controller.getCanvas();
         graphicsContext = canvas.getGraphicsContext2D();
-        trans   = new Affine();
+        trans = new Affine();
         bgTrans = new Affine();
         graphicsContext.setTransform(trans);
         controller.bindZoomBar();
@@ -114,18 +107,14 @@ public class View {
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
-        //Draws map
-        //region TESTING
-        //Tegner kun tiles inde for viewport
+        //Draws map. Tegner kun tiles inde for viewport
         if (tilegrid != null) {
             try {
                 tilegrid.drawVisibleTiles(graphicsContext, getViewport(), getLOD());
-                //tilegrid.drawVisibleTiles(graphicsContext, getViewport(), 4);
             } catch (NonInvertibleTransformException e) {
                 System.out.println("Error getting viewport! Error: " + e.getMessage());
             }
         }
-        //endregion
 
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
@@ -133,7 +122,7 @@ public class View {
         }
     }
 
-    /// Method pans on the canvas -- STOLEN FROM NUTAN
+    /// Method pans on the canvas
     public void pan(double dx, double dy) {
         //Moves the map
         trans.prependTranslation(dx, dy);
@@ -146,16 +135,6 @@ public class View {
      *  @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
      */
     public void zoom(double dx, double dy, double factor, boolean ignoreMinMax) {
-        /*if (factor >= 1 && currentZoom > minZoom) currentZoom--; //Zoom ind
-        else if (factor <= 1 && currentZoom < maxZoom) currentZoom++; //Zoom out
-        else if (ignoreMinMax) {
-            //Needs to be changed
-        } else {
-            //If we are not allowed to zoom
-            System.out.println("Nuhu");
-            return;
-        }*/
-
         //Zooms
         trans.prependTranslation(-dx, -dy);
         trans.prependScale(factor, factor);

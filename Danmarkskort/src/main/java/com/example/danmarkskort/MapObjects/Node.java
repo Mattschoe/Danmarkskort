@@ -1,14 +1,14 @@
 package com.example.danmarkskort.MapObjects;
 
-import com.example.danmarkskort.Exceptions.InvalidAddressException;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
-import java.awt.*;
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.*;
 
-public class Node implements Serializable, MapObject {
+public class Node implements Serializable, MapObject, Comparable<Node> {
     @Serial private static final long serialVersionUID = 1444149606229887777L;
 
     //region Fields
@@ -17,6 +17,9 @@ public class Node implements Serializable, MapObject {
     private String houseNumber;
     private short postcode;
     private String street;
+    private double distanceTo;
+    private int edges;
+    private List<Road> roadEdges;
     //endregion
 
     //region Constructor(s)
@@ -24,6 +27,8 @@ public class Node implements Serializable, MapObject {
      *  itself in the {@link #calculateXY} method when being instantiated
      */
     public Node(double latitude, double longitude) {
+        distanceTo = Integer.MAX_VALUE;
+        roadEdges = new ArrayList<>();
         calculateXY(latitude, longitude);
     }
 
@@ -37,11 +42,13 @@ public class Node implements Serializable, MapObject {
      * @param street
      */
     public Node(double latitude, double longitude, String city, String houseNumber, short postcode, String street) {
-        calculateXY(latitude, longitude);
+        distanceTo = Integer.MAX_VALUE;
+        roadEdges = new ArrayList<>();
         this.city = city;
         this.houseNumber = houseNumber;
         this.postcode = postcode;
         this.street = street;
+        calculateXY(latitude, longitude);
     }
     //endregion
 
@@ -68,24 +75,55 @@ public class Node implements Serializable, MapObject {
     }
 
     public void draw(GraphicsContext graphicsContext) {
+        if (!roadEdges.isEmpty()) {
+            graphicsContext.setStroke(Color.ORANGE);
+            graphicsContext.setLineWidth(0.01);
+            graphicsContext.strokeLine(x, y, x, y);
+        }
+        if (partOfRoute) {
+            graphicsContext.setStroke(Color.RED);
+            graphicsContext.setLineWidth(0.01);
+            graphicsContext.strokeLine(x, y, x, y);
+        }
+    }
 
+    /**Compares the node given as parameter with this node.
+     * @return 0 if they have equal distance <br> a value less than zero if this node is less than the other node <br> a value more than zero if this node is greater than the other node
+     */
+    @Override
+    public int compareTo(Node otherNode) {
+        return Double.compare(this.distanceTo, otherNode.distanceTo);
     }
     //endregion
 
     //region Getters and setters
-    /** Address array where the Node stores the address (if it has one). Remember to check for null-errors! <br>
-     *  address[0] = City, fx: "København S"<br>
-     *  address[1] = House-number, fx: "2" <br>
-     *  address[2] = postcode, fx: "2860" <br>
-     *  address[3] = street, fx: "Decembervej"
-     */
-    public String getCity() { return city; }
-    public short getPostcode() { return postcode; }
     public float getX() { return x; }
     public float getY() { return y; }
+    public void setDistanceTo(double distanceTo) { this.distanceTo = distanceTo; }
+    public double getDistanceTo() { return distanceTo; }
+    ///Adds 1 to the edge counter
+    public void addEdge() { edges++; }
+    ///Adds the given Road to the list of connected Roads to this Node
+    public void addEdge(Road road) { roadEdges.add(road); }
+    ///Returns whether this node is an intersection or not
+    public boolean isIntersection() {  return edges > 1; }
+    public List<Road> getEdges() { return roadEdges; }
+
+    //region Address
+    public String getCity() { return city; }
+    public short getPostcode() { return postcode; }
+    public String getStreet() { return street; }
+    public String getHouseNumber() { return houseNumber; }
+    ///Combines all other getAddress getters together to one whole string. Useful for UI
+    public String getAddress() { return (street + " " + houseNumber + ", " + postcode + " " + city); }
+    public boolean hasFullAddress()  { return street != null && houseNumber != null && postcode != 0 && city != null; }
+    //endregion
+
     @Override
     public float[] getBoundingBox() {
         return new float[]{x, y, x, y};
     }
+    boolean partOfRoute;
+    public void setPartOfRoute(boolean value) { partOfRoute = value; }
     //endregion
 }

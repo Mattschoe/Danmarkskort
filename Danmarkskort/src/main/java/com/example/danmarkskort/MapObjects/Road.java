@@ -7,22 +7,27 @@ import javafx.scene.paint.Color;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+///A Road is a way that doesn't contain the same start and endNode. A Road is marked if it's drivable. Formally a Road consists of a list of Nodes that represent this Roads place in XY space. A Road is also used as an edge in a graph, where the list of nodes are condensed into a start- and endNode
 public class Road implements Serializable, MapObject {
     @Serial private static final long serialVersionUID = 2430026592275563830L;
 
     //region Fields
     private final List<Node> nodes;
-    private final Set<Line> lines;
     private final boolean foot;
     private final boolean bicycle;
+    private boolean isDrivable;
     private int maxSpeed;
     private String roadType;
+    private String roadName;
     private float[] boundingBox;
     private transient Color color;
     private float lineWidth;
+    private float weight;
+    private boolean partOfRoute;
     //endregion
 
     //region Constructor(s)
@@ -33,16 +38,19 @@ public class Road implements Serializable, MapObject {
      *  @param maxSpeed the max speed on the road
      *  @param roadType the type of road
      */
-    public Road(List<Node> nodes, boolean foot, boolean bicycle, int maxSpeed, String roadType) {
+    public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDrivable, int maxSpeed, String roadType, String roadName) {
         this.nodes = nodes;
-        this.lines = new HashSet<>();
-        createLines();
-
         this.foot = foot;
         this.bicycle = bicycle;
+        this.isDrivable = isDrivable;
         this.maxSpeed = maxSpeed;
         this.roadType = roadType;
+        this.roadName = roadName;
 
+        for (Node node : nodes) {
+            node.addEdge(this);
+        }
+        calculateWeight();
         calculateBoundingBox();
         determineVisuals();
     }
@@ -53,43 +61,41 @@ public class Road implements Serializable, MapObject {
      *  @param bicycle if road the is rideable on bike. Should be true by default
      *  @param roadType the type of road
      */
-    public Road(List<Node> nodes, boolean foot, boolean bicycle, String roadType) {
+    public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDrivable, String roadType, String roadName) {
         this.nodes = nodes;
-        this.lines = new HashSet<>();
-        createLines();
-
         this.foot = foot;
         this.bicycle = bicycle;
+        this.isDrivable = isDrivable;
         this.roadType = roadType;
-
+        this.roadName = roadName;
+        for (Node node : nodes) {
+            node.addEdge(this);
+        }
+        calculateWeight();
         calculateBoundingBox();
         determineVisuals();
     }
     //endregion
 
     //region Methods
-    /// Creates the lines between the {@link Node}'s (Used later for drawing)
-    private void createLines() {
-        //Tegner en linje fra den første node til den sidste i rækkefølge. (No?) Slutter af med at lave en linje mellem den sidste og første
-        Node currentNode = nodes.getFirst();
-        for (int i = 1; i < nodes.size(); i++) {
-            lines.add(new Line(currentNode, nodes.get(i)));
-            currentNode = nodes.get(i);
-        }
-        //lines.add(new Line(currentNode, nodes.getLast())); //Tror ikke det her skal bruges i Roads
-    }
-
-    /** Draws the road. This method excludes roads like metros which are underground. See {@link #drawMetro(Canvas)} for the ability to draw the metro
+    /** Draws the road.
      *  @param gc the GraphicsContext in which the road will be drawn
      */
     public void draw(GraphicsContext gc) {
         assert gc != null;
+        if (!isDrivable) return; //Skipper lige ikke-bil veje for nu
 
-        gc.setStroke(color);
+        if (partOfRoute) gc.setStroke(Color.RED);
+        else gc.setStroke(color);
         gc.setLineWidth(lineWidth/Math.sqrt(gc.getTransform().determinant()));
 
-        for (Line line : lines) {
-            line.draw(gc);
+
+        //Loops through the nodes drawing the lines between them
+        Node startNode = nodes.getFirst();
+        for (int i = 1; i < nodes.size(); i++) {
+            Node endNode = nodes.get(i);
+            gc.strokeLine(startNode.getX(), startNode.getY(), endNode.getX(), endNode.getY());
+            startNode = endNode;
         }
     }
 
@@ -160,26 +166,67 @@ public class Road implements Serializable, MapObject {
         }
     }
 
-    /// Draws the metro, bus-routes, etc.
-    @Deprecated public void drawMetro(Canvas mapCanvas) {}
-
-    /// Calculates maxSpeed if the tag wasn't present in the OSM-file
-    @Deprecated private void calculateSpeed() {}
+    ///TO DO: THIS METHOD NEEDS TO BE FIXED TO ADJUST FOR SPEEDLIMIT BUT IT HASS TO ACCOUNT FOR WHERE THE NODES ARE LOCATED IN XY SPACE}
+    private void calculateWeight() {
+        float deltaX = nodes.getFirst().getX() - nodes.getLast().getX();
+        float deltaY = nodes.getFirst().getY() - nodes.getLast().getY();
+        weight = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    }
     //endregion
 
     //region Getters and setters
-    public Set<Line>  getLines()           { return lines;    }
-    public boolean    isWalkable()         { return foot;     }
-    public boolean    isCyclable()         { return bicycle;  }
-    public int        getMaxSpeed()        { return maxSpeed; }
-    public List<Node> getNodes()           { return nodes;    }
-    public String     getType()            { return roadType; }
-    public boolean    hasRoadType()        { return !roadType.isEmpty(); }
+    ///Returns whether this piece of road is drivable or not (not in this case means walkable/cyclable)
+    public boolean isDrivable() { return isDrivable;  }
+    public int getMaxSpeed() { return maxSpeed; }
+    public List<Node> getNodes() { return nodes;    }
+    public String getType() { return roadType; }
+    public String getRoadName() { return roadName; }
+    public boolean hasRoadType() { return !roadType.isEmpty(); }
+    public boolean hasMaxSpeed() { return maxSpeed != 0; }
+    public boolean isWalkable() { return foot; }
+    public boolean isBicycle() { return bicycle; }
+    ///Returns whether the given node is either the start or the endNode of this road
+    public boolean isStartOrEndNode(Node node) { return nodes.getFirst().equals(node) || nodes.getLast().equals(node); }
+
+    /**
+     * Returns the opposite of the Node given. So if given the roads startNode it will return the roads endNode (and reverse).
+     * @param node HAS TO BE EITHER THE ROADS START- OR END-NODE. WILL RETURN NULL ELSE
+     */
+    public Node getOppositeNode(Node node) {
+        assert isStartOrEndNode(node);
+        if (node.equals(nodes.getFirst())) return nodes.getLast();
+        if (node.equals(nodes.getLast())) return nodes.getFirst();
+        return null;
+    }
+
+    public Node getStart() { return nodes.getFirst(); }
+    public Node getEnd() { return nodes.getLast(); }
+
     public void setType(String type) {
         roadType = type;
         determineVisuals();
     }
+    public float getWeight() { return weight; }
     @Override
     public float[] getBoundingBox() { return boundingBox; }
+    ///Returns either the start- or endNode. Which one is decided from the given {@code node}'s XY
+    public Node getStartOrEndNodeFromRoad(Node node) {
+        Node startNode = nodes.getFirst();
+        Node endNode = nodes.getLast();
+
+        if (node.equals(startNode)) return startNode;
+        if (node.equals(endNode)) return endNode;
+
+        float nodeX = node.getX();
+        float nodeY = node.getY();
+
+        double distanceToStart = Math.sqrt(Math.pow(startNode.getX() - nodeX, 2) + Math.pow(startNode.getY() - nodeY, 2));
+        double distanceToEnd = Math.sqrt(Math.pow(endNode.getX() - nodeX, 2) + Math.pow(endNode.getY() - nodeY, 2));
+
+        if (distanceToStart < distanceToEnd) return startNode;
+        else return endNode;
+    }
+
+    public void setPartOfRoute(boolean partOfRoute) { this.partOfRoute = partOfRoute; }
     //endregion
 }

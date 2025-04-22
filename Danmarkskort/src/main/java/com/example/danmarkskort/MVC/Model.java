@@ -1,24 +1,14 @@
 package com.example.danmarkskort.MVC;
 
 import com.example.danmarkskort.Exceptions.ParserSavingException;
-import com.example.danmarkskort.MapObjects.Node;
-import com.example.danmarkskort.MapObjects.Polygon;
-import com.example.danmarkskort.MapObjects.Road;
-import com.example.danmarkskort.MapObjects.Tile;
-import com.example.danmarkskort.MapObjects.Tilegrid;
+import com.example.danmarkskort.MapObjects.*;
 import com.example.danmarkskort.Parser;
+import com.example.danmarkskort.Searching.Search;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import javafx.scene.canvas.Canvas;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.sql.Array;
-import java.sql.SQLOutput;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -32,6 +22,7 @@ public class Model {
     private File outputFile; //The output .obj file
     private int numberOfTilesX, numberOfTilesY;
     private Tilegrid tilegrid;
+    private Search search;
     //endregion
 
     //region Constructor(s)
@@ -76,9 +67,10 @@ public class Model {
         Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
-
         System.out.println("Finished creating Tilegrid!");
         //endregion
+
+        search = new Search(parser.getNodes().valueCollection());
         parser = null; //Fjerner reference til parser så den bliver GC'et
     }
     //endregion
@@ -272,7 +264,7 @@ public class Model {
         //Saves nodes
         try {
             System.out.println("Saving nodes...");
-            int numberOfChunks = 16;
+            int numberOfChunks = 8;
             TLongObjectHashMap<Node> nodes = parser.getNodes();
             long[] nodeIDs = nodes.keySet().toArray(); //Need this to split it into chunks
             int amountOfNodes = nodes.size();
@@ -300,9 +292,9 @@ public class Model {
         }
 
         //Saves Roads
-        try {
+        /* try {
             System.out.println("Saving roads...");
-            int numberOfChunks = 16;
+            int numberOfChunks = 8;
             TLongObjectHashMap<Road> roads = parser.getRoads();
             long[] roadIDs = roads.keySet().toArray(); //Need this to split it into chunks
             int amountOfRoads = roads.size();
@@ -328,6 +320,8 @@ public class Model {
         } catch (Exception e) {
             throw new ParserSavingException("Error saving roads to OBJ!: " + e.getMessage());
         }
+
+         */
 
 
         //Saves Polygons
@@ -362,6 +356,20 @@ public class Model {
         System.exit(0);
     }
 
+    ///Creates a POI and stores it into its given Tile
+    public POI createPOI(float localX, float localY, String name) {
+        Tile tile = tilegrid.getTileFromXY(localX, localY);
+        if (tile == null) return null; //No tile within point
+        POI POI = new POI(localX, localY, name, tile);
+        tile.addPOI(POI);
+        return POI;
+    }
+
+    ///Starts a search from {@code startNode} to {@code endNode}
+    public void search(Node startNode, Node endNode) {
+        search.route(startNode, endNode);
+    }
+
     /// Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile
     private Tile[][] initializeTileGrid(float minX, float minY, float maxX, float maxY, int tileSize) {
         //Calculates number of tiles along each axis
@@ -391,7 +399,7 @@ public class Model {
          }
 
          //region Adds Roads
-         for (Road road : parser.getRoads().valueCollection()) {
+         for (Road road : parser.getRoads()) {
              //Converts start- and endXY to tile sizes
              float[] boundingBox = road.getBoundingBox();
              int startTileX = (int) ((boundingBox[0] - minX) / tileSize);

@@ -1,20 +1,24 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.MapObjects.Node;
+import com.example.danmarkskort.MapObjects.POI;
+import com.example.danmarkskort.MapObjects.Road;
+import com.example.danmarkskort.MapObjects.Tile;
 import javafx.animation.AnimationTimer;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.text.Text;
+import javafx.scene.transform.Affine;
+import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -25,6 +29,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
+
     //region Fields
     private View view;
     private Model model;
@@ -34,10 +39,13 @@ public class Controller implements Initializable {
     private TrieST<String> trieCity; //Part of test
     private TrieST<String> trieStreet;
     private MouseEvent mouseEvent; //Used to pan
+    private POI startPOI;
+    private POI endPOI;
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
 
+    //region FXML
     @FXML private Canvas canvas;
     @FXML private CheckMenuItem fpsButton;
     @FXML private ListView<String> listView;
@@ -45,6 +53,9 @@ public class Controller implements Initializable {
     @FXML private Text fpsText;
     @FXML private Text zoomText;
     @FXML private TextField searchBar;
+    @FXML private Button switchSearch;
+    @FXML private Button findRoute;
+    @FXML private TextField destination;
     //endregion
 
     //region Constructor(s)
@@ -235,6 +246,13 @@ public class Controller implements Initializable {
             }
         }
     }
+
+    private void startSearch() {
+        System.out.println("Starting search...");
+        model.search(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
+        System.out.println("Finished search!");
+    }
+
     //endregion
 
     //region Canvas methods
@@ -247,7 +265,92 @@ public class Controller implements Initializable {
 
     /** Metode køres når man slipper sit klik på Canvas'et */
     @FXML protected void onCanvasClick(MouseEvent e) {
-        System.out.println("Clicked at ("+ e.getX() +", "+ e.getY() +")!");
+        if (e.getClickCount() == 1) {
+            double x, y;
+
+            try {
+                Point2D point = view.getTrans().inverseTransform(e.getX(), e.getY());
+                x = point.getX();
+                y = point.getY();
+            } catch (Exception exception) {
+                return;
+            }
+
+            Tile tile = model.getTilegrid().getTileFromXY((float) x, (float) y);
+            if (tile == null) return;
+            double closestDistance = Double.MAX_VALUE;
+            Node closestNode = null;
+            for (Node node : tile.getNodesInTile()) {
+                if (node.getEdges().isEmpty()) continue;
+                double nodeX = node.getX();
+                double nodeY = node.getY();
+                double distance = Math.sqrt(Math.pow((nodeX - x), 2) + Math.pow((nodeY - y), 2)); //Afstandsformlen ser cooked ud i Java wth -MN
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestNode = node;
+                }
+            }
+            assert closestNode != null;
+            System.out.println(closestNode);
+        }
+        //endregion
+
+        //region DOUBLE CLICK (Searching)
+        if (e.getClickCount() == 2) {
+            //Makes POI
+            Affine transform = view.getTrans();
+            POI POI = null;
+            try {
+                Point2D point = transform.inverseTransform(e.getX(), e.getY());
+                POI = model.createPOI((float) point.getX(), (float) point.getY(), "Test");
+            } catch (NonInvertibleTransformException exception) {
+                System.out.println("Error inversion mouseclick coords!" + exception.getMessage());
+            }
+            view.drawMap(); //Makes sure that the POI is shown instantly
+
+            //Assigns spot for POI. Sets as start if empty or if "find route" has not been activated, if else, else we set it as the destination
+            if (POI != null) {
+                onActivateSearch();
+                if (searchBar.getText().trim().isEmpty() || !destination.isVisible()) {
+                    startPOI = POI;
+                } else {
+                    endPOI = POI;
+                }
+                updateSearchText();
+            }
+        }
+        //endregion
+    }
+
+    ///Opens the search menu when activated. If both start- and endPOI are initialized, this button is used for activating the route finding between the two POI's.
+    @FXML public void onActivateSearch() {
+        findRoute.setVisible(true);
+    }
+
+    ///"Find Route" button on UI
+    @FXML public void onRouteSearchStart() {
+        if (startPOI != null && endPOI != null && !searchBar.getText().trim().isEmpty() && !destination.getText().trim().isEmpty()) {
+            startSearch();
+        } else {
+            switchSearch.setVisible(true);
+            destination.setVisible(true);
+        }
+    }
+
+    @FXML public void switchDestinationAndStart() {
+        POI temp = startPOI;
+        startPOI = endPOI;
+        endPOI = temp;
+        updateSearchText();
+    }
+
+    ///Updates the text in the search. Call this after changing the POI responsible for the text
+    private void updateSearchText() {
+        searchBar.clear();
+        destination.clear();
+
+        if (startPOI != null) searchBar.setText(startPOI.getNodeAddress());
+        if (endPOI != null) destination.setText(endPOI.getNodeAddress());
     }
 
     /** Metode køres idet man klikker ned på Canvas'et */
@@ -263,7 +366,6 @@ public class Controller implements Initializable {
         panRequest = true;
     }
     //endregion
-    //endregion
 
     //region Getters and setters
     /** Sætter Controllerens view-felt til et givent View
@@ -271,7 +373,6 @@ public class Controller implements Initializable {
      *  @param view View'et som Controllerens view-felt sættes til
      */
     public void setView(View view) { this.view = view; }
-
     /** Returnerer Controllerens canvas-felt, der "populates" direkte idet en scene FXML-loades
      *  (Denne metode bruges kun af View-klassen en enkelt gang, så View kan få Canvas'et af Controlleren)
      *  @return Controllerens canvas-felt

@@ -18,8 +18,9 @@ public class Parser implements Serializable {
 
     //region Fields
     private transient TLongObjectHashMap<Node> id2Node; //map for storing a Node and the id used to refer to it
-    private transient TLongObjectHashMap<Road>    id2Road;
+    private transient TLongObjectHashMap<Road> id2Road;
     private transient TLongObjectHashMap<Polygon> id2Polygon;
+    private transient Set<Road> roads;
     private final File file; //The file that's loaded in
     ///\[0] = minLat <br> \[1] = minLong <br> \[2] = maxLat <br> \[3] = maxLong
     private final double[] bounds;
@@ -52,8 +53,7 @@ public class Parser implements Serializable {
         } else if (filename.endsWith(".osm")) {
             parseOSM(file);
         }
-        System.out.println("Finished parsing file. With: " + failedNodes + " nodes | " + failedWays + " ways | " + failedRelations + " relations, that failed!");
-        System.out.println("And with + " + outOfBoundsNodes + " nodes out of bounds!");
+        System.out.println("Finished parsing file. With: " + failedNodes + " nodes | " + failedWays + " ways | " + failedRelations + " relations, that failed! And with" + outOfBoundsNodes + " nodes out of bounds!");
     }
     //endregion
 
@@ -129,6 +129,7 @@ public class Parser implements Serializable {
                 }
             }
         }
+        splitRoads();
     }
 
 
@@ -153,7 +154,6 @@ public class Parser implements Serializable {
         double lat = Double.parseDouble(input.getAttributeValue(null, "lat"));
         double lon = Double.parseDouble(input.getAttributeValue(null, "lon"));
         if (lat < bounds[0] || lat > bounds[2] || lon < bounds[1] || lon > bounds[3]) throw new MapObjectOutOfBoundsException("Node is out of bounds!");
-
 
         int nextInput = input.next();
         //If simple node, saves it and returns
@@ -269,16 +269,18 @@ public class Parser implements Serializable {
                 if (input.getLocalName().equals("nd")) {
                     long nodeReference = Long.parseLong(input.getAttributeValue(null, "ref"));
 
+                    Node node = id2Node.get(nodeReference);
+
                     //Makes sure that it doesn't point towards a null Node
-                    if (id2Node.get(nodeReference) == null) break;
+                    if (node == null) break;
 
                     //If same node is referenced twice, parses 'Way' as 'Polygon'
-                    if (nodesInWay.contains(id2Node.get(nodeReference))) {
-                        nodesInWay.add(id2Node.get(nodeReference));
+                    if (nodesInWay.contains(node)) {
+                        nodesInWay.add(node);
                         id2Polygon.put(wayID, parsePolygon(input, nodesInWay));
                         return;
                     } else {
-                        nodesInWay.add(id2Node.get(nodeReference)); //Adding node to currently looked at nodes
+                        nodesInWay.add(node); //Adding node to currently looked at nodes
                     }
                 } else if (input.getLocalName().equals("tag")) {
                     //When reaching "tag" elements, we know it isn't a Polygon (no "Node" is mentioned twice), and therefore we parse it as a Road
@@ -332,8 +334,10 @@ public class Parser implements Serializable {
         //region node parameters
         boolean foot = true;
         boolean bicycle = true;
+        boolean drivable = false;
         int maxSpeed = 0;
         String roadType = "";
+        String roadName = "";
         boolean hasMaxSpeed = false;
         //endregion
 
@@ -341,17 +345,17 @@ public class Parser implements Serializable {
         int nextInput = firstTag;
         while (input.hasNext()) {
             //End of Road
-            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) {
-                break;
-            }
+            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) break;
 
             //Tries and saves the important tags
             if (nextInput == XMLStreamConstants.START_ELEMENT && input.getLocalName().equals("tag"))  {
                 String key = input.getAttributeValue(null, "k"); //for fat i "k" attribute som fx "maxSpeed"
                 String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
                 if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
-                if (key.equals("highway") || key.equals("natural") || key.equals("area:highway")){     //find ud af typen af highway
+                if (key.equals("highway") || key.equals("natural") || key.equals("area:highway")) {     //find ud af typen af highway
                     roadType = value;
+                    if (value.equals("footway") || value.equals("bridleway") || value.equals("steps") || value.equals("corridor") || value.equals("path") || value.equals("cycleway")) drivable = false;
+                    else drivable = true;
                 } else if (key.equals("maxspeed")) {
                     maxSpeed = Integer.parseInt(value);
                     hasMaxSpeed = true;
@@ -361,6 +365,8 @@ public class Parser implements Serializable {
                     foot = value.equals("yes");
                 } else if (key.equals("route")) {
                     roadType = key;
+                } else if (key.equals("name")) {
+                    roadName = value;
                 }
             }
             nextInput = input.next(); //Moves on to the next "tag" element
@@ -368,17 +374,9 @@ public class Parser implements Serializable {
 
         //Instantierer en ny Road en road og tager stilling til om den har en maxSpeed eller ej.
         Road road;
-        if (hasMaxSpeed){
-            road = new Road(nodes, foot, bicycle, maxSpeed, roadType);
-        } else {
-            road = new Road(nodes, foot, bicycle, roadType);
-        }
+        if (hasMaxSpeed) road = new Road(nodes, foot, bicycle, drivable, maxSpeed, roadType, roadName);
+        else road = new Road(nodes, foot, bicycle, drivable, roadType, roadName);
         return road;
-    }
-
-    /// @return true if bounds is incomplete, else false
-    private boolean isBoundsIncomplete() {
-        return bounds[0] == 0 || bounds[1] == 0 || bounds[2] == 0 || bounds[3] == 0;
     }
 
     /// Sets the standard bounds to the middle of DK
@@ -388,23 +386,45 @@ public class Parser implements Serializable {
         bounds[2] = 57.995290;
         bounds[3] = 15.708697; //Bornholm gør at DK er mega lang :(, once again et giga Bornholm L
     }
+
+    ///Splits all roads into multiple each time there is intersection
+    private void splitRoads() {
+        roads = new HashSet<>(id2Road.size());
+        for (long ID : id2Road.keys()) {
+            Road road = id2Road.get(ID);
+            List<Node> nodes = road.getNodes();
+            List<Node> currentRoad = new ArrayList<>();
+
+            //Runs through every node, checks if intersection, and makes a road on every intersection. Road 'ABCDE' therefore becomes 'ABC' & 'CDE' if 'C' is an intersection
+            currentRoad.add(nodes.getFirst()); //Adds first node to avoid edgecase where start node is an intersection
+            for (int i = 1; i < nodes.size(); i++) {
+                Node node = nodes.get(i);
+                currentRoad.add(node);
+
+                if (node.isIntersection() || i == nodes.size() - 1) {
+                    //We hit an intersection, or the end, so we make a road
+                    if (road.hasMaxSpeed()) roads.add(new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getMaxSpeed(), road.getType(), road.getRoadName()));
+                    else roads.add(new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getType(), road.getRoadName()));
+
+                    //Starts a new segment from the intersection
+                    currentRoad.clear();
+                    currentRoad.add(node);
+                }
+            }
+            id2Road.remove(ID);
+        }
+    }
     //endregion
 
+
     //region GETTERS AND SETTERS
-    public String getFileName() { return file.getName(); }
     public File getFile() { return file; }
     public TLongObjectHashMap<Node> getNodes() { return id2Node; }
-    public TLongObjectHashMap<Road> getRoads() { return id2Road; }
+    public Set<Road> getRoads() { return roads; }
     public TLongObjectHashMap<Polygon> getPolygons() { return id2Polygon; }
     public void setNodes(TLongObjectHashMap<Node> nodes) { id2Node = nodes; }
     public void setRoads(TLongObjectHashMap<Road> roads) { id2Road = roads; }
     public void setPolygons(TLongObjectHashMap<Polygon> polygons) { id2Polygon = polygons; }
-    ///Nulls the hashmaps to clear them from memory
-    public void clearParser() {
-        id2Node.clear();
-        id2Road.clear();
-        id2Polygon.clear();
-    }
     public double[] getBounds() { return bounds; }
     //endregion
 }
