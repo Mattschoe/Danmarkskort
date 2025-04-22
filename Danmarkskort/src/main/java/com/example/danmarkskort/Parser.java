@@ -380,6 +380,7 @@ public class Parser implements Serializable {
             Node complexNode = new Node(lat, lon, city, houseNumber, postcode, street);
             addressNodes.add(complexNode);
             id2Node.put(id, complexNode);
+
         }
     }
     //endregion

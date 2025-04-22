@@ -29,7 +29,7 @@ public class TrieST<Item> {
         word = word.toLowerCase();
         TrieNode current = get(root, word, 0);
         if (current == null) return null;
-        return current.getValue(); //Dette skal ændres da det er goofy kode
+        return current.getValue();
     }
 
     /**
@@ -184,7 +184,7 @@ public class TrieST<Item> {
         return isCity;
     }
 
-    /*Midlertidig!
+
     public static void main(String[] args) {
         TrieST<String> trie = new TrieST<>(false);
 
@@ -214,7 +214,7 @@ public class TrieST<Item> {
 
     }
 
-     */
+
 
 
 }

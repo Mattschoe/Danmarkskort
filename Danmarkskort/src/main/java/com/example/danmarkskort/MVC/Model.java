@@ -268,11 +268,17 @@ public class Model {
             }
 
             if (address[3] != null) { //street NOGET GÅR GALT I STREET
-                if (streets.contains(address[3])) { //Hvis vejnavnet ALLEREDE ER TAGET
-                    for (Node street : trieCity.getList(address[3])) { //Skal virkelig ikke være triecity her
-                        if (!street.getCity().equals(address[0])) {
-                            trieStreet.put(address[3], street);
-                        }
+                if (streets.contains(address[3])) {//Hvis vejnavnet ALLEREDE ER TAGET
+                    int streetCounter = 0;
+                    for (Node streetNode : trieStreet.getList(address[3])) { //Kører gennem listen af noder med samme vejnavn
+                            if (!streetNode.getCity().equals(address[0])) { // flawed logik.
+                            streetCounter++;
+                            }
+                    }
+                    if (streetCounter == trieStreet.getList(address[3]).size()) { //Hvis navnet er unikt!
+                        trieStreet.put(address[3], node);
+                        System.out.println("dobbeltby: " + address[3]);
+                        System.out.println(trieStreet.getList(address[3]).size());
                     }
                 } else {
                 streets.add(address[3]); //Nu er vejnavnet indsat!
