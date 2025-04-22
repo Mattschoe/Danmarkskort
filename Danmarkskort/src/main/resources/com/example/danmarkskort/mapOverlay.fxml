@@ -20,8 +20,9 @@
       <items>
           <Menu text="Color Scheme">
               <items>
-                  <MenuItem mnemonicParsing="false" text="Color-blind" />
-                  <MenuItem mnemonicParsing="false" text="another one!" />
+                  <MenuItem mnemonicParsing="false" onAction="#paletteDefault" text="Default" />
+                  <MenuItem mnemonicParsing="false" onAction="#paletteMidnight" text="Midnight"/>
+                  <MenuItem mnemonicParsing="false" onAction="#paletteBasic" text="Basic"/>
               </items>
           </Menu>
           <Menu text="Filter road">
@@ -58,11 +59,6 @@
         </Menu>
         <Menu mnemonicParsing="false" text="Show">
             <CheckMenuItem fx:id="fpsButton" mnemonicParsing="false" text="FPS"/>
-        </Menu>
-        <Menu mnemonicParsing="false" text="Palette">
-            <MenuItem mnemonicParsing="false" onAction="#paletteDefault" text="Default"/>
-            <MenuItem mnemonicParsing="false" onAction="#paletteMidnight" text="Midnight"/>
-            <MenuItem mnemonicParsing="false" onAction="#paletteBasic" text="Basic"/>
         </Menu>
     </MenuBar>
    <Button fx:id="findRoute" layoutX="172.0" layoutY="35.0" mnemonicParsing="false" onMouseClicked="#onRouteSearchStart" text="Find Route" visible="false" />
