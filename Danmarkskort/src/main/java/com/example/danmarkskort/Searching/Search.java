@@ -43,9 +43,9 @@ public class Search {
                 System.out.println("Reached EndNode!");
                 break; //Reached endNode
             }
-            for (Road road : currentNode.getEdges()) {
+            /* for (Road road : currentNode.getEdges()) {
                 relax(road, road.getStartOrEndNodeFromRoad(currentNode));
-            }
+            } */
         }
         drawPath();
     }
