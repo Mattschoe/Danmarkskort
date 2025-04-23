@@ -23,6 +23,7 @@ public class Model {
     private int numberOfTilesX, numberOfTilesY;
     private Tilegrid tilegrid;
     private Search search;
+    private List<Road> latestRoute;
     //endregion
 
     //region Constructor(s)
@@ -243,7 +244,7 @@ public class Model {
 
         //Loads polygons colors after serialization
         for (Polygon polygon : parser.getPolygons().valueCollection()) {
-            polygon.determineColor2();
+            polygon.determineColor();
         }
     }
 
@@ -372,9 +373,13 @@ public class Model {
 
     }
 
-    ///Starts a search from {@code startNode} to {@code endNode}
-    public void search(Node startNode, Node endNode) {
+    /**
+     * Starts a search from {@code startNode} to {@code endNode}
+     * @return A structured list of all roads in the route. Returns null if route not found
+     */
+    public List<Road> search(Node startNode, Node endNode) {
         search.route(startNode, endNode);
+        return search.getRoute();
     }
 
     /// Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile
@@ -500,5 +505,7 @@ public class Model {
 
     //region Getters and setters
     public Tilegrid getTilegrid() { return tilegrid; }
+    public List<Road> getLatestRoute() { return latestRoute; }
+    public void setLatestRoute(List<Road> route) { latestRoute = route; }
     //endregion
 }

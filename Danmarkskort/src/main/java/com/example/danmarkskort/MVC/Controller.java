@@ -1,6 +1,7 @@
 package com.example.danmarkskort.MVC;
 
 import com.example.danmarkskort.MapObjects.*;
+import com.example.danmarkskort.PDFOutput;
 import javafx.animation.AnimationTimer;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import javafx.beans.value.ChangeListener;
@@ -9,11 +10,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -28,10 +25,11 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
-
     //region Fields
     private View view;
     private Model model;
@@ -44,11 +42,12 @@ public class Controller implements Initializable {
     private POI startPOI;
     private POI endPOI;
     private Point2D POIMark;
+    private List<String> POIList = List.of("En", "TO", "Tre");
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
 
-    //region FXML
+    //region FXML fields
     @FXML private Canvas canvas;
     @FXML private CheckMenuItem fpsButton;
     @FXML private ListView<String> listView;
@@ -57,14 +56,18 @@ public class Controller implements Initializable {
     @FXML private Text zoomText;
     @FXML private TextField searchBar;
     @FXML private Button switchSearch;
-    @FXML private Button removePOIButton;
     @FXML private Button findRoute;
     @FXML private TextField destination;
+    @FXML private MenuItem POIMenuButton;
+
+
+    //endregion
     //endregion
 
     //region Constructor(s)
-    /** View-konstruktøren skaber/kører en instans af
-     *  konstruktøren her, når den loader en FXML-scene
+    /**
+     * View-konstruktøren skaber/kører en instans af
+     * konstruktøren her, når den loader en FXML-scene
      */
     public Controller() {
         canvas = new Canvas(400, 600);
@@ -73,10 +76,6 @@ public class Controller implements Initializable {
         this.trieCity = new TrieST<>(true);
         this.trieStreet = new TrieST<>(false);
         listView = new ListView<>();
-
-        //Det her er cooked -MN
-        try { model = Model.getInstance(); }
-        catch (IllegalStateException _) {} //Model not loaded yet, so we wait
 
         //region AnimationTimer
         AnimationTimer fpsTimer = new AnimationTimer() {
@@ -140,10 +139,10 @@ public class Controller implements Initializable {
         //Sætter et par stilistiske elementer
         fileChooser.setTitle("Choose your file");
         fileChooser.getExtensionFilters().addAll(
-                new ExtensionFilter("All readable files", "*.osm","*.obj","*.txt","*.zip"),
+                new ExtensionFilter("All readable files", "*.osm", "*.obj",/* "*.txt",*/ "*.zip"),
                 new ExtensionFilter("OpenStreetMap-files", "*.osm"),
                 new ExtensionFilter("Parser-class objects", "*.obj"),
-                new ExtensionFilter("Text-files", "*.txt"),
+                //new ExtensionFilter("Text-files", "*.txt"),
                 new ExtensionFilter("Zip-files", "*.zip"),
                 new ExtensionFilter("All files", "*.*"));
         String routeDesktop = switch(System.getProperty("os.name").split(" ")[0]) {
@@ -253,10 +252,39 @@ public class Controller implements Initializable {
 
     private void startSearch() {
         System.out.println("Starting search...");
-        model.search(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
+        List<Road> route = model.search(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
+        for (Road road : route) {
+            view.addObjectToDraw(road);
+        }
+        view.drawMap(); //Draws to refresh instantly
         System.out.println("Finished search!");
     }
 
+    /// Method opens af list of points of interests so the user can edit it.
+    @FXML protected void POIMenu(){
+        //der skal være en liste der bliver opdateret når man tilføjer og fjerne POI's som bliver vist når man klikker på menuen
+        System.out.println("Så skal man kunne skfite her");
+        System.out.println(POIList);
+    }
+    /// Method to export a route as PDF
+    @FXML protected void exportAsPDF(){
+        System.out.println("Attempting to export as PDF!");
+
+        List<Road> latestRoute = Model.getInstance().getLatestRoute();
+
+        if (latestRoute != null) {
+            List<String> roads = new ArrayList<>();
+            for (Road road : latestRoute) roads.add(road.getRoadName());
+            PDFOutput.generateRoute(roads);
+            System.out.println("PDF-export successful!");
+        }
+        else System.out.println("PDF-export failed!");
+    }
+
+    /// Method to open a textbox with a written guide when "Guide" is pressed
+    @FXML protected void guideTextButton(){
+        guideText.setVisible(guideButton.isSelected());
+    }
     //endregion
 
     //region Canvas methods
@@ -382,23 +410,45 @@ public class Controller implements Initializable {
 
     //region ColorSheet toggles
     @FXML private void paletteDefault() {
-        view.setBgColor(Color.LIGHTBLUE);
+        if (model == null) model = Model.getInstance();
 
+        view.setBgColor(Color.LIGHTBLUE);
+        fpsText.setFill(Color.BLACK);
+        zoomText.setFill(Color.BLACK);
         for (Tile tile : model.getTilegrid().getGridList()) {
             for (MapObject mo : tile.getObjectsInTile()) {
                 if (mo instanceof Road road) road.setPalette("default");
+                if (mo instanceof Polygon p) p.setPalette("default");
             }
         }
         view.drawMap();
     }
 
     @FXML private void paletteMidnight() {
-        view.setBgColor(Color.THISTLE);
+        if (model == null) model = Model.getInstance();
 
+        view.setBgColor(Color.rgb(23, 3, 63));
+        fpsText.setFill(Color.WHITE);
+        zoomText.setFill(Color.WHITE);
         for (Tile tile : model.getTilegrid().getGridList()) {
             for (MapObject mo : tile.getObjectsInTile()) {
                 if (mo instanceof Road road) road.setPalette("midnight");
                 if (mo instanceof Polygon p) p.setPalette("midnight");
+            }
+        }
+        view.drawMap();
+    }
+
+    @FXML private void paletteBasic() {
+        if (model == null) model = Model.getInstance();
+
+        view.setBgColor(Color.GHOSTWHITE);
+        fpsText.setFill(Color.INDIGO);
+        zoomText.setFill(Color.INDIGO);
+        for (Tile tile : model.getTilegrid().getGridList()) {
+            for (MapObject mo : tile.getObjectsInTile()) {
+                if (mo instanceof Road road) road.setPalette("basic");
+                if (mo instanceof Polygon p) p.setPalette("basic");
             }
         }
         view.drawMap();

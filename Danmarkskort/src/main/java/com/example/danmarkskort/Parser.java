@@ -11,6 +11,8 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 
 public class Parser implements Serializable {
@@ -129,9 +131,10 @@ public class Parser implements Serializable {
                 }
             }
         }
+        //Counts references and splits nodes
+        countNodeReferences();
         splitRoads();
     }
-
 
     /**
      * Saves the OSM-file's bounds-coordinates (so that View can zoom in to these on startup) <br>
@@ -268,19 +271,24 @@ public class Parser implements Serializable {
             if (nextInput == XMLStreamConstants.START_ELEMENT) {
                 if (input.getLocalName().equals("nd")) {
                     long nodeReference = Long.parseLong(input.getAttributeValue(null, "ref"));
-
                     Node node = id2Node.get(nodeReference);
 
                     //Makes sure that it doesn't point towards a null Node
                     if (node == null) break;
 
-                    //If same node is referenced twice, parses 'Way' as 'Polygon'
-                    if (nodesInWay.contains(node)) {
+                    //Adds first node and then skips rest to avoid false positive in next check
+                    if (nodesInWay.isEmpty()) {
+                        nodesInWay.add(node);
+                        continue;
+                    }
+
+                    //If node is same as start (A cycle), parses 'Way' as 'Polygon'
+                    if (nodesInWay.getFirst().equals(node)) {
                         nodesInWay.add(node);
                         id2Polygon.put(wayID, parsePolygon(input, nodesInWay));
                         return;
                     } else {
-                        nodesInWay.add(node); //Adding node to currently looked at nodes
+                        nodesInWay.add(node); //Otherwise adds node to currently looked at nodes
                     }
                 } else if (input.getLocalName().equals("tag")) {
                     //When reaching "tag" elements, we know it isn't a Polygon (no "Node" is mentioned twice), and therefore we parse it as a Road
@@ -392,6 +400,7 @@ public class Parser implements Serializable {
         roads = new HashSet<>(id2Road.size());
         for (long ID : id2Road.keys()) {
             Road road = id2Road.get(ID);
+
             List<Node> nodes = road.getNodes();
             List<Node> currentRoad = new ArrayList<>();
 
@@ -403,8 +412,14 @@ public class Parser implements Serializable {
 
                 if (node.isIntersection() || i == nodes.size() - 1) {
                     //We hit an intersection, or the end, so we make a road
-                    if (road.hasMaxSpeed()) roads.add(new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getMaxSpeed(), road.getType(), road.getRoadName()));
-                    else roads.add(new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getType(), road.getRoadName()));
+                    Road newRoad;
+                    if (road.hasMaxSpeed()) newRoad = new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getMaxSpeed(), road.getType(), road.getRoadName());
+                    else newRoad = new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getType(), road.getRoadName());
+
+                    for (Node roadNode : newRoad.getNodes()) {
+                        roadNode.addEdge(newRoad);
+                    }
+                    roads.add(road);
 
                     //Starts a new segment from the intersection
                     currentRoad.clear();
@@ -414,6 +429,16 @@ public class Parser implements Serializable {
             id2Road.remove(ID);
         }
     }
+
+    ///Counts the amount of times a node in {@code id2Roads} is referenced in the OSM data and saves that in each node as an "edge"
+    private void countNodeReferences() {
+        for (Road road : id2Road.valueCollection()) {
+            for (Node node : road.getNodes()) {
+                node.addEdge();
+            }
+        }
+    }
+
     //endregion
 
 
