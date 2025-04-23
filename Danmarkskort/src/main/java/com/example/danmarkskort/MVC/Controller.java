@@ -227,11 +227,11 @@ public class Controller implements Initializable {
     /// TODO
     /// skal kunne acceptere to strenge
     @FXML protected void searchBarTyped(KeyEvent event) {
-        if (this.trieCity == null) { //Skal på sigt bare gøres når loading baren er done.
+         //Skal på sigt bare gøres når loading baren er done.
             System.out.println("Trie loaded!");
             this.trieCity = model.getTrieCity();
             this.trieStreet = model.getTrieStreet();
-        }
+
 
         listView.getItems().clear();
 
@@ -305,7 +305,10 @@ public class Controller implements Initializable {
                 System.out.println("Backspace or space pressed.");
                 //event.consume(); hvad gør vi her
             }
-                System.out.println(trie.getList(trie.keysWithPrefix(input).getFirst()).size() > 1);
+                System.out.println(trie); //
+                System.out.println(trie.getList(trie.keysWithPrefix(input).getFirst())); //
+                System.out.println(trie.getList(trie.keysWithPrefix(input).getFirst()).size()); //
+                System.out.println(trie.getList(trie.keysWithPrefix(input).getFirst()).size() > 1); // TEST----
                 if (trie.getList(trie.keysWithPrefix(input).getFirst()).size() > 1) { //Finder vejen i forskellige byer - problemer no such element?
                     for (int i = 0; i < trie.getList(trie.keysWithPrefix(input).getFirst()).size(); i++) {
                         listView.getItems().add(trie.getList(trie.keysWithPrefix(input).getFirst()).get(i).getStreet() + " (" + trie.getList(trie.keysWithPrefix(input).getFirst()).get(i).getCity() + ")");
