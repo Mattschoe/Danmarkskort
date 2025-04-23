@@ -56,7 +56,6 @@ public class Controller implements Initializable {
     @FXML private TextArea guideText;
     @FXML private Button switchSearch;
     @FXML private Button findRoute;
-    @FXML private Button CloseGuideButton;
     @FXML private TextField destination;
     @FXML private MenuItem POIMenuButton;
 
@@ -274,9 +273,6 @@ public class Controller implements Initializable {
         CloseGuideButton.setVisible(guideButton.isSelected());
     }
 
-    @FXML protected void closeGuide(){
-        CloseGuideButton.setVisible(false);
-    }
 
     //endregion
 
