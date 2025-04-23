@@ -23,6 +23,7 @@ public class Model {
     private int numberOfTilesX, numberOfTilesY;
     private Tilegrid tilegrid;
     private Search search;
+    private List<Road> latestRoute;
     //endregion
 
     //region Constructor(s)
@@ -497,5 +498,7 @@ public class Model {
 
     //region Getters and setters
     public Tilegrid getTilegrid() { return tilegrid; }
+    public List<Road> getLatestRoute() { return latestRoute; }
+    public void setLatestRoute(List<Road> route) { latestRoute = route; }
     //endregion
 }

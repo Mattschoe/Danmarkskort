@@ -1,6 +1,7 @@
 package com.example.danmarkskort.MVC;
 
 import com.example.danmarkskort.MapObjects.*;
+import com.example.danmarkskort.PDFOutput;
 import javafx.animation.AnimationTimer;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import javafx.beans.value.ChangeListener;
@@ -24,6 +25,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -281,26 +283,23 @@ public class Controller implements Initializable {
     }
     /// Method to export a route as PDF
     @FXML protected void exportAsPDF(){
-        System.out.println("exporting as PDF");
+        System.out.println("Attempting to export as PDF!");
+
+        List<Road> latestRoute = Model.getInstance().getLatestRoute();
+
+        if (latestRoute != null) {
+            List<String> roads = new ArrayList<>();
+            for (Road road : latestRoute) roads.add(road.getRoadName());
+            PDFOutput.generateRoute(roads);
+            System.out.println("PDF-export successful!");
+        }
+        else System.out.println("PDF-export failed!");
     }
 
     /// Method to open a textbox with a written guide when "Guide" is pressed
     @FXML protected void guideTextButton(){
         guideText.setVisible(guideButton.isSelected());
     }
-    @FXML
-    public void initialize() {
-        System.out.println("init called");
-        POIMenu.getItems().clear();
-
-        for (String poi : POIList) {
-            MenuItem item = new MenuItem(poi);
-            item.setOnAction(e -> System.out.println("Selected: " + poi));
-            POIMenu.getItems().add(item);
-        }
-    }
-
-
     //endregion
 
     //region Canvas methods
