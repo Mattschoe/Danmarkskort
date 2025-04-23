@@ -264,24 +264,24 @@ public class Controller implements Initializable {
             if (addressSearchedFor[0] != null && addressSearchedFor[1] != null && addressSearchedFor[2] != null && addressSearchedFor[3] != null) { //HVIS FULD ADDRESSE
                 System.out.println("fuld addresse"); //TESTING
                 for (Node node : trie.getList(addressSearchedFor[0])) { //Kører gennem alle veje med vejnavnet
-                    if (node.getHousenumber().equals(addressSearchedFor[1]) && node.getPostcode().equals(addressSearchedFor[2]) && node.getCity().equals(addressSearchedFor[3])) { //Hvis nummer, postnummer og by passer
-                        System.out.println("dette er vejen: " + node.getStreet() + " nummer: " + node.getHousenumber() + " i byen: " + node.getCity() + " med postnummeret:" + node.getPostcode()); //TESTING
+                    if (node.getHouseNumber().equals(addressSearchedFor[1]) && String.valueOf(node.getPostcode()).equals(addressSearchedFor[2]) && node.getCity().equals(addressSearchedFor[3])) { //Hvis nummer, postnummer og by passer
+                        System.out.println("dette er vejen: " + node.getStreet() + " nummer: " + node.getHouseNumber() + " i byen: " + node.getCity() + " med postnummeret:" + String.valueOf(node.getPostcode())); //TESTING
                         System.out.println(node);
                     }
                 }
             } else if (addressSearchedFor[0] != null && addressSearchedFor[1] != null && addressSearchedFor[3] != null) { // hvis vej + husnummer + by
                 System.out.println("vej + nummer + by"); //TESTING
                 for (Node node : trie.getList(addressSearchedFor[0])) { //Kører gennem alle veje med vejnavnet
-                    if (node.getHousenumber().equals(addressSearchedFor[1]) && node.getCity().equals(addressSearchedFor[3])) { //Hvis nummer og by passer
-                        System.out.println("dette er vejen: " + node.getStreet() + " nummer: " + node.getHousenumber() + " i byen: " + node.getCity()); //TESTING
+                    if (node.getHouseNumber().equals(addressSearchedFor[1]) && node.getCity().equals(addressSearchedFor[3])) { //Hvis nummer og by passer
+                        System.out.println("dette er vejen: " + node.getStreet() + " nummer: " + node.getHouseNumber() + " i byen: " + node.getCity()); //TESTING
                         System.out.println(node);
                     }
                 }
             } else if (addressSearchedFor[0] != null && addressSearchedFor[1] != null) { // hvis vej + husnummer
                 System.out.println("vej + nummer"); //TESTING
                 for (Node node : trie.getList(addressSearchedFor[0])) { //Kører gennem alle veje med vejnavnet
-                    if (node.getHousenumber().equals(addressSearchedFor[1])) { //Hvis nummer og by passer
-                        System.out.println("dette er vejen: " + node.getStreet() + " nummer: " + node.getHousenumber()); //TESTING
+                    if (node.getHouseNumber().equals(addressSearchedFor[1])) { //Hvis nummer og by passer
+                        System.out.println("dette er vejen: " + node.getStreet() + " nummer: " + node.getHouseNumber()); //TESTING
                         System.out.println(node);
                     }
                 }
@@ -305,8 +305,8 @@ public class Controller implements Initializable {
                 System.out.println("Backspace or space pressed.");
                 //event.consume(); hvad gør vi her
             }
-
-                if (trie.getList(trie.keysWithPrefix(input).getFirst()).size() > 1) { //Finder vejen i forskellige byer.
+                System.out.println(trie.getList(trie.keysWithPrefix(input).getFirst()).size() > 1);
+                if (trie.getList(trie.keysWithPrefix(input).getFirst()).size() > 1) { //Finder vejen i forskellige byer - problemer no such element?
                     for (int i = 0; i < trie.getList(trie.keysWithPrefix(input).getFirst()).size(); i++) {
                         listView.getItems().add(trie.getList(trie.keysWithPrefix(input).getFirst()).get(i).getStreet() + " (" + trie.getList(trie.keysWithPrefix(input).getFirst()).get(i).getCity() + ")");
                         if (i >= 2) { return; }

@@ -11,6 +11,9 @@ import javafx.scene.canvas.Canvas;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 ///A Model is a Singleton class that stores the map in a tile-grid. It also stores the parser which parses the .osm data. Call {@link #getInstance()} to get the Model
 public class Model {
@@ -520,7 +523,7 @@ public class Model {
         cities = new HashSet<>();
         int testCounter = 0; //TESTING
         for (Node node : parser.getAddressNodes()) { //gennemgår alle address nodes
-            String[] address = node.getAddress();
+            String[] address = new String[]{node.getStreet(),node.getHouseNumber(), String.valueOf(node.getPostcode()),node.getCity()};
 
             //Byer indsættes i trien til byer
             if (address[0] != null && !cities.contains(address[0])) { //Hvis byen ikke allerede er indlæst
