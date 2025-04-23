@@ -55,6 +55,7 @@ public class Controller implements Initializable {
     @FXML private Text fpsText;
     @FXML private Text zoomText;
     @FXML private TextField searchBar;
+    @FXML private TextArea guideText;
     @FXML private Button switchSearch;
     @FXML private Button findRoute;
     @FXML private TextField destination;
@@ -279,6 +280,11 @@ public class Controller implements Initializable {
             PDFOutput.generateRoute(roads);
         }
         else System.out.println("PDF-export failed! :(");
+    }
+
+    /// Method to open a textbox with a written guide when "Guide" is pressed
+    @FXML protected void guideTextButton(){
+        guideText.setVisible(guideButton.isSelected());
     }
     //endregion
 
