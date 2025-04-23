@@ -227,10 +227,11 @@ public class Controller implements Initializable {
     /// TODO
     /// skal kunne acceptere to strenge
     @FXML protected void searchBarTyped(KeyEvent event) {
-         //Skal på sigt bare gøres når loading baren er done.
-            System.out.println("Trie loaded!");
-            this.trieCity = model.getTrieCity();
-            this.trieStreet = model.getTrieStreet();
+            if (trieCity == null) { //Her sker fejl - Trien loader ikke?
+                System.out.println("Trie loaded!");
+                this.trieCity = model.getTrieCity();
+                this.trieStreet = model.getTrieStreet();
+            }
 
 
         listView.getItems().clear();
