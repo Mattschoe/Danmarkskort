@@ -278,8 +278,9 @@ public class Controller implements Initializable {
             List<String> roads = new ArrayList<>();
             for (Road road : latestRoute) roads.add(road.getRoadName());
             PDFOutput.generateRoute(roads);
+            System.out.println("PDF-export successful!");
         }
-        else System.out.println("PDF-export failed! :(");
+        else System.out.println("PDF-export failed!");
     }
 
     /// Method to open a textbox with a written guide when "Guide" is pressed
