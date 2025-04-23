@@ -3,21 +3,13 @@ package com.example.danmarkskort.MVC;
 import com.example.danmarkskort.AddressSearch.Street;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import com.example.danmarkskort.Exceptions.ParserSavingException;
-import com.example.danmarkskort.MapObjects.Node;
-import com.example.danmarkskort.MapObjects.Polygon;
-import com.example.danmarkskort.MapObjects.Road;
-import com.example.danmarkskort.MapObjects.Tile;
-import com.example.danmarkskort.MapObjects.Tilegrid;
+import com.example.danmarkskort.MapObjects.*;
 import com.example.danmarkskort.Parser;
+import com.example.danmarkskort.Searching.Search;
+import gnu.trove.map.hash.TLongObjectHashMap;
 import javafx.scene.canvas.Canvas;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.*;
 
 ///A Model is a Singleton class that stores the map in a tile-grid. It also stores the parser which parses the .osm data. Call {@link #getInstance()} to get the Model
@@ -28,7 +20,9 @@ public class Model {
     private Parser parser;
     private File outputFile; //The output .obj file
     private int numberOfTilesX, numberOfTilesY;
-    private final Tilegrid tilegrid;
+    private Tilegrid tilegrid;
+    private Search search;
+    private List<Road> latestRoute;
     private TrieST<String> trieCity;
     private TrieST<String> trieStreet;
     Set<String> streets;
@@ -37,7 +31,7 @@ public class Model {
 
     //region Constructor(s)
     /** Checks what filetype the filepath parameter is.
-     *  Calls {@link #parseOBJ()} if it's an OBJ-file, if not, creates a new {@link Parser} class and propagates the responsibility
+     *  Calls {@link #parseOBJToParser()} if it's an OBJ-file, if not, creates a new {@link Parser} class and propagates the responsibility
      */
     public Model(String filePath, Canvas canvas) {
         assert canvas != null;
@@ -49,7 +43,8 @@ public class Model {
         //If .obj file
         if (filePath.endsWith(".obj")) {
             try {
-                parseOBJ();
+                parseOBJToParser();
+                System.out.println("Finished deserializing parser!");
             } catch (Exception e) {
                 System.out.println("Error loading .obj!: " + e.getMessage());
                 System.out.println("Stacktrace:");
@@ -59,7 +54,6 @@ public class Model {
             //If anything else it creates a new parser and tries saves it as .obj
             try {
                 parser = new Parser(file);
-                //saveParserToOBJ(); I STYKKER :(
             } catch (ParserSavingException e) {
                 System.out.println(e.getMessage());
             } catch (Exception e) {
@@ -70,15 +64,20 @@ public class Model {
         //endregion
 
         //region Tilegrid
-        //Converts into tilegrid
-        int tileSize = 10;
-        double[] tileGridBounds = getMinMaxCoords();
+        //Converts into tilegrid if we haven't loaded a tilegrid in via OBJ
+        System.out.println("Starting on tilegrid!");
+        int tileSize = 11;
+        float[] tileGridBounds = getMinMaxCoords();
         Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
+        System.out.println("Finished creating Tilegrid!");
         //endregion
 
         loadAddressNodes();
+
+        search = new Search(parser.getNodes().valueCollection());
+        parser = null; //Fjerner reference til parser så den bliver GC'et
     }
     //endregion
 
@@ -107,26 +106,282 @@ public class Model {
     }
 
     /// Parses a .obj file. This method is called in the Parser constructor if the given filepath ends with .obj
-    private void parseOBJ() throws IOException, ClassNotFoundException {
-        ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
-        parser = (Parser) input.readObject();
-        input.close();
-    }
+    private void parseOBJToParser() {
+        TLongObjectHashMap<Node> id2Node = new TLongObjectHashMap<>(66_289_558);
+        TLongObjectHashMap<Road> id2Road = new TLongObjectHashMap<>(2_214_235);
+        TLongObjectHashMap<Polygon> id2Polygon = new TLongObjectHashMap<>(6_168_995);
 
-    /// Saves the parser to a .obj file so it can be called later. Method is called in {@link #Model} if the file isn't a .obj
-    private void saveParserToOBJ() {
-        outputFile = new File(file+".obj");
+        System.out.println("Deserializing parser...");
+        //region Reading .obj files
+        //Parser
         try {
-            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream(outputFile));
-            outputStream.writeObject(parser);
-            outputStream.close();
-        } catch (IOException e) {
-            throw new ParserSavingException("Error saving parser as .obj! Error Message: " + e.getMessage());
+            ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
+            parser = (Parser) input.readObject();
+            input.close();
+        } catch (Exception e) {
+            System.out.println("Error reading parser!: " + e.getMessage());
+        }
+
+        //Nodes
+        try {
+            File folder = new File("data/StandardMap");
+            File[] nodeFiles = folder.listFiles((dir, name) -> name.startsWith("nodes_") && name.endsWith(".obj"));
+            assert nodeFiles != null;
+
+            ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+            List<Future<TLongObjectHashMap<Node>>> futureMap = new ArrayList<>();
+
+            //Runs through each nodefile and makes a thread serialize it
+            for (File file : nodeFiles) {
+                futureMap.add(executor.submit(() -> {
+                    TLongObjectHashMap<Node> localMap = new TLongObjectHashMap<>();
+                    try {
+                        ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
+                        int chunkSize = input.readInt();
+                        for (int i = 0; i < chunkSize; i++) {
+                            long nodeID = input.readLong();
+                            Node node = (Node) input.readObject();
+                            localMap.put(nodeID, node);
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error reading file: " + file.getName() + ", with error: " + e.getMessage());
+                    }
+                    return localMap;
+                }));
+            }
+
+            //Adds each localMap from the threads into the collected map
+            for (Future<TLongObjectHashMap<Node>> future : futureMap) {
+                id2Node.putAll(future.get());
+            }
+            executor.shutdown();
+            System.out.println("- Finished reading nodes!");
+        } catch (Exception e) {
+            System.out.println("Error reading nodes!: " + e.getMessage());
+        }
+
+        //Roads
+        try {
+            File folder = new File("data/StandardMap");
+            File[] roadFiles = folder.listFiles((dir, name) -> name.startsWith("roads_") && name.endsWith(".obj"));
+            assert roadFiles != null;
+
+            ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+            List<Future<TLongObjectHashMap<Road>>> futureMap = new ArrayList<>();
+
+            //Runs through each nodefile and makes a thread serialize it
+            for (File file : roadFiles) {
+                futureMap.add(executor.submit(() -> {
+                    TLongObjectHashMap<Road> localMap = new TLongObjectHashMap<>();
+                    try {
+                        ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
+                        int chunkSize = input.readInt();
+                        for (int i = 0; i < chunkSize; i++) {
+                            long roadID = input.readLong();
+                            Road road = (Road) input.readObject();
+                            localMap.put(roadID, road);
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error reading file: " + file.getName() + ", with error: " + e.getMessage());
+                    }
+                    return localMap;
+                }));
+            }
+
+            //Adds each localMap from the threads into the collected map
+            for (Future<TLongObjectHashMap<Road>> future : futureMap) {
+                id2Road.putAll(future.get());
+            }
+            executor.shutdown();
+            System.out.println("- Finished reading roads!");
+        } catch (Exception e) {
+            System.out.println("Error reading roads!: " + e.getMessage());
+        }
+
+        //Polygons
+        //Roads
+        try {
+            File folder = new File("data/StandardMap");
+            File[] polygonFiles = folder.listFiles((dir, name) -> name.startsWith("polygons_") && name.endsWith(".obj"));
+            assert polygonFiles != null;
+
+            ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+            List<Future<TLongObjectHashMap<Polygon>>> futureMap = new ArrayList<>();
+
+            //Runs through each nodefile and makes a thread serialize it
+            for (File file : polygonFiles) {
+                futureMap.add(executor.submit(() -> {
+                    TLongObjectHashMap<Polygon> localMap = new TLongObjectHashMap<>();
+                    try {
+                        ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
+                        int chunkSize = input.readInt();
+                        for (int i = 0; i < chunkSize; i++) {
+                            long polygonID = input.readLong();
+                            Polygon polygon = (Polygon) input.readObject();
+                            localMap.put(polygonID, polygon);
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error reading file: " + file.getName() + ", with error: " + e.getMessage());
+                    }
+                    return localMap;
+                }));
+            }
+
+            //Adds each localMap from the threads into the collected map
+            for (Future<TLongObjectHashMap<Polygon>> future : futureMap) {
+                id2Polygon.putAll(future.get());
+            }
+            executor.shutdown();
+            System.out.println("- Finished reading polygons!");
+        } catch (Exception e) {
+            System.out.println("Error reading polygons!: " + e.getMessage());
+        }
+        //endregion
+
+
+        //Inserts into parser
+        parser.setNodes(id2Node);
+        parser.setRoads(id2Road);
+        parser.setPolygons(id2Polygon);
+
+        //Closes input and checks for errors
+        assert parser != null && parser.getNodes() != null && parser.getRoads() != null && parser.getPolygons() != null;
+
+        //Loads polygons colors after serialization
+        for (Polygon polygon : parser.getPolygons().valueCollection()) {
+            polygon.determineColor();
         }
     }
 
+    /// Saves the parser to a .obj file so it can be called later. Method is called in {@link #Model} if the file isn't a .obj
+    public void saveParserToOBJ() {
+        //Saves parser
+        try {
+            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/parser.obj"));
+            System.out.println("Saving parser...");
+            outputStream.writeObject(parser);
+            System.out.println("Finished saving parser!");
+            System.out.println();
+            outputStream.close();
+        } catch (Exception e) {
+            throw new ParserSavingException("Error saving parser to OBJ!: " + e.getMessage());
+        }
+
+        //Saves nodes
+        try {
+            System.out.println("Saving nodes...");
+            int numberOfChunks = 8;
+            TLongObjectHashMap<Node> nodes = parser.getNodes();
+            long[] nodeIDs = nodes.keySet().toArray(); //Need this to split it into chunks
+            int amountOfNodes = nodes.size();
+            int chunkSize = (int) Math.ceil((double) amountOfNodes / numberOfChunks); //Splits all nodes into chunks
+
+            for (int i = 0; i < numberOfChunks; i++) {
+                //Determines the start and end indexes for each chunks
+                int start = i * chunkSize;
+                int end = Math.min(start + chunkSize, amountOfNodes);
+
+                ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/nodes_" + i + ".obj"));
+                outputStream.writeInt(end - start); //Amount of nodes in this chunk
+
+                //Saves all nodes that the chunk have space for
+                for (int j = start; j < end; j++) {
+                    long id = nodeIDs[j];
+                    outputStream.writeLong(id);
+                    outputStream.writeObject(nodes.get(id));
+                }
+                outputStream.close();
+                System.out.println("Saved chunk " + i + " with " + (end - start) + " amount of nodes");
+            }
+        } catch (Exception e) {
+            throw new ParserSavingException("Error saving nodes to OBJ!: " + e.getMessage());
+        }
+
+        //Saves Roads
+        /* try {
+            System.out.println("Saving roads...");
+            int numberOfChunks = 8;
+            TLongObjectHashMap<Road> roads = parser.getRoads();
+            long[] roadIDs = roads.keySet().toArray(); //Need this to split it into chunks
+            int amountOfRoads = roads.size();
+            int chunkSize = (int) Math.ceil((double) amountOfRoads / numberOfChunks); //Splits all nodes into chunks
+
+            for (int i = 0; i < numberOfChunks; i++) {
+                //Determines the start and end indexes for each chunks
+                int start = i * chunkSize;
+                int end = Math.min(start + chunkSize, amountOfRoads);
+
+                ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/roads_" + i + ".obj"));
+                outputStream.writeInt(end - start); //Amount of nodes in this chunk
+
+                //Saves all nodes that the chunk have space for
+                for (int j = start; j < end; j++) {
+                    long id = roadIDs[j];
+                    outputStream.writeLong(id);
+                    outputStream.writeObject(roads.get(id));
+                }
+                outputStream.close();
+                System.out.println("Saved chunk " + i + " with " + (end - start) + " amount of roads!");
+            }
+        } catch (Exception e) {
+            throw new ParserSavingException("Error saving roads to OBJ!: " + e.getMessage());
+        }
+
+         */
+
+
+        //Saves Polygons
+        try {
+            System.out.println("Saving polygons...");
+            int numberOfChunks = 16;
+            TLongObjectHashMap<Polygon> polygons = parser.getPolygons();
+            long[] polygonID = polygons.keySet().toArray(); //Need this to split it into chunks
+            int amountOfPolygons = polygons.size();
+            int chunkSize = (int) Math.ceil((double) amountOfPolygons / numberOfChunks); //Splits all nodes into chunks
+
+            for (int i = 0; i < numberOfChunks; i++) {
+                //Determines the start and end indexes for each chunks
+                int start = i * chunkSize;
+                int end = Math.min(start + chunkSize, amountOfPolygons);
+
+                ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/polygons_" + i + ".obj"));
+                outputStream.writeInt(end - start); //Amount of nodes in this chunk
+
+                //Saves all nodes that the chunk have space for
+                for (int j = start; j < end; j++) {
+                    long id = polygonID[j];
+                    outputStream.writeLong(id);
+                    outputStream.writeObject(polygons.get(id));
+                }
+                outputStream.close();
+                System.out.println("Saved chunk " + i + " with " + (end - start) + " amount of polygons!");
+            }
+        } catch (Exception e) {
+            throw new ParserSavingException("Error saving polygons to OBJ!: " + e.getMessage());
+        }
+        System.exit(0);
+    }
+
+    ///Creates a POI and stores it into its given Tile
+    public POI createPOI(float localX, float localY, String name) {
+        Tile tile = tilegrid.getTileFromXY(localX, localY);
+        if (tile == null) return null; //No tile within point
+        POI POI = new POI(localX, localY, name, tile);
+        tile.addPOI(POI);
+        return POI;
+    }
+
+    /**
+     * Starts a search from {@code startNode} to {@code endNode}
+     * @return A structured list of all roads in the route. Returns null if route not found
+     */
+    public List<Road> search(Node startNode, Node endNode) {
+        search.route(startNode, endNode);
+        return search.getRoute();
+    }
+
     /// Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile
-    private Tile[][] initializeTileGrid(double minX, double minY, double maxX, double maxY, int tileSize) {
+    private Tile[][] initializeTileGrid(float minX, float minY, float maxX, float maxY, int tileSize) {
         //Calculates number of tiles along each axis
         numberOfTilesX = (int) Math.ceil((maxX - minX) / tileSize);
         numberOfTilesY = (int) Math.ceil((maxY - minY) / tileSize);
@@ -135,14 +390,14 @@ public class Model {
          Tile[][] tileGrid = new Tile[numberOfTilesX][numberOfTilesY];
          for (int x = 0; x < numberOfTilesX; x++) {
              for (int y = 0; y < numberOfTilesY; y++) {
-                 double i = Math.min(minX + x * tileSize, maxX);
-                 double j = Math.min(minY + y * tileSize, maxY);
+                 float i = Math.min(minX + x * tileSize, maxX);
+                 float j = Math.min(minY + y * tileSize, maxY);
                  tileGrid[x][y] = new Tile(i, j, i + tileSize, j + tileSize, tileSize);
              }
          }
 
          //Adds Nodes
-         for (Node node : parser.getNodes().values()) {
+         for (Node node : parser.getNodes().valueCollection()) {
              int tileX = (int) ((node.getX() - minX) / tileSize);
              int tileY = (int) ((node.getY() - minY) / tileSize);
 
@@ -153,10 +408,10 @@ public class Model {
              tileGrid[tileX][tileY].addMapObject(node);
          }
 
-         //Adds Roads
-         for (Road road : parser.getRoads().values()) {
+         //region Adds Roads
+         for (Road road : parser.getRoads()) {
              //Converts start- and endXY to tile sizes
-             double[] boundingBox = road.getBoundingBox();
+             float[] boundingBox = road.getBoundingBox();
              int startTileX = (int) ((boundingBox[0] - minX) / tileSize);
              int startTileY = (int) ((boundingBox[1] - minY) / tileSize);
              int endTileX = (int) ((boundingBox[2] - minX) / tileSize);
@@ -175,11 +430,12 @@ public class Model {
                  }
              }
          }
+         //endregion
 
-         //Adds Polygons
-         for (Polygon polygon : parser.getPolygons().values()) {
+         //region Adds Polygons
+         for (Polygon polygon : parser.getPolygons().valueCollection()) {
              //Converts start- and endXY to tile sizes
-             double[] boundingBox = polygon.getBoundingBox();
+             float[] boundingBox = polygon.getBoundingBox();
              int startTileX = (int) ((boundingBox[0] - minX) / tileSize);
              int startTileY = (int) ((boundingBox[1] - minY) / tileSize);
              int endTileX = (int) ((boundingBox[2] - minX) / tileSize);
@@ -198,6 +454,7 @@ public class Model {
                  }
              }
          }
+         //endregion
 
          //Initializes all tile grids draw methods
          for (int x = 0; x < numberOfTilesX; x++) {
@@ -208,18 +465,18 @@ public class Model {
          return tileGrid;
     }
 
-    /// @return the minimum x and y coordinate and the maximum. Used for splitting that box into tiles in {@link #initializeTileGrid(double, double, double, double, int)}
-    private double[] getMinMaxCoords() {
-        double[] minMaxCoords = new double[4];
-        double minX = Double.POSITIVE_INFINITY;
-        double minY = Double.POSITIVE_INFINITY;
-        double maxX = Double.NEGATIVE_INFINITY;
-        double maxY = Double.NEGATIVE_INFINITY;
+    /// @return the minimum x and y coordinate and the maximum. Used for splitting that box into tiles}
+    private float[] getMinMaxCoords() {
+        float[] minMaxCoords = new float[4];
+        float minX = Float.POSITIVE_INFINITY;
+        float minY = Float.POSITIVE_INFINITY;
+        float maxX = Float.NEGATIVE_INFINITY;
+        float maxY = Float.NEGATIVE_INFINITY;
 
         //Loops through each node and gets the minimum and maximum node
-        for (Node node : parser.getNodes().values()) {
-            double nodeX = node.getX();
-            double nodeY = node.getY();
+        for (Node node : parser.getNodes().valueCollection()) {
+            float nodeX = node.getX();
+            float nodeY = node.getY();
 
             //X
             if (nodeX < minX ) {
@@ -235,6 +492,7 @@ public class Model {
                 maxY = nodeY;
             }
         }
+        assert minX != Double.POSITIVE_INFINITY && minY != Double.POSITIVE_INFINITY && maxX != Double.NEGATIVE_INFINITY && maxY != Double.NEGATIVE_INFINITY;
         minMaxCoords[0] = minX;
         minMaxCoords[1] = minY;
         minMaxCoords[2] = maxX;
@@ -282,6 +540,8 @@ public class Model {
     //region Getters and setters
     public Parser   getParser()   { return parser;   }
     public Tilegrid getTilegrid() { return tilegrid; }
+    public List<Road> getLatestRoute() { return latestRoute; }
+    public void setLatestRoute(List<Road> route) { latestRoute = route; }
     public TrieST<String> getTrieCity() {
         return trieCity;
     }

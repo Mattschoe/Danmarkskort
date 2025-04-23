@@ -1,38 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckMenuItem?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.danmarkskort.MVC.Controller">
-    <Canvas fx:id="canvas" height="400.0" onMouseClicked="#onCanvasClick" onMouseDragged="#onCanvasDragged" onMousePressed="#onCanvasPressed" onScroll="#onCanvasScroll" width="600.0" />
-    <MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-        <Menu mnemonicParsing="false" text="File">
-            <MenuItem mnemonicParsing="false" text="Close" />
-        </Menu>
-        <Menu mnemonicParsing="false" text="Edit">
-            <MenuItem mnemonicParsing="false" text="Delete" />
-        </Menu>
-        <Menu mnemonicParsing="false" text="Help">
-            <MenuItem mnemonicParsing="false" text="About" />
-        </Menu>
-    </MenuBar>
-    <MenuButton layoutX="527.0" layoutY="35.0" mnemonicParsing="false" text="Filtre" AnchorPane.rightAnchor="15.0">
+    <Canvas fx:id="canvas" height="400.0" layoutY="-10.0" onMouseClicked="#onCanvasClick" onMouseDragged="#onCanvasDragged" onMousePressed="#onCanvasPressed" onScroll="#onCanvasScroll" width="600.0" />
+    <MenuButton layoutX="527.0" layoutY="35.0" mnemonicParsing="false" text="Filter" AnchorPane.rightAnchor="15.0">
       <items>
-          <MenuItem mnemonicParsing="false" text="Action 1" />
-          <MenuItem mnemonicParsing="false" text="Action 2" />
+          <Menu text="Color Scheme">
+              <items>
+                  <MenuItem mnemonicParsing="false" onAction="#paletteDefault" text="Default" />
+                  <MenuItem mnemonicParsing="false" onAction="#paletteMidnight" text="Midnight"/>
+                  <MenuItem mnemonicParsing="false" onAction="#paletteBasic" text="Basic"/>
+              </items>
+          </Menu>
+          <Menu text="Filter road">
+              <items>
+                  <MenuItem mnemonicParsing="false" text="Walkable" />
+                  <MenuItem mnemonicParsing="false" text="Highways" />
+              </items>
+          </Menu>
       </items>
     </MenuButton>
+   <Text fx:id="zoomText" layoutX="484.0" layoutY="363.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Zoom-factor: 1" AnchorPane.bottomAnchor="36.0" AnchorPane.rightAnchor="42.0">
+      <font>
+         <Font size="11.0" />
+      </font></Text>
 
-    <Slider fx:id="zoomBar" layoutX="445.0" layoutY="348.0" max="140000.0" min="2000.0" value="21695.0" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="15.0" />
-
-    <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onKeyTyped="#searchBarTyped" promptText="Søg efter adresse..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
+    <Slider fx:id="zoomBar" layoutX="445.0" layoutY="348.0" minorTickCount="5" mouseTransparent="true" showTickMarks="true" value="1.0" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="15.0" />
 
     <ListView fx:id="listView" layoutX="15.0" layoutY="61.0" prefHeight="72.0" prefWidth="150.0" visible="false" />
+
+    <Text fx:id="fpsText" layoutX="497.00000000000006" layoutY="52.14921875" strokeType="OUTSIDE" strokeWidth="0.0" text="FPS" AnchorPane.rightAnchor="84.044921875" AnchorPane.topAnchor="39.2" />
+
+    <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onKeyPressed="#onActivateSearch" onKeyTyped="#searchBarTyped" promptText="Search..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
+   <TextField fx:id="destination" layoutX="15.0" layoutY="71.0" onKeyTyped="#searchBarTyped" promptText="Choose Destination..." visible="false" />
+    <MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <Menu mnemonicParsing="false" text="File">
+            <MenuItem mnemonicParsing="false" onAction="#standardInputButton" text="Load Standart" />
+            <MenuItem mnemonicParsing="false" onAction="#exportAsPDF" text="Export as PDF" />
+        </Menu>
+        <Menu mnemonicParsing="false" text="Edit">
+            <MenuItem fx:id="POImenu" mnemonicParsing="false" onAction="#POIMenu" text="Points of interest" />
+        </Menu>
+        <Menu mnemonicParsing="false" text="Help">
+            <CheckMenuItem fx:id="guideButton" mnemonicParsing="false" onAction="#guideTextButton" text="Guide" />
+        </Menu>
+        <Menu mnemonicParsing="false" text="Show">
+            <CheckMenuItem fx:id="fpsButton" mnemonicParsing="false" text="FPS"/>
+        </Menu>
+    </MenuBar>
+   <Button fx:id="findRoute" layoutX="172.0" layoutY="35.0" mnemonicParsing="false" onMouseClicked="#onRouteSearchStart" text="Find Route" visible="false" />
+   <Button fx:id="switchSearch" layoutX="172.0" layoutY="71.0" mnemonicParsing="false" onMouseClicked="#switchDestinationAndStart" text="Switch" visible="false" />
+   <TextArea fx:id="guideText" editable="false" layoutY="25.0" prefHeight="376.0" prefWidth="600.0" text="To load the standard map of Denmark, choose the option in the File tab.&#10;&#10;To print instructions as a PDF, select the option under the File tab.&#10;&#10;To choose points of interest, search via the search bar or select them on the map.&#10;&#10;To access and edit points of interest, use the Edit tab.&#10;&#10;To show the FPS counter, toggle it on via the Show tab.&#10;&#10;To change the color scheme, choose one of the options in the Filter tab.&#10;&#10;To close the guide, toggle it off in the Help menu." visible="false" />
 </AnchorPane>

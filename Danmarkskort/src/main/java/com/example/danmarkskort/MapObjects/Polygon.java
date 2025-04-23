@@ -1,5 +1,6 @@
 package com.example.danmarkskort.MapObjects;
 
+import com.example.danmarkskort.ColorSheet;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
@@ -7,17 +8,21 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
+import static com.example.danmarkskort.ColorSheet.*;
+
 public class Polygon implements Serializable, MapObject{
     @Serial private static final long serialVersionUID = 1444149606229887777L;
 
     //region Fields
     private final List<Node> nodes;
-    private double[] xPoints;
-    private double[] yPoints;
+    private float[] xPoints;
+    private float[] yPoints;
     private int nodesSize;
     private String type; //The type of polygon, fx: "Building", "Coastline", etc.
-    private Color color;
-    private double[] boundingBox;
+    private String palette;
+    private ColorSheet cs;
+    private transient Color color;
+    private float[] boundingBox;
     //endregion
 
     //region Constructor(s)
@@ -28,9 +33,10 @@ public class Polygon implements Serializable, MapObject{
         assert nodes.size() != 1;
         this.nodes = nodes;
         this.type = type;
+        this.palette = "default";
+        determineColor();
 
         createArrays();
-        determineColor();
         calculateBoundingBox();
     }
     //endregion
@@ -40,8 +46,8 @@ public class Polygon implements Serializable, MapObject{
     private void createArrays() {
         nodesSize = nodes.size();
 
-        xPoints = new double[nodesSize];
-        yPoints = new double[nodesSize];
+        xPoints = new float[nodesSize];
+        yPoints = new float[nodesSize];
 
         for (int i = 0; i < nodesSize; i++) {
             xPoints[i] = nodes.get(i).getX();
@@ -53,17 +59,248 @@ public class Polygon implements Serializable, MapObject{
     @Override public void draw(GraphicsContext gc) { draw(gc, false); }
 
     public void draw(GraphicsContext gc, boolean drawLines) {
+        //Converts our array into temporary double arrays to preserve space
+        double[] tempXPoints = new double[nodesSize];
+        double[] tempYPoints = new double[nodesSize];
+
+        for (int i = 0; i < nodesSize; i++) {
+            tempXPoints[i] = xPoints[i];
+            tempYPoints[i] = yPoints[i];
+        }
+
         if (drawLines) {
             gc.setStroke(color.darker().darker());
-            gc.strokePolygon(xPoints, yPoints, nodesSize);
+            gc.strokePolygon(tempXPoints, tempYPoints, nodesSize);
         }
 
         gc.setFill(color);
-        gc.fillPolygon(xPoints, yPoints, nodesSize);
+        gc.fillPolygon(tempXPoints, tempYPoints, nodesSize);
+
+        //TODO %% FARVER KANTEN RUNDT OM COAST-POLYGONER PÅ SAMME MÅDE SOM COAST-ROAD; might be labour intensive??
+        if (type.equals("coastline")) {
+            gc.setStroke(Color.BLACK);
+            gc.setLineWidth(1.5/Math.sqrt(gc.getTransform().determinant()));
+            gc.strokePolygon(tempXPoints, tempYPoints, nodesSize);
+            gc.setLineWidth(1/Math.sqrt(gc.getTransform().determinant()));
+        }
+    }
+    
+    public void assertColorSheetProp() {
+        cs = switch(type) {
+            //region landuse: developed-land
+            case "commercial"    -> POLY_COMMERCIAL;
+            case "construction"  -> POLY_CONSTRUCTION;
+            case "education"     -> POLY_EDUCATION;
+            case "fairground"    -> POLY_FAIRGROUND;
+            case "industrial"    -> POLY_INDUSTRIAL;
+            case "residential"   -> POLY_RESIDENTIAL;
+            case "retail"        -> POLY_RETAIL;
+            case "institutional" -> POLY_INSTITUTIONAL;
+            //endregion
+            //region landuse: rural-and-agricultural
+            case "aquaculture"    -> POLY_AQUACULTURE;
+            case "allotments"     -> POLY_ALLOTMENTS;
+            case "farmland"       -> POLY_FARMLAND;
+            case "farmyard"       -> POLY_FARMYARD;
+            case "paddy"          -> POLY_PADDY;
+            case "animal_keeping" -> POLY_ANIMAL_KEEPING;
+            case "flower_bed"     -> POLY_FLOWER_BED;
+            case "forest"         -> POLY_FOREST;
+            case "logging"        -> POLY_LOGGING;
+            case "greenhouse_horticulture" -> POLY_GREENHOUSE_HORTICULTURE;
+            case "meadow"         -> POLY_MEADOW;
+            case "orchard"        -> POLY_ORCHARD;
+            case "plant_nursery"  -> POLY_PLANT_NURSERY;
+            case "vineyard"       -> POLY_VINEYARD;
+            //endregion
+            //region landuse: water
+            case "basin"     -> POLY_BASIN;
+            case "salt_pond" -> POLY_SALT_POND;
+            //endregion
+            //region landuse: other
+            case "brownfield"        -> POLY_BROWNFIELD;
+            case "cemetery"          -> POLY_CEMETERY;
+            case "depot"             -> POLY_DEPOT;
+            case "garages"           -> POLY_GARAGES;
+            case "grass"             -> POLY_GRASS;
+            case "greenfield"        -> POLY_GREENFIELD;
+            case "landfill"          -> POLY_LANDFILL;
+            case "military"          -> POLY_MILITARY;
+            case "port"              -> POLY_PORT;
+            case "quarry"            -> POLY_QUARRY;
+            case "railway"           -> POLY_RAILWAY;
+            case "recreation_ground" -> POLY_RECREATION_GROUND;
+            case "religious"         -> POLY_RELIGIOUS;
+            case "village_green"     -> POLY_VILLAGE_GREEN;
+            case "greenery"          -> POLY_GREENERY;
+            case "winter_sports"     -> POLY_WINTER_SPORTS;
+            //endregion
+
+            //region natural: vegetation
+            case "grassland"  -> POLY_GRASSLAND;
+            case "heath"      -> POLY_HEATH;
+            case "scrub"      -> POLY_SCRUB;
+            case "tree"       -> POLY_TREE;
+            case "tree_row"   -> POLY_TREE_ROW;
+            case "tree_stump" -> POLY_TREE_STUMP;
+            case "tundra"     -> POLY_TUNDRA;
+            case "wood"       -> POLY_WOOD;
+            //endregion
+            //region natural: water
+            case "bay"        -> POLY_BAY;
+            case "beach"      -> POLY_BEACH;
+            case "blowhole"   -> POLY_BLOWHOLE;
+            case "cape"       -> POLY_CAPE;
+            case "crevasse"   -> POLY_CREVASSE;
+            case "geyser"     -> POLY_GEYSER;
+            case "glacier"    -> POLY_GLACIER;
+            case "hot_spring" -> POLY_HOT_SPRING;
+            case "isthmus"    -> POLY_ISTHMUS;
+            case "mud"        -> POLY_MUD;
+            case "peninsula"  -> POLY_PENINSULA;
+            case "reef"       -> POLY_REEF;
+            case "shingle"    -> POLY_SHINGLE;
+            case "shoal"      -> POLY_SHOAL;
+            case "spring"     -> POLY_SPRING;
+            case "strait"     -> POLY_STRAIT;
+            case "water"      -> POLY_WATER;
+            case "wetland"    -> POLY_WETLAND;
+            //endregion
+            //region natural: geology
+            case "arete"         -> POLY_ARETE;
+            case "bare_rock"     -> POLY_BARE_ROCK;
+            case "cave_entrance" -> POLY_CAVE_ENTRANCE;
+            case "cliff"         -> POLY_CLIFF;
+            case "earth_bank"    -> POLY_EARTH_BANK;
+            case "fumarole"      -> POLY_FUMAROLE;
+            case "gully"         -> POLY_GULLY;
+            case "peak"          -> POLY_PEAK;
+            case "ridge"         -> POLY_RIDGE;
+            case "saddle"        -> POLY_SADDLE;
+            case "sand"          -> POLY_SAND;
+            case "scree"         -> POLY_SCREE;
+            case "volcano"       -> POLY_VOLCANO;
+            //endregion
+
+            //region leisure
+            case "adult_gaming_centre" -> POLY_ADULT_GAMING_CENTRE;
+            case "amusement_arcade"    -> POLY_AMUSEMENT_ARCADE;
+            case "bandstand"           -> POLY_BANDSTAND;
+            case "bathing_place"       -> POLY_BATHING_PLACE;
+            case "beach_resort"        -> POLY_BEACH_RESORT;
+            case "bird_hide"           -> POLY_BIRD_HIDE;
+            case "bleachers"           -> POLY_BLEACHERS;
+            case "bowling_alley"       -> POLY_BOWLING_ALLEY;
+            case "common"              -> POLY_COMMON;
+            case "dance"               -> POLY_DANCE;
+            case "disc_golf_course"    -> POLY_DISC_GOLF_COURSE;
+            case "dog_park"            -> POLY_DOG_PARK;
+            case "escape_game"         -> POLY_ESCAPE_GAME;
+            case "firepit"             -> POLY_FIREPIT;
+            case "fishing"             -> POLY_FISHING;
+            case "fitness_centre"      -> POLY_FITNESS_CENTRE;
+            case "fitness_station"     -> POLY_FITNESS_STATION;
+            case "garden"              -> POLY_GARDEN;
+            case "golf_course"         -> POLY_GOLF_COURSE;
+            case "hackerspace"         -> POLY_HACKERSPACE;
+            case "horse_riding"        -> POLY_HORSE_RIDING;
+            case "ice_rink"            -> POLY_ICE_RINK;
+            case "marina"              -> POLY_MARINA;
+            case "miniature_golf"      -> POLY_MINIATURE_GOLF;
+            case "nature_reserve"      -> POLY_NATURE_RESERVE;
+            case "outdoor_seating"     -> POLY_OUTDOOR_SEATING;
+            case "park"                -> POLY_PARK;
+            case "picnic_table"        -> POLY_PICNIC_TABLE;
+            case "pitch"               -> POLY_PITCH;
+            case "playground"          -> POLY_PLAYGROUND;
+            case "resort"              -> POLY_RESORT;
+            case "sauna"               -> POLY_SAUNA;
+            case "slipway"             -> POLY_SLIPWAY;
+            case "sports_centre"       -> POLY_SPORTS_CENTRE;
+            case "sports_hall"         -> POLY_SPORTS_HALL;
+            case "stadium"             -> POLY_STADIUM;
+            case "summer_camp"         -> POLY_SUMMER_CAMP;
+            case "swimming_area"       -> POLY_SWIMMING_AREA;
+            case "swimming_pool"       -> POLY_SWIMMING_POOL;
+            case "tanning_salon"       -> POLY_TANNING_SALON;
+            case "track"               -> POLY_TRACK;
+            case "trampoline_park"     -> POLY_TRAMPOLINE_PARK;
+            case "water_park"          -> POLY_WATER_PARK;
+            case "wildlife_hide"       -> POLY_WILDLIFE_HIDE;
+            //endregion
+
+            //region man_made
+            case "breakwater"       -> POLY_BREAKWATER;
+            case "bridge"           -> POLY_BRIDGE;
+            case "groyne"           -> POLY_GROYNE;
+            case "pier"             -> POLY_PIER;
+            case "wastewater_plant" -> POLY_WASTEWATER_PLANT;
+            case "waterworks"       -> POLY_WATERWORKS;
+            //endregion
+
+            //region aeroway
+            case "aerodrome" -> POLY_AERODROME;
+            case "apron"     -> POLY_APRON;
+            case "runway"    -> POLY_RUNWAY;
+            case "terminal"  -> POLY_TERMINAL;
+            //endregion
+
+            //region place
+            case "island" -> POLY_ISLAND;
+            case "isolated_dwelling" -> POLY_ISOLATED_DWELLING;
+            //endregion
+
+            //region other
+            case "amenity"        -> POLY_AMENITY;
+            case "area:highway"   -> POLY_AREAHIGHWAY;
+            case "attraction"     -> POLY_ATTRACTION;
+            case "barrier"        -> POLY_BARRIER;
+            case "boundary"       -> POLY_BOUNDARY;
+            case "bridge:support" -> POLY_BRIDGESUPPORT;
+            case "building"       -> POLY_BUILDING;
+            case "cairn"          -> POLY_CAIRN;
+            case "coastline"      -> POLY_COASTLINE;
+            case "embankment"     -> POLY_EMBANKMENT;
+            case "ferry"          -> POLY_FERRY;
+            case "highway"        -> POLY_HIGHWAY;
+            case "historic"       -> POLY_HISTORIC;
+            case "indoor"         -> POLY_INDOOR;
+            case "mast"           -> POLY_MAST;
+            case "power"          -> POLY_POWER;
+            case "rock"           -> POLY_ROCK;
+            case "silo"           -> POLY_SILO;
+            case "stage"          -> POLY_STAGE;
+            case "stone"          -> POLY_STONE;
+            case "storage_tank"   -> POLY_STORAGE_TANK;
+            case "surface"        -> POLY_SURFACE;
+            case "square"         -> POLY_SQUARE;
+            case "tourism"        -> POLY_TOURISM;
+            case "waterway"       -> POLY_WATERWAY;
+            //endregion
+
+            //region patches
+            case "Cityringen" -> POLY_CITYRINGEN;
+            case "shrubbery"  -> POLY_SHRUBBERY;
+            case "fence_type" -> POLY_FENCE_TYPE;
+            case "flowerbed"  -> POLY_FLOWERBED;
+            case "route"      -> POLY_ROUTE;
+            case "sport"      -> POLY_SPORT;
+            case "yes"        -> POLY_YES;
+            case "paved"      -> POLY_PAVED;
+            case "forestØsterled" -> POLY_forestOesterled;
+            case "scrubStrandvejenStrandvejen" -> POLY_scrubStrandvejenStrandvejen;
+            //endregion
+            default -> POLY_DEFAULT;
+        };
+    }
+
+    public void determineColor() {
+        assertColorSheetProp();
+        color = cs.handlePalette(palette);
     }
 
     /// Enormous switch-statement determines the Polygon's color based off its 'type'-field
-    private void determineColor() {
+    @Deprecated public void determineColorDeprecated() {
         color = switch(type) {
             //region landuse: developed-land
             case "commercial"    -> Color.rgb(242, 217, 216);
@@ -88,7 +325,7 @@ public class Polygon implements Serializable, MapObject{
             case "greenhouse_horticulture" -> Color.rgb(238, 240, 213);
             case "meadow"         -> Color.rgb(205, 235, 176);
             case "orchard"        -> Color.rgb(172, 224, 161);
-            case "plant_nursery"  -> Color.rgb(174, 223, 163);
+            case "plant_nursery"  -> Color.rgb(172, 224, 161);
             case "vineyard"       -> Color.rgb(172, 224, 161);
             //endregion
             //region landuse: water
@@ -191,10 +428,10 @@ public class Polygon implements Serializable, MapObject{
             case "picnic_table"        -> Color.rgb(115, 74, 8);
             case "pitch"               -> Color.rgb(136, 224, 190);
             case "playground"          -> Color.rgb(14, 133, 23);
-            case "resort"              -> Color.RED;
+            case "resort"              -> Color.rgb(140, 220, 255, 0.3);
             case "sauna"               -> Color.rgb(14, 133, 23);
             case "slipway"             -> Color.rgb(0, 146, 128);
-            case "sports_centre"       -> Color.rgb(161, 219, 166, 0.3);
+            case "sports_centre"       -> Color.rgb(223, 252, 226);
             case "sports_hall"         -> Color.RED;
             case "stadium"             -> Color.rgb(161, 219, 166, 0.3);
             case "summer_camp"         -> Color.RED;
@@ -207,47 +444,86 @@ public class Polygon implements Serializable, MapObject{
             case "wildlife_hide"       -> Color.RED;
             //endregion
 
-            //region other values
-            case "amenity"   -> Color.rgb(254, 254, 229);
-            case "building"  -> Color.rgb(217, 208, 201);
-            case "coastline" -> Color.PERU;
-            case "surface"   -> Color.DARKGREY;
-            case "island"    -> Color.rgb(242, 239, 233);
+            //region man_made
+            case "breakwater"       -> Color.rgb(184, 184, 184);
+            case "bridge"           -> Color.rgb(184, 184, 184);
+            case "groyne"           -> Color.rgb(153, 153, 153);
+            case "pier"             -> Color.rgb(243, 239, 233);
+            case "wastewater_plant" -> Color.rgb(235, 219, 233);
+            case "waterworks"       -> Color.rgb(235, 219, 233);
             //endregion
 
-            //region patches...
+            //region aeroway
+            case "aerodrome" -> Color.rgb(233, 231, 226);
+            case "apron"     -> Color.rgb(218, 218, 224);
+            case "runway"    -> Color.rgb(187, 187, 204);
+            case "terminal"  -> Color.rgb(196, 182, 171);
+            //endregion
+
+            //region place
+            case "island" -> Color.rgb(242, 239, 233);
+            case "isolated_dwelling" -> Color.rgb(242, 239, 233);
+            //endregion
+
+            //region other
+            case "amenity"        -> Color.rgb(196, 182, 171);
+            case "area:highway"   -> Color.rgb(50, 50, 50, 0.3);
+            case "attraction"     -> Color.rgb(239, 213, 179, 0.3);
+            case "barrier"        -> Color.rgb(111, 111, 111, 0.3);
+            case "boundary"       -> Color.TRANSPARENT; /*Color.rgb(207, 155, 203, 0.3);*/
+            case "bridge:support" -> Color.rgb(111, 111, 111, 0.3);
+            case "building"       -> Color.rgb(217, 208, 201);
+            case "cairn"          -> Color.TAN;
+            case "coastline"      -> Color.rgb(242, 239, 233);
+            case "embankment"     -> Color.rgb(91, 127, 0, 0.3);
+            case "ferry"          -> Color.rgb(125, 138, 245, 0.3);
+            case "highway"        -> Color.rgb(50, 50, 50, 0.3);
+            case "historic"       -> Color.rgb(115, 74, 8, 0.3);
+            case "indoor"         -> Color.rgb(158, 148, 140);
+            case "mast"           -> Color.WHITE;
+            case "power"          -> Color.rgb(227, 204, 223);
+            case "rock"           -> Color.GREY;
+            case "silo"           -> Color.STEELBLUE;
+            case "stage"          -> Color.STEELBLUE;
+            case "stone"          -> Color.DARKGREY;
+            case "storage_tank"   -> Color.STEELBLUE;
+            case "surface"        -> Color.DARKGREY;
+            case "square"         -> Color.STEELBLUE;
+            case "tourism"        -> Color.rgb(222, 246, 192);
+            case "waterway"       -> Color.TRANSPARENT;
+            //endregion
+
+            //region patches
             case "Cityringen" -> Color.TRANSPARENT;
-            case "shrubbery"  -> Color.RED;
+            case "shrubbery"  -> Color.rgb(199, 199, 180);
+            case "fence_type" -> Color.rgb(158, 148, 140, 0.3);
             case "flowerbed"  -> Color.RED;
             case "route"      -> Color.RED;
             case "sport"      -> Color.RED;
-            case "yes"        -> Color.RED;
+            case "yes"        -> Color.TRANSPARENT;
             case "paved"      -> Color.RED;
             case "forestØsterled" -> Color.RED;
-            case "stage"      -> Color.RED;
-            case "rock"       -> Color.RED;
             case "scrubStrandvejenStrandvejen" -> Color.RED;
-            case "stone"      -> Color.RED;
             //endregion
             default -> Color.rgb(0, 74, 127, 0.1);
         };
     }
 
     private void calculateBoundingBox() {
-        boundingBox = new double[4];
-        boundingBox[0] = Double.POSITIVE_INFINITY; //minX
-        boundingBox[1] = Double.POSITIVE_INFINITY; //minY
-        boundingBox[2] = Double.NEGATIVE_INFINITY; //maxX
-        boundingBox[3]= Double.NEGATIVE_INFINITY; //maxY
+        boundingBox = new float[4];
+        boundingBox[0] = Float.POSITIVE_INFINITY; //minX
+        boundingBox[1] = Float.POSITIVE_INFINITY; //minY
+        boundingBox[2] = Float.NEGATIVE_INFINITY; //maxX
+        boundingBox[3] = Float.NEGATIVE_INFINITY; //maxY
 
         //Finds the lowest and highest X
-        for (double x : xPoints) {
+        for (float x : xPoints) {
             if (x < boundingBox[0]) boundingBox[0] = x;
             if (x > boundingBox[2]) boundingBox[2] = x;
         }
 
         //Finds the lowest and highest Y
-        for (double y : yPoints) {
+        for (float y : yPoints) {
             if (y < boundingBox[1]) boundingBox[1] = y;
             if (y > boundingBox[3]) boundingBox[3] = y;
         }
@@ -255,16 +531,18 @@ public class Polygon implements Serializable, MapObject{
     //endregion
 
     //region Getters and setters
-    public List<Node> getNodes()           { return nodes;           }
-    public String     getType()            { return type;            }
-    public boolean    hasType()            { return !type.isEmpty(); }
+    public String getType() { return type;            }
+    public boolean hasType() { return !type.isEmpty(); }
+    @Override public float[] getBoundingBox() { return boundingBox; }
 
     public void setType(String type) {
         this.type = type;
         determineColor();
     }
 
-    @Override
-    public double[] getBoundingBox() { return boundingBox; }
+    public void setPalette(String palette) {
+        this.palette = palette;
+        determineColor();
+    }
     //endregion
 }

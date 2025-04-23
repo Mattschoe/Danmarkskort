@@ -3,22 +3,25 @@ package com.example.danmarkskort.MapObjects;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.*;
 
-public class Tile implements MapObject{
+public class Tile implements MapObject, Serializable {
     List<MapObject> objectsInTile;
-    double[] bounds;
+    ///\[0] = minX <br> \[1] = minY <br> \[2] = maxX <br> \[3] = maxY <br>
+    float[] bounds;
     int tileSize;
     Set<MapObject> predefinedRelations, motorway, trunk, primary, secondary, tertiary, unclassified, residential, defaultRoad, buildings, area, coastline;
+    Set<Node> nodes;
+    Set<Road> roads;
+    Set<POI> POIs;
 
     //region Constructor(s)
-    public Tile(double minX, double minY, double maxX, double maxY, int tileSize) {
+    public Tile(float minX, float minY, float maxX, float maxY, int tileSize) {
         objectsInTile = new ArrayList<>();
         this.tileSize = tileSize;
-        bounds = new double[4];
+        bounds = new float[4];
         bounds[0] = minX;
         bounds[1] = minY;
         bounds[2] = maxX;
@@ -37,6 +40,9 @@ public class Tile implements MapObject{
         buildings = new HashSet<>();
         area = new HashSet<>();
         coastline = new HashSet<>();
+        nodes = new HashSet<>();
+        POIs = new HashSet<>();
+        roads = new HashSet<>();
         //endregion
     }
     //endregion
@@ -46,16 +52,11 @@ public class Tile implements MapObject{
         objectsInTile.add(object);
     }
 
+    public void addPOI(POI POI) { POIs.add(POI); }
+
     @Override
     public void draw(GraphicsContext graphicsContext) {
-        //Tegner tilet
-        //graphicsContext.setStroke(Color.DARKORANGE);
-        //graphicsContext.strokeRect(bounds[0],bounds[1], tileSize, tileSize);
-
-        //Tegner objekterne i tilet
-        for (MapObject mapObject : objectsInTile) {
-            mapObject.draw(graphicsContext);
-        }
+        draw(graphicsContext, 4);
     }
 
     /**
@@ -83,6 +84,7 @@ public class Tile implements MapObject{
                     if (levelOfDetail > 3) {
                         drawArea(graphicsContext);
                         drawBuildings(graphicsContext);
+                        drawPOIs(graphicsContext);
                         draw(graphicsContext, levelOfDetail - 1);
                     }
                 }
@@ -161,6 +163,18 @@ public class Tile implements MapObject{
             mapObject.draw(graphicsContext);
         }
     }
+
+    private void drawNodes(GraphicsContext graphicsContext) {
+        for (MapObject mapObject : nodes) {
+            mapObject.draw(graphicsContext);
+        }
+    }
+
+    private void drawPOIs(GraphicsContext graphicsContext) {
+        for (POI POI : POIs) {
+            POI.draw(graphicsContext);
+        }
+    }
     //endregion
 
 
@@ -171,6 +185,7 @@ public class Tile implements MapObject{
         for (MapObject mapObject : objectsInTile) {
             if (mapObject instanceof Road road) {
                 String roadType = road.getType();
+                roads.add(road);
                 switch (roadType) {
                     case "motorway" -> motorway.add(mapObject);
                     case "trunk" -> trunk.add(mapObject);
@@ -188,15 +203,30 @@ public class Tile implements MapObject{
                     case "building" -> buildings.add(mapObject);
                     default -> area.add(mapObject);
                 }
+            } else if (mapObject instanceof Node node) {
+                nodes.add(node);
             }
         }
+    }
+
+    ///Returns whether a given point is within this tile
+    public boolean contains(float x, float y) {
+        return x >= bounds[0] && x <= bounds[2] && y >= bounds[1] && y <= bounds[3];
     }
     //endregion
 
     //region Getters and setters
     public List<MapObject> getObjectsInTile() { return objectsInTile; }
-
+    public Set<Node> getNodesInTile() { return nodes; }
+    public Set<MapObject> getMotorway() { return motorway; }
+    public Set<MapObject> getTrunk() { return trunk; }
+    public Set<MapObject> getCoastline() { return coastline; }
+    public Set<Road> getRoads() { return roads; }
     @Override
-    public double[] getBoundingBox() { return bounds; }
+    public float[] getBoundingBox() { return bounds; }
+    public boolean isEmpty() { return objectsInTile.isEmpty(); }
+    public void setMotorway(Set<MapObject> motorway) { this.motorway = motorway; }
+    public void setTrunk(Set<MapObject> trunk) { this.trunk = trunk; }
+    public void setCoastline(Set<MapObject> coastline) { this.coastline = coastline; }
     //endregion
 }

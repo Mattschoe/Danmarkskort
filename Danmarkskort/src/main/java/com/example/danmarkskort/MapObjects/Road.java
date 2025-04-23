@@ -1,107 +1,145 @@
 package com.example.danmarkskort.MapObjects;
 
-import javafx.scene.canvas.Canvas;
+import com.example.danmarkskort.ColorSheet;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
+import static com.example.danmarkskort.ColorSheet.*;
+
+/**
+ * A Road is a way that doesn't contain the same start and endNode. A Road is marked if it's drivable.
+ * Formally a Road consists of a list of Nodes that represent this Roads place in XY space.
+ * A Road is also used as an edge in a graph, where the list of nodes are condensed into a start- and endNode
+ */
 public class Road implements Serializable, MapObject {
     @Serial private static final long serialVersionUID = 2430026592275563830L;
 
     //region Fields
     private final List<Node> nodes;
-    private final Set<Line> lines;
     private final boolean foot;
     private final boolean bicycle;
+    private boolean isDrivable;
     private int maxSpeed;
     private String roadType;
-    private double[] boundingBox;
+    private String roadName;
+    private float[] boundingBox;
+
+    private ColorSheet cs;
+    private String palette;
+    private transient Color color;
+    private float lineWidth;
+    private float weight;
+    private boolean partOfRoute;
     //endregion
 
     //region Constructor(s)
-    /**
-     * ROAD WITH MAXSPEED. A {@link Road} is a collection of {@link Node}'s without the same start and end node.
-     * @param nodes the collection of nodes
-     * @param foot if the road is walkable or not Should be true by default
-     * @param bicycle if road the is rideable on bike. Should be true by default
-     * @param maxSpeed the max speed on the road
-     * @param roadType the type of road
+    /** ROAD WITH MAXSPEED. A {@link Road} is a collection of {@link Node}'s without the same start and end node.
+     *  @param nodes the collection of nodes
+     *  @param foot if the road is walkable or not Should be true by default
+     *  @param bicycle if road the is rideable on bike. Should be true by default
+     *  @param maxSpeed the max speed on the road
+     *  @param roadType the type of road
      */
-    public Road(List<Node> nodes, boolean foot, boolean bicycle, int maxSpeed, String roadType) {
+    public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDrivable, int maxSpeed, String roadType, String roadName) {
         this.nodes = nodes;
-        lines = new HashSet<>();
         this.foot = foot;
         this.bicycle = bicycle;
+        this.isDrivable = isDrivable;
         this.maxSpeed = maxSpeed;
         this.roadType = roadType;
-        createLines();
+        this.roadName = roadName;
+
+        calculateWeight();
         calculateBoundingBox();
+
+        assignColorSheetProp();
+        this.palette = "default";
+        determineVisuals();
     }
 
-    /**
-     * ROAD WITHOUT MAXSPEED. A {@link Road} is a collection of {@link Node}'s without the same start and end node.
-     * @param nodes the collection of nodes
-     * @param foot if the road is walkable or not Should be true by default
-     * @param bicycle if road the is rideable on bike. Should be true by default
-     * @param roadType the type of road
+    /** ROAD WITHOUT MAXSPEED. A {@link Road} is a collection of {@link Node}'s without the same start and end node.
+     *  @param nodes the collection of nodes
+     *  @param foot if the road is walkable or not Should be true by default
+     *  @param bicycle if road the is rideable on bike. Should be true by default
+     *  @param roadType the type of road
      */
-    public Road(List<Node> nodes, boolean foot, boolean bicycle, String roadType) {
+    public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDrivable, String roadType, String roadName) {
         this.nodes = nodes;
-        lines = new HashSet<>();
         this.foot = foot;
         this.bicycle = bicycle;
+        this.isDrivable = isDrivable;
         this.roadType = roadType;
-        createLines();
+        this.roadName = roadName;
+
+        calculateWeight();
         calculateBoundingBox();
+
+        assignColorSheetProp();
+        this.palette = "default";
+        determineVisuals();
     }
     //endregion
 
     //region Methods
-    /// Creates the lines between the {@link Node}'s (Used later for drawing)
-    private void createLines() {
-        //Tegner en linje fra den første node til den sidste i rækkefølge. (No?) Slutter af med at lave en linje mellem den sidste og første
-        Node currentNode = nodes.getFirst();
-        for (int i = 1; i < nodes.size(); i++) {
-            lines.add(new Line(currentNode, nodes.get(i)));
-            currentNode = nodes.get(i);
+    /** Draws the road.
+     *  @param gc the GraphicsContext in which the road will be drawn
+     */
+    public void draw(GraphicsContext gc) {
+        if (!isDrivable) return; //Skipper lige ikke-bil veje for nu
+
+        if (partOfRoute) {
+            gc.setStroke(Color.RED);
+            lineWidth = 3f;
         }
-        //lines.add(new Line(currentNode, nodes.getLast())); //Tror ikke det her skal bruges i Roads
+        else gc.setStroke(color);
+        gc.setLineWidth(lineWidth/Math.sqrt(gc.getTransform().determinant()));
+
+
+        //Loops through the nodes drawing the lines between them
+        Node startNode = nodes.getFirst();
+        for (int i = 1; i < nodes.size(); i++) {
+            Node endNode = nodes.get(i);
+            gc.strokeLine(startNode.getX(), startNode.getY(), endNode.getX(), endNode.getY());
+            startNode = endNode;
+        }
     }
 
-    /**
-     * Draws the road on a given canvas. This method excludes roads like metro's which are underground. See {@link #drawMetro(Canvas)} for the ability to draw the metro
-     * @param graphicsContext the graphicsContext where the road will be drawn on
-     */
-    public void draw(GraphicsContext graphicsContext) {
-        assert graphicsContext != null;
-        switch (roadType) {
-            case "route":
-                graphicsContext.setStroke(Color.TRANSPARENT);
-                graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant())); break;
-            case "coastline":
-                graphicsContext.setStroke(Color.BLACK);
-                graphicsContext.setLineWidth(1.5/Math.sqrt(graphicsContext.getTransform().determinant())); break;
-            default:
-                graphicsContext.setStroke(Color.rgb(100, 100, 100));
-                graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant())); break;
-        }
+    private void assignColorSheetProp() {
+        cs = switch(roadType) {
+            case "coastline" -> ROAD_COASTLINE;
+            case "primary"   -> ROAD_PRIMARY;
+            case "secondary" -> ROAD_SECONDARY;
+            case "tertiary"  -> ROAD_TERTIARY;
+            case "cycleway"  -> ROAD_CYCLEWAY;
+            case "track", "path" -> ROAD_TRACK_PATH;
+            case "tree_row"  -> ROAD_TREE_ROW;
+            case "route"     -> ROAD_ROUTE;
+            default          -> ROAD_DEFAULT;
+        };
+    }
 
-        for (Line line : lines) {
-            line.draw(graphicsContext);
-        }
+    private void determineVisuals() {
+        color = cs.handlePalette(palette);
+
+        lineWidth = switch(roadType) {
+            case "coastline" -> 2f;
+            case "primary"   -> 1.9f;
+            case "secondary" -> 1.8f;
+            case "tertiary"  -> 1.7f;
+            default -> 1f;
+        };
     }
 
     private void calculateBoundingBox() {
-        boundingBox = new double[4];
-        boundingBox[0] = Double.POSITIVE_INFINITY; //minX
-        boundingBox[1] = Double.POSITIVE_INFINITY; //minY
-        boundingBox[2] = Double.NEGATIVE_INFINITY; //maxX
-        boundingBox[3]= Double.NEGATIVE_INFINITY; //maxY
+        boundingBox = new float[4];
+        boundingBox[0] = Float.POSITIVE_INFINITY; //minX
+        boundingBox[1] = Float.POSITIVE_INFINITY; //minY
+        boundingBox[2] = Float.NEGATIVE_INFINITY; //maxX
+        boundingBox[3]= Float.NEGATIVE_INFINITY; //maxY
 
         //Finds the lowest and highest XY
         for (Node node : nodes) {
@@ -115,24 +153,67 @@ public class Road implements Serializable, MapObject {
         }
     }
 
-    /// Draws the metro, bus-routes, etc.
-    @Deprecated public void drawMetro(Canvas mapCanvas) {}
-
-    /// Calculates maxSpeed if the tag wasn't present in the OSM-file
-    @Deprecated private void calculateSpeed() {}
+    ///TO DO: THIS METHOD NEEDS TO BE FIXED TO ADJUST FOR SPEEDLIMIT BUT IT HASS TO ACCOUNT FOR WHERE THE NODES ARE LOCATED IN XY SPACE}
+    private void calculateWeight() {
+        float deltaX = nodes.getFirst().getX() - nodes.getLast().getX();
+        float deltaY = nodes.getFirst().getY() - nodes.getLast().getY();
+        weight = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    }
     //endregion
 
     //region Getters and setters
-    public Set<Line>  getLines()           { return lines;    }
-    public boolean    isWalkable()         { return foot;     }
-    public boolean    isCyclable()         { return bicycle;  }
-    public int        getMaxSpeed()        { return maxSpeed; }
-    public List<Node> getNodes()           { return nodes;    }
-    public String     getType()            { return roadType; }
-    public void       setType(String type) { roadType = type; }
-    public boolean    hasRoadType()        { return !roadType.isEmpty(); }
+    ///Returns whether this piece of road is drivable or not (not in this case means walkable/cyclable)
+    public boolean isDrivable() { return isDrivable;  }
+    public int getMaxSpeed() { return maxSpeed; }
+    public List<Node> getNodes() { return nodes;    }
+    public String getType() { return roadType; }
+    public String getRoadName() { return roadName; }
+    public boolean hasMaxSpeed() { return maxSpeed != 0; }
+    public boolean isWalkable() { return foot; }
+    public boolean isBicycle() { return bicycle; }
+    ///Returns whether the given node is either the start or the endNode of this road
+    public boolean isStartOrEndNode(Node node) { return nodes.getFirst().equals(node) || nodes.getLast().equals(node); }
 
+    /**
+     * Returns the opposite of the Node given. So if given the roads startNode it will return the roads endNode (and reverse).
+     * @param node HAS TO BE EITHER THE ROADS START- OR END-NODE. WILL RETURN NULL ELSE
+     */
+    public Node getOppositeNode(Node node) {
+        if (node.equals(nodes.getFirst())) return nodes.getLast();
+        if (node.equals(nodes.getLast())) return nodes.getFirst();
+        return null;
+    }
+
+    public void setType(String type) {
+        roadType = type;
+        determineVisuals();
+    }
+    public float getWeight() { return weight; }
     @Override
-    public double[] getBoundingBox() { return boundingBox; }
+    public float[] getBoundingBox() { return boundingBox; }
+    ///Returns either the start- or endNode. Which one is decided from the given {@code node}'s XY
+    public Node getStartOrEndNodeFromRoad(Node node) {
+        Node startNode = nodes.getFirst();
+        Node endNode = nodes.getLast();
+
+        if (node.equals(startNode)) return startNode;
+        if (node.equals(endNode)) return endNode;
+
+        float nodeX = node.getX();
+        float nodeY = node.getY();
+
+        double distanceToStart = Math.sqrt(Math.pow(startNode.getX() - nodeX, 2) + Math.pow(startNode.getY() - nodeY, 2));
+        double distanceToEnd = Math.sqrt(Math.pow(endNode.getX() - nodeX, 2) + Math.pow(endNode.getY() - nodeY, 2));
+
+        if (distanceToStart < distanceToEnd) return startNode;
+        else return endNode;
+    }
+
+    public void setPartOfRoute(boolean partOfRoute) { this.partOfRoute = partOfRoute; }
+
+    public void setPalette(String palette) {
+        this.palette = palette;
+        determineVisuals();
+    }
     //endregion
 }

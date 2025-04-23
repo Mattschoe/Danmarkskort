@@ -2,19 +2,24 @@ package com.example.danmarkskort.MVC;
 
 import com.example.danmarkskort.AddressParser;
 import com.example.danmarkskort.MapObjects.Node;
+import com.example.danmarkskort.MapObjects.*;
+import com.example.danmarkskort.PDFOutput;
 import javafx.animation.AnimationTimer;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.scene.transform.Affine;
+import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
@@ -22,50 +27,70 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
     //region Fields
     private View view;
     private Model model;
-    private double lastX, lastY;
-    private boolean panRequest, zoomRequest;
-    private ScrollEvent scrollEvent;
-    private TrieST<String> trieCity; //part of test
+    private double lastX, lastY; //Used to pan
+    private boolean panRequest, zoomRequest; //Used by AnimationTimer
+    private ScrollEvent scrollEvent; //Used to zoom
+    private TrieST<String> trieCity; //Part of test
     private TrieST<String> trieStreet;
-    private MouseEvent mouseEvent;
+    private MouseEvent mouseEvent; //Used to pan
+    private POI startPOI;
+    private POI endPOI;
+    private List<String> POIList = List.of("En", "TO", "Tre");
     private AddressParser addressParser;
 
+    private long lastSystemTime; //Used to calculate FPS
+    private int framesThisSec;   //Used to calculate FPS
+
+    //region FXML fields
     @FXML private Canvas canvas;
+    @FXML private CheckMenuItem fpsButton;
+    @FXML private CheckMenuItem guideButton;
     @FXML private ListView<String> listView;
     @FXML private Slider zoomBar;
+    @FXML private Text fpsText;
+    @FXML private Text zoomText;
     @FXML private TextField searchBar;
+    @FXML private TextArea guideText;
+    @FXML private Button switchSearch;
+    @FXML private Button findRoute;
+    @FXML private TextField destination;
+    @FXML private MenuItem POIMenuButton;
+
+
+    //endregion
     //endregion
 
-    /** View-konstruktøren skaber/kører en instans af
+    //region Constructor(s)
+    /**
+     * View-konstruktøren skaber/kører en instans af
      * konstruktøren her, når den loader en FXML-scene
      */
     public Controller() {
         canvas = new Canvas(400, 600);
         System.out.println("Controller created!");
+
+        this.trieCity = new TrieST<>(true);
+        this.trieStreet = new TrieST<>(false);
         listView = new ListView<>();
         addressParser = new AddressParser();
         System.out.println("AddressParser created!");
 
-        //Det her er cooked -MN
-        try {
-            model = Model.getInstance();
-        } catch (IllegalStateException _) {} //Model not loaded yet, so we wait
-
-
         //region AnimationTimer
-        //TODO: Fix, this doesnt work og tror det er fordi den lægger i konstruktøren men idk -MN
-        //OBS JEG MISTÆNKER DET HER FOR IKKE AT VIRKE -MN
-        //UPDATE: Jeg tror endnu mindre på det nu -MN
-        //UPDATE: Jeg tror en lille smule på det, men jeg har ikke læst op på AnimationTimer-klassen endnu -OFS
         AnimationTimer fpsTimer = new AnimationTimer() {
-            @Override
-            public void handle(long now) {
+            @Override public void handle(long now) {
+                if (fpsText != null) {
+                    if (fpsButton.isSelected()) calculateFPS(now);
+                    else if (!fpsText.getText().isEmpty()) fpsText.setText("");
+                }
+
                 if (panRequest) {
                     double dx = mouseEvent.getX() - lastX;
                     double dy = mouseEvent.getY() - lastY;
@@ -94,21 +119,11 @@ public class Controller implements Initializable {
         model = Model.getInstance(mapFile.getPath(), canvas);
         view.setTilegrid(model.getTilegrid());
         assert model.getParser() != null;
-
     }
 
-    /** Method runs right after a Controller is created -- if we're in a scene with a zoomBar,
-     *  the zoomBar's slider is set to communicate with the zoom-level of the canvas/document
+    /** Runs right after a Controller is created --
+     *  configures something(???) for an object in the mapOverlay.fxml scene
      */
-    @Deprecated protected void initialize() {
-        if (zoomBar != null) {
-            zoomBar.valueProperty().addListener((_, _, _) -> {
-                //Functionality for the zoomBar Slider -- I (Olli) have given up for the time being
-                //TODO FIX/CHANGE/REMOVE ZOOMSLIDER
-            });
-        }
-    }
-
     @Override public void initialize(URL url, ResourceBundle resourceBundle) {
         listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
             @Override
@@ -125,6 +140,7 @@ public class Controller implements Initializable {
         });
     }
 
+    //region Start-up scene methods
     /** Method runs upon clicking the "Upload file"-button in the start-up scene.
      *  Lets the user pick a file and tries to parse it as a map. If successful,
      *  switches the scene to a canvas with the map drawn.
@@ -136,10 +152,10 @@ public class Controller implements Initializable {
         //Sætter et par stilistiske elementer
         fileChooser.setTitle("Choose your file");
         fileChooser.getExtensionFilters().addAll(
-                new ExtensionFilter("All readable files", "*.osm","*.obj","*.txt","*.zip"),
+                new ExtensionFilter("All readable files", "*.osm", "*.obj",/* "*.txt",*/ "*.zip"),
                 new ExtensionFilter("OpenStreetMap-files", "*.osm"),
                 new ExtensionFilter("Parser-class objects", "*.obj"),
-                new ExtensionFilter("Text-files", "*.txt"),
+                //new ExtensionFilter("Text-files", "*.txt"),
                 new ExtensionFilter("Zip-files", "*.zip"),
                 new ExtensionFilter("All files", "*.*"));
         String routeDesktop = switch(System.getProperty("os.name").split(" ")[0]) {
@@ -157,19 +173,54 @@ public class Controller implements Initializable {
             assert view != null;
 
             //Starts up the map
-            view.drawMap(model.getParser());
+            view.drawMap();
         }
     }
 
     /// Method runs upon clicking the "Run standard"-button in the start-up scene
     @FXML protected void standardInputButton() throws IOException {
-        File standardMapFile = new File("./data/small.osm.obj"); //TODO skal ændres senere
+        File standardMapFile = new File("data/StandardMap/parser.obj"); //TODO skal ændres senere
         assert standardMapFile.exists();
 
         view = new View(view.getStage(), "mapOverlay.fxml");
         loadFile(standardMapFile);
 
-        view.drawMap(model.getParser());
+        view.drawMap();
+    }
+
+    //endregion
+
+    //region mapOverlay.fxml scene methods
+    /// Calculates FPS and adjusts the display-text
+    private void calculateFPS(long systemTime) {
+        long deltaSystemTime = systemTime - lastSystemTime;
+        ++framesThisSec;
+
+        if (deltaSystemTime >= 1_000_000_000) {
+            double fps = framesThisSec / (deltaSystemTime / 1_000_000_000.0);
+            fpsText.setText(String.format("FPS: %.0f", fps));
+
+            framesThisSec = 0;
+            lastSystemTime = systemTime;
+        }
+    }
+
+    /// Adds a listener on View's Affine "trans" which updates the zoomBar based on trans' zoom-factor
+    public void bindZoomBar() {
+        if (zoomBar != null) {
+            view.getTrans().mxxProperty().addListener(_ -> {
+                double currentZoom = view.getTrans().getMxx();
+                if (currentZoom < 1) {
+                    zoomBar.setValue(0);
+                    zoomText.setText("Zoom-factor: >1");
+                }
+                else {
+                    if (currentZoom > 100) zoomBar.setValue(100);
+                    else zoomBar.setValue(currentZoom);
+                    zoomText.setText(String.format("Zoom-factor: %.0f", currentZoom));
+                }
+            });
+        }
     }
 
     /// Methods runs upon typing in the search-bar
@@ -272,6 +323,44 @@ public class Controller implements Initializable {
         }
     }
 
+    private void startSearch() {
+        System.out.println("Starting search...");
+        List<Road> route = model.search(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
+        for (Road road : route) {
+            view.addObjectToDraw(road);
+        }
+        view.drawMap(); //Draws to refresh instantly
+        System.out.println("Finished search!");
+    }
+
+    /// Method opens af list of points of interests so the user can edit it.
+    @FXML protected void POIMenu(){
+        //der skal være en liste der bliver opdateret når man tilføjer og fjerne POI's som bliver vist når man klikker på menuen
+        System.out.println("Så skal man kunne skfite her");
+        System.out.println(POIList);
+    }
+    /// Method to export a route as PDF
+    @FXML protected void exportAsPDF(){
+        System.out.println("Attempting to export as PDF!");
+
+        List<Road> latestRoute = Model.getInstance().getLatestRoute();
+
+        if (latestRoute != null) {
+            List<String> roads = new ArrayList<>();
+            for (Road road : latestRoute) roads.add(road.getRoadName());
+            PDFOutput.generateRoute(roads);
+            System.out.println("PDF-export successful!");
+        }
+        else System.out.println("PDF-export failed!");
+    }
+
+    /// Method to open a textbox with a written guide when "Guide" is pressed
+    @FXML protected void guideTextButton(){
+        guideText.setVisible(guideButton.isSelected());
+    }
+    //endregion
+
+    //region Canvas methods
     /// Method runs upon zooming/scrolling on the Canvas
     @FXML protected void onCanvasScroll(ScrollEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked
@@ -281,7 +370,92 @@ public class Controller implements Initializable {
 
     /** Metode køres når man slipper sit klik på Canvas'et */
     @FXML protected void onCanvasClick(MouseEvent e) {
-        System.out.println("Clicked at ("+ e.getX() +", "+ e.getY() +")!");
+        if (e.getClickCount() == 1) {
+            double x, y;
+
+            try {
+                Point2D point = view.getTrans().inverseTransform(e.getX(), e.getY());
+                x = point.getX();
+                y = point.getY();
+            } catch (Exception exception) {
+                return;
+            }
+
+            Tile tile = model.getTilegrid().getTileFromXY((float) x, (float) y);
+            if (tile == null) return;
+            double closestDistance = Double.MAX_VALUE;
+            Node closestNode = null;
+            for (Node node : tile.getNodesInTile()) {
+                if (node.getEdges().isEmpty()) continue;
+                double nodeX = node.getX();
+                double nodeY = node.getY();
+                double distance = Math.sqrt(Math.pow((nodeX - x), 2) + Math.pow((nodeY - y), 2)); //Afstandsformlen ser cooked ud i Java wth -MN
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestNode = node;
+                }
+            }
+            assert closestNode != null;
+            System.out.println(closestNode);
+        }
+        //endregion
+
+        //region DOUBLE CLICK (Searching)
+        if (e.getClickCount() == 2) {
+            //Makes POI
+            Affine transform = view.getTrans();
+            POI POI = null;
+            try {
+                Point2D point = transform.inverseTransform(e.getX(), e.getY());
+                POI = model.createPOI((float) point.getX(), (float) point.getY(), "Test");
+            } catch (NonInvertibleTransformException exception) {
+                System.out.println("Error inversion mouseclick coords!" + exception.getMessage());
+            }
+            view.drawMap(); //Makes sure that the POI is shown instantly
+
+            //Assigns spot for POI. Sets as start if empty or if "find route" has not been activated, if else, else we set it as the destination
+            if (POI != null) {
+                onActivateSearch();
+                if (searchBar.getText().trim().isEmpty() || !destination.isVisible()) {
+                    startPOI = POI;
+                } else {
+                    endPOI = POI;
+                }
+                updateSearchText();
+            }
+        }
+        //endregion
+    }
+
+    ///Opens the search menu when activated. If both start- and endPOI are initialized, this button is used for activating the route finding between the two POI's.
+    @FXML public void onActivateSearch() {
+        findRoute.setVisible(true);
+    }
+
+    ///"Find Route" button on UI
+    @FXML public void onRouteSearchStart() {
+        if (startPOI != null && endPOI != null && !searchBar.getText().trim().isEmpty() && !destination.getText().trim().isEmpty()) {
+            startSearch();
+        } else {
+            switchSearch.setVisible(true);
+            destination.setVisible(true);
+        }
+    }
+
+    @FXML public void switchDestinationAndStart() {
+        POI temp = startPOI;
+        startPOI = endPOI;
+        endPOI = temp;
+        updateSearchText();
+    }
+
+    ///Updates the text in the search. Call this after changing the POI responsible for the text
+    private void updateSearchText() {
+        searchBar.clear();
+        destination.clear();
+
+        if (startPOI != null) searchBar.setText(startPOI.getNodeAddress());
+        if (endPOI != null) destination.setText(endPOI.getNodeAddress());
     }
 
     /** Metode køres idet man klikker ned på Canvas'et */
@@ -298,13 +472,61 @@ public class Controller implements Initializable {
     }
     //endregion
 
+    //region ColorSheet toggles
+    @FXML private void paletteDefault() {
+        if (model == null) model = Model.getInstance();
+
+        view.setBgColor(Color.LIGHTBLUE);
+        fpsText.setFill(Color.BLACK);
+        zoomText.setFill(Color.BLACK);
+        for (Tile tile : model.getTilegrid().getGridList()) {
+            for (MapObject mo : tile.getObjectsInTile()) {
+                if (mo instanceof Road road) road.setPalette("default");
+                if (mo instanceof Polygon p) p.setPalette("default");
+            }
+        }
+        view.drawMap();
+    }
+
+    @FXML private void paletteMidnight() {
+        if (model == null) model = Model.getInstance();
+
+        view.setBgColor(Color.rgb(23, 3, 63));
+        fpsText.setFill(Color.WHITE);
+        zoomText.setFill(Color.WHITE);
+        for (Tile tile : model.getTilegrid().getGridList()) {
+            for (MapObject mo : tile.getObjectsInTile()) {
+                if (mo instanceof Road road) road.setPalette("midnight");
+                if (mo instanceof Polygon p) p.setPalette("midnight");
+            }
+        }
+        view.drawMap();
+    }
+
+    @FXML private void paletteBasic() {
+        if (model == null) model = Model.getInstance();
+
+        view.setBgColor(Color.GHOSTWHITE);
+        fpsText.setFill(Color.INDIGO);
+        zoomText.setFill(Color.INDIGO);
+        for (Tile tile : model.getTilegrid().getGridList()) {
+            for (MapObject mo : tile.getObjectsInTile()) {
+                if (mo instanceof Road road) road.setPalette("basic");
+                if (mo instanceof Polygon p) p.setPalette("basic");
+            }
+        }
+        view.drawMap();
+    }
+    //endregion
+
+    //endregion
+
     //region Getters and setters
     /** Sætter Controllerens view-felt til et givent View
      *  (Denne metode bruges kun af View-klassen en enkelt gang, så View og Controller kan snakke sammen)
      *  @param view View'et som Controllerens view-felt sættes til
      */
     public void setView(View view) { this.view = view; }
-
     /** Returnerer Controllerens canvas-felt, der "populates" direkte idet en scene FXML-loades
      *  (Denne metode bruges kun af View-klassen en enkelt gang, så View kan få Canvas'et af Controlleren)
      *  @return Controllerens canvas-felt
