@@ -93,16 +93,14 @@ public class View {
 
         //Canvas højde og bredde bindes til vinduets
         canvas.widthProperty().bind(scene.widthProperty());
-        canvas.heightProperty().bind(scene.heightProperty());
+        canvas.heightProperty().bind(stage.heightProperty());
 
         //Listeners tilføjes, der redrawer Canvas'et når vinduet skifter størrelse
         scene.widthProperty().addListener(_ -> drawMap());
         scene.heightProperty().addListener(_ -> drawMap());
     }
 
-    /**
-     * Draws the whole map in the tiles visible.
-     */
+    /// Draws the whole map in the tiles visible
     public void drawMap() {
         assert graphicsContext != null && canvas != null;
 

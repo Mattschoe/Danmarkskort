@@ -434,7 +434,7 @@ public enum ColorSheet {
     public Color paletteBasic() {
         return switch(this) {
             case ROAD_COASTLINE -> Color.BLACK;
-            case ROAD_PRIMARY    -> Color.RED;
+            case ROAD_PRIMARY    -> Color.RED.darker();
             case ROAD_SECONDARY  -> Color.GREEN;
             case ROAD_TERTIARY   -> Color.BLUE;
             case ROAD_CYCLEWAY   -> Color.ORANGE;

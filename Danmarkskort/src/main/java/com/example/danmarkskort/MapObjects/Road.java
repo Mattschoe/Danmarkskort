@@ -6,10 +6,7 @@ import javafx.scene.paint.Color;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import static com.example.danmarkskort.ColorSheet.*;
 
@@ -94,7 +91,10 @@ public class Road implements Serializable, MapObject {
     public void draw(GraphicsContext gc) {
         if (!isDrivable) return; //Skipper lige ikke-bil veje for nu
 
-        if (partOfRoute) gc.setStroke(Color.RED);
+        if (partOfRoute) {
+            gc.setStroke(Color.RED);
+            lineWidth = 3f;
+        }
         else gc.setStroke(color);
         gc.setLineWidth(lineWidth/Math.sqrt(gc.getTransform().determinant()));
 
@@ -124,7 +124,14 @@ public class Road implements Serializable, MapObject {
 
     private void determineVisuals() {
         color = cs.handlePalette(palette);
-        lineWidth = 1;
+
+        lineWidth = switch(roadType) {
+            case "coastline" -> 2f;
+            case "primary"   -> 1.9f;
+            case "secondary" -> 1.8f;
+            case "tertiary"  -> 1.7f;
+            default -> 1f;
+        };
     }
 
     private void calculateBoundingBox() {
