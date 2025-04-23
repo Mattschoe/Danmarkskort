@@ -255,7 +255,7 @@ public class Model {
         //Man skal panne for at skabe en instans af model??
         //æøå issues
         //Hvis man trykker på forslag og derfor enter = null
-        //HÅNDTERING AF VEJE MED SAMME VEJNAVN men nu at den skal finde den nøjagtige
+        //vejnavnene skal komme op i forskelllige byer (evt. dette)
         trieCity = new TrieST<>(true);
         trieStreet = new TrieST<>(false);
         streets = new HashSet<>();
@@ -270,27 +270,10 @@ public class Model {
                 cities.add(address[0]);
             }
 
-            if (address[3] != null) { //street NOGET GÅR GALT I STREET
-                if (streets.contains(address[3])) {//Hvis vejnavnet ALLEREDE ER TAGET
-                    int streetCounter = 0;
-                    for (Node streetNode : trieStreet.getList(address[3])) { //Kører gennem listen af noder med samme vejnavn
-                            if (!streetNode.getCity().equals(address[0])) {
-                            streetCounter++;
-                            }
-                    }
-                    if (streetCounter == trieStreet.getList(address[3]).size()) { //Hvis navnet er unikt!
-                        trieStreet.put(address[3], node);
-                    }
-                } else {
-                streets.add(address[3]); //Nu er vejnavnet indsat!
-                trieStreet.put(address[3], node);
-            }
-            }
+            //streets.add(address[3]); //Nu er vejnavnet indsat!
+            trieStreet.put(address[3], node);
         }
-
-                //
-
-        }
+    }
 
 
 

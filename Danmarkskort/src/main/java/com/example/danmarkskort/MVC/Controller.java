@@ -48,9 +48,9 @@ public class Controller implements Initializable {
     public Controller() {
         canvas = new Canvas(400, 600);
         System.out.println("Controller created!");
+        listView = new ListView<>();
         addressParser = new AddressParser();
         System.out.println("AddressParser created!");
-        listView = new ListView<>();
 
         //Det her er cooked -MN
         try {
@@ -173,6 +173,8 @@ public class Controller implements Initializable {
     }
 
     /// Methods runs upon typing in the search-bar
+    /// TODO
+    /// skal kunne acceptere to strenge
     @FXML protected void searchBarTyped(KeyEvent event) {
         if (this.trieCity == null) { //Skal på sigt bare gøres når loading baren er done.
             System.out.println("Trie loaded!");
@@ -200,22 +202,51 @@ public class Controller implements Initializable {
             System.out.println("enter entered!");
             //SKAL FINDE UD AF HVOR SPECIFIKT DER ER SØGT (splitter input op!)
             input = input.replaceAll("([()])","");
-            String[] inputArr = input.split(" ");
-            System.out.println(inputArr.length);
-            if (inputArr.length == 1) { //HVis der kun søges på vej eller by
-                if (!trie.keysThatMatch(input).isEmpty()) {
-                    System.out.print("Found exact value: ");
-                    System.out.println(trie.get(trie.keysThatMatch(input).getFirst()));
-                } else {
-                    System.out.println("Didnt find exact key");
-                    System.out.println("value of closest key: " + trie.get(trie.keysWithPrefix(input).getFirst()));
-                }
-            } else if (inputArr.length == 2) { //Start med at kunne søge efter vej + by (skal på sigt også kunne finde vej + husnummer)
-                for (Node node : trie.getList(inputArr[0])) {
-                    if (node.getCity().equals(inputArr[1])) {
-                        System.out.println("dette er vejen: " + node.getStreet() + " i byen: " + node.getCity()); //TESTING
+
+            addressParser.parseAddress(input);
+            String[] addressSearchedFor = addressParser.getAddress();
+            System.out.println(addressSearchedFor[0]); //TESTING SHIT ----
+            System.out.println(addressSearchedFor[1]);
+            System.out.println(addressSearchedFor[2]);
+            System.out.println(addressSearchedFor[3]); //HER TIL ----
+
+            if (addressSearchedFor[0] != null && addressSearchedFor[1] != null && addressSearchedFor[2] != null && addressSearchedFor[3] != null) { //HVIS FULD ADDRESSE
+                System.out.println("fuld addresse"); //TESTING
+                for (Node node : trie.getList(addressSearchedFor[0])) { //Kører gennem alle veje med vejnavnet
+                    if (node.getHousenumber().equals(addressSearchedFor[1]) && node.getPostcode().equals(addressSearchedFor[2]) && node.getCity().equals(addressSearchedFor[3])) { //Hvis nummer, postnummer og by passer
+                        System.out.println("dette er vejen: " + node.getStreet() + " nummer: " + node.getHousenumber() + " i byen: " + node.getCity() + " med postnummeret:" + node.getPostcode()); //TESTING
+                        System.out.println(node);
                     }
                 }
+            } else if (addressSearchedFor[0] != null && addressSearchedFor[1] != null && addressSearchedFor[3] != null) { // hvis vej + husnummer + by
+                System.out.println("vej + nummer + by"); //TESTING
+                for (Node node : trie.getList(addressSearchedFor[0])) { //Kører gennem alle veje med vejnavnet
+                    if (node.getHousenumber().equals(addressSearchedFor[1]) && node.getCity().equals(addressSearchedFor[3])) { //Hvis nummer og by passer
+                        System.out.println("dette er vejen: " + node.getStreet() + " nummer: " + node.getHousenumber() + " i byen: " + node.getCity()); //TESTING
+                        System.out.println(node);
+                    }
+                }
+            } else if (addressSearchedFor[0] != null && addressSearchedFor[1] != null) { // hvis vej + husnummer
+                System.out.println("vej + nummer"); //TESTING
+                for (Node node : trie.getList(addressSearchedFor[0])) { //Kører gennem alle veje med vejnavnet
+                    if (node.getHousenumber().equals(addressSearchedFor[1])) { //Hvis nummer og by passer
+                        System.out.println("dette er vejen: " + node.getStreet() + " nummer: " + node.getHousenumber()); //TESTING
+                        System.out.println(node);
+                    }
+                }
+            } else if (addressSearchedFor[0] != null) { // hvis vej eller by!
+//                System.out.println("vej eller by"); //TESTING
+//                if (!trie.keysThatMatch(addressSearchedFor[0]).isEmpty()) {
+//                    System.out.print("Found exact value: ");
+//                    System.out.println(trie.get(trie.keysThatMatch(addressSearchedFor[0]).getFirst()));
+//                } else {
+                    if (trie.isCity()) {
+                        System.out.print("by: ");
+                    } else {
+                        System.out.print("vej: ");
+                    }
+                    System.out.println(trie.get(trie.keysWithPrefix(addressSearchedFor[0]).getFirst()));
+
             }
 
         } else {

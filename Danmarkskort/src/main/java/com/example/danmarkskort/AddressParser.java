@@ -12,6 +12,7 @@ public class AddressParser {
     public void parseAddress(String input) {
 
         Matcher matcher = PATTERN.matcher(input);
+        address = new String[4];
 
         if (matcher.matches()) {
             if (matcher.group("fulladdress") != null) {
@@ -26,12 +27,17 @@ public class AddressParser {
             } else if (matcher.group("roadHouseNo") != null) {
                 address[0] = matcher.group("street3");
                 address[1] = matcher.group("house3");
-            }
+            } else if (matcher.group("roadOrCityOnly") != null) {
+                address[0] = matcher.group("roadOrCityOnly");
 
+            }
+            /*
             address[0] = matcher.group("street");
             address[1] = matcher.group("house");
             address[2] = matcher.group("postcode");
             address[3] = matcher.group("city");
+
+             */
         }
 
 
