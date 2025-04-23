@@ -274,7 +274,6 @@ public class Controller implements Initializable {
     /// Method to open a textbox with a written guide when "Guide" is pressed
     @FXML protected void guideTextButton(){
         guideText.setVisible(guideButton.isSelected());
-        CloseGuideButton.setVisible(guideButton.isSelected());
     }
 
 
