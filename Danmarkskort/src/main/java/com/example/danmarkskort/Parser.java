@@ -222,16 +222,13 @@ public class Parser implements Serializable {
         }
 
         for (long memberID : members) {
-            if (id2Polygon.containsKey(memberID)) {
-                Polygon member = id2Polygon.get(memberID);
-                if (member.getType().isEmpty()) {
-                    member.setType(type);
-                }
+            Polygon polygon = id2Polygon.get(memberID);
+            Road road = id2Road.get(memberID);
+            if (memberID == 566853488) {
+                System.out.println("HEJSASA");
             }
-            else if (id2Road.containsKey(memberID)) {
-                Road member = id2Road.get(memberID);
-                if (member.getType().isEmpty()) member.setType(type);
-            }
+            if (polygon != null && polygon.getType().isEmpty()) polygon.setType(type);
+            else if (road != null && road.getType().isEmpty()) road.setType(type);
         }
     }
 
@@ -267,10 +264,10 @@ public class Parser implements Serializable {
                     return; //Returns out of method so we don't keep looping through OSM file
                 }
             } else if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) {
-                //If no tags we first check if its a cycle and simple parse it directly to Polygon or road
+                //If no tags we first check if it's a cycle and simple parse it directly to Polygon or road
                 if (nodesInWay.getFirst().equals(nodesInWay.getLast())) isCycle = true;
-                if (isCycle) parsePolygon(nodesInWay, new HashMap<>());
-                else parseRoad(nodesInWay, new HashMap<>());
+                if (isCycle) id2Polygon.put(wayID, parsePolygon(nodesInWay, new HashMap<>()));
+                else id2Road.put(wayID, parseRoad(nodesInWay, new HashMap<>()));
                 return;
             }
         }
@@ -313,7 +310,6 @@ public class Parser implements Serializable {
             nextInput = input.next();
         }
     }
-
 
     /**
      * Parses a {@link Polygon} a Polygon is a subset of way. then returns it. Method is called in {@link #parseTags(long, XMLStreamReader, int, List, boolean)}
