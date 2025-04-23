@@ -273,7 +273,7 @@ public class Controller implements Initializable {
 
     @FXML protected void savePOI(POI poi){
         favoritePOIs.add(poi);
-        
+
     }
 
     /// Method to export a route as PDF
@@ -368,6 +368,7 @@ public class Controller implements Initializable {
     ///Opens the search menu when activated. If both start- and endPOI are initialized, this button is used for activating the route finding between the two POI's.
     @FXML public void onActivateSearch() {
         findRoute.setVisible(true);
+        //savePOIButton.setVisible(true)
     }
 
     ///"Find Route" button on UI
