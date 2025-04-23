@@ -1,5 +1,7 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.MapObjects.MapObject;
+import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.MapObjects.Tilegrid;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
@@ -13,6 +15,9 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class View {
     //region Fields
@@ -25,8 +30,9 @@ public class View {
     private Scene scene;
     private final Stage stage;
     private boolean firstTimeDrawingMap;
-    private int maxZoom;
     private Tilegrid tilegrid;
+    ///Extra objects outside the grid that are included in draw method. Objects are added in {@link #addObjectToDraw(MapObject)}
+    private Set<MapObject> extraDrawObjects;
     //endregion
 
     //region Constructor(s)
@@ -36,6 +42,8 @@ public class View {
      *  @throws IOException thrown if the program fails to load the FXML-file
      */
     public View(Stage stage, String filename) throws IOException {
+        extraDrawObjects = new HashSet<>();
+
         //The standard location for fxml. Needs to be added to every filepath
         String fxmlLocation = "/com/example/danmarkskort/" + filename;
         firstTimeDrawingMap = true;
@@ -68,8 +76,6 @@ public class View {
         stage.setScene(scene);
         stage.show();
         initializeCanvas();
-
-        maxZoom = 15; //Sets up the Zoom levels
     }
     //endregion
 
@@ -87,16 +93,14 @@ public class View {
 
         //Canvas højde og bredde bindes til vinduets
         canvas.widthProperty().bind(scene.widthProperty());
-        canvas.heightProperty().bind(scene.heightProperty());
+        canvas.heightProperty().bind(stage.heightProperty());
 
         //Listeners tilføjes, der redrawer Canvas'et når vinduet skifter størrelse
         scene.widthProperty().addListener(_ -> drawMap());
         scene.heightProperty().addListener(_ -> drawMap());
     }
 
-    /**
-     * Draws the whole map in the tiles visible.
-     */
+    /// Draws the whole map in the tiles visible
     public void drawMap() {
         assert graphicsContext != null && canvas != null;
 
@@ -107,7 +111,7 @@ public class View {
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
-        //Draws map. Tegner kun tiles inde for viewport
+        //Draws map. Only draws tiles that are in view
         if (tilegrid != null) {
             try {
                 tilegrid.drawVisibleTiles(graphicsContext, getViewport(), getLOD());
@@ -116,10 +120,20 @@ public class View {
             }
         }
 
+        //Draws extra objects
+        for (MapObject object : extraDrawObjects) {
+            object.draw(graphicsContext);
+        }
+
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
             firstTimeDrawingMap = false;
         }
+    }
+
+    ///Saves the object given as parameter and includes it in {@link #drawMap()}.
+    public void addObjectToDraw(MapObject mapObject) {
+        extraDrawObjects.add(mapObject);
     }
 
     /// Method pans on the canvas

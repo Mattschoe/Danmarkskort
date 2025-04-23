@@ -53,9 +53,6 @@ public class Road implements Serializable, MapObject {
         this.roadType = roadType;
         this.roadName = roadName;
 
-        for (Node node : nodes) {
-            node.addEdge(this);
-        }
         calculateWeight();
         calculateBoundingBox();
 
@@ -77,9 +74,7 @@ public class Road implements Serializable, MapObject {
         this.isDrivable = isDrivable;
         this.roadType = roadType;
         this.roadName = roadName;
-        for (Node node : nodes) {
-            node.addEdge(this);
-        }
+
         calculateWeight();
         calculateBoundingBox();
 
@@ -94,10 +89,12 @@ public class Road implements Serializable, MapObject {
      *  @param gc the GraphicsContext in which the road will be drawn
      */
     public void draw(GraphicsContext gc) {
-        assert gc != null;
-        if (!isDrivable) return; //TODO %% Skipper lige ikke-bil veje for nu
+        if (!isDrivable) return; //Skipper lige ikke-bil veje for nu
 
-        if (partOfRoute) gc.setStroke(Color.RED);
+        if (partOfRoute) {
+            gc.setStroke(Color.RED);
+            lineWidth = 3f;
+        }
         else gc.setStroke(color);
         gc.setLineWidth(lineWidth/Math.sqrt(gc.getTransform().determinant()));
 
@@ -127,57 +124,16 @@ public class Road implements Serializable, MapObject {
 
     private void determineVisuals() {
         color = cs.handlePalette(palette);
-        lineWidth = 1;
+
+        lineWidth = switch(roadType) {
+            case "coastline" -> 2f;
+            case "primary"   -> 1.9f;
+            case "secondary" -> 1.8f;
+            case "tertiary"  -> 1.7f;
+            default -> 1f;
+        };
     }
 
-    /// Determines the Road's color and line-width
-    /*private void determineVisuals() {
-        if (roadType.equals("coastline")) {
-            color = cs.get(0);
-            lineWidth = 1.5f;
-        }
-        else if (roadType.equals("primary")) {
-            color = cs.get(1);
-            lineWidth = 1.5f;
-        }
-        else if (roadType.equals("secondary")) {
-            color = cs.get(2);
-            lineWidth = 1.5f;
-        }
-        else if (roadType.equals("tertiary")) {
-            color = cs.get(3);
-            lineWidth = 1.5f;
-        }
-        else if (roadType.equals("cycleway")) {
-            color = cs.get(4);
-            lineWidth = 1.1f;
-        }
-        else if (roadType.equals("track") || roadType.equals("path")) {
-            color = cs.get(5);
-            lineWidth = 1f;
-        }
-        else if (roadType.equals("tree_row")) {
-            color = cs.get(6);
-            lineWidth = 1f;
-        }
-        else if (roadType.equals("route")) {
-            color = cs.get(7);
-            lineWidth = 0f;
-        }
-        else {
-            //default
-            color = cs.get(8);
-            lineWidth = 1f;
-        }
-
-        /*
-         * Udover de roads vi farver, fandt jeg (Olli) en masse andre roadTypes, heriblandt
-         *      unclassified, residential, service, footway, power, cliff og proposed,
-         * som jeg har valgt at bare ladet blive farvet default-grå. Så sker der ikke *alt*
-         * for meget for øjnene :)
-         *
-    }
-    */
     private void calculateBoundingBox() {
         boundingBox = new float[4];
         boundingBox[0] = Float.POSITIVE_INFINITY; //minX
@@ -212,7 +168,6 @@ public class Road implements Serializable, MapObject {
     public List<Node> getNodes() { return nodes;    }
     public String getType() { return roadType; }
     public String getRoadName() { return roadName; }
-    public boolean hasRoadType() { return !roadType.isEmpty(); }
     public boolean hasMaxSpeed() { return maxSpeed != 0; }
     public boolean isWalkable() { return foot; }
     public boolean isBicycle() { return bicycle; }
@@ -224,14 +179,10 @@ public class Road implements Serializable, MapObject {
      * @param node HAS TO BE EITHER THE ROADS START- OR END-NODE. WILL RETURN NULL ELSE
      */
     public Node getOppositeNode(Node node) {
-        assert isStartOrEndNode(node);
         if (node.equals(nodes.getFirst())) return nodes.getLast();
         if (node.equals(nodes.getLast())) return nodes.getFirst();
         return null;
     }
-
-    public Node getStart() { return nodes.getFirst(); }
-    public Node getEnd() { return nodes.getLast(); }
 
     public void setType(String type) {
         roadType = type;

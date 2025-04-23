@@ -138,10 +138,10 @@ public class Controller implements Initializable {
         //Sætter et par stilistiske elementer
         fileChooser.setTitle("Choose your file");
         fileChooser.getExtensionFilters().addAll(
-                new ExtensionFilter("All readable files", "*.osm","*.obj","*.txt","*.zip"),
+                new ExtensionFilter("All readable files", "*.osm", "*.obj",/* "*.txt",*/ "*.zip"),
                 new ExtensionFilter("OpenStreetMap-files", "*.osm"),
                 new ExtensionFilter("Parser-class objects", "*.obj"),
-                new ExtensionFilter("Text-files", "*.txt"),
+                //new ExtensionFilter("Text-files", "*.txt"),
                 new ExtensionFilter("Zip-files", "*.zip"),
                 new ExtensionFilter("All files", "*.*"));
         String routeDesktop = switch(System.getProperty("os.name").split(" ")[0]) {
@@ -252,7 +252,11 @@ public class Controller implements Initializable {
 
     private void startSearch() {
         System.out.println("Starting search...");
-        model.search(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
+        List<Road> route = model.search(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
+        for (Road road : route) {
+            view.addObjectToDraw(road);
+        }
+        view.drawMap(); //Draws to refresh instantly
         System.out.println("Finished search!");
     }
 
