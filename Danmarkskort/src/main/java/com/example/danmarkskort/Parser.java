@@ -259,6 +259,7 @@ public class Parser implements Serializable {
     private void parseWay(XMLStreamReader input) throws XMLStreamException {
         List<Node> nodesInWay = new ArrayList<>();
         long wayID = Long.parseLong(input.getAttributeValue(null, "id"));
+        boolean isCycle = false; //Is true if the endNode and startNode is equal
 
         //Runs through every node and tag contained in that way
         while (input.hasNext()) {
@@ -281,64 +282,83 @@ public class Parser implements Serializable {
                         nodesInWay.add(node);
                         continue;
                     }
-
-                    //If node is same as start (A cycle), parses 'Way' as 'Polygon'
-                    if (nodesInWay.getFirst().equals(node)) {
-                        nodesInWay.add(node);
-                        id2Polygon.put(wayID, parsePolygon(input, nodesInWay));
-                        return;
-                    } else {
-                        nodesInWay.add(node); //Otherwise adds node to currently looked at nodes
-                    }
+                    nodesInWay.add(node);
                 } else if (input.getLocalName().equals("tag")) {
-                    //When reaching "tag" elements, we know it isn't a Polygon (no "Node" is mentioned twice), and therefore we parse it as a Road
-                    id2Road.put(wayID, parseRoad(input, nextInput, nodesInWay));
-                    return;
+                    if (nodesInWay.getFirst().equals(nodesInWay.getLast())) isCycle = true; //If last and first node is the same we have a cycle
+                    
+                    parseTags(wayID, input, nextInput, nodesInWay, isCycle); //End of nodes, so we start parsing tags
+                    return; //Returns out of method so we don't keep looping through OSM file
                 }
             }
         }
     }
 
     /**
-     * Parses a {@link Polygon} a Polygon is a subset of way. then returns it.
-     * @param input the XMLStreamReader that currently is sitting at the beginning of the to-be-parsed Polygon
+     * Reads all tags in Way. After parsing we check if the Way is a Road or a Polygon, and then calls the parser for the object.
+     * @param wayID the ID of the Way
+     * @param input the XMLStreamReader that's currently hovering on the first "tag" tag
+     * @param firstTag the int of the first tag (to avoid skipping it)
+     * @param nodesInWay the nodes associated with the way
+     * @throws XMLStreamException if error with streaming
+     */
+    private void parseTags(long wayID, XMLStreamReader input, int firstTag, List<Node> nodesInWay, boolean isCycle) throws XMLStreamException {
+        assert nodesInWay != null;
+        boolean road = false, building = false;
+
+        Map<String, String> tagsKeyToValue = new HashMap<>();
+        int nextInput = firstTag;
+        while (input.hasNext()) {
+            //No more tags so we parse Polygon or road
+            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) {
+                if (road) id2Road.put(wayID, parseRoad(nodesInWay, tagsKeyToValue));
+                else if (building) id2Polygon.put(wayID, parsePolygon(nodesInWay, tagsKeyToValue));
+                else if (isCycle) id2Polygon.put(wayID, parsePolygon(nodesInWay, tagsKeyToValue)); //If a cycle but no "highway" tag, its very likely a building
+                else id2Road.put(wayID, parseRoad(nodesInWay, tagsKeyToValue)); //If we don't register if building or road, we parse as road (Lot of roads don't have "Highway" tags)
+                return; //Returns out se we don't keep looping through OSM file
+            }
+            if (nextInput == XMLStreamConstants.START_ELEMENT) {
+                String key = input.getAttributeValue(null, "k");
+                String value = input.getAttributeValue(null, "v");
+                if (key == null || value == null) continue;
+                if (key.equals("highway")) road = true;
+                else if (key.equals("building")) building = true;
+                tagsKeyToValue.put(key, value); //Puts all tags inside
+            }
+            nextInput = input.next();
+        }
+    }
+
+    /**
+     * Parses a {@link Polygon} a Polygon is a subset of way. then returns it. Method is called in {@link #parseTags(long, XMLStreamReader, int, List, boolean)}
      * @param nodesInPolygon the nodes related to the to-be-parsed Polygon
+     * @param tagsInWay the tags related to the Polygon
      * @return Road which should then be stored in the map {@code id2Polygon} for further reference
      */
-    private Polygon parsePolygon(XMLStreamReader input, List<Node> nodesInPolygon) throws XMLStreamException {
+    private Polygon parsePolygon(List<Node> nodesInPolygon, Map<String, String> tagsInWay) {
         assert nodesInPolygon != null;
 
-        while (input.hasNext()) {
-            //End of tag
-            int nextInput = input.next();
-            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) break;
-
-            if (nextInput == XMLStreamConstants.START_ELEMENT) {
-                String key = input.getAttributeValue(null, "k"); //får fat i "k" attribute som fx "maxSpeed"
-                String value = input.getAttributeValue(null, "v"); // får fat i "v" attribute som fx 30 (hvis det er maxSpeed)
-                if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
-                switch (key) {
-                    case "aeroway", "disused:landuse", "landuse", "leisure", "man_made", "natural", "place":
-                        return new Polygon(nodesInPolygon, value);
-                    case "amenity", "area:highway", "attraction", "barrier", "boundary", "bridge:support", "building",
-                         "fence_type", "highway", "historic", "indoor", "military", "playground", "power",
-                         "surface", "tourism", "waterway":
-                        return new Polygon(nodesInPolygon, key);
-                }
-                if (value.equals("Cityringen")) return new Polygon(nodesInPolygon, value); //TODO %% Find en bedre måde at IKKE tegne Cityringen
+        for (String key : tagsInWay.keySet()) {
+            String value = tagsInWay.get(key);
+            switch (key) {
+                case "aeroway", "disused:landuse", "landuse", "leisure", "man_made", "natural", "place":
+                    return new Polygon(nodesInPolygon, value);
+                case "amenity", "area:highway", "attraction", "barrier", "boundary", "bridge:support", "building",
+                     "fence_type", "highway", "historic", "indoor", "military", "playground", "power",
+                     "surface", "tourism", "waterway":
+                    return new Polygon(nodesInPolygon, key);
             }
+            if (value.equals("Cityringen")) return new Polygon(nodesInPolygon, value); //TODO %% Find en bedre måde at IKKE tegne Cityringen
         }
-        return new Polygon(nodesInPolygon, "");
+        return new Polygon(nodesInPolygon, ""); //No type
     }
 
     /**
-     * Parses a {@link Road} and returns it. A road is a subset of Way. Method is called in {@link #parseWay(XMLStreamReader)}
-     * @param input the XMLStreamReader that currently is sitting at the beginning of the to-be-parsed Road
-     * @param firstTag the first tag, discovered in {@link #parseWay(XMLStreamReader)}
+     * Parses a {@link Road} and returns it. A road is a subset of Way. Method is called in {@link #parseTags(long, XMLStreamReader, int, List, boolean)}
      * @param nodes the nodes related to the to-be-parsed Road
+     * @param tagsInWay the tags that are related to this Road
      * @return Road which should then be stored in the map {@code id2Road} for further reference
      */
-    private Road parseRoad(XMLStreamReader input, int firstTag, List<Node> nodes) throws XMLStreamException {
+    private Road parseRoad(List<Node> nodes, Map<String, String> tagsInWay) {
         //region node parameters
         boolean foot = true;
         boolean bicycle = true;
@@ -349,36 +369,25 @@ public class Parser implements Serializable {
         boolean hasMaxSpeed = false;
         //endregion
 
-        //Loops through tags and saves them
-        int nextInput = firstTag;
-        while (input.hasNext()) {
-            //End of Road
-            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) break;
-
-            //Tries and saves the important tags
-            if (nextInput == XMLStreamConstants.START_ELEMENT && input.getLocalName().equals("tag"))  {
-                String key = input.getAttributeValue(null, "k"); //for fat i "k" attribute som fx "maxSpeed"
-                String value = input.getAttributeValue(null, "v"); // for fat i "v" attribute som fx 30 (hvis det er maxSpeed)
-                if (key == null || value == null) continue; //Sørger lige for at hvis der ikke er nogle k or v at vi skipper den
-                if (key.equals("highway") || key.equals("natural") || key.equals("area:highway")) {     //find ud af typen af highway
+        for (String key : tagsInWay.keySet()) {
+            String value = tagsInWay.get(key);
+            switch (key) {
+                case "highway", "natural", "area:highway" -> {
                     roadType = value;
-                    if (value.equals("footway") || value.equals("bridleway") || value.equals("steps") || value.equals("corridor") || value.equals("path") || value.equals("cycleway")) drivable = false;
-                    else drivable = true;
-                } else if (key.equals("maxspeed")) {
+                    drivable = !value.equals("footway") && !value.equals("bridleway") && !value.equals("steps") && !value.equals("corridor") && !value.equals("path") && !value.equals("cycleway");
+                }
+                case "maxspeed" -> {
                     maxSpeed = Integer.parseInt(value);
                     hasMaxSpeed = true;
-                } else if (key.equals("bicycle")) {
-                    bicycle = value.equals("true");
-                } else if (key.equals("foot")) {
-                    foot = value.equals("yes");
-                } else if (key.equals("route")) {
-                    roadType = key;
-                } else if (key.equals("name")) {
-                    roadName = value;
                 }
+                case "bicycle" -> bicycle = value.equals("true");
+                case "foot" -> foot = value.equals("yes");
+                case "route" -> roadType = key;
+                case "name" -> roadName = value;
             }
-            nextInput = input.next(); //Moves on to the next "tag" element
         }
+
+
 
         //Instantierer en ny Road en road og tager stilling til om den har en maxSpeed eller ej.
         Road road;
