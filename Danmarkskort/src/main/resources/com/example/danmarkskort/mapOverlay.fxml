@@ -55,5 +55,5 @@
     </MenuBar>
    <Button fx:id="findRoute" layoutX="172.0" layoutY="35.0" mnemonicParsing="false" onMouseClicked="#onRouteSearchStart" text="Find Route" visible="false" />
    <Button fx:id="switchSearch" layoutX="172.0" layoutY="71.0" mnemonicParsing="false" onMouseClicked="#switchDestinationAndStart" text="Switch" visible="false" />
-    <Button fx:id="removePOI" layoutX="172.0" layoutY="107.0" mnemonicParsing="false" onMouseClicked="#removePOI" text="Remove POI" visible="false" />
+    <Button fx:id="removePOIButton" layoutX="172.0" layoutY="107.0" mnemonicParsing="false" onMouseClicked="#removePOI" text="Remove POI" visible="false" />
 </AnchorPane>

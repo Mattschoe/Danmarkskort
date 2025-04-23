@@ -57,6 +57,7 @@ public class Controller implements Initializable {
     @FXML private Text zoomText;
     @FXML private TextField searchBar;
     @FXML private Button switchSearch;
+    @FXML private Button removePOIButton;
     @FXML private Button findRoute;
     @FXML private TextField destination;
     //endregion
@@ -314,6 +315,7 @@ public class Controller implements Initializable {
             //Assigns spot for POI. Sets as start if empty or if "find route" has not been activated, if else, else we set it as the destination
             if (POI != null) {
                 onActivateSearch();
+                removePOIButton.setVisible(true);
                 if (searchBar.getText().trim().isEmpty() || !destination.isVisible()) {
                     startPOI = POI;
                 } else {
