@@ -44,7 +44,6 @@ public class Controller implements Initializable {
     private Point2D POIMark;
     private List<String> POIList = List.of("En", "TO", "Tre");
     private List<POI> favoritePOIs = new ArrayList<>();
-    private final List<String> POIList = List.of("En", "TO", "Tre");
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
