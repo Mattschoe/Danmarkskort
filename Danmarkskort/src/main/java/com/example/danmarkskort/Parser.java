@@ -104,7 +104,7 @@ public class Parser implements Serializable {
      * @throws XMLStreamException if an error with the reader occurs
      */
     public void parseOSM(File file) throws IOException, XMLStreamException {
-        setStandardBounds(); //This has to be called first so we can check if nodes are in DKK
+        setBounds(); //This has to be called first so we can check if nodes are in DKK
         XMLStreamReader input = XMLInputFactory.newInstance().createXMLStreamReader(new FileReader(file)); //ny XMLStreamReader
         //Gennemgår hver tag og parser de tags vi bruger
         while (input.hasNext()) {
@@ -113,16 +113,14 @@ public class Parser implements Serializable {
                 String tagName = input.getLocalName();
 
                 //End of OSM
-                if (tagName.equals("bounds")) parseBounds(input);
-                else if (tagName.equals("node")) {
+                if (tagName.equals("node")) {
                     try { parseNode(input); } catch (MapObjectOutOfBoundsException e) {
                         outOfBoundsNodes++;
                     } catch (Exception e) {
                         failedNodes++;
                     }
                 } else if (tagName.equals("way")) {
-                    try { parseWay(input); } catch (Exception e) {
-                        failedWays++;
+                    try { parseWay(input); } catch (Exception e) {failedWays++;
                     }
                 } else if (tagName.equals("relation")) {
                     try { parseRelation(input); } catch (Exception e) {
@@ -134,17 +132,6 @@ public class Parser implements Serializable {
         //Counts references and splits nodes
         countNodeReferences();
         splitRoads();
-    }
-
-    /**
-     * Saves the OSM-file's bounds-coordinates (so that View can zoom in to these on startup) <br>
-     * [0] = minLat <br> [1] = minLong <br> [2] = maxLat <br> [3] = maxLong
-     */
-    private void parseBounds(XMLStreamReader input) {
-        bounds[0] = Double.parseDouble(input.getAttributeValue(0)); //Min. latitude
-        bounds[1] = Double.parseDouble(input.getAttributeValue(1)); //Min. longitude
-        bounds[2] = Double.parseDouble(input.getAttributeValue(2)); //Max. latitude
-        bounds[3] = Double.parseDouble(input.getAttributeValue(3)); //Max. longitude
     }
 
     /**
@@ -211,8 +198,7 @@ public class Parser implements Serializable {
             int nextInput = input.next();
 
             //Checks whether we've found the end element and terminates the while-loop if so
-            if (nextInput == XMLStreamConstants.END_ELEMENT
-                    && input.getLocalName().equals("relation")) { break; }
+            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("relation")) break;
 
             //Handles the relation's children
             if (nextInput == XMLStreamConstants.START_ELEMENT) {
@@ -265,30 +251,27 @@ public class Parser implements Serializable {
         while (input.hasNext()) {
             int nextInput = input.next();
 
-            //End of element
-            if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) break;
-
-            //Hvis det er en node gemmer vi den, og evt. parser en Polygon
+            //Hvis det er en node gemmer vi den
             if (nextInput == XMLStreamConstants.START_ELEMENT) {
-                if (input.getLocalName().equals("nd")) {
+                String inputName = input.getLocalName();
+                if (inputName.equals("nd")) {
                     long nodeReference = Long.parseLong(input.getAttributeValue(null, "ref"));
                     Node node = id2Node.get(nodeReference);
 
-                    //Makes sure that it doesn't point towards a null Node
-                    if (node == null) break;
-
-                    //Adds first node and then skips rest to avoid false positive in next check
-                    if (nodesInWay.isEmpty()) {
-                        nodesInWay.add(node);
-                        continue;
-                    }
-                    nodesInWay.add(node);
-                } else if (input.getLocalName().equals("tag")) {
+                    //Makes sure that it doesn't point towards a null Node, then adds it to the list of currently looked at nodes
+                    if (node != null) nodesInWay.add(node);
+                } else if (inputName.equals("tag")) {
                     if (nodesInWay.getFirst().equals(nodesInWay.getLast())) isCycle = true; //If last and first node is the same we have a cycle
                     
-                    parseTags(wayID, input, nextInput, nodesInWay, isCycle); //End of nodes, so we start parsing tags
+                    parseTags(wayID, input, nextInput, nodesInWay, isCycle); //End of nodes, so we start parsing tags (if applicable), otherwise this method moves on to creating the object
                     return; //Returns out of method so we don't keep looping through OSM file
                 }
+            } else if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) {
+                //If no tags we first check if its a cycle and simple parse it directly to Polygon or road
+                if (nodesInWay.getFirst().equals(nodesInWay.getLast())) isCycle = true;
+                if (isCycle) parsePolygon(nodesInWay, new HashMap<>());
+                else parseRoad(nodesInWay, new HashMap<>());
+                return;
             }
         }
     }
@@ -302,7 +285,9 @@ public class Parser implements Serializable {
      * @throws XMLStreamException if error with streaming
      */
     private void parseTags(long wayID, XMLStreamReader input, int firstTag, List<Node> nodesInWay, boolean isCycle) throws XMLStreamException {
-        assert nodesInWay != null;
+        if (nodesInWay.size() == 1) {
+            throw new IllegalArgumentException("Only 1 node in way");
+        }
         boolean road = false, building = false;
 
         Map<String, String> tagsKeyToValue = new HashMap<>();
@@ -319,14 +304,16 @@ public class Parser implements Serializable {
             if (nextInput == XMLStreamConstants.START_ELEMENT) {
                 String key = input.getAttributeValue(null, "k");
                 String value = input.getAttributeValue(null, "v");
-                if (key == null || value == null) continue;
-                if (key.equals("highway")) road = true;
-                else if (key.equals("building")) building = true;
-                tagsKeyToValue.put(key, value); //Puts all tags inside
+                if (key != null && value != null) {
+                    if (key.equals("highway")) road = true;
+                    else if (key.equals("building")) building = true;
+                    tagsKeyToValue.put(key, value); //Puts all tags inside
+                }
             }
             nextInput = input.next();
         }
     }
+
 
     /**
      * Parses a {@link Polygon} a Polygon is a subset of way. then returns it. Method is called in {@link #parseTags(long, XMLStreamReader, int, List, boolean)}
@@ -397,7 +384,7 @@ public class Parser implements Serializable {
     }
 
     /// Sets the standard bounds to the middle of DK
-    private void setStandardBounds() {
+    private void setBounds() {
         bounds[0] = 54.481528;
         bounds[1] = 7.679673;
         bounds[2] = 57.995290;
