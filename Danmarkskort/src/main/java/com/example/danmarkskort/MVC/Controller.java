@@ -1,6 +1,7 @@
 package com.example.danmarkskort.MVC;
 
 import com.example.danmarkskort.MapObjects.*;
+import com.example.danmarkskort.PDFOutput;
 import javafx.animation.AnimationTimer;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import javafx.beans.value.ChangeListener;
@@ -24,6 +25,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -267,11 +269,17 @@ public class Controller implements Initializable {
     }
     /// Method to export a route as PDF
     @FXML protected void exportAsPDF(){
-        System.out.println("exporting as PDF");
+        System.out.println("Attempting to export as PDF!");
+
+        List<Road> latestRoute = Model.getInstance().getLatestRoute();
+
+        if (latestRoute != null) {
+            List<String> roads = new ArrayList<>();
+            for (Road road : latestRoute) roads.add(road.getRoadName());
+            PDFOutput.generateRoute(roads);
+        }
+        else System.out.println("PDF-export failed! :(");
     }
-
-
-
     //endregion
 
     //region Canvas methods

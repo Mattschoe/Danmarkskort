@@ -1,11 +1,15 @@
 package com.example.danmarkskort.Searching;
 
+import com.example.danmarkskort.MVC.Model;
 import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.Road;
-import javafx.scene.canvas.GraphicsContext;
 
-import java.sql.SQLOutput;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 
 public class Search {
@@ -20,9 +24,7 @@ public class Search {
         assert !nodes.isEmpty();
     }
 
-    /**
-     * Start a route from the Node {@code from} to the Node {@code to}.
-     */
+    /// Start a route from the Node {@code from} to the Node {@code to}.
     public void route(Node from, Node to) {
         route = new ArrayList<>();
         startNode = from;
@@ -54,12 +56,13 @@ public class Search {
         }
         if (foundRoute) {
             drawPath(); //Only draws path if we actually found a path.
+            Model.getInstance().setLatestRoute(route);
         } else {
             System.out.println("No path found!");
         }
     }
 
-    ///Relaxes the edge. {@code currentNode} HAS to be either the roads start- or endNode, otherwise an error will be thrown.
+    /// Relaxes the edge. {@code currentNode} HAS to be either the roads start- or endNode, otherwise an error will be thrown.
     private void relax(Road road, Node currentNode) {
         double newDistanceTo = currentNode.getDistanceTo() + road.getWeight();
         Node nextNode = road.getOppositeNode(currentNode);
