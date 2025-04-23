@@ -14,6 +14,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
+<?import javafx.scene.control.TextArea?>
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.danmarkskort.MVC.Controller">
     <Canvas fx:id="canvas" height="400.0" layoutY="-10.0" onMouseClicked="#onCanvasClick" onMouseDragged="#onCanvasDragged" onMousePressed="#onCanvasPressed" onScroll="#onCanvasScroll" width="600.0" />
     <MenuButton layoutX="527.0" layoutY="35.0" mnemonicParsing="false" text="Filter" AnchorPane.rightAnchor="15.0">
@@ -66,3 +67,4 @@
    <TextArea fx:id="guideText" editable="false" layoutY="25.0" prefHeight="376.0" prefWidth="600.0" text="To load the standard map of Denmark, choose the option in the File tab.&#10;&#10;To print instructions as a PDF, select the option under the File tab.&#10;&#10;To choose points of interest, search via the search bar or select them on the map.&#10;&#10;To access and edit points of interest, use the Edit tab.&#10;&#10;To show the FPS counter, toggle it on via the Show tab.&#10;&#10;To change the color scheme, choose one of the options in the Filter tab.&#10;&#10;To close the guide, toggle it off in the Help menu." visible="false" />
     <Button fx:id="removePOIButton" layoutX="172.0" layoutY="107.0" mnemonicParsing="false" onMouseClicked="#removePOI" text="Remove POI" visible="false" />
 </AnchorPane>
+

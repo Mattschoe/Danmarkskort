@@ -43,6 +43,7 @@ public class Controller implements Initializable {
     private POI endPOI;
     private Point2D POIMark;
     private List<String> POIList = List.of("En", "TO", "Tre");
+    private List<POI> favoritePOIs = new ArrayList<>();
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
@@ -50,13 +51,16 @@ public class Controller implements Initializable {
     //region FXML fields
     @FXML private Canvas canvas;
     @FXML private CheckMenuItem fpsButton;
+    @FXML private CheckMenuItem guideButton;
     @FXML private ListView<String> listView;
     @FXML private Slider zoomBar;
     @FXML private Text fpsText;
     @FXML private Text zoomText;
     @FXML private TextField searchBar;
+    @FXML private TextArea guideText;
     @FXML private Button switchSearch;
     @FXML private Button findRoute;
+    @FXML private Button removePOIButton;
     @FXML private TextField destination;
     @FXML private MenuItem POIMenuButton;
 
@@ -266,6 +270,12 @@ public class Controller implements Initializable {
         System.out.println("Så skal man kunne skfite her");
         System.out.println(POIList);
     }
+
+    @FXML protected void savePOI(POI poi){
+        favoritePOIs.add(poi);
+        
+    }
+
     /// Method to export a route as PDF
     @FXML protected void exportAsPDF(){
         System.out.println("Attempting to export as PDF!");
