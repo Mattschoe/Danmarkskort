@@ -9,6 +9,7 @@
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
@@ -20,9 +21,8 @@
       <items>
           <Menu text="Color Scheme">
               <items>
-                  <MenuItem mnemonicParsing="false" onAction="#paletteDefault" text="Default" />
-                  <MenuItem mnemonicParsing="false" onAction="#paletteMidnight" text="Midnight"/>
-                  <MenuItem mnemonicParsing="false" onAction="#paletteBasic" text="Basic"/>
+                  <MenuItem mnemonicParsing="false" text="Color-blind" />
+                  <MenuItem mnemonicParsing="false" text="another one!" />
               </items>
           </Menu>
           <Menu text="Filter road">
@@ -48,19 +48,20 @@
    <TextField fx:id="destination" layoutX="15.0" layoutY="71.0" onKeyTyped="#searchBarTyped" promptText="Choose Destination..." visible="false" />
     <MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <Menu mnemonicParsing="false" text="File">
-            <MenuItem mnemonicParsing="false" onAction="#standardInputButton" text="Load Standard" />
+            <MenuItem mnemonicParsing="false" onAction="#standardInputButton" text="Load Standart" />
             <MenuItem mnemonicParsing="false" onAction="#exportAsPDF" text="Export as PDF" />
         </Menu>
         <Menu mnemonicParsing="false" text="Edit">
-            <MenuItem fx:id="POIMenuButton" mnemonicParsing="false" onAction="#POIMenu" text="Points of interest" />
+            <MenuItem fx:id="POImenu" mnemonicParsing="false" onAction="#POIMenu" text="Points of interest" />
         </Menu>
         <Menu mnemonicParsing="false" text="Help">
-            <CheckMenuItem fx:id="guideButton" mnemonicParsing="false" text="Guide" />
+            <CheckMenuItem fx:id="guideButton" mnemonicParsing="false" onAction="#guideTextButton" text="Guide" />
         </Menu>
-        <Menu mnemonicParsing="false" text="Show">
-            <CheckMenuItem fx:id="fpsButton" mnemonicParsing="false" text="FPS"/>
-        </Menu>
+      <Menu mnemonicParsing="false" text="Show">
+            <CheckMenuItem fx:id="fpsButton" mnemonicParsing="false" text="FPS" />
+      </Menu>
     </MenuBar>
    <Button fx:id="findRoute" layoutX="172.0" layoutY="35.0" mnemonicParsing="false" onMouseClicked="#onRouteSearchStart" text="Find Route" visible="false" />
    <Button fx:id="switchSearch" layoutX="172.0" layoutY="71.0" mnemonicParsing="false" onMouseClicked="#switchDestinationAndStart" text="Switch" visible="false" />
+   <TextArea fx:id="guideText" editable="false" layoutY="25.0" prefHeight="376.0" prefWidth="600.0" text="To load the standard map of Denmark, choose the option in the File tab.&#10;&#10;To print instructions as a PDF, select the option under the File tab.&#10;&#10;To choose points of interest, search via the search bar or select them on the map.&#10;&#10;To access and edit points of interest, use the Edit tab.&#10;&#10;To show the FPS counter, toggle it on via the Show tab.&#10;&#10;To change the color scheme, choose one of the options in the Filter tab.&#10;&#10;To close the guide, toggle it off in the Help menu." visible="false" />
 </AnchorPane>

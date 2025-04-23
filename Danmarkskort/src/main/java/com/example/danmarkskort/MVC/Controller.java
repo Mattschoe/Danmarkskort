@@ -53,8 +53,10 @@ public class Controller implements Initializable {
     @FXML private Text fpsText;
     @FXML private Text zoomText;
     @FXML private TextField searchBar;
+    @FXML private TextArea guideText;
     @FXML private Button switchSearch;
     @FXML private Button findRoute;
+    @FXML private Button CloseGuideButton;
     @FXML private TextField destination;
     @FXML private MenuItem POIMenuButton;
 
@@ -266,7 +268,15 @@ public class Controller implements Initializable {
         System.out.println("exporting as PDF");
     }
 
+    /// Method to open a textbox with a written guide when "Guide" is pressed
+    @FXML protected void guideTextButton(){
+        guideText.setVisible(guideButton.isSelected());
+        CloseGuideButton.setVisible(guideButton.isSelected());
+    }
 
+    @FXML protected void closeGuide(){
+        CloseGuideButton.setVisible(false);
+    }
 
     //endregion
 
