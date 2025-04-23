@@ -16,7 +16,7 @@ public class POI implements MapObject {
     /**
      *
      * @param name the name of the POI, usually given by the user
-     * @param tile the tile that the POI locates in
+     * @param tile the tile that the POI is located in
      */
     public POI(float x, float y, String name, Tile tile) {
         this.x = x;
@@ -84,6 +84,7 @@ public class POI implements MapObject {
     public String getNodeAddress() {
         return closestNodeToPOI.getAddress();
     }
-
+    public float getX() { return x; }
+    public float getY() { return y; }
     //endregion
 }

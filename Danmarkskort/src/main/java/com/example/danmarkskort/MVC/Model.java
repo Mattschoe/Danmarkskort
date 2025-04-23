@@ -365,6 +365,13 @@ public class Model {
         return POI;
     }
 
+    //fjern en given POI fra dens tile
+    public void removePOI(POI poi){
+        Tile tile = tilegrid.getTileFromXY(poi.getX(), poi.getY());
+        tile.getPOIs().remove(poi);
+
+    }
+
     ///Starts a search from {@code startNode} to {@code endNode}
     public void search(Node startNode, Node endNode) {
         search.route(startNode, endNode);

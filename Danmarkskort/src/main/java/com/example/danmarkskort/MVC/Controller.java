@@ -43,6 +43,7 @@ public class Controller implements Initializable {
     private MouseEvent mouseEvent; //Used to pan
     private POI startPOI;
     private POI endPOI;
+    private Point2D POIMark;
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
@@ -303,8 +304,8 @@ public class Controller implements Initializable {
             Affine transform = view.getTrans();
             POI POI = null;
             try {
-                Point2D point = transform.inverseTransform(e.getX(), e.getY());
-                POI = model.createPOI((float) point.getX(), (float) point.getY(), "Test");
+                POIMark = transform.inverseTransform(e.getX(), e.getY()); //ændret point til et felt, POIMark
+                POI = model.createPOI((float) POIMark.getX(), (float) POIMark.getY(), "Test");
             } catch (NonInvertibleTransformException exception) {
                 System.out.println("Error inversion mouseclick coords!" + exception.getMessage());
             }
@@ -344,6 +345,14 @@ public class Controller implements Initializable {
         startPOI = endPOI;
         endPOI = temp;
         updateSearchText();
+    }
+
+    @FXML public void removePOI(){
+        if(startPOI == null){return;}
+        //sæt knappen til visible og kald denne metode et sted
+        model.removePOI(startPOI);
+        startPOI=null;
+        view.drawMap();
     }
 
     ///Updates the text in the search. Call this after changing the POI responsible for the text

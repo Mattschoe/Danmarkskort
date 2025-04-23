@@ -51,7 +51,6 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${junitVersion}")
     implementation 'org.junit.jupiter:junit-jupiter:5.11.1'
 
-
     implementation 'com.itextpdf:itextpdf:5.5.13.3'
     implementation 'net.sf.trove4j:trove4j:3.0.3'
 }
