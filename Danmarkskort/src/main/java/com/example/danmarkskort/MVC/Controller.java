@@ -239,14 +239,12 @@ public class Controller implements Initializable {
     /// TODO
     /// skal kunne acceptere to strenge
     @FXML protected void searchBarTyped(KeyEvent event) {
-        //if (trieCity == null ||trieStreet == null) { //Her sker fejl - Trien loader ikke?
+        //Loads tries if first time
+        if (trieCity == null || trieStreet == null) {
             System.out.println("Loading tries!");
             this.trieCity = model.getTrieCity();
             this.trieStreet = model.getTrieStreet();
-
-        if (trieCity == null || trieStreet == null) {
-            System.out.println("Failed to load tries.");
-            return;
+            assert trieCity != null && trieStreet != null;
         }
 
         listView.getItems().clear();
@@ -257,9 +255,8 @@ public class Controller implements Initializable {
             return;
         }
 
-        System.out.println("User input: " + input);
-
-        listView.setVisible(searchBar.getText() != null);
+        if (searchBar.getText().trim().isEmpty()) listView.setVisible(false);
+        else listView.setVisible(true);
         List<String> matches = trieCity.keysWithPrefix(input);
 
         System.out.println("laver liste af matches (i by-trien)"); //TEST
@@ -281,7 +278,7 @@ public class Controller implements Initializable {
         }
     }
 
-    /// Auto-suggests roads and cities in a drop-down menu from the search-bar (????)
+    /// Auto-suggests roads and cities in a drop-down menu from the search-bar
     private void autoSuggest(String eventCharacter, String input, TrieST<String> trie) {
         if (eventCharacter.equals("\r") && input != null) { // Hvis der trykkes enter og der er et input
             System.out.println("enter entered!");
@@ -360,6 +357,8 @@ public class Controller implements Initializable {
     private void startSearch() {
         System.out.println("Starting search...");
         List<Road> route = model.search(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
+
+        //Adds route to the view so it gets drawn
         for (Road road : route) {
             view.addObjectToDraw(road);
         }

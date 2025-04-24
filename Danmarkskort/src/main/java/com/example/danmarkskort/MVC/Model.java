@@ -29,7 +29,7 @@ public class Model {
     private TrieST<String> trieCity;
     private TrieST<String> trieStreet;
     Set<String> streets;
-    Set<String> cities; //Do we need?
+    Map<String, Node> citiesToNode;
     //endregion
 
     //region Constructor(s)
@@ -503,36 +503,38 @@ public class Model {
         return minMaxCoords;
     }
 
-    /// Saves the Tile gid to a OBJ file so we cant fast load it later
-    private void saveTileGridToOBJ() {
-        //TODO MAKE THIS WORK ???
-    }
 
     /**
      * Inserts all streets and cities of the complex nodes to Tries
      */
     private void loadAddressNodes() {
-        //TODO
-        //Man skal panne for at skabe en instans af model??
-        //æøå issues
-        //Hvis man trykker på forslag og derfor enter = null
-        //vejnavnene skal komme op i forskelllige byer (evt. dette)
         trieCity = new TrieST(true);
         trieStreet = new TrieST(false);
-        cities = new HashSet<>();
-        int testCounter = 0; //TESTING
+        citiesToNode = new HashMap<>();
         for (Node node : parser.getAddressNodes()) { //gennemgår alle address nodes
-            String[] address = new String[]{node.getStreet(),node.getHouseNumber(), String.valueOf(node.getPostcode()),node.getCity()};
+            String street = node.getStreet();
+            String city = node.getCity();
 
-            //Byer indsættes i trien til byer TO DO: Make this not O(N^2)
-            if (address[0] != null && !cities.contains(address[0])) { //Hvis byen ikke allerede er indlæst
-                trieCity.put(address[0], node);
-                cities.add(address[0]);
-            }
+            //Inserts a representative node of a city.
+            if (city != null) citiesToNode.put(city, node);
 
-            //streets.add(address[3]); //Nu er vejnavnet indsat!
-            trieStreet.put(address[3], node);
+            //Insert node into streets if it has an address
+            if (street != null) trieStreet.put(street, node);
         }
+        //Adds nodes to the city trie
+        for (String city : citiesToNode.keySet()) {
+            trieCity.put(city, citiesToNode.get(city));
+        }
+    }
+
+    ///Returns the node that represents the given {@code city} from the trie. If city not included will return null
+    public Node getCityNode(String city) {
+        return trieCity.get(city);
+    }
+
+    ///Returns a list of nodes that are correlated with the given {@code prefix} from the trie
+    public List<Node> getNodesFromPrefix(String prefix) {
+
     }
 
 
@@ -540,7 +542,6 @@ public class Model {
     //endregion
 
     //region Getters and setters
-    public Parser   getParser()   { return parser;   }
     public Tilegrid getTilegrid() { return tilegrid; }
     public List<Road> getLatestRoute() { return latestRoute; }
     public void setLatestRoute(List<Road> route) { latestRoute = route; }
@@ -550,12 +551,5 @@ public class Model {
     public TrieST<String> getTrieStreet() {
         return trieStreet;
     }
-    public Set<String> getStreets() {
-        return streets;
-    }
-    public Set<String> getCities() {
-        return cities;
-    }
-
     //endregion
 }

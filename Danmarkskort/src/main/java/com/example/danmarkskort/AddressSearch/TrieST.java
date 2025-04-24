@@ -25,6 +25,7 @@ public class TrieST<Item> {
         return current.getValues(); //Dette skal ændres da det er goofy kode
     }
 
+    ///Returns the Node if in tree, gives null if not
     public Node get(String word) {
         word = word.toLowerCase();
         TrieNode current = get(root, word, 0);
@@ -78,11 +79,7 @@ public class TrieST<Item> {
             return current;
         }
         char c = word.charAt(depth); //Traverser ned af træet med hvert bogstav indtil der enten ikke er flere eller
-        try {
-            current.getChildren()[charToIndex(c)] = put(current.getChildren()[charToIndex(c)], word, val, depth + 1);
-        } catch (IndexOutOfBoundsException e) {
-            System.out.println("HELLO");
-        }
+        current.getChildren()[charToIndex(c)] = put(current.getChildren()[charToIndex(c)], word, val, depth + 1);
         return current;
     }
 
