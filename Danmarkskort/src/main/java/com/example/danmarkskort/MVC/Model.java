@@ -519,7 +519,6 @@ public class Model {
         //vejnavnene skal komme op i forskelllige byer (evt. dette)
         trieCity = new TrieST<>(true);
         trieStreet = new TrieST<>(false);
-        streets = new HashSet<>();
         cities = new HashSet<>();
         int testCounter = 0; //TESTING
         for (Node node : parser.getAddressNodes()) { //gennemgår alle address nodes
