@@ -28,10 +28,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.PriorityQueue;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class Controller implements Initializable {
     //region Fields
@@ -274,6 +271,9 @@ public class Controller implements Initializable {
             autoSuggestResults = new ArrayList<>(streets);
         } else {
             if (autoSuggestResults.isEmpty()) return; //If we never got suggestion, we return early and dont auto-suggest anything
+            for (Node node : autoSuggestResults) {
+                listView.getItems().add(node.getAddress());
+            }
         }
     }
 
