@@ -14,6 +14,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Affine;
@@ -25,9 +26,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class Controller implements Initializable {
     //region Fields
@@ -43,7 +42,7 @@ public class Controller implements Initializable {
     private POI endPOI;
     private Point2D POIMark;
     private List<String> POIList = List.of("En", "TO", "Tre");
-    private List<POI> favoritePOIs = new ArrayList<>();
+    private Map<String,POI> favoritePOIs = new HashMap<>();
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
@@ -61,9 +60,14 @@ public class Controller implements Initializable {
     @FXML private Button switchSearch;
     @FXML private Button findRoute;
     @FXML private Button removePOIButton;
-    @FXML private TextField destination;
+    @FXML private Button savePOIButton;
     @FXML private MenuItem POIMenuButton;
+    @FXML private TextField destination;
     @FXML private Menu POIMenu;
+    @FXML private TextField addNamePOI;
+    @FXML private Button addToPOIsUI;
+    @FXML private Button POIClose;
+    @FXML private TextArea addPOIBox;
 
 
     //endregion
@@ -132,9 +136,11 @@ public class Controller implements Initializable {
         });
         if(POIMenu != null){
         POIMenu.getItems().clear();
-        for (String poi : POIList) {
-            Menu subMenu = new Menu(poi);
 
+        if(favoritePOIs.isEmpty()){return;}
+
+        for (POI poi: favoritePOIs.values()) {
+            Menu subMenu = new Menu(poi.toString());
             MenuItem detailItem = new MenuItem("Details for " + poi);
             detailItem.setOnAction(e -> System.out.println("Clicked on: " + poi));
             subMenu.getItems().add(detailItem);
@@ -285,10 +291,41 @@ public class Controller implements Initializable {
         System.out.println(POIList);
     }
 
-    @FXML protected void savePOI(POI poi){
-        favoritePOIs.add(poi);
-
+    @FXML protected void savePOIToHashMap(){
+        if(startPOI == null){return;}
+        String name = addNamePOI.getText();
+        favoritePOIs.put(name, startPOI);
+        closePOIMenu();
+        //favoritePOI.(startPOI);
+        System.out.println("Saved POI!: " + startPOI + " with name: " + name);
+       /* for(POI poi : favoritePOIs){
+            System.out.println("- " + poi);
+        }*/
     }
+
+    @FXML protected void openPOIMenu(){
+        addPOIBox.setVisible(true);
+        addNamePOI.setVisible(true);
+        addToPOIsUI.setVisible(true);
+        POIClose.setVisible(true);
+    }
+
+    @FXML protected void closePOIMenu(){
+        addPOIBox.setVisible(false);
+        addNamePOI.setVisible(false);
+        addToPOIsUI.setVisible(false);
+        POIClose.setVisible(false);
+    }
+
+    @FXML public void removePOIMarker(){
+        if(startPOI == null){return;}
+        //sæt knappen til visible og kald denne metode et sted
+        model.removePOI(startPOI);
+        startPOI=null;
+        view.drawMap();
+    }
+
+
 
     /// Method to export a route as PDF
     @FXML protected void exportAsPDF(){
@@ -359,6 +396,7 @@ public class Controller implements Initializable {
             try {
                 POIMark = transform.inverseTransform(e.getX(), e.getY()); //ændret point til et felt, POIMark
                 POI = model.createPOI((float) POIMark.getX(), (float) POIMark.getY(), "Test");
+                savePOIButton.setVisible(true);
             } catch (NonInvertibleTransformException exception) {
                 System.out.println("Error inversion mouseclick coords!" + exception.getMessage());
             }
@@ -381,7 +419,6 @@ public class Controller implements Initializable {
     ///Opens the search menu when activated. If both start- and endPOI are initialized, this button is used for activating the route finding between the two POI's.
     @FXML public void onActivateSearch() {
         findRoute.setVisible(true);
-        //savePOIButton.setVisible(true)
     }
 
     ///"Find Route" button on UI
@@ -401,13 +438,7 @@ public class Controller implements Initializable {
         updateSearchText();
     }
 
-    @FXML public void removePOI(){
-        if(startPOI == null){return;}
-        //sæt knappen til visible og kald denne metode et sted
-        model.removePOI(startPOI);
-        startPOI=null;
-        view.drawMap();
-    }
+
 
     ///Updates the text in the search. Call this after changing the POI responsible for the text
     private void updateSearchText() {

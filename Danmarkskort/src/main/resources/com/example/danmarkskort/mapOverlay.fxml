@@ -49,7 +49,7 @@
     <TextField fx:id="destination" layoutX="15.0" layoutY="71.0" onKeyTyped="#searchBarTyped" promptText="Choose Destination..." visible="false" />
     <MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <Menu mnemonicParsing="false" text="File">
-            <MenuItem mnemonicParsing="false" onAction="#standardInputButton" text="Load Standart" />
+            <MenuItem mnemonicParsing="false" onAction="#standardInputButton" text="Load Standard" />
             <MenuItem mnemonicParsing="false" onAction="#exportAsPDF" text="Export as PDF" />
         </Menu>
         <Menu mnemonicParsing="false" text="Edit">
@@ -67,5 +67,9 @@
    <TextArea fx:id="guideText" editable="false" layoutY="25.0" prefHeight="376.0" prefWidth="600.0" text="To load the standard map of Denmark, choose the option in the File tab.&#10;&#10;To print instructions as a PDF, select the option under the File tab.&#10;&#10;To choose points of interest, search via the search bar or select them on the map.&#10;&#10;To access and edit points of interest, use the Edit tab.&#10;&#10;To show the FPS counter, toggle it on via the Show tab.&#10;&#10;To change the color scheme, choose one of the options in the Filter tab.&#10;&#10;To close the guide, toggle it off in the Help menu." visible="false" />
    <TextField fx:id="closestRoadBar" layoutX="451.0" layoutY="70.0" prefHeight="26.0" prefWidth="140.0" promptText="Closest Road..." />
     <Button fx:id="removePOIButton" layoutX="172.0" layoutY="107.0" mnemonicParsing="false" onMouseClicked="#removePOI" text="Remove POI" visible="false" />
-   <Button fx:id="savePOIButton" layoutX="254.0" layoutY="35.0" mnemonicParsing="false" text="Save POI" visible="false" />
+   <Button fx:id="savePOIButton" layoutX="249.0" layoutY="35.0" mnemonicParsing="false" onMouseClicked="#openPOIMenu" text="Save POI" visible="false" />
+   <TextArea fx:id="addPOIBox" editable="false" layoutX="210.0" layoutY="142.0" prefHeight="142.0" prefWidth="181.0" visible="false" />
+   <TextField id="addNamePOI" fx:id="addNamePOI" layoutX="220.0" layoutY="190.0" promptText="Add name to POI..." visible="false" />
+   <Button id="addToPOIsUI" fx:id="addToPOIsUI" layoutX="281.0" layoutY="236.0" onMouseClicked="#savePOIToHashMap" mnemonicParsing="false" text="Add" visible="false" />
+   <Button id="POIClose" fx:id="POIClose" layoutX="364.0" layoutY="145.0" onMouseClicked="#closePOIMenu" mnemonicParsing="false" prefHeight="13.0" prefWidth="23.0" text="x" visible="false" />
 </AnchorPane>

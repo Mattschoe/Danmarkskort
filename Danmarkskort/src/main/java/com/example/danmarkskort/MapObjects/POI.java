@@ -74,6 +74,10 @@ public class POI implements MapObject {
         return closestNode;
     }
 
+    @Override
+    public String toString() {
+        return "placeholder name";
+    }
     //region getters and setters
     ///Returns the name of this POI
     public String getName() { return name;}
