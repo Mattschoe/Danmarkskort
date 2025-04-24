@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -46,6 +47,7 @@ public class Controller implements Initializable {
     private POI endPOI;
     private final List<String> POIList = List.of("En", "TO", "Tre");
     private AddressParser addressParser;
+    List<Node> autoSuggestResults;
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
@@ -83,7 +85,7 @@ public class Controller implements Initializable {
         this.trieStreet = new TrieST<>(false);
         listView = new ListView<>();
         addressParser = new AddressParser();
-        System.out.println("AddressParser created!");
+        autoSuggestResults = new ArrayList<>();
 
         //region AnimationTimer
         AnimationTimer fpsTimer = new AnimationTimer() {
@@ -247,13 +249,12 @@ public class Controller implements Initializable {
             assert trieCity != null && trieStreet != null;
         }
 
-        String input = "";
         //If user wants to search we pick the top node
-        if (event.getCode().equals(KeyCode.ENTER)) {
-            //autoSuggest(input).getFirst();
+        if (event.getCharacter().equals("\r")) { //If "Enter" is pressed
+            System.out.println(autoSuggestResults.getFirst().getAddress());
         } else {
             listView.getItems().clear(); //Potential cleanup from earlier search
-            input = searchBar.getText().toLowerCase();
+            String input = searchBar.getText().toLowerCase();
 
             //if search-bar is empty we return out
             if (input.isEmpty()) {
@@ -272,19 +273,27 @@ public class Controller implements Initializable {
      */
     private void autoSuggest(String input) {
         List<Node> cities = model.getCitiesFromPrefix(input);
+        List<Node> streets = model.getStreetsFromPrefix(input);
+
+        //If prefix matches
         if (!cities.isEmpty()) {
             for (Node node : cities) {
                 listView.getItems().add(node.getCity());
             }
-        } else {
-            List<Node> streets = model.getStreetsFromPrefix(input);
+            autoSuggestResults = new ArrayList<>(cities);
+        } else if (!streets.isEmpty()) {
+            //If no city found we show streets
             for (Node node : streets) {
                 listView.getItems().add(node.getAddress());
             }
+            autoSuggestResults = new ArrayList<>(streets);
+        } else {
+            if (autoSuggestResults.isEmpty()) return; //If we never got suggestion, we return early and dont auto-suggest anything
+            //We are out of suggestions, so we work of what we already have.
+            for (Node node : autoSuggestResults) {
+                listView.getItems().add(node.getAddress());
+            }
         }
-
-
-        
     }
 
     private void startSearch() {
