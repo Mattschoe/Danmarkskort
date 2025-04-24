@@ -292,9 +292,9 @@ public class Controller implements Initializable {
         String name = addNamePOI.getText();
         favoritePOIs.put(name, startPOI);
         closePOIMenu();
-        favoritePOIs.getItems
+       // favoritePOIs.getItems
         //favoritePOI.(startPOI);
-        System.out.println("Saved POI!: " + startPOI + " with name: " + name);
+     //   System.out.println("Saved POI!: " + startPOI + " with name: " + name);
        /* for(POI poi : favoritePOIs){
             System.out.println("- " + poi);
         }*/
