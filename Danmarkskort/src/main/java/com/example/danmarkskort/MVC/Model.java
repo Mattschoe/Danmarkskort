@@ -508,8 +508,8 @@ public class Model {
      * Inserts all streets and cities of the complex nodes to Tries
      */
     private void loadAddressNodes() {
-        trieCity = new TrieST(true);
-        trieStreet = new TrieST(false);
+        trieCity = new TrieST();
+        trieStreet = new TrieST();
         citiesToNode = new HashMap<>();
         for (Node node : parser.getAddressNodes()) { //gennemgår alle address nodes
             String street = node.getStreet();
@@ -525,11 +525,6 @@ public class Model {
         for (String city : citiesToNode.keySet()) {
             trieCity.put(city, citiesToNode.get(city));
         }
-    }
-
-    ///Returns the node that represents the given {@code city} from the trie. If city not included will return null
-    public Node getCityNode(String city) {
-        return trieCity.get(city);
     }
 
     ///Returns a list of city-nodes that are correlated with the given {@code prefix} from the trie
@@ -552,17 +547,13 @@ public class Model {
         return streetsWithPrefix;
     }
 
+
+
     //endregion
 
     //region Getters and setters
     public Tilegrid getTilegrid() { return tilegrid; }
     public List<Road> getLatestRoute() { return latestRoute; }
     public void setLatestRoute(List<Road> route) { latestRoute = route; }
-    public TrieST<String> getTrieCity() {
-        return trieCity;
-    }
-    public TrieST<String> getTrieStreet() {
-        return trieStreet;
-    }
     //endregion
 }

@@ -40,13 +40,10 @@ public class Controller implements Initializable {
     private double lastX, lastY; //Used to pan
     private boolean panRequest, zoomRequest; //Used by AnimationTimer
     private ScrollEvent scrollEvent; //Used to zoom
-    private TrieST<String> trieCity; //Part of test
-    private TrieST<String> trieStreet;
     private MouseEvent mouseEvent; //Used to pan
     private POI startPOI;
     private POI endPOI;
     private final List<String> POIList = List.of("En", "TO", "Tre");
-    private AddressParser addressParser;
     List<Node> autoSuggestResults;
 
     private long lastSystemTime; //Used to calculate FPS
@@ -67,8 +64,6 @@ public class Controller implements Initializable {
     @FXML private TextField destination;
     @FXML private MenuItem POIMenuButton;
     @FXML private Menu POIMenu;
-
-
     //endregion
     //endregion
 
@@ -81,10 +76,7 @@ public class Controller implements Initializable {
         canvas = new Canvas(400, 600);
         System.out.println("Controller created!");
 
-        this.trieCity = new TrieST<>(true);
-        this.trieStreet = new TrieST<>(false);
         listView = new ListView<>();
-        addressParser = new AddressParser();
         autoSuggestResults = new ArrayList<>();
 
         //region AnimationTimer
@@ -241,13 +233,6 @@ public class Controller implements Initializable {
     /// Methods runs upon modifying the {@code searchbar} in the UI.
     @FXML protected void searchBarTyped(KeyEvent event) {
         if (model == null) model = Model.getInstance();
-        //Loads tries if first time
-        if (trieCity == null || trieStreet == null) {
-            System.out.println("Loading tries!");
-            this.trieCity = model.getTrieCity();
-            this.trieStreet = model.getTrieStreet();
-            assert trieCity != null && trieStreet != null;
-        }
 
         //If user wants to search we pick the top node
         if (event.getCharacter().equals("\r")) { //If "Enter" is pressed
@@ -289,10 +274,6 @@ public class Controller implements Initializable {
             autoSuggestResults = new ArrayList<>(streets);
         } else {
             if (autoSuggestResults.isEmpty()) return; //If we never got suggestion, we return early and dont auto-suggest anything
-            //We are out of suggestions, so we work of what we already have.
-            for (Node node : autoSuggestResults) {
-                listView.getItems().add(node.getAddress());
-            }
         }
     }
 
@@ -310,6 +291,13 @@ public class Controller implements Initializable {
     //endregion
 
     //region Canvas methods
+    @FXML protected void onAddressPickedFromList(MouseEvent event) {
+        if (event.getClickCount() == 2) {
+            String selectedItem = listView.getSelectionModel().getSelectedItem();
+            if (selectedItem != null) System.out.println(selectedItem);
+        }
+    }
+
     /// Method opens af list of points of interests so the user can edit it.
     @FXML protected void POIMenuAction(){
         //der skal være en liste der bliver opdateret når man tilføjer og fjerne POI's som bliver vist når man klikker på menuen

@@ -6,11 +6,6 @@ import java.util.LinkedList;
 public class TrieST<Item> {
     public int R = 49; // Størrelse på alfabet (Radix)
     private TrieNode root; // root of trie
-    private final boolean isCity;
-
-    public TrieST(boolean isCity) {
-        this.isCity = isCity;
-    }
 
     /**
      * Takes a string key and returns its corresponding value by calling private method {@link #get(TrieNode, String, int)}
@@ -79,11 +74,8 @@ public class TrieST<Item> {
             return current;
         }
         char c = word.charAt(depth); //Traverser ned af træet med hvert bogstav indtil der enten ikke er flere eller vi har fundet
-        try {
-            current.getChildren()[charToIndex(c)] = put(current.getChildren()[charToIndex(c)], word, val, depth + 1);
-        } catch (IndexOutOfBoundsException e) {
-            System.out.println(":(");
-        }
+
+        current.getChildren()[charToIndex(c)] = put(current.getChildren()[charToIndex(c)], word, val, depth + 1);
         return current;
     }
 
@@ -186,40 +178,4 @@ public class TrieST<Item> {
             default -> c - 'a';
         };
     }
-    
-    public boolean isCity() {
-        return isCity;
-    }
-
-/*
-    public static void main(String[] args) {
-        TrieST<String> trie = new TrieST<>(false);
-
-        trie.put("Ødense",new Node(20,29));
-        trie.put("Ødense",new Node(20,28));
-        trie.put("Æjby",new Node(20,27));
-        trie.put("Æjby",new Node(20,26));
-        trie.put("Æjby",new Node(20,25));
-        trie.put("üjsti",new Node(20,24));
-        trie.put("Ejnej",new Node(20,23));
-        trie.put("Odensi",new Node(20,22));
-
-        for (Node node : trie.getList("Æjby")) {
-            System.out.print("Æjby indsat: ");
-            System.out.println(node);
-        }
-
-        System.out.print("Dette er Ejenj: ");
-        System.out.println(trie.get("Ejnej"));
-
-        trie.put("Ejnej", new Node(34,20));
-
-        for (Node node : trie.getList("Ejnej")) {
-            System.out.print("Dette er nye Ejnejs");
-            System.out.println(node);
-        }
-
-    }
-
- */
 }
