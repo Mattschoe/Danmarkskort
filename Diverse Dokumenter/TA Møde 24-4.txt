@@ -1,0 +1,10 @@
+TA Møde 24/4
+- Vi skal kunne skrive mere detaljeret retning
+- Zoombar skal være en scale bar (Hvor meget stemmer en bar til i original scale, oversæt til meter og derefter del med zoom factor
+- Test på Jacoco
+- KD-træer  
+
+- Video skal vise features, tænk over hvad kan du egentlig vise på 5 minutter. 
+
+
+- tag koordinater i vektorer, kig retning (positiv op, negativ ned) og udregn venstre højre ud fra det
