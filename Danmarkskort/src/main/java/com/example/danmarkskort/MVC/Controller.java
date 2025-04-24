@@ -227,24 +227,45 @@ public class Controller implements Initializable {
     /// TODO
     /// skal kunne acceptere to strenge
     @FXML protected void searchBarTyped(KeyEvent event) {
-            if (trieCity == null) { //Her sker fejl - Trien loader ikke?
-                System.out.println("Trie loaded!");
-                this.trieCity = model.getTrieCity();
-                this.trieStreet = model.getTrieStreet();
-            }
+        //if (trieCity == null ||trieStreet == null) { //Her sker fejl - Trien loader ikke?
+            System.out.println("Loading tries!");
+            this.trieCity = model.getTrieCity();
+            this.trieStreet = model.getTrieStreet();
 
+        if (trieCity == null || trieStreet == null) {
+            System.out.println("Failed to load tries.");
+            return;
+        }
 
         listView.getItems().clear();
-
         String input = searchBar.getText();
 
-        System.out.println("input: " + input);
+        if (input.isEmpty()) {
+            System.out.println("Input is empty. Returning early.");
+            return;
+        }
+
+        System.out.println("User input: " + input);
+
         listView.setVisible(searchBar.getText() != null);
-        // HVIS DER STADIG ER MULIGE BYER
-        if (!trieCity.keysWithPrefix(input).isEmpty()) { //Her skabes problemer
+        List<String> matches = trieCity.keysWithPrefix(input);
+
+        System.out.println("laver liste af matches (i by-trien)"); //TEST
+        System.out.println(matches.size());
+
+        if (!matches.isEmpty()) {
+            System.out.println("leder efter by"); //TEST
             autoSuggest(event.getCharacter(), input, trieCity);
-        } else { // Skal lede i vejnavne
-            autoSuggest(event.getCharacter(), input, trieStreet);
+        } else {
+            System.out.println("laver liste af matches (i vej-trien)"); //TEST
+            matches = trieStreet.keysWithPrefix(input);
+            System.out.println(matches.size());
+            if (!matches.isEmpty()) {
+                System.out.println("leder efter vej"); //TEST
+                autoSuggest(event.getCharacter(), input, trieStreet);
+            } else {
+                System.out.println("Ingen matches fundet :(.");
+            }
         }
     }
 
