@@ -41,8 +41,8 @@ public class Controller implements Initializable {
     private POI startPOI;
     private POI endPOI;
     private Point2D POIMark;
-    private List<String> POIList = List.of("En", "TO", "Tre");
     private Map<String,POI> favoritePOIs = new HashMap<>();
+    List<MenuItem> POIMenuList = new ArrayList<>();
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
@@ -284,21 +284,37 @@ public class Controller implements Initializable {
         System.out.println("Finished search!");
     }
 
-    /// Method opens af list of points of interests so the user can edit it.
-    @FXML protected void POIMenuAction(){
-        //der skal være en liste der bliver opdateret når man tilføjer og fjerne POI's som bliver vist når man klikker på menuen
-        System.out.println("Så skal man kunne skfite her");
-        System.out.println(POIList);
-    }
-
+    /// This metod is used to save the current POI to a map and add it as a menuitem to the POI menubar to give it delete and find adress as options.
     @FXML protected void savePOIToHashMap(){
         if(startPOI == null){return;}
         String name = addNamePOI.getText();
         favoritePOIs.put(name, startPOI);
         closePOIMenu();
+
+        Menu POIMenuItem = new Menu(name);
+        POIMenu.getItems().add(POIMenuItem);
+
+        MenuItem deletePOI = new MenuItem("Delete");
+        deletePOI.setOnAction(e -> {
+            favoritePOIs.remove(name);
+            POIMenu.getItems().remove(POIMenuItem);
+        });
+
+        MenuItem showAddress = new MenuItem("Show Address");
+        showAddress.setOnAction(e -> {
+            POI poi = favoritePOIs.get(name);
+            if (poi != null) {
+                String address = poi.getNodeAddress();
+                    searchBar.setText(address);
+            }
+        });
+
+        POIMenuItem.getItems().addAll(showAddress, deletePOI);
+
+        // Add the full POI menu to the master menu
         //favoritePOI.(startPOI);
         System.out.println("Saved POI!: " + startPOI + " with name: " + name);
-       /* for(POI poi : favoritePOIs){
+        /* for(POI poi : favoritePOIs){
             System.out.println("- " + poi);
         }*/
     }
@@ -523,5 +539,6 @@ public class Controller implements Initializable {
      *  @return Controllerens canvas-felt
      */
     public Canvas getCanvas() { return canvas; }
+
     //endregion
 }
