@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 
 public class TrieST<Item> {
-    public int R = 43; // Størrelse på alfabet (Radix)
+    public int R = 47; // Størrelse på alfabet (Radix)
     private TrieNode root; // root of trie
     private final boolean isCity;
 
@@ -72,18 +72,17 @@ public class TrieST<Item> {
      * @return returns the TrieNode which the key is now associated to
      */
     private TrieNode put(TrieNode current, String word, Node val, int depth) { // Change value associated with key if in subtrie rooted at x.
-        if (current == null) current = new TrieNode(); //Hvis trienoden ikke eksistere allerede, skab den
+        if (current == null) current = new TrieNode(); //Hvis trienoden ikke eksisterer allerede, skaber vi den
         if (depth == word.length()) {
-            if (current.getValue() == null) {
-                current.setValue(val);
-            } else {
-                current.setValue(val);
-
-            }
+            current.setValue(val);
             return current;
         }
-        char c = word.charAt(depth); // Traversere ned af træet med hvert bogstav indtil der enten ikke er flere eller
-        current.getChildren()[charToIndex(c)] = put(current.getChildren()[charToIndex(c)], word, val, depth + 1);
+        char c = word.charAt(depth); //Traverser ned af træet med hvert bogstav indtil der enten ikke er flere eller
+        try {
+            current.getChildren()[charToIndex(c)] = put(current.getChildren()[charToIndex(c)], word, val, depth + 1);
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println("HELLO");
+        }
         return current;
     }
 
@@ -118,19 +117,8 @@ public class TrieST<Item> {
         if (current == null) return;
         if (current.getValue() != null) queue.addFirst(prefix);
         for (char c = 'a' ; c < R + 'a'; c++) {
-            collect(current.getChildren()[charToIndex(c)],prefix + c, queue); //what the hell er dette
+            collect(current.getChildren()[charToIndex(c)],prefix + c, queue); //what the hell er dette -T, Idk man but slay ig -MN
         }
-    }
-
-    /**
-     * Returns a LinkedList consisting of keys that match the pattern parameter by calling {@link #collect(TrieNode, String, String, LinkedList)}
-     * @param pattern String that should match a key
-     * @return returns a LinkedList with keys
-     */
-    public LinkedList<String> keysThatMatch(String pattern) {
-        LinkedList<String> queue = new LinkedList<>();
-        collect(root, "", pattern, queue);
-        return queue;
     }
 
     /**
@@ -155,6 +143,18 @@ public class TrieST<Item> {
         }
     }
 
+    /**
+     * Returns a LinkedList consisting of keys that match the pattern parameter by calling {@link #collect(TrieNode, String, String, LinkedList)}
+     * @param pattern String that should match a key
+     * @return returns a LinkedList with keys
+     */
+    public LinkedList<String> keysThatMatch(String pattern) {
+        LinkedList<String> queue = new LinkedList<>();
+        collect(root, "", pattern, queue);
+        return queue;
+    }
+
+    ///Converts special character chars to int to prevent giant radix
     private int charToIndex(char c) {
         return switch (c) {
             case 'æ' -> 26;
@@ -176,6 +176,10 @@ public class TrieST<Item> {
             case '7' -> 41;
             case '8' -> 42;
             case '9' -> 43;
+            case 'ä' -> 44;
+            case 'ö' -> 45;
+            case 'ë' -> 46;
+            case '/' -> 47;
             default -> c - 'a';
         };
     }
@@ -215,8 +219,4 @@ public class TrieST<Item> {
     }
 
  */
-
-
-
-
 }

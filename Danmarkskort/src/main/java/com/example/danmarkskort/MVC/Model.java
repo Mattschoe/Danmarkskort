@@ -517,14 +517,14 @@ public class Model {
         //æøå issues
         //Hvis man trykker på forslag og derfor enter = null
         //vejnavnene skal komme op i forskelllige byer (evt. dette)
-        trieCity = new TrieST<>(true);
-        trieStreet = new TrieST<>(false);
+        trieCity = new TrieST(true);
+        trieStreet = new TrieST(false);
         cities = new HashSet<>();
         int testCounter = 0; //TESTING
         for (Node node : parser.getAddressNodes()) { //gennemgår alle address nodes
             String[] address = new String[]{node.getStreet(),node.getHouseNumber(), String.valueOf(node.getPostcode()),node.getCity()};
 
-            //Byer indsættes i trien til byer
+            //Byer indsættes i trien til byer TO DO: Make this not O(N^2)
             if (address[0] != null && !cities.contains(address[0])) { //Hvis byen ikke allerede er indlæst
                 trieCity.put(address[0], node);
                 cities.add(address[0]);
