@@ -41,7 +41,7 @@ public class Controller implements Initializable {
     private MouseEvent mouseEvent; //Used to pan
     private POI startPOI;
     private POI endPOI;
-    private List<String> POIList = List.of("En", "TO", "Tre");
+    private final List<String> POIList = List.of("En", "TO", "Tre");
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
@@ -60,6 +60,7 @@ public class Controller implements Initializable {
     @FXML private Button findRoute;
     @FXML private TextField destination;
     @FXML private MenuItem POIMenuButton;
+    @FXML private Menu POIMenu;
 
 
     //endregion
@@ -126,6 +127,18 @@ public class Controller implements Initializable {
                 searchBar.setText(selected);
             }
         });
+        if(POIMenu != null){
+        POIMenu.getItems().clear();
+        for (String poi : POIList) {
+            Menu subMenu = new Menu(poi);
+
+            MenuItem detailItem = new MenuItem("Details for " + poi);
+            detailItem.setOnAction(e -> System.out.println("Clicked on: " + poi));
+            subMenu.getItems().add(detailItem);
+
+            POIMenu.getItems().add(subMenu);
+        }
+        }
     }
 
     //region Start-up scene methods
@@ -263,7 +276,7 @@ public class Controller implements Initializable {
     }
 
     /// Method opens af list of points of interests so the user can edit it.
-    @FXML protected void POIMenu(){
+    @FXML protected void POIMenuAction(){
         //der skal være en liste der bliver opdateret når man tilføjer og fjerne POI's som bliver vist når man klikker på menuen
         System.out.println("Så skal man kunne skfite her");
         System.out.println(POIList);
