@@ -13,6 +13,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -125,7 +126,7 @@ public class Controller implements Initializable {
      *  configures something(???) for an object in the mapOverlay.fxml scene
      */
     @Override public void initialize(URL url, ResourceBundle resourceBundle) {
-        listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+        /* listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
                 String selected = listView.getSelectionModel().getSelectedItem();
@@ -137,18 +138,18 @@ public class Controller implements Initializable {
                 }
                listView.setVisible(false);
             }
-        });
-        if(POIMenu != null){
-        POIMenu.getItems().clear();
-        for (String poi : POIList) {
-            Menu subMenu = new Menu(poi);
+        }); */
+        if(POIMenu != null) {
+            POIMenu.getItems().clear();
+            for (String poi : POIList) {
+                Menu subMenu = new Menu(poi);
 
-            MenuItem detailItem = new MenuItem("Details for " + poi);
-            detailItem.setOnAction(e -> System.out.println("Clicked on: " + poi));
-            subMenu.getItems().add(detailItem);
+                MenuItem detailItem = new MenuItem("Details for " + poi);
+                detailItem.setOnAction(e -> System.out.println("Clicked on: " + poi));
+                subMenu.getItems().add(detailItem);
 
-            POIMenu.getItems().add(subMenu);
-        }
+                POIMenu.getItems().add(subMenu);
+            }
         }
     }
 
@@ -235,10 +236,9 @@ public class Controller implements Initializable {
         }
     }
 
-    /// Methods runs upon typing in the search-bar
-    /// TODO
-    /// skal kunne acceptere to strenge
+    /// Methods runs upon modifying the {@code searchbar} in the UI.
     @FXML protected void searchBarTyped(KeyEvent event) {
+        if (model == null) model = Model.getInstance();
         //Loads tries if first time
         if (trieCity == null || trieStreet == null) {
             System.out.println("Loading tries!");
@@ -247,111 +247,44 @@ public class Controller implements Initializable {
             assert trieCity != null && trieStreet != null;
         }
 
-        listView.getItems().clear();
-        String input = searchBar.getText();
-
-        if (input.isEmpty()) {
-            System.out.println("Input is empty. Returning early.");
-            return;
-        }
-
-        if (searchBar.getText().trim().isEmpty()) listView.setVisible(false);
-        else listView.setVisible(true);
-        List<String> matches = trieCity.keysWithPrefix(input);
-
-        System.out.println("laver liste af matches (i by-trien)"); //TEST
-        System.out.println(matches.size());
-
-        if (!matches.isEmpty()) {
-            System.out.println("leder efter by"); //TEST
-            autoSuggest(event.getCharacter(), input, trieCity);
+        String input = "";
+        //If user wants to search we pick the top node
+        if (event.getCode().equals(KeyCode.ENTER)) {
+            //autoSuggest(input).getFirst();
         } else {
-            System.out.println("laver liste af matches (i vej-trien)"); //TEST
-            matches = trieStreet.keysWithPrefix(input);
-            System.out.println(matches.size());
-            if (!matches.isEmpty()) {
-                System.out.println("leder efter vej"); //TEST
-                autoSuggest(event.getCharacter(), input, trieStreet);
-            } else {
-                System.out.println("Ingen matches fundet :(.");
+            listView.getItems().clear(); //Potential cleanup from earlier search
+            input = searchBar.getText().toLowerCase();
+
+            //if search-bar is empty we return out
+            if (input.isEmpty()) {
+                listView.setVisible(false);
+                return;
             }
+
+            //Auto suggests dynamically every user input
+            listView.setVisible(true);
+            autoSuggest(input);
         }
     }
 
-    /// Auto-suggests roads and cities in a drop-down menu from the search-bar
-    private void autoSuggest(String eventCharacter, String input, TrieST<String> trie) {
-        if (eventCharacter.equals("\r") && input != null) { // Hvis der trykkes enter og der er et input
-            System.out.println("enter entered!");
-            //SKAL FINDE UD AF HVOR SPECIFIKT DER ER SØGT (splitter input op!)
-            input = input.replaceAll("([()])","");
-
-            addressParser.parseAddress(input);
-            String[] addressSearchedFor = addressParser.getAddress();
-            System.out.println(addressSearchedFor[0]); //TESTING SHIT ----
-            System.out.println(addressSearchedFor[1]);
-            System.out.println(addressSearchedFor[2]);
-            System.out.println(addressSearchedFor[3]); //HER TIL ----
-
-            if (addressSearchedFor[0] != null && addressSearchedFor[1] != null && addressSearchedFor[2] != null && addressSearchedFor[3] != null) { //HVIS FULD ADDRESSE
-                System.out.println("fuld addresse"); //TESTING
-                for (Node node : trie.getList(addressSearchedFor[0])) { //Kører gennem alle veje med vejnavnet
-                    if (node.getHouseNumber().equals(addressSearchedFor[1]) && String.valueOf(node.getPostcode()).equals(addressSearchedFor[2]) && node.getCity().equals(addressSearchedFor[3])) { //Hvis nummer, postnummer og by passer
-                        System.out.println("dette er vejen: " + node.getStreet() + " nummer: " + node.getHouseNumber() + " i byen: " + node.getCity() + " med postnummeret:" + String.valueOf(node.getPostcode())); //TESTING
-                        System.out.println(node);
-                    }
-                }
-            } else if (addressSearchedFor[0] != null && addressSearchedFor[1] != null && addressSearchedFor[3] != null) { // hvis vej + husnummer + by
-                System.out.println("vej + nummer + by"); //TESTING
-                for (Node node : trie.getList(addressSearchedFor[0])) { //Kører gennem alle veje med vejnavnet
-                    if (node.getHouseNumber().equals(addressSearchedFor[1]) && node.getCity().equals(addressSearchedFor[3])) { //Hvis nummer og by passer
-                        System.out.println("dette er vejen: " + node.getStreet() + " nummer: " + node.getHouseNumber() + " i byen: " + node.getCity()); //TESTING
-                        System.out.println(node);
-                    }
-                }
-            } else if (addressSearchedFor[0] != null && addressSearchedFor[1] != null) { // hvis vej + husnummer
-                System.out.println("vej + nummer"); //TESTING
-                for (Node node : trie.getList(addressSearchedFor[0])) { //Kører gennem alle veje med vejnavnet
-                    if (node.getHouseNumber().equals(addressSearchedFor[1])) { //Hvis nummer og by passer
-                        System.out.println("dette er vejen: " + node.getStreet() + " nummer: " + node.getHouseNumber()); //TESTING
-                        System.out.println(node);
-                    }
-                }
-            } else if (addressSearchedFor[0] != null) { // hvis vej eller by!
-//                System.out.println("vej eller by"); //TESTING
-//                if (!trie.keysThatMatch(addressSearchedFor[0]).isEmpty()) {
-//                    System.out.print("Found exact value: ");
-//                    System.out.println(trie.get(trie.keysThatMatch(addressSearchedFor[0]).getFirst()));
-//                } else {
-                    if (trie.isCity()) {
-                        System.out.print("by: ");
-                    } else {
-                        System.out.print("vej: ");
-                    }
-                    System.out.println(trie.get(trie.keysWithPrefix(addressSearchedFor[0]).getFirst()));
-
+    /**
+     * Auto-suggests roads and cities in a drop-down menu from the search-bar. Will auto-suggest cities, unless there are non, then it will suggest potentiel streets.
+     */
+    private void autoSuggest(String input) {
+        List<Node> cities = model.getCitiesFromPrefix(input);
+        if (!cities.isEmpty()) {
+            for (Node node : cities) {
+                listView.getItems().add(node.getCity());
             }
-
         } else {
-            if (eventCharacter.equals("\b") || eventCharacter.equals(" ")) { //hvis der trykkes backspace eller
-                System.out.println("Backspace or space pressed.");
-                //event.consume(); hvad gør vi her
+            List<Node> streets = model.getStreetsFromPrefix(input);
+            for (Node node : streets) {
+                listView.getItems().add(node.getAddress());
             }
-
-                if (trie.getList(trie.keysWithPrefix(input).getFirst()).size() > 1) { //Finder vejen i forskellige byer - problemer no such element?
-                    for (int i = 0; i < trie.getList(trie.keysWithPrefix(input).getFirst()).size(); i++) {
-                        listView.getItems().add(trie.getList(trie.keysWithPrefix(input).getFirst()).get(i).getStreet() + " (" + trie.getList(trie.keysWithPrefix(input).getFirst()).get(i).getCity() + ")");
-                        if (i >= 2) { return; }
-                    }
-                } else {
-                    for (int i = 0; i < trie.keysWithPrefix(input).size(); i++) { //Finder de 3 første relevante adresser.
-                        listView.getItems().add(trie.keysWithPrefix(input).get(i));
-
-                        if (i >= 2) {
-                            return;
-                        }
-                    }
-                }
         }
+
+
+        
     }
 
     private void startSearch() {
@@ -365,13 +298,16 @@ public class Controller implements Initializable {
         view.drawMap(); //Draws to refresh instantly
         System.out.println("Finished search!");
     }
+    //endregion
 
+    //region Canvas methods
     /// Method opens af list of points of interests so the user can edit it.
     @FXML protected void POIMenuAction(){
         //der skal være en liste der bliver opdateret når man tilføjer og fjerne POI's som bliver vist når man klikker på menuen
         System.out.println("Så skal man kunne skfite her");
         System.out.println(POIList);
     }
+
     /// Method to export a route as PDF
     @FXML protected void exportAsPDF(){
         System.out.println("Attempting to export as PDF!");
@@ -391,9 +327,7 @@ public class Controller implements Initializable {
     @FXML protected void guideTextButton(){
         guideText.setVisible(guideButton.isSelected());
     }
-    //endregion
 
-    //region Canvas methods
     /// Method runs upon zooming/scrolling on the Canvas
     @FXML protected void onCanvasScroll(ScrollEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked
@@ -550,8 +484,6 @@ public class Controller implements Initializable {
         }
         view.drawMap();
     }
-    //endregion
-
     //endregion
 
     //region Getters and setters

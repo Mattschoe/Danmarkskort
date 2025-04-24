@@ -532,12 +532,25 @@ public class Model {
         return trieCity.get(city);
     }
 
-    ///Returns a list of nodes that are correlated with the given {@code prefix} from the trie
-    public List<Node> getNodesFromPrefix(String prefix) {
-
+    ///Returns a list of city-nodes that are correlated with the given {@code prefix} from the trie
+    public List<Node> getCitiesFromPrefix(String prefix) {
+        List<Node> citiesWithPrefix = new ArrayList<>();
+        //Runs through every subtree with the prefix and adds the node to the list of nodes with this prefix
+        for (String keys : trieCity.keysWithPrefix(prefix)) {
+            citiesWithPrefix.add(trieCity.get(keys));
+        }
+        return citiesWithPrefix;
     }
 
-
+    ///Returns a list of street-nodes that are correlated with the given {@code prefix} from the trie
+    public List<Node> getStreetsFromPrefix(String prefix) {
+        List<Node> streetsWithPrefix = new ArrayList<>();
+        //Runs through every subtree with the prefix and adds the node to the list of nodes with this prefix
+        for (String keys : trieStreet.keysWithPrefix(prefix)) {
+            streetsWithPrefix.addAll(trieStreet.getList(keys));
+        }
+        return streetsWithPrefix;
+    }
 
     //endregion
 

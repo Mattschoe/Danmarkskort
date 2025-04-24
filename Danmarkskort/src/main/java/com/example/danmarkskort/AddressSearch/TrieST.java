@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 
 public class TrieST<Item> {
-    public int R = 47; // Størrelse på alfabet (Radix)
+    public int R = 49; // Størrelse på alfabet (Radix)
     private TrieNode root; // root of trie
     private final boolean isCity;
 
@@ -78,8 +78,12 @@ public class TrieST<Item> {
             current.setValue(val);
             return current;
         }
-        char c = word.charAt(depth); //Traverser ned af træet med hvert bogstav indtil der enten ikke er flere eller
-        current.getChildren()[charToIndex(c)] = put(current.getChildren()[charToIndex(c)], word, val, depth + 1);
+        char c = word.charAt(depth); //Traverser ned af træet med hvert bogstav indtil der enten ikke er flere eller vi har fundet
+        try {
+            current.getChildren()[charToIndex(c)] = put(current.getChildren()[charToIndex(c)], word, val, depth + 1);
+        } catch (IndexOutOfBoundsException e) {
+            System.out.println(":(");
+        }
         return current;
     }
 
@@ -177,6 +181,8 @@ public class TrieST<Item> {
             case 'ö' -> 45;
             case 'ë' -> 46;
             case '/' -> 47;
+            case '(' -> 48;
+            case ')' -> 49;
             default -> c - 'a';
         };
     }

@@ -7,7 +7,7 @@ import java.util.LinkedList;
 public class TrieNode {
     Node val;
     LinkedList<Node> values;
-    TrieNode[] children = new TrieNode[48];
+    TrieNode[] children = new TrieNode[50];
 
     TrieNode() {
         values = new LinkedList<>();
