@@ -25,7 +25,7 @@ tasks.withType(JavaCompile) {
 }
 
 tasks.withType(JavaExec) {
-    jvmArgs('-Xmx8g')
+    jvmArgs('-Xmx16g')
 }
 
 tasks.withType(Test) {
