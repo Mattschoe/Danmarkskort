@@ -1,47 +1,38 @@
 package com.example.danmarkskort.AddressSearch;
 import com.example.danmarkskort.MapObjects.Node;
+import gnu.trove.map.hash.TCharObjectHashMap;
 
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 
 public class TrieNode {
-    Node val;
-    LinkedList<Node> values;
-    TrieNode[] children = new TrieNode[50];
+    ///The prefix of this node
+    private String prefix;
+    ///All the following children of this node
+    private Map<String, TrieNode> children;
+    ///All the nodes associated with the full path of the trieNodes
+    private List<Node> nodes;
 
-    TrieNode() {
-        values = new LinkedList<>();
-    }
-    /**
-     * Returns value of TrieNode
-     * @return value of type Node
-     */
-    public LinkedList<Node> getValues() {
-        return values;
+    TrieNode(String prefix) {
+        this.prefix = prefix;
+        children = new HashMap<>();
+        nodes = new LinkedList<>();
     }
 
-    public Node getValue() {
-        return val;
-    }
+    public String getPrefix() { return prefix;}
+    ///Updates the nodes prefix to be the value of the given {@code newPrefix}
+    public void updatePrefix(String newPrefix) { this.prefix = newPrefix; }
 
-    /**
-     * Sets value of TrieNode
-     * @param val of type Node
-     */
-    public void setValue(Node val) {
-        if (this.val == null) {
-            this.val = val;
-        }
-        values.add(val);
+    public Map<String, TrieNode> getChildren() { return children; }
 
-    }
+    ///Returns all the nodes associated with this prefix
+    public List<Node> getValues() { return nodes; }
 
-    /**
-     * returns the children of TrieNode
-     * @return returns an array of the children of the TrieNode
-     */
-    public TrieNode[] getChildren() {
-        return children;
-    }
+    ///Adds a node to the list of values associated with this nodes prefix
+    public void addValue(Node value) { nodes.add(value); }
+
 
 }
