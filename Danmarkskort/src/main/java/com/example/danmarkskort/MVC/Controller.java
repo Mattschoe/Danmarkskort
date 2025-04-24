@@ -281,47 +281,7 @@ public class Controller implements Initializable {
         System.out.println("Finished search!");
     }
 
-    /// Method opens af list of points of interests so the user can edit it.
-    @FXML protected void POIMenuAction(){
-        //der skal være en liste der bliver opdateret når man tilføjer og fjerne POI's som bliver vist når man klikker på menuen
 
-    }
-
-    @FXML protected void savePOIToHashMap(){
-        if(startPOI == null){return;}
-        String name = addNamePOI.getText();
-        favoritePOIs.put(name, startPOI);
-        closePOIMenu();
-        favoritePOIs.getItems
-        //favoritePOI.(startPOI);
-        System.out.println("Saved POI!: " + startPOI + " with name: " + name);
-       /* for(POI poi : favoritePOIs){
-            System.out.println("- " + poi);
-        }*/
-    }
-
-    @FXML protected void openPOIMenu(){
-        addPOIBox.setVisible(true);
-        addNamePOI.setVisible(true);
-        addToPOIsUI.setVisible(true);
-        POIClose.setVisible(true);
-    }
-
-    @FXML protected void closePOIMenu(){
-        addPOIBox.setVisible(false);
-        addNamePOI.setVisible(false);
-        addToPOIsUI.setVisible(false);
-        POIClose.setVisible(false);
-    }
-
-    //Metode til at fjerne den røde markering på kortet for en POI. virker kun for den POI, der senest er placeret
-    @FXML public void removePOIMarker(){
-        if(startPOI == null){return;}
-        //sæt knappen til visible og kald denne metode et sted
-        model.removePOI(startPOI);
-        startPOI=null;
-        view.drawMap();
-    }
 
 
 
@@ -413,6 +373,47 @@ public class Controller implements Initializable {
         }
         //endregion
     }
+
+    /// Method opens af list of points of interests so the user can edit it.
+    @FXML protected void POIMenuAction(){
+        //der skal være en liste der bliver opdateret når man tilføjer og fjerne POI's som bliver vist når man klikker på menuen
+    }
+
+    @FXML protected void savePOIToHashMap(){
+        if(startPOI == null){return;}
+        String name = addNamePOI.getText();
+        favoritePOIs.put(name, startPOI);
+        closePOIMenu();
+        //   System.out.println("Saved POI!: " + startPOI + " with name: " + name);
+        /* for(POI poi : favoritePOIs){
+            System.out.println("- " + poi);
+        }*/
+    }
+
+    @FXML protected void openPOIMenu(){
+        addPOIBox.setVisible(true);
+        addNamePOI.setVisible(true);
+        addToPOIsUI.setVisible(true);
+        POIClose.setVisible(true);
+    }
+
+    @FXML protected void closePOIMenu(){
+        addPOIBox.setVisible(false);
+        addNamePOI.setVisible(false);
+        addToPOIsUI.setVisible(false);
+        POIClose.setVisible(false);
+    }
+
+    //Metode til at fjerne den røde markering på kortet for en POI. virker kun for den POI, der senest er placeret
+    @FXML public void removePOIMarker(){
+        if(startPOI == null){return;}
+        //sæt knappen til visible og kald denne metode et sted
+        model.removePOI(startPOI);
+        startPOI=null;
+        view.drawMap();
+    }
+
+
 
     ///Opens the search menu when activated. If both start- and endPOI are initialized, this button is used for activating the route finding between the two POI's.
     @FXML public void onActivateSearch() {
