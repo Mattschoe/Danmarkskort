@@ -14,7 +14,6 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Affine;
@@ -41,7 +40,6 @@ public class Controller implements Initializable {
     private POI startPOI;
     private POI endPOI;
     private Point2D POIMark;
-    private List<String> POIList = List.of("En", "TO", "Tre");
     private Map<String,POI> favoritePOIs = new HashMap<>();
 
     private long lastSystemTime; //Used to calculate FPS
@@ -138,11 +136,10 @@ public class Controller implements Initializable {
         POIMenu.getItems().clear();
 
         if(favoritePOIs.isEmpty()){return;}
-
-        for (POI poi: favoritePOIs.values()) {
-            Menu subMenu = new Menu(poi.toString());
-            MenuItem detailItem = new MenuItem("Details for " + poi);
-            detailItem.setOnAction(e -> System.out.println("Clicked on: " + poi));
+        for (String name: favoritePOIs.keySet()) {
+            Menu subMenu = new Menu(name);
+            MenuItem detailItem = new MenuItem("Details for " + name);
+            detailItem.setOnAction(e -> System.out.println("Clicked on: " + name));
             subMenu.getItems().add(detailItem);
 
             POIMenu.getItems().add(subMenu);
@@ -287,8 +284,7 @@ public class Controller implements Initializable {
     /// Method opens af list of points of interests so the user can edit it.
     @FXML protected void POIMenuAction(){
         //der skal være en liste der bliver opdateret når man tilføjer og fjerne POI's som bliver vist når man klikker på menuen
-        System.out.println("Så skal man kunne skfite her");
-        System.out.println(POIList);
+
     }
 
     @FXML protected void savePOIToHashMap(){
@@ -296,6 +292,7 @@ public class Controller implements Initializable {
         String name = addNamePOI.getText();
         favoritePOIs.put(name, startPOI);
         closePOIMenu();
+        favoritePOIs.getItems
         //favoritePOI.(startPOI);
         System.out.println("Saved POI!: " + startPOI + " with name: " + name);
        /* for(POI poi : favoritePOIs){
@@ -317,6 +314,7 @@ public class Controller implements Initializable {
         POIClose.setVisible(false);
     }
 
+    //Metode til at fjerne den røde markering på kortet for en POI. virker kun for den POI, der senest er placeret
     @FXML public void removePOIMarker(){
         if(startPOI == null){return;}
         //sæt knappen til visible og kald denne metode et sted
