@@ -1,5 +1,7 @@
 package com.example.danmarkskort;
 
+import com.example.danmarkskort.MapObjects.Node;
+import com.example.danmarkskort.MapObjects.Road;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
@@ -15,92 +17,124 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
-import java.util.Random;
 
-public class PDFOutput {
-    Document document;
-    PdfWriter pdfWriter;
-    Font boldFont;
-    Font normalFont;
+public abstract class PDFOutput {
+    /**
+     * Generates and opens a PDF describing a given route
+     * @param roads the list Roads in the route
+     */
+    public static void generateRoute(List<Road> roads) throws FileNotFoundException, DocumentException {
+        Document document = new Document();
 
-    public PDFOutput() throws DocumentException, FileNotFoundException {
-        document = new Document();
-        pdfWriter = PdfWriter.getInstance(document, new FileOutputStream("./output/Rutevejledning.pdf"));
-        documentSettings();
+        String path = createFilePath(roads);
+        FileOutputStream outFile = new FileOutputStream("./output/"+ path +".pdf");         //Skaber PDF'en
+        PdfWriter.getInstance(document, outFile);                                                  //Laver en Writer der kan finde ud af at skrive i PDF-dokumentet (I think???)
 
-        document.open();
-        writeInstructions();
-        document.close();
-    }
+        Font normalFont = FontFactory.getFont(FontFactory.HELVETICA, 12, BaseColor.BLACK);    //Laver en standard-skrifttype
+        Font boldFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, BaseColor.BLACK); //Laver en tyk skrifttype (til overskriften)
 
-    private PDFOutput(List<String> roads) throws DocumentException, FileNotFoundException {
-        roads.removeIf(road -> road == null || road.isEmpty());
+        document.open(); //Åbner dokumentet så vi kan begynde at skrive i det
 
-        document = new Document(); //Skaber et nyt dokument der kan skrives i
-        String route = roads.getFirst() +"-to-"+ roads.getLast(); //Skaber pdf-filens titel
-        route = route.replaceAll("\\.", "").replaceAll(" ", "-");
-
-        String path = "./output/"+ route +".pdf"; //Angiver hvor filen skal skabes
-        FileOutputStream outFile = new FileOutputStream(path);
-
-        pdfWriter = PdfWriter.getInstance(document, outFile); //Gør at vi kan skrive i filen (tror jeg??)
-        documentSettings(); //Konfigurerer 2 skrifttyper vi kan bruge til at skrive
-
-        document.open(); //Åbner dokumentet så vi kan begynde at skrive
-        //-----
-        //Tilføjer en linje i dokumentet med hvor vi skal fra og hvortil (som en slags titel)
-        route = roads.getFirst() +" to "+ roads.getLast();
-        Paragraph paragraph = new Paragraph(route, boldFont);
+        //Tiløjer overskriften i PDF'en
+        String overskrift = roads.getFirst().getRoadName() +" to "+ roads.getLast().getRoadName();
+        Paragraph paragraph = new Paragraph(overskrift, boldFont);
         document.add(paragraph);
         document.add(Chunk.NEWLINE);
 
-        int stepCount = 1;
-        String lastRoad = roads.getFirst();
-
-        //Tilføjer den første vej med et bestemt prefix
-        paragraph = new Paragraph(stepCount++ +". Start along "+roads.getFirst(), normalFont);
+        //Tilføjer første vej med et bestemt prefix
+        paragraph = new Paragraph("1. Start along "+roads.getFirst().getRoadName(), normalFont);
         document.add(paragraph);
-        roads.removeFirst();
 
-        //Tilføjer alt mellem første og sidste vej med tilfældige prefixes
-        String[] genericText = {"Continue along ", "Follow ", "Proceed on ", "Go down "};
-        Random random = new Random();
-        for (String road : roads) { //For hver vej tilføjes vejen og en generic "motivation"
-            if (road.equals(roads.getLast())) break; //Stopper hvis der kun er én vej tilbage, så den kan få et bestemt prefix
-            if (road.equals(lastRoad)) continue;
+        int step = 1; //Tilføjer alle andre veje med højre/venstre-angivelser
+        for (int i=1; i < roads.size(); ++i) {
+            Road road = roads.get(i);
+            Road previousRoad = roads.get(i-1);
 
-            String prefix = genericText[random.nextInt(genericText.length)];
-            paragraph = new Paragraph(stepCount++ +". "+prefix+road, normalFont);
+            String roadName = road.getRoadName().isEmpty()? "NAMELESS ROAD" : road.getRoadName(); //Gemmer vejnavnene
+            String previousRoadName = previousRoad.getRoadName().isEmpty()? "NAMELESS ROAD" : previousRoad.getRoadName();
+            if (roadName.equals(previousRoadName)) continue; //Skipper vejen hvis den har samme navn -- sker ofte fordi én vej kan være opdelt i mange mindre bidder
+
+            //Node prevFirst = previousRoad.getNodes().get(previousRoad.getNodes().size() - 2);
+            Node prevFirst = previousRoad.getNodes().getFirst();
+            Node prevLast = previousRoad.getNodes().getLast();
+            Node crntFirst = road.getNodes().getFirst();
+            Node crntLast = road.getNodes().getLast();
+            /*
+             * NB! Det *kan* være at højre/venstre bliver angivet forkert. I det tilfælde vil mit
+             * (OFS) gæt være, at det har at gøre med at funktionen her ikke tager højde for Roads
+             * der er opdelt i mere end to dele. Det burde være et yderst sjældent edge-case og
+             * jeg er helt rundtosset af at arbejde med højre/venstre-sving at the moment, så det
+             * kommer jeg simpelthen ikke til at implementere med mindre det viser sig at være et
+             * større og vigtigere problem end jeg har forudset. Thank you for coming to my TED talk
+             */
+
+            String direction;
+            if (prevFirst.equals(crntFirst)) {
+                direction = determineDirection(prevFirst, prevLast, crntLast);
+            }
+            else if (prevFirst.equals(crntLast)) {
+                direction = determineDirection(prevFirst, prevLast, crntFirst);
+            }
+            else if (prevLast.equals(crntLast)) {
+                direction = determineDirection(prevLast, prevFirst, crntFirst);
+            }
+            else if (prevLast.equals(crntFirst)) {
+                direction = determineDirection(prevLast, prevFirst, crntLast);
+            }
+            else {
+                System.out.println("prevFirst: "+prevFirst+" -- ("+prevFirst.getX()+", "+prevFirst.getY()+")");
+                System.out.println("prevLast:  "+prevLast +" -- ("+prevLast.getX() +", "+prevLast.getY() +")");
+                System.out.println("crntFirst: "+crntFirst+" -- ("+crntFirst.getX()+", "+crntFirst.getY()+")");
+                System.out.println("crntLast:  "+crntLast +" -- ("+crntLast.getX() +", "+crntLast.getY() +")");
+                throw new RuntimeException("CURSED VECTORS");
+            }
+
+            paragraph = new Paragraph(step++ +". Turn "+direction+" at "+roadName);
             document.add(paragraph);
-            lastRoad = road;
         }
 
-        //Tilføjer den sidste vej med et bestemt prefix
-        paragraph = new Paragraph(stepCount +". Concluding at "+roads.getLast(), normalFont);
+        //Tilføjer sidste vej med et bestemt prefix
+        paragraph = new Paragraph(step +". Conclude at "+roads.getLast().getRoadName(), normalFont);
         document.add(paragraph);
 
-        //-----
-        document.close(); //Dokumentet lukkes igen
+        document.close(); //Lukker dokumentet; vi er færdige med at skrive
 
-        //Forsøger at åbne dokumentet
-        try { Desktop.getDesktop().open(new File(path)); }
+        try { Desktop.getDesktop().open(new File("./output/"+ path +".pdf")); } //Forsøger at åbne dokumentet
         catch (IOException e) { System.out.println("Couldn't open file! Error: "+ e.getMessage()); }
     }
 
-    private void writeInstructions() throws DocumentException {
-        Chunk chunk = new Chunk("Hej med dig!", boldFont);
-        document.add(chunk);
-        chunk = new Chunk("Hej med dig!", normalFont);
-        document.add(chunk);
+    /**
+     * Determines the direction of a turn given three points.
+     * The points are used to interpret the two vectors between which the angle is present.
+     * @param p0 the origin-point of both vectors
+     * @param p1 the end-point of the first vector
+     * @param p2 the end-point of the second vector
+     * @return {@code "RIGHT"}, {@code "LEFT"} or {@code "STRAIGHT"} depending on how the second vector relates to the first
+     */
+    private static String determineDirection(Node p0, Node p1, Node p2) {
+        //Vektor a går fra p0 til p1, vektor b går fra p0 til p2
+        float[] vectorA = {p1.getX()-p0.getX(), p1.getY()-p0.getY()};
+        float[] vectorB = {p2.getX()-p0.getX(), p2.getY()-p0.getY()};
+
+        float dot = vectorA[0] * - vectorB[1] + vectorA[1] * vectorB[0];
+        if (dot > 0) return "RIGHT";
+        else if (dot < 0) return "LEFT";
+        else return "STRAIGHT";
     }
 
-    private void documentSettings() {
-        normalFont = FontFactory.getFont(FontFactory.HELVETICA, 12, BaseColor.BLACK);
-        boldFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.BLACK);
-    }
+    /**
+     * Creates the file-name for a route.
+     * @param roads the list of Roads in the route
+     * @return the file-name for the route, w/o dots, and with dashes instead of spaces
+     */
+    private static String createFilePath(List<Road> roads) {
+        String originRoad = roads.getFirst().getRoadName().isEmpty()? "Undefined-place" : roads.getFirst().getRoadName();
+        String endingRoad = roads.getLast().getRoadName().isEmpty()?  "undefined-place" : roads.getLast().getRoadName();
 
-    public static void generateRoute(List<String> roads) {
-        try { new PDFOutput(roads); }
-        catch (Exception e) { System.out.println(e.getMessage()); }
+        String path = originRoad +"-to-"+ endingRoad;        //Skaber pdf-filens filsti
+        path = path.replaceAll("\\.", ""); //Fjerner alle punktummer fra filstien
+        path = path.replaceAll(" ", "-");  //Udskifter mellemrum i filstien med bindestreger
+
+        return path;
     }
 }

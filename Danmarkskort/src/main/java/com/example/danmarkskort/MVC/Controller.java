@@ -25,7 +25,6 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -288,12 +287,15 @@ public class Controller implements Initializable {
         List<Road> latestRoute = Model.getInstance().getLatestRoute();
 
         if (latestRoute != null) {
-            List<String> roads = new ArrayList<>();
-            for (Road road : latestRoute) roads.add(road.getRoadName());
-            PDFOutput.generateRoute(roads);
-            System.out.println("PDF-export successful!");
+            try {
+                PDFOutput.generateRoute(latestRoute);
+                System.out.println("PDF-export successful!");
+            }
+            catch (Exception e) {
+                System.out.println("PDF-export failed! Error: "+ e.getMessage());
+            }
         }
-        else System.out.println("PDF-export failed!");
+        else System.out.println("PDF-export failed! Error: latestRoute is null");
     }
 
     /// Method to open a textbox with a written guide when "Guide" is pressed
