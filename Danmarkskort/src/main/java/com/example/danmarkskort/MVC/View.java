@@ -148,12 +148,19 @@ public class View {
      *  @param dy deltaY
      *  @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
      */
-    public void zoom(double dx, double dy, double factor, boolean ignoreMinMax) {
+    public void zoom(double dx, double dy, double factor) {
         //Zooms
         trans.prependTranslation(-dx, -dy);
         trans.prependScale(factor, factor);
         trans.prependTranslation(dx, dy);
         drawMap();
+    }
+
+    ///Zooms in on the coords given as parameter
+    public void zoomOnCoords(float x, float y) {
+        System.out.println(x + " " + y);
+        pan(x, y);
+        zoom(x, y, 2);
     }
 
     /// Changes the current zoom level to a range from 0 to 4 (needed for the LOD). 0 is minimum amount of details, 4 is maximum

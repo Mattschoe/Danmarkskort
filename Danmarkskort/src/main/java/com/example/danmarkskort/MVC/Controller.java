@@ -94,7 +94,7 @@ public class Controller implements Initializable {
                     panRequest = false;
                 } else if (zoomRequest) {
                     double factor = scrollEvent.getDeltaY();
-                    view.zoom(scrollEvent.getX(), scrollEvent.getY(), Math.pow(1.01, factor), true);
+                    view.zoom(scrollEvent.getX(), scrollEvent.getY(), Math.pow(1.01, factor));
                     zoomRequest = false;
                 }
             }
@@ -233,7 +233,8 @@ public class Controller implements Initializable {
 
         //If user wants to search we pick the top node
         if (event.getCharacter().equals("\r")) { //If "Enter" is pressed
-            System.out.println(autoSuggestResults.getFirst().getAddress());
+            Node selection = autoSuggestResults.getFirst();
+            view.zoomOnCoords(selection.getX(), selection.getY());
         } else {
             listView.getItems().clear(); //Potential cleanup from earlier search
             String input = searchBar.getText().toLowerCase();
@@ -246,14 +247,14 @@ public class Controller implements Initializable {
 
             //Auto suggests dynamically every user input
             listView.setVisible(true);
-            autoSuggest(input);
+            autoSuggestResults = autoSuggest(input);
         }
     }
 
     /**
      * Auto-suggests roads and cities in a drop-down menu from the search-bar. Will auto-suggest cities, unless there are non, then it will suggest potentiel streets.
      */
-    private void autoSuggest(String input) {
+    private List<Node> autoSuggest(String input) {
         List<Node> cities = model.getCitiesFromPrefix(input);
         List<Node> streets = model.getStreetsFromPrefix(input);
 
@@ -262,15 +263,15 @@ public class Controller implements Initializable {
             for (Node node : cities) {
                 listView.getItems().add(node.getCity());
             }
+            return cities;
         } else if (!streets.isEmpty()) {
             //If no city found we show streets
             for (Node node : streets) {
                 listView.getItems().add(node.getAddress());
             }
-        } else {
-            if (autoSuggestResults.isEmpty()) return; //If we never got suggestion, we return early and don't auto-suggest anything
-            listView.getItems().clear();
+            return streets;
         }
+        return Collections.emptyList();
     }
 
     private void startSearch() {
@@ -287,10 +288,12 @@ public class Controller implements Initializable {
     //endregion
 
     //region Canvas methods
+    ///When user chooses a node in the autosuggestion we override the searchbar, and zoom in on the node
     @FXML protected void onAddressPickedFromList(MouseEvent event) {
         if (event.getClickCount() == 2) {
-            String selectedItem = listView.getSelectionModel().getSelectedItem();
-            if (selectedItem != null) System.out.println(selectedItem);
+            Node chosenNode = autoSuggestResults.get(listView.getSelectionModel().getSelectedIndex());
+            searchBar.setText(chosenNode.getAddress());
+            view.zoomOnCoords(chosenNode.getX(), chosenNode.getY());
         }
     }
 
