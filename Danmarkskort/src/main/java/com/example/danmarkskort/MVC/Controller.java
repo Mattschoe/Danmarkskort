@@ -1,5 +1,7 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.AddressParser;
+import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.*;
 import com.example.danmarkskort.PDFOutput;
 import javafx.animation.AnimationTimer;
@@ -11,6 +13,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -25,8 +28,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class Controller implements Initializable {
     //region Fields
@@ -35,12 +37,11 @@ public class Controller implements Initializable {
     private double lastX, lastY; //Used to pan
     private boolean panRequest, zoomRequest; //Used by AnimationTimer
     private ScrollEvent scrollEvent; //Used to zoom
-    private TrieST<String> trieCity; //Part of test
-    private TrieST<String> trieStreet;
     private MouseEvent mouseEvent; //Used to pan
     private POI startPOI;
     private POI endPOI;
     private final List<String> POIList = List.of("En", "TO", "Tre");
+    List<Node> autoSuggestResults;
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
@@ -60,8 +61,6 @@ public class Controller implements Initializable {
     @FXML private TextField destination;
     @FXML private MenuItem POIMenuButton;
     @FXML private Menu POIMenu;
-
-
     //endregion
     //endregion
 
@@ -74,9 +73,8 @@ public class Controller implements Initializable {
         canvas = new Canvas(400, 600);
         System.out.println("Controller created!");
 
-        this.trieCity = new TrieST<>(true);
-        this.trieStreet = new TrieST<>(false);
         listView = new ListView<>();
+        autoSuggestResults = new ArrayList<>();
 
         //region AnimationTimer
         AnimationTimer fpsTimer = new AnimationTimer() {
@@ -96,7 +94,7 @@ public class Controller implements Initializable {
                     panRequest = false;
                 } else if (zoomRequest) {
                     double factor = scrollEvent.getDeltaY();
-                    view.zoom(scrollEvent.getX(), scrollEvent.getY(), Math.pow(1.01, factor), true);
+                    view.zoom(scrollEvent.getX(), scrollEvent.getY(), Math.pow(1.01, factor));
                     zoomRequest = false;
                 }
             }
@@ -119,24 +117,30 @@ public class Controller implements Initializable {
      *  configures something(???) for an object in the mapOverlay.fxml scene
      */
     @Override public void initialize(URL url, ResourceBundle resourceBundle) {
-        listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+        /* listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
                 String selected = listView.getSelectionModel().getSelectedItem();
                 searchBar.setText(selected);
+                if (!trieCity.keysWithPrefix(selected).isEmpty()) { //Her skabes problemer
+                    autoSuggest("\r", selected, trieCity);
+                } else { // Skal lede i vejnavne
+                    autoSuggest("\r", selected, trieStreet);
+                }
+               listView.setVisible(false);
             }
-        });
-        if(POIMenu != null){
-        POIMenu.getItems().clear();
-        for (String poi : POIList) {
-            Menu subMenu = new Menu(poi);
+        }); */
+        if(POIMenu != null) {
+            POIMenu.getItems().clear();
+            for (String poi : POIList) {
+                Menu subMenu = new Menu(poi);
 
-            MenuItem detailItem = new MenuItem("Details for " + poi);
-            detailItem.setOnAction(e -> System.out.println("Clicked on: " + poi));
-            subMenu.getItems().add(detailItem);
+                MenuItem detailItem = new MenuItem("Details for " + poi);
+                detailItem.setOnAction(e -> System.out.println("Clicked on: " + poi));
+                subMenu.getItems().add(detailItem);
 
-            POIMenu.getItems().add(subMenu);
-        }
+                POIMenu.getItems().add(subMenu);
+            }
         }
     }
 
@@ -188,6 +192,11 @@ public class Controller implements Initializable {
         view.drawMap();
     }
 
+    ///Disables the list view if we have picked one and then moves the mouse out of the listview
+    @FXML protected void mouseExitedListView() {
+        listView.setVisible(false);
+    }
+
     //endregion
 
     //region mapOverlay.fxml scene methods
@@ -223,55 +232,74 @@ public class Controller implements Initializable {
         }
     }
 
-    /// Methods runs upon typing in the search-bar
+    /// Methods runs upon modifying the {@code searchbar} in the UI.
     @FXML protected void searchBarTyped(KeyEvent event) {
-        listView.getItems().clear();
-        String input = searchBar.getText();
-        if (searchBar.getText().isEmpty()) {
-            listView.setVisible(false);
+        if (model == null) model = Model.getInstance();
+
+        //If user wants to search we pick the top node
+        if (event.getCharacter().equals("\r")) { //If "Enter" is pressed
+            Node selection = autoSuggestResults.getFirst();
+            view.zoomTo(selection.getX(), selection.getY());
         } else {
+            listView.getItems().clear(); //Potential cleanup from earlier search
+            String input = searchBar.getText().toLowerCase();
+
+            //if search-bar is empty we return out
+            if (input.isEmpty()) {
+                listView.setVisible(false);
+                return;
+            }
+
+            //Auto suggests dynamically every user input
             listView.setVisible(true);
-        }
-
-        // HVIS DER STADIG ER MULIGE BYER
-        if (!trieCity.keysWithPrefix(input).isEmpty()) {
-            System.out.println("Dette er byer");
-            autoSuggest(event, input, trieCity);
-
-        } else { // Skal lede i vejnavne
-            System.out.println("Dette er veje");
-            autoSuggest(event, input, trieStreet);
+            autoSuggestResults = autoSuggest(input);
         }
     }
 
-    /// Auto-suggests roads and cities in a drop-down menu from the search-bar (????)
-    private void autoSuggest(KeyEvent event, String input, TrieST<String> trie) {
-        if (event.getCharacter().equals("\r")) { // Hvis der trykkes enter
-            if (trie.keysThatMatch(input) != null) {
-                System.out.println(trie.get(trie.keysThatMatch(input).getFirst()));
-            } else {
-                System.out.println(trie.keysWithPrefix(input).getFirst());
+    /**
+     * Auto-suggests roads and cities in a drop-down menu from the search-bar. Will auto-suggest cities, unless there are non, then it will suggest potentiel streets.
+     */
+    private List<Node> autoSuggest(String input) {
+        List<Node> cities = model.getCitiesFromPrefix(input);
+        List<Node> streets = model.getStreetsFromPrefix(input);
+
+        //If prefix matches
+        if (!cities.isEmpty()) {
+            for (Node node : cities) {
+                listView.getItems().add(node.getCity());
             }
-        } else {
-            if (event.getCharacter().equals("\b")) { //hvis der trykkes backspace eller
-                event.consume();
+            return cities;
+        } else if (!streets.isEmpty()) {
+            //If no city found we show streets
+            for (Node node : streets) {
+                listView.getItems().add(node.getAddress());
             }
-            //Finder de 3 første relevante adresser.
-            for (int i = 0; i < trie.keysWithPrefix(input).size(); i++) {
-                listView.getItems().add(trie.keysWithPrefix(input).get(i));
-                if (i >= 2) { return; }
-            }
+            return streets;
         }
+        return Collections.emptyList();
     }
 
     private void startSearch() {
         System.out.println("Starting search...");
         List<Road> route = model.search(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
+
+        //Adds route to the view so it gets drawn
         for (Road road : route) {
             view.addObjectToDraw(road);
         }
         view.drawMap(); //Draws to refresh instantly
         System.out.println("Finished search!");
+    }
+    //endregion
+
+    //region Canvas methods
+    ///When user chooses a node in the autosuggestion we override the searchbar, and zoom in on the node
+    @FXML protected void onAddressPickedFromList(MouseEvent event) {
+        if (event.getClickCount() == 2) {
+            Node chosenNode = autoSuggestResults.get(listView.getSelectionModel().getSelectedIndex());
+            searchBar.setText(chosenNode.getAddress());
+            view.zoomTo(chosenNode.getX(), chosenNode.getY());
+        }
     }
 
     /// Method opens af list of points of interests so the user can edit it.
@@ -280,6 +308,7 @@ public class Controller implements Initializable {
         System.out.println("Så skal man kunne skfite her");
         System.out.println(POIList);
     }
+
     /// Method to export a route as PDF
     @FXML protected void exportAsPDF(){
         System.out.println("Attempting to export as PDF!");
@@ -302,9 +331,7 @@ public class Controller implements Initializable {
     @FXML protected void guideTextButton(){
         guideText.setVisible(guideButton.isSelected());
     }
-    //endregion
 
-    //region Canvas methods
     /// Method runs upon zooming/scrolling on the Canvas
     @FXML protected void onCanvasScroll(ScrollEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked
@@ -461,8 +488,6 @@ public class Controller implements Initializable {
         }
         view.drawMap();
     }
-    //endregion
-
     //endregion
 
     //region Getters and setters

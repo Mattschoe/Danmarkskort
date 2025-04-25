@@ -1,5 +1,7 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.AddressSearch.Street;
+import com.example.danmarkskort.AddressSearch.TrieST;
 import com.example.danmarkskort.Exceptions.ParserSavingException;
 import com.example.danmarkskort.MapObjects.*;
 import com.example.danmarkskort.Parser;
@@ -24,13 +26,17 @@ public class Model {
     private Tilegrid tilegrid;
     private Search search;
     private List<Road> latestRoute;
+    private TrieST trieCity;
+    private TrieST trieStreet;
+    Set<String> streets;
+    Map<String, Node> citiesToNode;
     //endregion
 
     //region Constructor(s)
     /** Checks what filetype the filepath parameter is.
      *  Calls {@link #parseOBJToParser()} if it's an OBJ-file, if not, creates a new {@link Parser} class and propagates the responsibility
      */
-    private Model(String filePath, Canvas canvas) {
+    public Model(String filePath, Canvas canvas) {
         assert canvas != null;
 
         file = new File(filePath);
@@ -70,6 +76,8 @@ public class Model {
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
         System.out.println("Finished creating Tilegrid!");
         //endregion
+
+        loadAddressNodes();
 
         search = new Search(parser.getNodes().valueCollection());
         parser = null; //Fjerner reference til parser så den bliver GC'et
@@ -493,6 +501,40 @@ public class Model {
         minMaxCoords[2] = maxX;
         minMaxCoords[3] = maxY;
         return minMaxCoords;
+    }
+
+
+    /**
+     * Inserts all streets and cities of the complex nodes to Tries
+     */
+    private void loadAddressNodes() {
+        trieCity = new TrieST();
+        trieStreet = new TrieST();
+        citiesToNode = new HashMap<>();
+        for (Node node : parser.getAddressNodes()) { //gennemgår alle address nodes
+            String street = node.getStreet();
+            String city = node.getCity();
+
+            //Inserts a representative node of a city.
+            if (city != null) citiesToNode.put(city, node);
+
+            //Insert node into streets if it has an address
+            if (street != null) trieStreet.put(node);
+        }
+        //Adds nodes to the city trie
+        for (Node node : citiesToNode.values()) {
+            trieCity.put(new SimpleNode(node.getCity(), node));
+        }
+    }
+
+    ///Returns a list of city-nodes that are correlated with the given {@code prefix} from the trie
+    public List<Node> getCitiesFromPrefix(String prefix) {
+        return trieCity.keysWithPrefix(prefix);
+    }
+
+    ///Returns a list of street-nodes that are correlated with the given {@code prefix} from the trie
+    public List<Node> getStreetsFromPrefix(String prefix) {
+        return trieStreet.keysWithPrefix(prefix);
     }
     //endregion
 

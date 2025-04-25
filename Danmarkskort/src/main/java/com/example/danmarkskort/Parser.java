@@ -26,6 +26,8 @@ public class Parser implements Serializable {
     private final File file; //The file that's loaded in
     ///\[0] = minLat <br> \[1] = minLong <br> \[2] = maxLat <br> \[3] = maxLong
     private final double[] bounds;
+    private final Set<Road> significantHighways;
+    private final Set<Node> addressNodes;
 
     private int failedWays;
     private int failedRelations;
@@ -45,6 +47,8 @@ public class Parser implements Serializable {
         id2Road = new TLongObjectHashMap<>(2_214_235);
         id2Polygon = new TLongObjectHashMap<>(6_168_995);
         bounds = new double[4];
+        significantHighways = new HashSet<>();
+        addressNodes = new HashSet<>();
 
         failedWays = 0; failedNodes = 0; failedRelations = 0; outOfBoundsNodes = 0;
 
@@ -184,7 +188,9 @@ public class Parser implements Serializable {
         if (city == null && houseNumber == null && postcode == 0 && street == null) {
             id2Node.put(id, new Node(lat, lon)); //Instantiates a new node (node containing no child-elements)
         } else {
-            id2Node.put(id, new Node(lat, lon, city, houseNumber, postcode, street));
+            Node complexNode = new Node(lat, lon, city, houseNumber, postcode, street);
+            addressNodes.add(complexNode);
+            id2Node.put(id, complexNode);
         }
     }
 
@@ -443,5 +449,13 @@ public class Parser implements Serializable {
     public void setRoads(TLongObjectHashMap<Road> roads) { id2Road = roads; }
     public void setPolygons(TLongObjectHashMap<Polygon> polygons) { id2Polygon = polygons; }
     public double[] getBounds() { return bounds; }
+    /**
+     * @return the set of significant highways, which will be the only roads drawn when the map is zoomed out a certain amount
+     */
+    public Set<Road> getSignificantHighways() { return significantHighways; }
+
+    public Set<Node> getAddressNodes() {
+        return addressNodes;
+    }//
     //endregion
 }
