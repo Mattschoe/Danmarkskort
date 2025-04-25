@@ -2,6 +2,7 @@ package com.example.danmarkskort.MapObjects;
 
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
@@ -12,7 +13,9 @@ public class POI implements MapObject {
     Node closestNodeWithRoad;
     float x, y;
     String name;
-
+    private static final Image pinImage = new Image(
+            POI.class.getResource("/com/example/danmarkskort/icon_gå.png").toExternalForm()
+    );
     /**
      *
      * @param name the name of the POI, usually given by the user
@@ -28,10 +31,10 @@ public class POI implements MapObject {
 
     @Override
     public void draw(GraphicsContext graphicsContext) {
-        graphicsContext.setStroke(Color.RED);
-        graphicsContext.setLineWidth(0.01);
-        graphicsContext.strokeLine(x, y, x, y);
+        double size = 0.06;
+        graphicsContext.drawImage(pinImage, x - size / 2, y - size, size, size);
     }
+
 
     @Override
     public float[] getBoundingBox() {

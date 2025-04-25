@@ -41,7 +41,8 @@ public class Controller implements Initializable {
     private POI endPOI;
     private Point2D POIMark;
     private Map<String,POI> favoritePOIs = new HashMap<>();
-    List<MenuItem> POIMenuList = new ArrayList<>();
+    private List<POI> oldPOIs = new ArrayList<>();
+
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
@@ -133,19 +134,6 @@ public class Controller implements Initializable {
                 searchBar.setText(selected);
             }
         });
-        if(POIMenu != null){
-        POIMenu.getItems().clear();
-
-        if(favoritePOIs.isEmpty()){return;}
-        for (String name: favoritePOIs.keySet()) {
-            Menu subMenu = new Menu(name);
-            MenuItem detailItem = new MenuItem("Details for " + name);
-            detailItem.setOnAction(e -> System.out.println("Clicked on: " + name));
-            subMenu.getItems().add(detailItem);
-
-            POIMenu.getItems().add(subMenu);
-        }
-        }
     }
 
     //region Start-up scene methods
@@ -284,10 +272,11 @@ public class Controller implements Initializable {
 
     /// This metod is used to save the current POI to a map and add it as a menuitem to the POI menubar to give it delete and find adress as options.
     @FXML protected void savePOIToHashMap(){
-        if(startPOI == null){return;}
         String name = addNamePOI.getText();
         favoritePOIs.put(name, startPOI);
         closePOIMenu();
+
+        POI tempPOI = startPOI;
 
         Menu POIMenuItem = new Menu(name);
         POIMenu.getItems().add(POIMenuItem);
@@ -296,6 +285,8 @@ public class Controller implements Initializable {
         deletePOI.setOnAction(e -> {
             favoritePOIs.remove(name);
             POIMenu.getItems().remove(POIMenuItem);
+            view.removeObjectToDraw(tempPOI);
+            view.drawMap();
         });
 
         MenuItem showAddress = new MenuItem("Show Address");
@@ -306,20 +297,14 @@ public class Controller implements Initializable {
                     searchBar.setText(address);
             }
         });
-
         POIMenuItem.getItems().addAll(showAddress, deletePOI);
-
-        // Add the full POI menu to the master menu
-        //favoritePOI.(startPOI);
         System.out.println("Saved POI!: " + startPOI + " with name: " + name);
-        /* for(POI poi : favoritePOIs){
-            System.out.println("- " + poi);
-        }*/
     }
 
     @FXML protected void openPOIMenu(){
         addPOIBox.setVisible(true);
         addNamePOI.setVisible(true);
+        addNamePOI.clear();
         addToPOIsUI.setVisible(true);
         POIClose.setVisible(true);
     }
@@ -332,15 +317,13 @@ public class Controller implements Initializable {
     }
 
     //Metode til at fjerne den røde markering på kortet for en POI. virker kun for den POI, der senest er placeret
-    @FXML public void removePOIMarker(){
+    @FXML public void removePOIMarker(POI poi){
         if(startPOI == null){return;}
         //sæt knappen til visible og kald denne metode et sted
-        model.removePOI(startPOI);
+        model.removePOI(poi);
         startPOI=null;
         view.drawMap();
     }
-
-
 
     /// Method to export a route as PDF
     @FXML protected void exportAsPDF(){
@@ -422,10 +405,23 @@ public class Controller implements Initializable {
                 onActivateSearch();
                 if (searchBar.getText().trim().isEmpty() || !destination.isVisible()) {
                     startPOI = POI;
+                    oldPOIs.add(POI);
                 } else {
                     endPOI = POI;
+                    oldPOIs.add(POI);
                 }
+
                 updateSearchText();
+            }
+            //Removes old POI from the map.
+            if (oldPOIs.size() > 2) {
+                while (oldPOIs.size() > 2) {
+                    POI removed = oldPOIs.remove(0);
+                    if (!favoritePOIs.containsValue(removed)) {
+                        oldPOIs.remove(removed);
+                        removePOIMarker(removed);
+                    }
+                }
             }
         }
         //endregion

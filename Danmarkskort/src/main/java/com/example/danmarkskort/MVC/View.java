@@ -136,6 +136,9 @@ public class View {
         extraDrawObjects.add(mapObject);
     }
 
+    /// Removes the object given as parameter
+    public void removeObjectToDraw(MapObject mapObject) { extraDrawObjects.remove(mapObject); }
+
     /// Method pans on the canvas
     public void pan(double dx, double dy) {
         //Moves the map
