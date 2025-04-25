@@ -285,7 +285,7 @@ public class Controller implements Initializable {
         deletePOI.setOnAction(e -> {
             favoritePOIs.remove(name);
             POIMenu.getItems().remove(POIMenuItem);
-            view.removeObjectToDraw(tempPOI);
+            //view.removeObjectToDraw(tempPOI);
             view.drawMap();
         });
 

@@ -14,7 +14,7 @@ public class POI implements MapObject {
     float x, y;
     String name;
     private static final Image pinImage = new Image(
-            POI.class.getResource("/com/example/danmarkskort/icon_gå.png").toExternalForm()
+            POI.class.getResource("/com/example/danmarkskort/pin.png").toExternalForm()
     );
     /**
      *
