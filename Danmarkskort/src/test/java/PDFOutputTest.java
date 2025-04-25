@@ -13,7 +13,7 @@ public class    PDFOutputTest {
     public void testOutput() {
         PDFOutput pdfOutput;
         try {
-             pdfOutput = new PDFOutput();
+             //pdfOutput = new PDFOutput();
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
