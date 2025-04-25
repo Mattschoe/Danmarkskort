@@ -36,13 +36,15 @@ public abstract class PDFOutput {
         document.open(); //Åbner dokumentet så vi kan begynde at skrive i det
 
         //Tiløjer overskriften i PDF'en
-        String overskrift = roads.getFirst().getRoadName() +" to "+ roads.getLast().getRoadName();
+        String originRoad = roads.getFirst().getRoadName().isEmpty()? "NAMELESS PLACE" : roads.getFirst().getRoadName();
+        String endingRoad = roads.getLast().getRoadName().isEmpty()?  "NAMELESS PLACE" : roads.getLast().getRoadName();
+        String overskrift = originRoad +" to "+ endingRoad;
         Paragraph paragraph = new Paragraph(overskrift, boldFont);
         document.add(paragraph);
         document.add(Chunk.NEWLINE);
 
         //Tilføjer første vej med et bestemt prefix
-        paragraph = new Paragraph("1. Start along "+roads.getFirst().getRoadName(), normalFont);
+        paragraph = new Paragraph("1. Start along "+originRoad, normalFont);
         document.add(paragraph);
 
         int step = 1; //Tilføjer alle andre veje med højre/venstre-angivelser
@@ -94,7 +96,7 @@ public abstract class PDFOutput {
         }
 
         //Tilføjer sidste vej med et bestemt prefix
-        paragraph = new Paragraph(step +". Conclude at "+roads.getLast().getRoadName(), normalFont);
+        paragraph = new Paragraph(step +". Conclude at "+endingRoad, normalFont);
         document.add(paragraph);
 
         document.close(); //Lukker dokumentet; vi er færdige med at skrive
@@ -128,8 +130,8 @@ public abstract class PDFOutput {
      * @return the file-name for the route, w/o dots, and with dashes instead of spaces
      */
     private static String createFilePath(List<Road> roads) {
-        String originRoad = roads.getFirst().getRoadName().isEmpty()? "Undefined-place" : roads.getFirst().getRoadName();
-        String endingRoad = roads.getLast().getRoadName().isEmpty()?  "undefined-place" : roads.getLast().getRoadName();
+        String originRoad = roads.getFirst().getRoadName().isEmpty()? "Nameless-place" : roads.getFirst().getRoadName();
+        String endingRoad = roads.getLast().getRoadName().isEmpty()?  "nameless-place" : roads.getLast().getRoadName();
 
         String path = originRoad +"-to-"+ endingRoad;        //Skaber pdf-filens filsti
         path = path.replaceAll("\\.", ""); //Fjerner alle punktummer fra filstien

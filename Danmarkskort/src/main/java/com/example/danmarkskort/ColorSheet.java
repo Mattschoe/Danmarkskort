@@ -435,14 +435,14 @@ public enum ColorSheet {
         return switch(this) {
             case ROAD_COASTLINE -> Color.BLACK;
             case ROAD_PRIMARY    -> Color.RED.darker();
-            case ROAD_SECONDARY  -> Color.GREEN;
+            case ROAD_SECONDARY  -> Color.CHARTREUSE;
             case ROAD_TERTIARY   -> Color.BLUE;
             case ROAD_CYCLEWAY   -> Color.ORANGE;
             case ROAD_TRACK_PATH -> Color.MAGENTA;
             case ROAD_TREE_ROW   -> Color.LIGHTGREEN;
             case ROAD_ROUTE      -> Color.rgb(255, 255, 255, 0.3);
             case ROAD_DEFAULT    -> Color.DIMGREY;
-            default -> Color.rgb(147, 112, 219, 0.4);
+            default -> Color.rgb(206, 169, 128, 0.4);
         };
     }
     //endregion
