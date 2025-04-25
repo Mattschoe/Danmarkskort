@@ -117,19 +117,6 @@ public class Controller implements Initializable {
      *  configures something(???) for an object in the mapOverlay.fxml scene
      */
     @Override public void initialize(URL url, ResourceBundle resourceBundle) {
-        /* listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
-                String selected = listView.getSelectionModel().getSelectedItem();
-                searchBar.setText(selected);
-                if (!trieCity.keysWithPrefix(selected).isEmpty()) { //Her skabes problemer
-                    autoSuggest("\r", selected, trieCity);
-                } else { // Skal lede i vejnavne
-                    autoSuggest("\r", selected, trieStreet);
-                }
-               listView.setVisible(false);
-            }
-        }); */
         if(POIMenu != null) {
             POIMenu.getItems().clear();
             for (String poi : POIList) {
