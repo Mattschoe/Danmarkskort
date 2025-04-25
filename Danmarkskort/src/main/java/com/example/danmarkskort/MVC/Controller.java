@@ -262,18 +262,14 @@ public class Controller implements Initializable {
             for (Node node : cities) {
                 listView.getItems().add(node.getCity());
             }
-            autoSuggestResults = new ArrayList<>(cities);
         } else if (!streets.isEmpty()) {
             //If no city found we show streets
             for (Node node : streets) {
                 listView.getItems().add(node.getAddress());
             }
-            autoSuggestResults = new ArrayList<>(streets);
         } else {
-            if (autoSuggestResults.isEmpty()) return; //If we never got suggestion, we return early and dont auto-suggest anything
-            for (Node node : autoSuggestResults) {
-                listView.getItems().add(node.getAddress());
-            }
+            if (autoSuggestResults.isEmpty()) return; //If we never got suggestion, we return early and don't auto-suggest anything
+            listView.getItems().clear();
         }
     }
 

@@ -26,8 +26,8 @@ public class Model {
     private Tilegrid tilegrid;
     private Search search;
     private List<Road> latestRoute;
-    private TrieST<String> trieCity;
-    private TrieST<String> trieStreet;
+    private TrieST trieCity;
+    private TrieST trieStreet;
     Set<String> streets;
     Map<String, Node> citiesToNode;
     //endregion
@@ -519,36 +519,23 @@ public class Model {
             if (city != null) citiesToNode.put(city, node);
 
             //Insert node into streets if it has an address
-            if (street != null) trieStreet.put(street, node);
+            if (street != null) trieStreet.put(node);
         }
         //Adds nodes to the city trie
-        for (String city : citiesToNode.keySet()) {
-            trieCity.put(city, citiesToNode.get(city));
+        for (Node node : citiesToNode.values()) {
+            trieCity.put(new SimpleNode(node.getCity(), node));
         }
     }
 
     ///Returns a list of city-nodes that are correlated with the given {@code prefix} from the trie
     public List<Node> getCitiesFromPrefix(String prefix) {
-        List<Node> citiesWithPrefix = new ArrayList<>();
-        //Runs through every subtree with the prefix and adds the node to the list of nodes with this prefix
-        for (String keys : trieCity.keysWithPrefix(prefix)) {
-            citiesWithPrefix.add(trieCity.get(keys));
-        }
-        return citiesWithPrefix;
+        return trieCity.keysWithPrefix(prefix);
     }
 
     ///Returns a list of street-nodes that are correlated with the given {@code prefix} from the trie
     public List<Node> getStreetsFromPrefix(String prefix) {
-        List<Node> streetsWithPrefix = new ArrayList<>();
-        //Runs through every subtree with the prefix and adds the node to the list of nodes with this prefix
-        for (String keys : trieStreet.keysWithPrefix(prefix)) {
-            streetsWithPrefix.addAll(trieStreet.getList(keys));
-        }
-        return streetsWithPrefix;
+        return trieStreet.keysWithPrefix(prefix);
     }
-
-
-
     //endregion
 
     //region Getters and setters

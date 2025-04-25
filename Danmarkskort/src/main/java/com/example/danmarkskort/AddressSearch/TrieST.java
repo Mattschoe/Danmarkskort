@@ -8,10 +8,14 @@ import java.util.*;
 public class TrieST {
     private TrieNode root;
 
-    ///Puts a Node and its key that should be its address. {@code key} HAS TO BE LOWERCASE BEFORE PUTTING
+    public TrieST() {
+        root = new TrieNode("");
+    }
+
+    ///Puts a Node (its address) into the tree
     public void put(Node node) {
         TrieNode current = root;
-        String remaining = node.getAddress();
+        String remaining = node.getAddress().toLowerCase();
 
         while (!remaining.isEmpty()) {
             boolean matched = false;
@@ -83,15 +87,26 @@ public class TrieST {
 
     ///Returns a list of nodes that all start with the given {@code prefix}
     public List<Node> keysWithPrefix(String prefix) {
-        TrieNode current = root;
+        return collectWithPrefix(root, prefix);
+    }
+
+    ///Recursively runs down the tree returning only either what fully matches or has children that match (Fx: "København S" only returns all under that prefix and not under "København")
+    private List<Node> collectWithPrefix(TrieNode current, String remaining) {
         List<Node> result = new ArrayList<>();
 
         for (String child : current.getChildren().keySet()) {
             TrieNode childNode = current.getChildren().get(child);
-            int sharedPrefix = commonPrefixLength(child, prefix);
+            int sharedPrefix = commonPrefixLength(child, remaining);
 
-            //Atleast 1 shared char so we add all the nodes in that subtree to result list
-            if (sharedPrefix > 0) result.addAll(collectAll(childNode));
+            if (sharedPrefix == 0) continue; //No shared prefix so we don't look at this child
+
+            if (sharedPrefix == remaining.length()) {
+                //Full match so we return everything (Fx: "København" returns everything under the node "København .."
+                result.addAll(collectAll(childNode));
+            } else if (sharedPrefix == child.length() && remaining.length() > child.length()) {
+                //Full match but the user input has more (Fx: "København S", gets all under "København S" and not "København")
+                result.addAll(collectWithPrefix(childNode, remaining.substring(sharedPrefix)));
+            }
         }
         return result;
     }
