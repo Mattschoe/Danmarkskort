@@ -86,7 +86,7 @@ public abstract class PDFOutput {
                 System.out.println("prevLast:  "+prevLast +" -- ("+prevLast.getX() +", "+prevLast.getY() +")");
                 System.out.println("crntFirst: "+crntFirst+" -- ("+crntFirst.getX()+", "+crntFirst.getY()+")");
                 System.out.println("crntLast:  "+crntLast +" -- ("+crntLast.getX() +", "+crntLast.getY() +")");
-                throw new RuntimeException("CURSED VECTORS");
+                throw new RuntimeException("Cursed vectors -- they do not relate as expected! :(");
             }
 
             paragraph = new Paragraph(step++ +". Turn "+direction+" at "+roadName);
