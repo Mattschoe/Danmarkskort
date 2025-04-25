@@ -156,11 +156,19 @@ public class View {
         drawMap();
     }
 
+
     ///Zooms in on the coords given as parameter
-    public void zoomOnCoords(float x, float y) {
-        System.out.println(x + " " + y);
-        pan(x, y);
-        zoom(x, y, 2);
+    public void zoomTo(float x, float y) {
+        //Finds how much we need to zoom in/out by dividing the target with the currentZoom level
+        Point2D pivot = trans.transform(x, y);
+        double targetScale = 500.0;
+        double factor = targetScale / trans.getMxx();
+        zoom(pivot.getX(), pivot.getY(), factor);
+
+        //Moves the view so the given XY is in the middle
+        double deltaX = (canvas.getWidth()/2) - pivot.getX();
+        double deltaY = (canvas.getHeight()/2) - pivot.getY();
+        pan(deltaX, deltaY);
     }
 
     /// Changes the current zoom level to a range from 0 to 4 (needed for the LOD). 0 is minimum amount of details, 4 is maximum

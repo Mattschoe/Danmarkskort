@@ -192,6 +192,11 @@ public class Controller implements Initializable {
         view.drawMap();
     }
 
+    ///Disables the list view if we have picked one and then moves the mouse out of the listview
+    @FXML protected void mouseExitedListView() {
+        listView.setVisible(false);
+    }
+
     //endregion
 
     //region mapOverlay.fxml scene methods
@@ -234,7 +239,7 @@ public class Controller implements Initializable {
         //If user wants to search we pick the top node
         if (event.getCharacter().equals("\r")) { //If "Enter" is pressed
             Node selection = autoSuggestResults.getFirst();
-            view.zoomOnCoords(selection.getX(), selection.getY());
+            view.zoomTo(selection.getX(), selection.getY());
         } else {
             listView.getItems().clear(); //Potential cleanup from earlier search
             String input = searchBar.getText().toLowerCase();
@@ -293,7 +298,7 @@ public class Controller implements Initializable {
         if (event.getClickCount() == 2) {
             Node chosenNode = autoSuggestResults.get(listView.getSelectionModel().getSelectedIndex());
             searchBar.setText(chosenNode.getAddress());
-            view.zoomOnCoords(chosenNode.getX(), chosenNode.getY());
+            view.zoomTo(chosenNode.getX(), chosenNode.getY());
         }
     }
 
