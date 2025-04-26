@@ -54,132 +54,137 @@ public class Tile implements MapObject, Serializable {
 
     public void addPOI(POI POI) { POIs.add(POI); }
 
+    ///Draws everything in the tile
     @Override
     public void draw(GraphicsContext graphicsContext) {
-        draw(graphicsContext, 4);
-    }
-
-    /**
-     * Draws the {@code visibleTiles} given the Level of detail
-     * @param levelOfDetail ranging from 0 to 4, where 0 being the minimum amount and 4 being the maximum amount of details.
-     */
-    public void draw(GraphicsContext graphicsContext, int levelOfDetail) {
-        //Tegner tilet
-        //graphicsContext.setStroke(Color.DARKORANGE);
-        //graphicsContext.strokeRect(bounds[0],bounds[1], tileSize, tileSize);
-
-        //HUSK: Altid tegn farve/baggrund før du tegner road på hvert level
-        drawMotorway(graphicsContext);
-        drawTrunk(graphicsContext);
-        drawCoastline(graphicsContext);
-        if (levelOfDetail > 0) {
-            drawPrimary(graphicsContext);
-            if (levelOfDetail > 1) {
-                drawSecondary(graphicsContext);
-                if (levelOfDetail > 2) {
-                    drawTertiary(graphicsContext);
-                    drawUnclassified(graphicsContext);
-                    drawResidential(graphicsContext);
-                    drawDefaultRoad(graphicsContext);
-                    if (levelOfDetail > 3) {
-                        drawArea(graphicsContext);
-                        drawBuildings(graphicsContext);
-                        drawPOIs(graphicsContext);
-                        draw(graphicsContext, levelOfDetail - 1);
-                    }
-                }
-            }
+        for (MapObject object : motorway ) {
+            object.draw(graphicsContext);
+        }
+        for (MapObject object : trunk) {
+            object.draw(graphicsContext);
+        }
+        for (MapObject object : primary) {
+            object.draw(graphicsContext);
+        }
+        for (MapObject object : secondary) {
+            object.draw(graphicsContext);
+        }
+        for (MapObject object : tertiary) {
+            object.draw(graphicsContext);
+        }
+        for (MapObject object : unclassified) {
+            object.draw(graphicsContext);
+        }
+        for (MapObject object : residential) {
+            object.draw(graphicsContext);
+        }
+        for (MapObject object : defaultRoad) {
+            object.draw(graphicsContext);
+        }
+        for (MapObject object : buildings) {
+            object.draw(graphicsContext);
+        }
+        for (MapObject object : area) {
+            object.draw(graphicsContext);
+        }
+        for (MapObject object : coastline) {
+            object.draw(graphicsContext);
+        }
+        for (MapObject object : nodes) {
+            object.draw(graphicsContext);
+        }
+        for (MapObject object : POIs) {
+            object.draw(graphicsContext);
         }
     }
 
-    //region Private draw-methods
+    //region draw-methods
     ///All big Motorways
-    private void drawMotorway(GraphicsContext graphicsContext) {
+    public void drawMotorway(GraphicsContext graphicsContext) {
         for (MapObject mapObject : motorway) {
             mapObject.draw(graphicsContext);
         }
     }
     ///All important roads that aren't motorways
-    private void drawTrunk(GraphicsContext graphicsContext) {
+    public void drawTrunk(GraphicsContext graphicsContext) {
         for (MapObject mapObject : trunk) {
             mapObject.draw(graphicsContext);
         }
     }
     ///All next important roads (Big town to big town)
-    private void drawPrimary(GraphicsContext graphicsContext) {
+    public void drawPrimary(GraphicsContext graphicsContext) {
         for (MapObject mapObject : primary) {
             mapObject.draw(graphicsContext);
         }
     }
     ///All next most important roads (town to town)
-    private void drawSecondary(GraphicsContext graphicsContext) {
+    public void drawSecondary(GraphicsContext graphicsContext) {
         for (MapObject mapObject : secondary) {
             mapObject.draw(graphicsContext);
         }
     }
     ///All next most important roads
-    private void drawTertiary(GraphicsContext graphicsContext) {
+    public void drawTertiary(GraphicsContext graphicsContext) {
         for (MapObject mapObject : tertiary) {
             mapObject.draw(graphicsContext);
         }
     }
     ///Least most important roads
-    private void drawUnclassified(GraphicsContext graphicsContext) {
+    public void drawUnclassified(GraphicsContext graphicsContext) {
         for (MapObject mapObject : unclassified) {
             mapObject.draw(graphicsContext);
         }
     }
     ///Roads which serve acces to housing
-    private void drawResidential(GraphicsContext graphicsContext) {
+    public void drawResidential(GraphicsContext graphicsContext) {
         for (MapObject mapObject : residential) {
             mapObject.draw(graphicsContext);
         }
     }
 
     ///Roads without a type
-    private void drawDefaultRoad(GraphicsContext graphicsContext) {
+    public void drawDefaultRoad(GraphicsContext graphicsContext) {
         for (MapObject mapObject : defaultRoad) {
             mapObject.draw(graphicsContext);
         }
     }
 
     ///Buildings
-    private void drawBuildings(GraphicsContext graphicsContext) {
+    public void drawBuildings(GraphicsContext graphicsContext) {
         for (MapObject mapObject : buildings) {
             mapObject.draw(graphicsContext);
         }
     }
 
     ///Area colors
-    private void drawArea(GraphicsContext graphicsContext) {
+    public void drawArea(GraphicsContext graphicsContext) {
         for (MapObject mapObject : area) {
             mapObject.draw(graphicsContext);
         }
     }
 
     ///Area colors
-    private void drawCoastline(GraphicsContext graphicsContext) {
+    public void drawCoastline(GraphicsContext graphicsContext) {
         for (MapObject mapObject : coastline) {
             mapObject.draw(graphicsContext);
         }
     }
 
-    private void drawNodes(GraphicsContext graphicsContext) {
+    public void drawNodes(GraphicsContext graphicsContext) {
         for (MapObject mapObject : nodes) {
             mapObject.draw(graphicsContext);
         }
     }
 
-    private void drawPOIs(GraphicsContext graphicsContext) {
+    public void drawPOIs(GraphicsContext graphicsContext) {
         for (POI POI : POIs) {
             POI.draw(graphicsContext);
         }
     }
     //endregion
 
-
     /**
-     * Initializes all the draw methods so we later can call them in {@link #draw(GraphicsContext, int)}
+     * Initializes all the draw methods so we later can call them in
      */
     public void initializeDrawMethods() {
         for (MapObject mapObject : objectsInTile) {

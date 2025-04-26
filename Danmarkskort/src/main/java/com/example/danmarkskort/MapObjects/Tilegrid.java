@@ -30,7 +30,6 @@ public class Tilegrid implements Serializable {
         this.numberOfTilesX = numberOfTilesX;
         this.numberOfTilesY = numberOfTilesY;
 
-        initializePredefinedRelations();
         initializeZoomedOutTile();
     }
 
@@ -39,16 +38,58 @@ public class Tilegrid implements Serializable {
      * @param levelOfDetail ranging from 0 to 4, where 0 being the minimum amount and 4 being the maximum amount of details.
      */
     public void drawVisibleTiles(GraphicsContext graphicsContext, float[] viewport, int levelOfDetail) {
-        if (levelOfDetail < 1) zoomedOutTile.draw(graphicsContext, levelOfDetail);
+        if (levelOfDetail < 1) zoomedOutTile.draw(graphicsContext);
         else {
-            // drawPredefinedRelations(); //OBS det her betyder at vi tegner selvom det ikke kan ses, skal måske ændres senere
             visibleTiles = getTilesInView(viewport);
+
+            //We first draw colors so we don't overlap roads
             for (Tile tile : visibleTiles) {
                 if (tile.isEmpty()) continue;
-                tile.draw(graphicsContext, levelOfDetail);
+                if (levelOfDetail > 1) tile.drawArea(graphicsContext);
+            }
+
+            //Then we go through each tile and draw their different roads/buildings given the levelOfDetail
+            for (Tile tile : visibleTiles) {
+                if (tile.isEmpty()) continue;
+                drawLOD1(tile, graphicsContext);
+                if (levelOfDetail > 1) {
+                    drawLOD2(tile, graphicsContext);
+                    if (levelOfDetail > 2) {
+                        drawLOD3(tile, graphicsContext);
+                        if (levelOfDetail > 3) {
+                            drawLOD4(tile, graphicsContext);
+                        }
+                    }
+                }
             }
         }
     }
+
+    //region private draw methods
+    private void drawLOD1(Tile tile, GraphicsContext graphicsContext) {
+        tile.drawMotorway(graphicsContext);
+        tile.drawTrunk(graphicsContext);
+        tile.drawCoastline(graphicsContext);
+        tile.drawPrimary(graphicsContext);
+    }
+
+    private void drawLOD2(Tile tile, GraphicsContext graphicsContext) {
+        tile.drawSecondary(graphicsContext);
+    }
+
+    private void drawLOD3(Tile tile, GraphicsContext graphicsContext) {
+        tile.drawTertiary(graphicsContext);
+        tile.drawUnclassified(graphicsContext);
+        tile.drawResidential(graphicsContext);
+        tile.drawDefaultRoad(graphicsContext);
+    }
+
+    private void drawLOD4(Tile tile, GraphicsContext graphicsContext) {
+        tile.drawBuildings(graphicsContext);
+        tile.drawPOIs(graphicsContext);
+    }
+
+    //endregion
 
     ///Adds the given mapObject to the tile that fits the given x, y coordinate. x, y should be the coordinate of the mapObject
     public Tile getTileFromXY(float x, float y) {
@@ -80,13 +121,6 @@ public class Tilegrid implements Serializable {
         zoomedOutTile.setTrunk(trunk);
         zoomedOutTile.setCoastline(coastline);
     }
-
-    ///All big relations (Predifined in parser, fx: Sjælland, Jylland, osv.)
-    private void drawPredefinedRelations() {
-        //Gem de vigtige relations
-    }
-
-    private void initializePredefinedRelations() {}
 
     /**
      * All the tiles currently in view

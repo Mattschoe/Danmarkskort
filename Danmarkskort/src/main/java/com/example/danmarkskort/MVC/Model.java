@@ -399,7 +399,7 @@ public class Model {
              }
          }
 
-         //Adds Nodes
+         //region Adds Nodes
          for (Node node : parser.getNodes().valueCollection()) {
              int tileX = (int) ((node.getX() - minX) / tileSize);
              int tileY = (int) ((node.getY() - minY) / tileSize);
@@ -410,6 +410,7 @@ public class Model {
 
              tileGrid[tileX][tileY].addMapObject(node);
          }
+         //endregion
 
          //region Adds Roads
          for (Road road : parser.getRoads()) {
