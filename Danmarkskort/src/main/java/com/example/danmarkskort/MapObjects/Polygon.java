@@ -236,6 +236,7 @@ public class Polygon implements Serializable, MapObject{
             case "pier"             -> POLY_PIER;
             case "wastewater_plant" -> POLY_WASTEWATER_PLANT;
             case "waterworks"       -> POLY_WATERWORKS;
+            case "quay"             -> POLY_ARETE;
             //endregion
 
             //region aeroway

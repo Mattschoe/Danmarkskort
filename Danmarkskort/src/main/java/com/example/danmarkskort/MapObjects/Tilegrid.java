@@ -58,6 +58,9 @@ public class Tilegrid implements Serializable {
                         drawLOD3(tile, graphicsContext);
                         if (levelOfDetail > 3) {
                             drawLOD4(tile, graphicsContext);
+                            if (levelOfDetail > 4) {
+                                drawLOD5(tile, graphicsContext);
+                            }
                         }
                     }
                 }
@@ -79,12 +82,15 @@ public class Tilegrid implements Serializable {
 
     private void drawLOD3(Tile tile, GraphicsContext graphicsContext) {
         tile.drawTertiary(graphicsContext);
-        tile.drawUnclassified(graphicsContext);
-        tile.drawResidential(graphicsContext);
-        tile.drawDefaultRoad(graphicsContext);
     }
 
     private void drawLOD4(Tile tile, GraphicsContext graphicsContext) {
+        tile.drawResidential(graphicsContext);
+        tile.drawUnclassified(graphicsContext);
+        tile.drawDefaultRoad(graphicsContext);
+    }
+
+    private void drawLOD5(Tile tile, GraphicsContext graphicsContext) {
         tile.drawBuildings(graphicsContext);
         tile.drawPOIs(graphicsContext);
     }

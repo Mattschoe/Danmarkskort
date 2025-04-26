@@ -173,10 +173,13 @@ public class View {
 
     /// Changes the current zoom level to a range from 0 to 4 (needed for the LOD). 0 is minimum amount of details, 4 is maximum
     private int getLOD() {
-        if (trans.getMxx() > 65) return 4;
-        if (trans.getMxx() > 40) return 3;
-        if (trans.getMxx() > 8)  return 2;
-        if (trans.getMxx() > 4)  return 1;
+        double zoomLevel = trans.getMxx();
+        System.out.println(zoomLevel);
+        if (zoomLevel > 550) return 5;
+        if (zoomLevel > 160) return 4;
+        if (zoomLevel > 85) return 3;
+        if (zoomLevel > 8)  return 2;
+        if (zoomLevel > 4)  return 1;
         else return 0;
     }
     //endregion

@@ -230,9 +230,6 @@ public class Parser implements Serializable {
         for (long memberID : members) {
             Polygon polygon = id2Polygon.get(memberID);
             Road road = id2Road.get(memberID);
-            if (memberID == 566853488) {
-                System.out.println("HEJSASA");
-            }
             if (polygon != null && polygon.getType().isEmpty()) polygon.setType(type);
             else if (road != null && road.getType().isEmpty()) road.setType(type);
         }
@@ -436,7 +433,6 @@ public class Parser implements Serializable {
             }
         }
     }
-
     //endregion
 
 
@@ -448,14 +444,8 @@ public class Parser implements Serializable {
     public void setNodes(TLongObjectHashMap<Node> nodes) { id2Node = nodes; }
     public void setRoads(TLongObjectHashMap<Road> roads) { id2Road = roads; }
     public void setPolygons(TLongObjectHashMap<Polygon> polygons) { id2Polygon = polygons; }
-    public double[] getBounds() { return bounds; }
-    /**
-     * @return the set of significant highways, which will be the only roads drawn when the map is zoomed out a certain amount
-     */
-    public Set<Road> getSignificantHighways() { return significantHighways; }
-
     public Set<Node> getAddressNodes() {
         return addressNodes;
-    }//
+    }
     //endregion
 }
