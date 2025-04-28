@@ -153,11 +153,24 @@ public class Road implements Serializable, MapObject {
         }
     }
 
-    ///TO DO: THIS METHOD NEEDS TO BE FIXED TO ADJUST FOR SPEEDLIMIT BUT IT HASS TO ACCOUNT FOR WHERE THE NODES ARE LOCATED IN XY SPACE}
+    ///TO DO: THIS METHOD NEEDS TO BE FIXED TO ADJUST FOR SPEEDLIMIT BUT IT HAS TO ACCOUNT FOR WHERE THE NODES ARE LOCATED IN XY SPACE}
     private void calculateWeight() {
         float deltaX = nodes.getFirst().getX() - nodes.getLast().getX();
         float deltaY = nodes.getFirst().getY() - nodes.getLast().getY();
-        weight = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+       float distance = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+       float speedLimit = this.getMaxSpeed();
+
+       //edge weight gives nu som tiden det vil tage at komme fra startnode til slutnode på den givne road
+       if(speedLimit > 0) {
+        weight = distance / speedLimit;
+       } else {
+           /* hvis fartgrænsen er ukendt, skal denne road nedprioriteres. Dette vil dog skulle ændres, så snart
+           vi skal have implementeret cykelruter
+           */
+           weight= distance * 10;
+       }
     }
     //endregion
 
