@@ -22,12 +22,11 @@ public class Parser implements Serializable {
     private transient TLongObjectHashMap<Node> id2Node; //map for storing a Node and the id used to refer to it
     private transient TLongObjectHashMap<Road> id2Road;
     private transient TLongObjectHashMap<Polygon> id2Polygon;
+    private transient final Set<Node> addressNodes;
     private transient Set<Road> roads;
     private final File file; //The file that's loaded in
     ///\[0] = minLat <br> \[1] = minLong <br> \[2] = maxLat <br> \[3] = maxLong
     private final double[] bounds;
-    private final Set<Road> significantHighways;
-    private final Set<Node> addressNodes;
 
     private int failedWays;
     private int failedRelations;
@@ -43,11 +42,9 @@ public class Parser implements Serializable {
     public Parser(File file) throws NullPointerException, IOException, XMLStreamException, FactoryConfigurationError {
         this.file = file;
         id2Node = new TLongObjectHashMap<>(66_289_558);
-        //id2Node = new HashMap<>(49_721_049);
         id2Road = new TLongObjectHashMap<>(2_214_235);
         id2Polygon = new TLongObjectHashMap<>(6_168_995);
         bounds = new double[4];
-        significantHighways = new HashSet<>();
         addressNodes = new HashSet<>();
 
         failedWays = 0; failedNodes = 0; failedRelations = 0; outOfBoundsNodes = 0;

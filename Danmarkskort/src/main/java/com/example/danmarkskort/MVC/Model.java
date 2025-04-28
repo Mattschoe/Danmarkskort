@@ -80,7 +80,7 @@ public class Model {
         loadAddressNodes();
 
         search = new Search(parser.getNodes().valueCollection());
-        parser = null; //Fjerner reference til parser så den bliver GC'et
+        //parser = null; //Fjerner reference til parser så den bliver GC'et
     }
     //endregion
 
@@ -301,11 +301,10 @@ public class Model {
         }
 
         //Saves Roads
-        /* try {
+        try {
             System.out.println("Saving roads...");
             int numberOfChunks = 8;
-            TLongObjectHashMap<Road> roads = parser.getRoads();
-            long[] roadIDs = roads.keySet().toArray(); //Need this to split it into chunks
+            List<Road> roads = new ArrayList<>(parser.getRoads()); //So we can iterate over it
             int amountOfRoads = roads.size();
             int chunkSize = (int) Math.ceil((double) amountOfRoads / numberOfChunks); //Splits all nodes into chunks
 
@@ -319,19 +318,15 @@ public class Model {
 
                 //Saves all nodes that the chunk have space for
                 for (int j = start; j < end; j++) {
-                    long id = roadIDs[j];
-                    outputStream.writeLong(id);
-                    outputStream.writeObject(roads.get(id));
+                    outputStream.writeObject(roads.get(j));
                 }
+
                 outputStream.close();
                 System.out.println("Saved chunk " + i + " with " + (end - start) + " amount of roads!");
             }
         } catch (Exception e) {
             throw new ParserSavingException("Error saving roads to OBJ!: " + e.getMessage());
         }
-
-         */
-
 
         //Saves Polygons
         try {

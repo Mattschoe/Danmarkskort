@@ -40,9 +40,9 @@ public class ModelTest {
     }
 
     /**
-     * Same as {@link #saveParserAsOBJ()} just doesnt delete the OBJ file again. Should be marked @Disabled as standard since it doesn't dele the file again
+     * Same as {@link #saveParserAsOBJ()} just doesn't delete the OBJ file again. Should be marked @Disabled as standard since it doesn't dele the file again
      */
-    @Disabled
+    //@Disabled
     @Test
     public void createOBJFile() {
         Model model = Model.getInstance("./data/mapOfDenmark.osm", canvas);
