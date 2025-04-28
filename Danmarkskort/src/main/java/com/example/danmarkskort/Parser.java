@@ -7,6 +7,7 @@ import com.example.danmarkskort.MapObjects.Road;
 
 import javax.xml.stream.*;
 import java.io.*;
+import java.net.IDN;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
