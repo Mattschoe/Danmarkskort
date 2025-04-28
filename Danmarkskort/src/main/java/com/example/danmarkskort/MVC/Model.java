@@ -21,14 +21,12 @@ public class Model {
     private static Model modelInstance;
     private final File file;
     private Parser parser;
-    private File outputFile; //The output .obj file
     private int numberOfTilesX, numberOfTilesY;
-    private Tilegrid tilegrid;
-    private Search search;
+    private final Tilegrid tilegrid;
+    private final Search search;
     private List<Road> latestRoute;
     private TrieST trieCity;
     private TrieST trieStreet;
-    Set<String> streets;
     Map<String, Node> citiesToNode;
     //endregion
 
@@ -111,7 +109,7 @@ public class Model {
     /// Parses a .obj file. This method is called in the Parser constructor if the given filepath ends with .obj
     private void parseOBJToParser() {
         TLongObjectHashMap<Node> id2Node = new TLongObjectHashMap<>(66_289_558);
-        TLongObjectHashMap<Road> id2Road = new TLongObjectHashMap<>(2_214_235);
+        Set<Road> roads = new HashSet<>(2_214_235);
         TLongObjectHashMap<Polygon> id2Polygon = new TLongObjectHashMap<>(6_168_995);
 
         System.out.println("Deserializing parser...");
@@ -170,30 +168,29 @@ public class Model {
             assert roadFiles != null;
 
             ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-            List<Future<TLongObjectHashMap<Road>>> futureMap = new ArrayList<>();
+            List<Future<Set<Road>>> futureSet = new ArrayList<>();
 
             //Runs through each nodefile and makes a thread serialize it
             for (File file : roadFiles) {
-                futureMap.add(executor.submit(() -> {
-                    TLongObjectHashMap<Road> localMap = new TLongObjectHashMap<>();
+                futureSet.add(executor.submit(() -> {
+                    Set<Road> localSet = new HashSet<>();
                     try {
                         ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
                         int chunkSize = input.readInt();
                         for (int i = 0; i < chunkSize; i++) {
-                            long roadID = input.readLong();
                             Road road = (Road) input.readObject();
-                            localMap.put(roadID, road);
+                            localSet.add(road);
                         }
                     } catch (Exception e) {
                         System.out.println("Error reading file: " + file.getName() + ", with error: " + e.getMessage());
                     }
-                    return localMap;
+                    return localSet;
                 }));
             }
 
             //Adds each localMap from the threads into the collected map
-            for (Future<TLongObjectHashMap<Road>> future : futureMap) {
-                id2Road.putAll(future.get());
+            for (Future<Set<Road>> future : futureSet) {
+                roads.addAll(future.get());
             }
             executor.shutdown();
             System.out.println("- Finished reading roads!");
@@ -244,7 +241,7 @@ public class Model {
 
         //Inserts into parser
         parser.setNodes(id2Node);
-        parser.setRoads(id2Road);
+        parser.setRoads(roads);
         parser.setPolygons(id2Polygon);
 
         //Closes input and checks for errors
@@ -253,6 +250,13 @@ public class Model {
         //Loads polygons colors after serialization
         for (Polygon polygon : parser.getPolygons().valueCollection()) {
             polygon.determineColor();
+        }
+
+        //Adds roads back into nodes adjacency list
+        for (Road road : parser.getRoads()) {
+            for (Node node : road.getNodes()) {
+                node.addEdge(road);
+            }
         }
     }
 
@@ -269,6 +273,7 @@ public class Model {
         } catch (Exception e) {
             throw new ParserSavingException("Error saving parser to OBJ!: " + e.getMessage());
         }
+
 
         //Saves nodes
         try {
@@ -300,6 +305,7 @@ public class Model {
             throw new ParserSavingException("Error saving nodes to OBJ!: " + e.getMessage());
         }
 
+
         //Saves Roads
         try {
             System.out.println("Saving roads...");
@@ -328,10 +334,11 @@ public class Model {
             throw new ParserSavingException("Error saving roads to OBJ!: " + e.getMessage());
         }
 
+
         //Saves Polygons
         try {
             System.out.println("Saving polygons...");
-            int numberOfChunks = 16;
+            int numberOfChunks = 8;
             TLongObjectHashMap<Polygon> polygons = parser.getPolygons();
             long[] polygonID = polygons.keySet().toArray(); //Need this to split it into chunks
             int amountOfPolygons = polygons.size();

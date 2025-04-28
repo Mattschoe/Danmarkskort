@@ -20,7 +20,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     private String street;
     private double distanceTo;
     private int edges;
-    private List<Road> roadEdges;
+    private transient List<Road> roadEdges;
     //endregion
 
     //region Constructor(s)

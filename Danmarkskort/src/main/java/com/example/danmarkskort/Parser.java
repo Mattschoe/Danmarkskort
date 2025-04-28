@@ -439,7 +439,7 @@ public class Parser implements Serializable {
     public Set<Road> getRoads() { return roads; }
     public TLongObjectHashMap<Polygon> getPolygons() { return id2Polygon; }
     public void setNodes(TLongObjectHashMap<Node> nodes) { id2Node = nodes; }
-    public void setRoads(TLongObjectHashMap<Road> roads) { id2Road = roads; }
+    public void setRoads(Set<Road> roads) { this.roads = roads; }
     public void setPolygons(TLongObjectHashMap<Polygon> polygons) { id2Polygon = polygons; }
     public Set<Node> getAddressNodes() {
         return addressNodes;
