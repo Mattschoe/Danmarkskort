@@ -279,7 +279,7 @@ public enum ColorSheet {
             case POLY_HOT_SPRING -> Color.RED;
             case POLY_ISTHMUS    -> Color.RED;
             case POLY_MUD        -> Color.rgb(230, 220, 210);
-            case POLY_PENINSULA  -> Color.RED;
+            case POLY_PENINSULA  -> Color.rgb(157, 199, 159, 0.3);
             case POLY_REEF       -> Color.RED;
             case POLY_SHINGLE    -> Color.rgb(237, 228, 220);
             case POLY_SHOAL      -> Color.rgb(255, 241, 186);
