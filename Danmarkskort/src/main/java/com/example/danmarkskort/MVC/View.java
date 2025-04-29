@@ -133,7 +133,9 @@ public class View {
 
     ///Saves the object given as parameter and includes it in {@link #drawMap()}.
     public void addObjectToDraw(MapObject mapObject) {
-        extraDrawObjects.add(mapObject);
+        if (mapObject != null) {
+            extraDrawObjects.add(mapObject);
+        }
     }
 
     /// Removes the object given as parameter

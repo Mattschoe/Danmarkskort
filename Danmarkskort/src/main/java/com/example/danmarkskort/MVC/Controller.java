@@ -272,20 +272,22 @@ public class Controller implements Initializable {
 
     /// This metod is used to save the current POI to a map and add it as a menuitem to the POI menubar to give it delete and find adress as options.
     @FXML protected void savePOIToHashMap(){
+        if(startPOI == null){return;}
         String name = addNamePOI.getText();
         favoritePOIs.put(name, startPOI);
-        closePOIMenu();
+        oldPOIs.remove(startPOI);
+        view.addObjectToDraw(startPOI);
 
-        POI tempPOI = startPOI;
+        closePOIMenu();
 
         Menu POIMenuItem = new Menu(name);
         POIMenu.getItems().add(POIMenuItem);
 
         MenuItem deletePOI = new MenuItem("Delete");
         deletePOI.setOnAction(e -> {
+            view.removeObjectToDraw(startPOI);
             favoritePOIs.remove(name);
             POIMenu.getItems().remove(POIMenuItem);
-            //view.removeObjectToDraw(tempPOI);
             view.drawMap();
         });
 
@@ -318,10 +320,8 @@ public class Controller implements Initializable {
 
     //Metode til at fjerne den røde markering på kortet for en POI. virker kun for den POI, der senest er placeret
     @FXML public void removePOIMarker(POI poi){
-        if(startPOI == null){return;}
         //sæt knappen til visible og kald denne metode et sted
         model.removePOI(poi);
-        startPOI=null;
         view.drawMap();
     }
 
@@ -414,6 +414,7 @@ public class Controller implements Initializable {
                 updateSearchText();
             }
             //Removes old POI from the map.
+
             if (oldPOIs.size() > 2) {
                 while (oldPOIs.size() > 2) {
                     POI removed = oldPOIs.remove(0);
