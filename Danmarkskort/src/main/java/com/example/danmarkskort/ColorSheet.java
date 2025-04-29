@@ -427,7 +427,7 @@ public enum ColorSheet {
             case ROAD_TREE_ROW   -> Color.MEDIUMSEAGREEN;
             case ROAD_ROUTE      -> Color.rgb(255, 255, 255, 0.3);
             case ROAD_DEFAULT    -> Color.LIGHTGREY;
-            case POLY_BOUNDARY       -> Color.TRANSPARENT;
+            case POLY_BOUNDARY   -> Color.TRANSPARENT;
             default              -> Color.rgb(255, 255, 255, 0.2);
         };
     }
@@ -443,7 +443,7 @@ public enum ColorSheet {
             case ROAD_TREE_ROW   -> Color.LIGHTGREEN;
             case ROAD_ROUTE      -> Color.rgb(255, 255, 255, 0.3);
             case ROAD_DEFAULT    -> Color.DIMGREY;
-            case POLY_BOUNDARY       -> Color.TRANSPARENT;
+            case POLY_BOUNDARY   -> Color.TRANSPARENT;
             default -> Color.rgb(206, 169, 128, 0.4);
         };
     }
