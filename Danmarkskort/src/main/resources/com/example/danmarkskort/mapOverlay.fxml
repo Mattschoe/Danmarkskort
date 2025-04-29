@@ -11,6 +11,7 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.danmarkskort.MVC.Controller">
@@ -35,7 +36,10 @@
    
     <ListView fx:id="listView" layoutX="15.0" layoutY="61.0" onMouseClicked="#onAddressPickedFromList" onMouseExited="#mouseExitedListView" prefHeight="72.0" prefWidth="150.0" visible="false" />
 
-    <Text fx:id="fpsText" layoutX="497.00000000000006" layoutY="52.14921875" strokeType="OUTSIDE" strokeWidth="0.0" text="FPS" AnchorPane.rightAnchor="84.044921875" AnchorPane.topAnchor="39.2" />
+    <Text fx:id="fpsText" layoutX="497.00000000000006" layoutY="52.14921875" strokeType="OUTSIDE" strokeWidth="0.0" text="FPS" AnchorPane.rightAnchor="84.044921875" AnchorPane.topAnchor="39.2">
+      <font>
+         <Font name="System Bold" size="12.0" />
+      </font></Text>
 
     <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onKeyPressed="#onActivateSearch" onKeyTyped="#searchBarTyped" promptText="Search..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
     <TextField fx:id="destination" layoutX="15.0" layoutY="71.0" onKeyTyped="#searchBarTyped" promptText="Choose Destination..." visible="false" />
@@ -58,5 +62,8 @@
    <Button fx:id="switchSearch" layoutX="172.0" layoutY="71.0" mnemonicParsing="false" onMouseClicked="#switchDestinationAndStart" text="Switch" visible="false" />
    <TextArea fx:id="guideText" editable="false" layoutY="25.0" prefHeight="376.0" prefWidth="600.0" text="To load the standard map of Denmark, choose the option in the File tab.&#10;&#10;To print instructions as a PDF, select the option under the File tab.&#10;&#10;To choose points of interest, search via the search bar or select them on the map.&#10;&#10;To access and edit points of interest, use the Edit tab.&#10;&#10;To show the FPS counter, toggle it on via the Show tab.&#10;&#10;To change the color scheme, choose one of the options in the Filter tab.&#10;&#10;To close the guide, toggle it off in the Help menu." visible="false" />
    <TextField fx:id="closestRoadBar" layoutX="445.0" layoutY="71.0" prefHeight="26.0" prefWidth="140.0" promptText="Closest Road..." AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="71.0" />
-   <Text fx:id="scaleText" layoutX="526.0" layoutY="358.0" strokeType="OUTSIDE" strokeWidth="0.0" text="50 m" AnchorPane.bottomAnchor="32.0" AnchorPane.rightAnchor="60.0" />
+   <Text fx:id="scaleText" layoutX="526.0" layoutY="358.0" strokeType="OUTSIDE" strokeWidth="0.0" AnchorPane.bottomAnchor="32.0" AnchorPane.rightAnchor="32.0">
+      <font>
+         <Font name="System Bold" size="12.0" />
+      </font></Text>
 </AnchorPane>

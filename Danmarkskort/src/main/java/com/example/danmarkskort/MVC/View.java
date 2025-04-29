@@ -28,12 +28,10 @@ public class View {
     private GraphicsContext graphicsContext;
     private final Scene scene;
     private final Stage stage;
-    private double scalePosX;
-    private double scalePosY;
     private boolean firstTimeDrawingMap;
     private Tilegrid tilegrid;
     ///Extra objects outside the grid that are included in draw method. Objects are added in {@link #addObjectToDraw(MapObject)}
-    private Set<MapObject> extraDrawObjects;
+    private final Set<MapObject> extraDrawObjects;
     //endregion
 
     //region Constructor(s)
@@ -90,7 +88,6 @@ public class View {
         bgTrans = new Affine();
         bgColor = Color.LIGHTBLUE;
         scaleColor = Color.BLACK;
-        updateScalePosXY();
         graphicsContext.setTransform(trans);
         //TODO %% controller.bindZoomBar();
 
@@ -99,14 +96,8 @@ public class View {
         canvas.heightProperty().bind(stage.heightProperty());
 
         //Listeners tilføjes, der redrawer Canvas'et når vinduet skifter størrelse
-        scene.widthProperty().addListener(_ -> {
-            updateScalePosXY();
-            drawMap();
-        });
-        scene.heightProperty().addListener(_ -> {
-            updateScalePosXY();
-            drawMap();
-        });
+        scene.widthProperty().addListener(_ -> drawMap());
+        scene.heightProperty().addListener(_ -> drawMap());
     }
 
     /// Draws the whole map in the tiles visible
@@ -134,11 +125,7 @@ public class View {
             object.draw(graphicsContext);
         }
 
-        //Draws scale-bar
-        graphicsContext.setTransform(bgTrans);
-        graphicsContext.setLineWidth(4);
-        graphicsContext.setStroke(scaleColor);
-        graphicsContext.strokeLine(scalePosX, scalePosY, scalePosX-100, scalePosY);
+        updateScale();
 
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
@@ -168,7 +155,6 @@ public class View {
         trans.prependTranslation(-dx, -dy);
         trans.prependScale(factor, factor);
         trans.prependTranslation(dx, dy);
-        updateScale();
         drawMap();
     }
 
@@ -198,12 +184,24 @@ public class View {
     }
 
     private void updateScale() {
-        // Logic goes here
-    }
+        graphicsContext.setTransform(bgTrans);
+        graphicsContext.setLineWidth(3);
+        graphicsContext.setStroke(scaleColor);
 
-    private void updateScalePosXY() {
-        scalePosX = scene.getWidth() - 25;
-        scalePosY = scene.getHeight() - 15;
+        double scalePosX = scene.getWidth() - 25;
+        double scalePosY = scene.getHeight() - 15;
+        graphicsContext.strokeLine(scalePosX, scalePosY, scalePosX-100, scalePosY);
+        graphicsContext.strokeLine(scalePosX, scalePosY+5, scalePosX, scalePosY-5);
+        graphicsContext.strokeLine(scalePosX-100, scalePosY+5, scalePosX-100, scalePosY-5);
+
+        double scaleOrigin = 67;
+        double currentScale = scaleOrigin / trans.getMxx();
+
+        String text;
+        if (currentScale < 1) { text = String.format("%.2f", currentScale * 1_000) + " m"; }
+        else { text = String.format("%.2f", currentScale) + " km"; }
+
+        controller.getScaleText().setText(text);
     }
     //endregion
 

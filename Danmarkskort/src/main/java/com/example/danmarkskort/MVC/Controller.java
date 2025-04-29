@@ -436,9 +436,7 @@ public class Controller implements Initializable {
         if (model == null) model = Model.getInstance();
 
         view.setBgColor(Color.LIGHTBLUE);
-        view.setScaleColor(Color.BLACK);
-        scaleText.setFill(Color.BLACK);
-        fpsText.setFill(Color.BLACK);
+        setMiscColors(Color.BLACK);
         //TODO %% zoomText.setFill(Color.BLACK);
         for (Tile tile : model.getTilegrid().getGridList()) {
             for (MapObject mo : tile.getObjectsInTile()) {
@@ -453,9 +451,7 @@ public class Controller implements Initializable {
         if (model == null) model = Model.getInstance();
 
         view.setBgColor(Color.rgb(23, 3, 63));
-        view.setScaleColor(Color.ANTIQUEWHITE);
-        scaleText.setFill(Color.ANTIQUEWHITE);
-        fpsText.setFill(Color.ANTIQUEWHITE);
+        setMiscColors(Color.ANTIQUEWHITE);
         //TODO %% zoomText.setFill(Color.WHITE);
         for (Tile tile : model.getTilegrid().getGridList()) {
             for (MapObject mo : tile.getObjectsInTile()) {
@@ -470,9 +466,7 @@ public class Controller implements Initializable {
         if (model == null) model = Model.getInstance();
 
         view.setBgColor(Color.GHOSTWHITE);
-        view.setScaleColor(Color.INDIGO);
-        scaleText.setFill(Color.INDIGO);
-        fpsText.setFill(Color.INDIGO);
+        setMiscColors(Color.INDIGO);
         //TODO %% zoomText.setFill(Color.INDIGO);
         for (Tile tile : model.getTilegrid().getGridList()) {
             for (MapObject mo : tile.getObjectsInTile()) {
@@ -481,6 +475,12 @@ public class Controller implements Initializable {
             }
         }
         view.drawMap();
+    }
+
+    private void setMiscColors(Color color) {
+        view.setScaleColor(color);
+        scaleText.setFill(color);
+        fpsText.setFill(color);
     }
     //endregion
 
@@ -495,5 +495,7 @@ public class Controller implements Initializable {
      *  @return Controllerens canvas-felt
      */
     public Canvas getCanvas() { return canvas; }
+
+    public Text getScaleText() { return scaleText; }
     //endregion
 }
