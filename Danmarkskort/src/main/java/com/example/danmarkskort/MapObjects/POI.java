@@ -13,7 +13,6 @@ public class POI implements MapObject {
     Node closestNodeWithRoad;
     float x, y;
     String name;
-    int poiCount = 0;
     private static final Image pinImage = new Image(
             POI.class.getResource("/com/example/danmarkskort/pin.png").toExternalForm()
     );
