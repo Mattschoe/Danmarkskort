@@ -23,10 +23,13 @@ public class View {
     private Affine bgTrans;
     private Canvas canvas;
     private transient Color bgColor;
+    private transient Color scaleColor;
     private final Controller controller;
     private GraphicsContext graphicsContext;
     private final Scene scene;
     private final Stage stage;
+    private double scalePosX;
+    private double scalePosY;
     private boolean firstTimeDrawingMap;
     private Tilegrid tilegrid;
     ///Extra objects outside the grid that are included in draw method. Objects are added in {@link #addObjectToDraw(MapObject)}
@@ -86,16 +89,24 @@ public class View {
         trans = new Affine();
         bgTrans = new Affine();
         bgColor = Color.LIGHTBLUE;
+        scaleColor = Color.BLACK;
+        updateScalePosXY();
         graphicsContext.setTransform(trans);
-        controller.bindZoomBar();
+        //TODO %% controller.bindZoomBar();
 
         //Canvas højde og bredde bindes til vinduets
         canvas.widthProperty().bind(scene.widthProperty());
         canvas.heightProperty().bind(stage.heightProperty());
 
         //Listeners tilføjes, der redrawer Canvas'et når vinduet skifter størrelse
-        scene.widthProperty().addListener(_ -> drawMap());
-        scene.heightProperty().addListener(_ -> drawMap());
+        scene.widthProperty().addListener(_ -> {
+            updateScalePosXY();
+            drawMap();
+        });
+        scene.heightProperty().addListener(_ -> {
+            updateScalePosXY();
+            drawMap();
+        });
     }
 
     /// Draws the whole map in the tiles visible
@@ -103,7 +114,7 @@ public class View {
         assert graphicsContext != null && canvas != null;
 
         //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
-        graphicsContext.setTransform(bgTrans);
+        //TODO %% graphicsContext.setTransform(bgTrans);
         graphicsContext.setFill(bgColor);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setTransform(trans);
@@ -122,6 +133,12 @@ public class View {
         for (MapObject object : extraDrawObjects) {
             object.draw(graphicsContext);
         }
+
+        //Draws scale-bar
+        graphicsContext.setTransform(bgTrans);
+        graphicsContext.setLineWidth(4);
+        graphicsContext.setStroke(scaleColor);
+        graphicsContext.strokeLine(scalePosX, scalePosY, scalePosX-100, scalePosY);
 
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
@@ -151,9 +168,9 @@ public class View {
         trans.prependTranslation(-dx, -dy);
         trans.prependScale(factor, factor);
         trans.prependTranslation(dx, dy);
+        updateScale();
         drawMap();
     }
-
 
     ///Zooms in on the coords given as parameter
     public void zoomTo(float x, float y) {
@@ -179,6 +196,15 @@ public class View {
         if (zoomLevel > 4)  return 1;
         else return 0;
     }
+
+    private void updateScale() {
+        // Logic goes here
+    }
+
+    private void updateScalePosXY() {
+        scalePosX = scene.getWidth() - 25;
+        scalePosY = scene.getHeight() - 15;
+    }
     //endregion
 
     //region Getters and setters
@@ -191,5 +217,6 @@ public class View {
     }
     public void setTilegrid(Tilegrid tilegrid) { this.tilegrid = tilegrid; }
     public void setBgColor(Color bgColor) { this.bgColor = bgColor; }
+    public void setScaleColor(Color scaleColor) { this.scaleColor = scaleColor; }
     //endregion
 }
