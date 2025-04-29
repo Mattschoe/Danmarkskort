@@ -101,11 +101,15 @@ public class Road implements Serializable, MapObject {
 
         //Loops through the nodes drawing the lines between them
         Node startNode = nodes.getFirst();
-        for (int i = 1; i < nodes.size(); i++) {
-            Node endNode = nodes.get(i);
-            gc.strokeLine(startNode.getX(), startNode.getY(), endNode.getX(), endNode.getY());
-            startNode = endNode;
-        }
+        if (startNode.partOfRoute) System.out.println("Route from startNode: " + startNode.getAddress() + " to endNode: " + nodes.getLast().getAddress() + " drawn!");
+            for (int i = 1; i < nodes.size(); i++) {
+                Node endNode = nodes.get(i);
+                gc.strokeLine(startNode.getX(), startNode.getY(), endNode.getX(), endNode.getY());
+                if(startNode.partOfRoute || endNode.partOfRoute) {
+                    System.out.println("Part of route drawn!");
+                }
+                startNode = endNode;
+            }
     }
 
     private void assignColorSheetProp() {
@@ -162,7 +166,7 @@ public class Road implements Serializable, MapObject {
 
        float speedLimit = this.getMaxSpeed();
 
-       //edge weight gives nu som tiden det vil tage at komme fra startnode til slutnode på den givne road
+       //edge weight udregnes nu som tiden det vil tage at komme fra startnode til slutnode på den givne road
        if(speedLimit > 0) {
         weight = distance / speedLimit;
        } else {
