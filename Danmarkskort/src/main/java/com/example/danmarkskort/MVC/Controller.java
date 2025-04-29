@@ -42,6 +42,7 @@ public class Controller implements Initializable {
     private Point2D POIMark;
     private Map<String,POI> favoritePOIs = new HashMap<>();
     private List<POI> oldPOIs = new ArrayList<>();
+    private List<POI> deletedPOIs = new ArrayList<>();
 
 
     private long lastSystemTime; //Used to calculate FPS
@@ -271,12 +272,14 @@ public class Controller implements Initializable {
     }
 
     /// This metod is used to save the current POI to a map and add it as a menuitem to the POI menubar to give it delete and find adress as options.
+    /// when deleting the POI it removes it from favoritePOI and adds it to a deletedPOI list whitch is used to clean the map later.
     @FXML protected void savePOIToHashMap(){
         if(startPOI == null){return;}
         String name = addNamePOI.getText();
         favoritePOIs.put(name, startPOI);
         oldPOIs.remove(startPOI);
         view.addObjectToDraw(startPOI);
+
 
         closePOIMenu();
 
@@ -286,9 +289,10 @@ public class Controller implements Initializable {
         MenuItem deletePOI = new MenuItem("Delete");
         deletePOI.setOnAction(e -> {
             view.removeObjectToDraw(startPOI);
+            POI poi = favoritePOIs.get(name);
             favoritePOIs.remove(name);
+            deletedPOIs.add(poi);
             POIMenu.getItems().remove(POIMenuItem);
-            view.drawMap();
         });
 
         MenuItem showAddress = new MenuItem("Show Address");
@@ -413,14 +417,23 @@ public class Controller implements Initializable {
 
                 updateSearchText();
             }
-            //Removes old POI from the map.
+            //Removes old POI from the map if they are not added to the list of favorites so there are no more than 2 active at once.
 
             if (oldPOIs.size() > 2) {
                 while (oldPOIs.size() > 2) {
+                    System.out.println(oldPOIs);
                     POI removed = oldPOIs.remove(0);
+
                     if (!favoritePOIs.containsValue(removed)) {
                         oldPOIs.remove(removed);
                         removePOIMarker(removed);
+                    }
+                    //Removes the deleted POI's from the map after they have been deleted via the savePOIToHashMap function
+                    while (!deletedPOIs.isEmpty()) {
+                        POI deleted = deletedPOIs.remove(0);
+                        view.removeObjectToDraw(deleted);
+                        model.removePOI(deleted);
+                        view.drawMap();
                     }
                 }
             }
