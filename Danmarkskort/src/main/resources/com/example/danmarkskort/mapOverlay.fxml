@@ -65,7 +65,6 @@
    <Button fx:id="findRoute" layoutX="172.0" layoutY="35.0" mnemonicParsing="false" onMouseClicked="#onRouteSearchStart" text="Find Route" visible="false" />
    <Button fx:id="switchSearch" layoutX="172.0" layoutY="71.0" mnemonicParsing="false" onMouseClicked="#switchDestinationAndStart" text="Switch" visible="false" />
    <TextArea fx:id="guideText" editable="false" layoutY="25.0" prefHeight="376.0" prefWidth="600.0" text="To load the standard map of Denmark, choose the option in the File tab.&#10;&#10;To print instructions as a PDF, select the option under the File tab.&#10;&#10;To choose points of interest, search via the search bar or select them on the map.&#10;&#10;To access and edit points of interest, use the Edit tab.&#10;&#10;To show the FPS counter, toggle it on via the Show tab.&#10;&#10;To change the color scheme, choose one of the options in the Filter tab.&#10;&#10;To close the guide, toggle it off in the Help menu." visible="false" />
-   <TextField fx:id="closestRoadBar" layoutX="451.0" layoutY="70.0" prefHeight="26.0" prefWidth="140.0" promptText="Closest Road..." />
    <Button fx:id="savePOIButton" layoutX="249.0" layoutY="35.0" mnemonicParsing="false" onMouseClicked="#openPOIMenu" text="Save POI" visible="false" />
    <TextArea fx:id="addPOIBox" editable="false" layoutX="210.0" layoutY="142.0" prefHeight="142.0" prefWidth="181.0" visible="false" />
    <TextField id="addNamePOI" fx:id="addNamePOI" layoutX="220.0" layoutY="190.0" promptText="Add name to POI..." visible="false" />
