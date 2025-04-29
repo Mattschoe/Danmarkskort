@@ -88,6 +88,7 @@ public class Tilegrid implements Serializable {
         tile.drawResidential(graphicsContext);
         tile.drawUnclassified(graphicsContext);
         tile.drawDefaultRoad(graphicsContext);
+        tile.drawPOIs(graphicsContext);
     }
 
     private void drawLOD5(Tile tile, GraphicsContext graphicsContext) {
