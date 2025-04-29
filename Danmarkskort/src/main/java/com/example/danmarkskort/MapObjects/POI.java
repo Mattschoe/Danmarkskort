@@ -85,5 +85,6 @@ public class POI implements MapObject {
         return closestNodeToPOI.getAddress();
     }
 
+
     //endregion
 }
