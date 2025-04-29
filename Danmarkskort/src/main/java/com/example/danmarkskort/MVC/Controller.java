@@ -160,6 +160,7 @@ public class Controller implements Initializable {
         if (selectedFile != null) {
             //Loads View and model
             view = new View(view.getStage(), "mapOverlay.fxml");
+            view.getStage().setTitle("Rats' Map of Denmark - "+ selectedFile.getName());
             loadFile(selectedFile);
             assert view != null;
 
@@ -311,7 +312,7 @@ public class Controller implements Initializable {
                 System.out.println("PDF-export failed! Error: "+ e.getMessage());
             }
         }
-        else System.out.println("PDF-export failed! Error: latestRoute is null");
+        else System.out.println("PDF-export failed; no route has been set yet!");
     }
 
     /// Method to open a textbox with a written guide when "Guide" is pressed
@@ -326,7 +327,7 @@ public class Controller implements Initializable {
         zoomRequest = true;
     }
 
-    /** Metode køres når man slipper sit klik på Canvas'et */
+    /// Method runs upon releasing a press on the Canvas
     @FXML protected void onCanvasClick(MouseEvent e) {
         if (e.getClickCount() == 1) {
             double x, y;
@@ -385,12 +386,12 @@ public class Controller implements Initializable {
         //endregion
     }
 
-    ///Opens the search menu when activated. If both start- and endPOI are initialized, this button is used for activating the route finding between the two POI's.
+    /// Opens the search menu when activated. If both start- and endPOI are initialized, this button is used for activating the route finding between the two POI's.
     @FXML public void onActivateSearch() {
         findRoute.setVisible(true);
     }
 
-    ///"Find Route" button on UI
+    /// "Find Route" button on UI
     @FXML public void onRouteSearchStart() {
         if (startPOI != null && endPOI != null && !searchBar.getText().trim().isEmpty() && !destination.getText().trim().isEmpty()) {
             startSearch();
@@ -407,7 +408,7 @@ public class Controller implements Initializable {
         updateSearchText();
     }
 
-    ///Updates the text in the search. Call this after changing the POI responsible for the text
+    /// Updates the text in the search. Call this after changing the POI responsible for the text
     private void updateSearchText() {
         searchBar.clear();
         destination.clear();
@@ -416,7 +417,7 @@ public class Controller implements Initializable {
         if (endPOI != null) destination.setText(endPOI.getNodeAddress());
     }
 
-    /** Metode køres idet man klikker ned på Canvas'et */
+    /// Method runs upon pressing down on the Canvas
     @FXML protected  void onCanvasPressed(MouseEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked xd
         lastX = e.getX();

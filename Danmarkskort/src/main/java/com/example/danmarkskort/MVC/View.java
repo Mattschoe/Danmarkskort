@@ -1,7 +1,6 @@
 package com.example.danmarkskort.MVC;
 
 import com.example.danmarkskort.MapObjects.MapObject;
-import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.MapObjects.Tilegrid;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
@@ -16,7 +15,6 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class View {
@@ -27,7 +25,7 @@ public class View {
     private transient Color bgColor;
     private final Controller controller;
     private GraphicsContext graphicsContext;
-    private Scene scene;
+    private final Scene scene;
     private final Stage stage;
     private boolean firstTimeDrawingMap;
     private Tilegrid tilegrid;
@@ -174,7 +172,6 @@ public class View {
     /// Changes the current zoom level to a range from 0 to 4 (needed for the LOD). 0 is minimum amount of details, 4 is maximum
     private int getLOD() {
         double zoomLevel = trans.getMxx();
-        System.out.println(zoomLevel);
         if (zoomLevel > 550) return 5;
         if (zoomLevel > 160) return 4;
         if (zoomLevel > 85) return 3;

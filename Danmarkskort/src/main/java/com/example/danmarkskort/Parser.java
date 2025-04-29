@@ -52,55 +52,13 @@ public class Parser implements Serializable {
 
         failedWays = 0; failedNodes = 0; failedRelations = 0; outOfBoundsNodes = 0;
 
-        String filename = getFile().getName();
-        //Switch case with what filetype the file is and call the appropriate method:
-        if (filename.endsWith(".zip")) {
-            parseZIP(filename);
-        } else if (filename.endsWith(".osm")) {
-            parseOSM(file);
-        }
+        parseOSM(file);
+
         System.out.println("Finished parsing file. With: " + failedNodes + " nodes | " + failedWays + " ways | " + failedRelations + " relations, that failed! And with " + outOfBoundsNodes + " nodes out of bounds!");
     }
     //endregion
 
     //region Methods
-    /**
-     * Creates zipInputStream to read .osm.ZIP-file. Gets ZIP-entry in String format to use in
-     * parseOSM().
-     * @param filename the name of the input file
-     * @throws IOException if the file isn't found
-     */
-    public void parseZIP(String filename) throws IOException, XMLStreamException {
-        File zipFile = new File(filename);
-        File extractedFile = null;
-
-        try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(zipFile))) {
-            ZipEntry entry;
-            while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().endsWith(".osm")) {
-                    extractedFile = new File(zipFile.getParent(), entry.getName());
-                    try (FileOutputStream fos = new FileOutputStream(extractedFile)) {
-                        byte[] buffer = new byte[1024];
-                        int len;
-                        while ((len = zipInputStream.read(buffer)) > 0) {
-                            fos.write(buffer, 0, len);
-                        }
-
-                    }
-                    zipInputStream.closeEntry();
-                    break;
-                }
-            }
-        }
-
-        if (extractedFile == null) {
-            throw new FileNotFoundException("No .osm file found in the ZIP archive.");
-        }
-
-        parseOSM(extractedFile); // Now pass the correct extracted file
-
-    }
-
     /**
      * Parses an .osm-file depending on the value of the start-tags encountered when the file is read line-by-line.
      * @param file the file to be parsed
@@ -109,7 +67,17 @@ public class Parser implements Serializable {
      */
     public void parseOSM(File file) throws IOException, XMLStreamException {
         setBounds(); //This has to be called first so we can check if nodes are in DKK
-        XMLStreamReader input = XMLInputFactory.newInstance().createXMLStreamReader(new FileReader(file)); //ny XMLStreamReader
+
+        XMLStreamReader input;
+        if (file.getAbsolutePath().endsWith(".zip")) {
+            ZipInputStream zipStream = new ZipInputStream(new FileInputStream(file));
+            zipStream.getNextEntry();
+            input = XMLInputFactory.newInstance().createXMLStreamReader(new InputStreamReader(zipStream));
+        }
+        else {
+            input = XMLInputFactory.newInstance().createXMLStreamReader(new FileReader(file)); //ny XMLStreamReader
+        }
+
         //Gennemgår hver tag og parser de tags vi bruger
         while (input.hasNext()) {
             int nextTag = input.next();

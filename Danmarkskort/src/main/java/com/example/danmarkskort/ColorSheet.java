@@ -201,7 +201,7 @@ public enum ColorSheet {
             //region road colors
             case ROAD_COASTLINE  -> Color.BLACK;
             case ROAD_PRIMARY    -> Color.DARKORANGE;
-            case ROAD_SECONDARY  -> Color.DARKSLATEBLUE;
+            case ROAD_SECONDARY  -> Color.SLATEBLUE;
             case ROAD_TERTIARY   -> Color.DARKGREEN;
             case ROAD_CYCLEWAY   -> Color.DARKMAGENTA;
             case ROAD_TRACK_PATH -> Color.SIENNA;

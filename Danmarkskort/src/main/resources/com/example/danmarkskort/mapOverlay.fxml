@@ -49,8 +49,8 @@
     <TextField fx:id="destination" layoutX="15.0" layoutY="71.0" onKeyTyped="#searchBarTyped" promptText="Choose Destination..." visible="false" />
     <MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <Menu mnemonicParsing="false" text="File">
-            <MenuItem mnemonicParsing="false" onAction="#standardInputButton" text="Load Standart" />
-            <MenuItem mnemonicParsing="false" onAction="#exportAsPDF" text="Export as PDF" />
+            <MenuItem mnemonicParsing="false" onAction="#standardInputButton" text="Load Standard" />
+            <MenuItem mnemonicParsing="false" onAction="#exportAsPDF" text="Export route" />
         </Menu>
         <Menu mnemonicParsing="false" text="Edit">
             <Menu fx:id="POIMenu" mnemonicParsing="false" onAction="#POIMenuAction" text="Points of interest" />
