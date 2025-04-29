@@ -131,8 +131,13 @@ public class View {
 
     ///Saves the object given as parameter and includes it in {@link #drawMap()}.
     public void addObjectToDraw(MapObject mapObject) {
-        extraDrawObjects.add(mapObject);
+        if (mapObject != null) {
+            extraDrawObjects.add(mapObject);
+        }
     }
+
+    /// Removes the object given as parameter
+    public void removeObjectToDraw(MapObject mapObject) { extraDrawObjects.remove(mapObject); }
 
     /// Method pans on the canvas
     public void pan(double dx, double dy) {

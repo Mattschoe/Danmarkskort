@@ -40,6 +40,11 @@ public class Controller implements Initializable {
     private MouseEvent mouseEvent; //Used to pan
     private POI startPOI;
     private POI endPOI;
+    private Point2D POIMark;
+    private Map<String,POI> favoritePOIs = new HashMap<>();
+    private List<POI> oldPOIs = new ArrayList<>();
+    private List<POI> deletedPOIs = new ArrayList<>();
+
     private final List<String> POIList = List.of("En", "TO", "Tre");
     List<Node> autoSuggestResults;
 
@@ -58,9 +63,17 @@ public class Controller implements Initializable {
     @FXML private TextArea guideText;
     @FXML private Button switchSearch;
     @FXML private Button findRoute;
-    @FXML private TextField destination;
+    @FXML private Button removePOIButton;
+    @FXML private Button savePOIButton;
     @FXML private MenuItem POIMenuButton;
+    @FXML private TextField destination;
     @FXML private Menu POIMenu;
+    @FXML private TextField addNamePOI;
+    @FXML private Button addToPOIsUI;
+    @FXML private Button POIClose;
+    @FXML private TextArea addPOIBox;
+
+
     //endregion
     //endregion
 
@@ -117,18 +130,13 @@ public class Controller implements Initializable {
      *  configures something(???) for an object in the mapOverlay.fxml scene
      */
     @Override public void initialize(URL url, ResourceBundle resourceBundle) {
-        if(POIMenu != null) {
-            POIMenu.getItems().clear();
-            for (String poi : POIList) {
-                Menu subMenu = new Menu(poi);
-
-                MenuItem detailItem = new MenuItem("Details for " + poi);
-                detailItem.setOnAction(e -> System.out.println("Clicked on: " + poi));
-                subMenu.getItems().add(detailItem);
-
-                POIMenu.getItems().add(subMenu);
+        listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
+                String selected = listView.getSelectionModel().getSelectedItem();
+                searchBar.setText(selected);
             }
-        }
+        });
     }
 
     //region Start-up scene methods
@@ -290,11 +298,63 @@ public class Controller implements Initializable {
         }
     }
 
-    /// Method opens af list of points of interests so the user can edit it.
-    @FXML protected void POIMenuAction(){
-        //der skal være en liste der bliver opdateret når man tilføjer og fjerne POI's som bliver vist når man klikker på menuen
-        System.out.println("Så skal man kunne skfite her");
-        System.out.println(POIList);
+    /// This metod is used to save the current POI to a map and add it as a menuitem to the POI menubar to give it delete and find adress as options.
+    /// when deleting the POI it removes it from favoritePOI and adds it to a deletedPOI list whitch is used to clean the map later.
+    @FXML protected void savePOIToHashMap(){
+        if(startPOI == null){return;}
+        String name = addNamePOI.getText();
+        favoritePOIs.put(name, startPOI);
+        oldPOIs.remove(startPOI);
+        view.addObjectToDraw(startPOI);
+
+
+        closePOIMenu();
+
+        Menu POIMenuItem = new Menu(name);
+        POIMenu.getItems().add(POIMenuItem);
+
+        MenuItem deletePOI = new MenuItem("Delete");
+        deletePOI.setOnAction(e -> {
+            view.removeObjectToDraw(startPOI);
+            POI poi = favoritePOIs.get(name);
+            favoritePOIs.remove(name);
+            deletedPOIs.add(poi);
+            POIMenu.getItems().remove(POIMenuItem);
+        });
+
+        MenuItem showAddress = new MenuItem("Show Address");
+        showAddress.setOnAction(e -> {
+            POI poi = favoritePOIs.get(name);
+            if (poi != null) {
+                String address = poi.getNodeAddress();
+                    searchBar.setText(address);
+            }
+        });
+        POIMenuItem.getItems().addAll(showAddress, deletePOI);
+        System.out.println("Saved POI!: " + startPOI + " with name: " + name);
+    }
+
+    @FXML protected void openPOIMenu(){
+        addPOIBox.setVisible(true);
+        addNamePOI.setVisible(true);
+        addNamePOI.clear();
+        addToPOIsUI.setVisible(true);
+        POIClose.setVisible(true);
+    }
+
+    @FXML protected void closePOIMenu(){
+        addPOIBox.setVisible(false);
+        addNamePOI.setVisible(false);
+        addToPOIsUI.setVisible(false);
+        POIClose.setVisible(false);
+    }
+
+
+    //Metode til at fjerne den røde markering på kortet for en POI. virker kun for den POI, der senest er placeret
+    @FXML public void removePOIMarker(POI poi){
+        //sæt knappen til visible og kald denne metode et sted
+        model.removePOI(poi);
+        view.drawMap();
     }
 
     /// Method to export a route as PDF
@@ -365,8 +425,9 @@ public class Controller implements Initializable {
             Affine transform = view.getTrans();
             POI POI = null;
             try {
-                Point2D point = transform.inverseTransform(e.getX(), e.getY());
-                POI = model.createPOI((float) point.getX(), (float) point.getY(), "Test");
+                POIMark = transform.inverseTransform(e.getX(), e.getY()); //ændret point til et felt, POIMark
+                POI = model.createPOI((float) POIMark.getX(), (float) POIMark.getY(), "Test");
+                savePOIButton.setVisible(true);
             } catch (NonInvertibleTransformException exception) {
                 System.out.println("Error inversion mouseclick coords!" + exception.getMessage());
             }
@@ -377,10 +438,33 @@ public class Controller implements Initializable {
                 onActivateSearch();
                 if (searchBar.getText().trim().isEmpty() || !destination.isVisible()) {
                     startPOI = POI;
+                    oldPOIs.add(POI);
                 } else {
                     endPOI = POI;
+                    oldPOIs.add(POI);
                 }
+
                 updateSearchText();
+            }
+            //Removes old POI from the map if they are not added to the list of favorites so there are no more than 2 active at once.
+
+            if (oldPOIs.size() > 2) {
+                while (oldPOIs.size() > 2) {
+                    System.out.println(oldPOIs);
+                    POI removed = oldPOIs.remove(0);
+
+                    if (!favoritePOIs.containsValue(removed)) {
+                        oldPOIs.remove(removed);
+                        removePOIMarker(removed);
+                    }
+                    //Removes the deleted POI's from the map after they have been deleted via the savePOIToHashMap function
+                    while (!deletedPOIs.isEmpty()) {
+                        POI deleted = deletedPOIs.remove(0);
+                        view.removeObjectToDraw(deleted);
+                        model.removePOI(deleted);
+                        view.drawMap();
+                    }
+                }
             }
         }
         //endregion
@@ -408,7 +492,9 @@ public class Controller implements Initializable {
         updateSearchText();
     }
 
-    /// Updates the text in the search. Call this after changing the POI responsible for the text
+
+
+    ///Updates the text in the search. Call this after changing the POI responsible for the text
     private void updateSearchText() {
         searchBar.clear();
         destination.clear();
@@ -489,5 +575,6 @@ public class Controller implements Initializable {
      *  @return Controllerens canvas-felt
      */
     public Canvas getCanvas() { return canvas; }
+
     //endregion
 }
