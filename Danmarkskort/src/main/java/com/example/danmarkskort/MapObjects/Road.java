@@ -22,10 +22,10 @@ public class Road implements Serializable, MapObject {
     private final List<Node> nodes;
     private final boolean foot;
     private final boolean bicycle;
-    private boolean isDrivable;
+    private final boolean isDriveable;
     private int maxSpeed;
     private String roadType;
-    private String roadName;
+    private final String roadName;
     private float[] boundingBox;
 
     private ColorSheet cs;
@@ -44,11 +44,11 @@ public class Road implements Serializable, MapObject {
      *  @param maxSpeed the max speed on the road
      *  @param roadType the type of road
      */
-    public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDrivable, int maxSpeed, String roadType, String roadName) {
+    public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDriveable, int maxSpeed, String roadType, String roadName) {
         this.nodes = nodes;
         this.foot = foot;
         this.bicycle = bicycle;
-        this.isDrivable = isDrivable;
+        this.isDriveable = isDriveable;
         this.maxSpeed = maxSpeed;
         this.roadType = roadType;
         this.roadName = roadName;
@@ -67,11 +67,11 @@ public class Road implements Serializable, MapObject {
      *  @param bicycle if road the is rideable on bike. Should be true by default
      *  @param roadType the type of road
      */
-    public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDrivable, String roadType, String roadName) {
+    public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDriveable, String roadType, String roadName) {
         this.nodes = nodes;
         this.foot = foot;
         this.bicycle = bicycle;
-        this.isDrivable = isDrivable;
+        this.isDriveable = isDriveable;
         this.roadType = roadType;
         this.roadName = roadName;
 
@@ -89,7 +89,7 @@ public class Road implements Serializable, MapObject {
      *  @param gc the GraphicsContext in which the road will be drawn
      */
     public void draw(GraphicsContext gc) {
-        if (!isDrivable) return; //Skipper lige ikke-bil veje for nu
+        if (!isDriveable) return; //Skipper lige ikke-bil veje for nu
 
         if (partOfRoute) {
             gc.setStroke(Color.RED);
@@ -102,14 +102,13 @@ public class Road implements Serializable, MapObject {
         //Loops through the nodes drawing the lines between them
         Node startNode = nodes.getFirst();
         if (startNode.partOfRoute) System.out.println("Route from startNode: " + startNode.getAddress() + " to endNode: " + nodes.getLast().getAddress() + " drawn!");
-            for (int i = 1; i < nodes.size(); i++) {
-                Node endNode = nodes.get(i);
-                gc.strokeLine(startNode.getX(), startNode.getY(), endNode.getX(), endNode.getY());
-                if(startNode.partOfRoute || endNode.partOfRoute) {
-                    System.out.println("Part of route drawn!");
-                }
-                startNode = endNode;
-            }
+
+        for (int i = 1; i < nodes.size(); i++) {
+            Node endNode = nodes.get(i);
+            gc.strokeLine(startNode.getX(), startNode.getY(), endNode.getX(), endNode.getY());
+            //if (startNode.partOfRoute || endNode.partOfRoute) System.out.println("Part of route drawn!");
+            startNode = endNode;
+        }
     }
 
     private void assignColorSheetProp() {
@@ -157,7 +156,7 @@ public class Road implements Serializable, MapObject {
         }
     }
 
-    ///TO DO: THIS METHOD NEEDS TO BE FIXED TO ADJUST FOR SPEEDLIMIT BUT IT HAS TO ACCOUNT FOR WHERE THE NODES ARE LOCATED IN XY SPACE}
+    ///TO DO: THIS METHOD NEEDS TO BE FIXED TO ADJUST FOR SPEEDLIMIT BUT IT HAS TO ACCOUNT FOR WHERE THE NODES ARE LOCATED IN XY SPACE
     private void calculateWeight() {
         float deltaX = nodes.getFirst().getX() - nodes.getLast().getX();
         float deltaY = nodes.getFirst().getY() - nodes.getLast().getY();
@@ -170,7 +169,7 @@ public class Road implements Serializable, MapObject {
        if(speedLimit > 0) {
         weight = distance / speedLimit;
        } else {
-           /* hvis fartgrænsen er ukendt, skal denne road nedprioriteres. Dette vil dog skulle ændres, så snart
+           /* Hvis fartgrænsen er ukendt, skal denne road nedprioriteres. Dette vil dog skulle ændres, så snart
            vi skal have implementeret cykelruter
            */
            weight= distance * 10;
@@ -180,7 +179,7 @@ public class Road implements Serializable, MapObject {
 
     //region Getters and setters
     ///Returns whether this piece of road is drivable or not (not in this case means walkable/cyclable)
-    public boolean isDrivable() { return isDrivable;  }
+    public boolean isDriveable() { return isDriveable;  }
     public int getMaxSpeed() { return maxSpeed; }
     public List<Node> getNodes() { return nodes;    }
     public String getType() { return roadType; }

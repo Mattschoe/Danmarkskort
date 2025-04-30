@@ -486,7 +486,7 @@ public class Model {
                     else outputBuffer.put((byte) 0);
                     if (road.isBicycle()) outputBuffer.put((byte) 1);
                     else outputBuffer.put((byte) 0);
-                    if (road.isDrivable()) outputBuffer.put((byte) 1);
+                    if (road.isDriveable()) outputBuffer.put((byte) 1);
                     else outputBuffer.put((byte) 0);
 
                     //Maxspeed
@@ -585,7 +585,7 @@ public class Model {
         long size = 0;
         for (Road road : roads) {
             size += Integer.BYTES; //Length of road.getNodes
-            size += road.getNodes().size() * Long.BYTES; size += 3; //foot, bicycle, isDrivable
+            size += road.getNodes().size() * Long.BYTES; size += 3; //foot, bicycle, isDriveable
             size += Integer.BYTES; //MaxSpeed
             if (road.getType() != null) size += Integer.BYTES + road.getType().getBytes(StandardCharsets.UTF_8).length; //RoadType
             else size += Integer.BYTES; //Space for "-1"

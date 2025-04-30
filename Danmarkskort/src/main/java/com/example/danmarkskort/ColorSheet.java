@@ -206,21 +206,21 @@ public enum ColorSheet {
             case ROAD_CYCLEWAY   -> Color.DARKMAGENTA;
             case ROAD_TRACK_PATH -> Color.SIENNA;
             case ROAD_TREE_ROW   -> Color.rgb(172, 210, 156);
-            case ROAD_ROUTE      -> Color.rgb(255, 255, 255, 0.3);
+            case ROAD_ROUTE      -> Color.rgb(255, 255, 255, 0.2);
             case ROAD_DEFAULT    -> Color.rgb(100, 100, 100);
             //endregion
             //region landuse: developed-land
             case POLY_COMMERCIAL    -> Color.rgb(242, 217, 216);
             case POLY_CONSTRUCTION  -> Color.rgb(199, 199, 180);
-            case POLY_EDUCATION     -> Color.RED;
-            case POLY_FAIRGROUND    -> Color.RED;
+            case POLY_EDUCATION     -> Color.rgb(205, 235, 176, 0.2);
+            case POLY_FAIRGROUND    -> Color.rgb(38, 127, 0, 0.2);
             case POLY_INDUSTRIAL    -> Color.rgb(235, 219, 233);
             case POLY_RESIDENTIAL   -> Color.rgb(225, 225, 225);
             case POLY_RETAIL        -> Color.rgb(225, 213, 208);
             case POLY_INSTITUTIONAL -> Color.RED;
             //endregion
             //region landuse: rural-and-agricultural
-            case POLY_AQUACULTURE    -> Color.RED;
+            case POLY_AQUACULTURE    -> Color.rgb(89, 103, 255, 0.2);
             case POLY_ALLOTMENTS     -> Color.rgb(201, 225, 191);
             case POLY_FARMLAND       -> Color.rgb(238, 240, 213);
             case POLY_FARMYARD       -> Color.rgb(239, 213, 179);
@@ -247,7 +247,7 @@ public enum ColorSheet {
             case POLY_GRASS             -> Color.rgb(205, 235, 176);
             case POLY_GREENFIELD        -> Color.rgb(241, 238, 232);
             case POLY_LANDFILL          -> Color.rgb(182, 182, 144);
-            case POLY_MILITARY          -> Color.rgb(154, 46, 47, 0.3);
+            case POLY_MILITARY          -> Color.rgb(154, 46, 47, 0.1);
             case POLY_PORT              -> Color.RED;
             case POLY_QUARRY            -> Color.rgb(196, 194, 194);
             case POLY_RAILWAY           -> Color.rgb(235, 219, 233);
@@ -279,8 +279,8 @@ public enum ColorSheet {
             case POLY_HOT_SPRING -> Color.RED;
             case POLY_ISTHMUS    -> Color.RED;
             case POLY_MUD        -> Color.rgb(230, 220, 210);
-            case POLY_PENINSULA  -> Color.rgb(157, 199, 159, 0.3);
-            case POLY_REEF       -> Color.RED;
+            case POLY_PENINSULA  -> Color.rgb(157, 199, 159, 0.2);
+            case POLY_REEF       -> Color.rgb(0, 74, 127, 0.2);
             case POLY_SHINGLE    -> Color.rgb(237, 228, 220);
             case POLY_SHOAL      -> Color.rgb(255, 241, 186);
             case POLY_SPRING     -> Color.rgb(122, 188, 236);
@@ -325,22 +325,22 @@ public enum ColorSheet {
             case POLY_GARDEN              -> Color.rgb(206, 236, 178);
             case POLY_GOLF_COURSE         -> Color.rgb(181, 226, 181);
             case POLY_HACKERSPACE         -> Color.RED;
-            case POLY_HORSE_RIDING        -> Color.RED;
+            case POLY_HORSE_RIDING        -> Color.rgb(242, 239, 233);
             case POLY_ICE_RINK            -> Color.rgb(222, 237, 237);
-            case POLY_MARINA              -> Color.rgb(139, 173, 228, 0.3);
+            case POLY_MARINA              -> Color.rgb(139, 173, 228, 2);
             case POLY_MINIATURE_GOLF      -> Color.rgb(222, 246, 192);
-            case POLY_NATURE_RESERVE      -> Color.rgb(157, 199, 159, 0.3);
+            case POLY_NATURE_RESERVE      -> Color.rgb(157, 199, 159, 0.2);
             case POLY_OUTDOOR_SEATING     -> Color.rgb(14, 133, 23);
             case POLY_PARK                -> Color.rgb(205, 247, 201);
             case POLY_PICNIC_TABLE        -> Color.rgb(115, 74, 8);
             case POLY_PITCH               -> Color.rgb(136, 224, 190);
             case POLY_PLAYGROUND          -> Color.rgb(14, 133, 23);
-            case POLY_RESORT              -> Color.rgb(140, 220, 255, 0.3);
+            case POLY_RESORT              -> Color.rgb(140, 220, 255, 0.2);
             case POLY_SAUNA               -> Color.rgb(14, 133, 23);
             case POLY_SLIPWAY             -> Color.rgb(0, 146, 128);
             case POLY_SPORTS_CENTRE       -> Color.rgb(223, 252, 226);
             case POLY_SPORTS_HALL         -> Color.RED;
-            case POLY_STADIUM             -> Color.rgb(161, 219, 166, 0.3);
+            case POLY_STADIUM             -> Color.rgb(161, 219, 166, 0.2);
             case POLY_SUMMER_CAMP         -> Color.RED;
             case POLY_SWIMMING_AREA       -> Color.rgb(14, 133, 23);
             case POLY_SWIMMING_POOL       -> Color.rgb(106, 177, 197);
@@ -374,18 +374,18 @@ public enum ColorSheet {
 
             //region other
             case POLY_AMENITY        -> Color.rgb(196, 182, 171);
-            case POLY_AREAHIGHWAY   -> Color.rgb(50, 50, 50, 0.3);
-            case POLY_ATTRACTION     -> Color.rgb(239, 213, 179, 0.3);
-            case POLY_BARRIER        -> Color.rgb(111, 111, 111, 0.3);
-            case POLY_BOUNDARY       -> Color.TRANSPARENT; /*Color.rgb(207, 155, 203, 0.3);*/
-            case POLY_BRIDGESUPPORT -> Color.rgb(111, 111, 111, 0.3);
+            case POLY_AREAHIGHWAY   -> Color.rgb(50, 50, 50, 0.2);
+            case POLY_ATTRACTION     -> Color.rgb(239, 213, 179, 0.2);
+            case POLY_BARRIER        -> Color.rgb(111, 111, 111, 0.2);
+            case POLY_BOUNDARY       -> Color.TRANSPARENT; /*Color.rgb(207, 155, 203, 0.2);*/
+            case POLY_BRIDGESUPPORT -> Color.rgb(111, 111, 111, 0.2);
             case POLY_BUILDING       -> Color.rgb(217, 208, 201);
             case POLY_CAIRN          -> Color.TAN;
             case POLY_COASTLINE      -> Color.rgb(242, 239, 233);
-            case POLY_EMBANKMENT     -> Color.rgb(91, 127, 0, 0.3);
-            case POLY_FERRY          -> Color.rgb(125, 138, 245, 0.3);
-            case POLY_HIGHWAY        -> Color.rgb(50, 50, 50, 0.3);
-            case POLY_HISTORIC       -> Color.rgb(115, 74, 8, 0.3);
+            case POLY_EMBANKMENT     -> Color.rgb(91, 127, 0, 0.2);
+            case POLY_FERRY          -> Color.rgb(125, 138, 245, 0.2);
+            case POLY_HIGHWAY        -> Color.rgb(50, 50, 50, 0.2);
+            case POLY_HISTORIC       -> Color.rgb(115, 74, 8, 0.2);
             case POLY_INDOOR         -> Color.rgb(158, 148, 140);
             case POLY_MAST           -> Color.WHITE;
             case POLY_POWER          -> Color.rgb(227, 204, 223);
@@ -403,7 +403,7 @@ public enum ColorSheet {
             //region patches
             case POLY_CITYRINGEN -> Color.TRANSPARENT;
             case POLY_SHRUBBERY  -> Color.rgb(199, 199, 180);
-            case POLY_FENCE_TYPE -> Color.rgb(158, 148, 140, 0.3);
+            case POLY_FENCE_TYPE -> Color.rgb(158, 148, 140, 0.2);
             case POLY_FLOWERBED  -> Color.RED;
             case POLY_ROUTE      -> Color.RED;
             case POLY_SPORT      -> Color.RED;
@@ -425,7 +425,7 @@ public enum ColorSheet {
             case ROAD_CYCLEWAY   -> Color.THISTLE;
             case ROAD_TRACK_PATH -> Color.INDIANRED;
             case ROAD_TREE_ROW   -> Color.MEDIUMSEAGREEN;
-            case ROAD_ROUTE      -> Color.rgb(255, 255, 255, 0.3);
+            case ROAD_ROUTE      -> Color.rgb(255, 255, 255, 0.2);
             case ROAD_DEFAULT    -> Color.LIGHTGREY;
             case POLY_BOUNDARY   -> Color.TRANSPARENT;
             default              -> Color.rgb(255, 255, 255, 0.2);
@@ -441,7 +441,7 @@ public enum ColorSheet {
             case ROAD_CYCLEWAY   -> Color.ORANGE;
             case ROAD_TRACK_PATH -> Color.MAGENTA;
             case ROAD_TREE_ROW   -> Color.LIGHTGREEN;
-            case ROAD_ROUTE      -> Color.rgb(255, 255, 255, 0.3);
+            case ROAD_ROUTE      -> Color.rgb(255, 255, 255, 0.2);
             case ROAD_DEFAULT    -> Color.DIMGREY;
             case POLY_BOUNDARY   -> Color.TRANSPARENT;
             default -> Color.rgb(206, 169, 128, 0.4);
