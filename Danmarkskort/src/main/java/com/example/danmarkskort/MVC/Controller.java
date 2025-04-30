@@ -363,7 +363,7 @@ public class Controller implements Initializable {
                 System.out.println("PDF-export failed! Error: "+ e.getMessage());
             }
         }
-        else System.out.println("PDF-export failed; no route has been set yet!");
+        else System.out.println("PDF-export failed; no route has been successfully set yet!");
     }
 
     /// Method to open a textbox with a written guide when "Guide" is pressed
