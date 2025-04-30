@@ -1,7 +1,6 @@
 package com.example.danmarkskort.MVC;
 
 import com.example.danmarkskort.MapObjects.MapObject;
-import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.MapObjects.Tilegrid;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Point2D;
@@ -16,7 +15,6 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class View {
@@ -25,14 +23,15 @@ public class View {
     private Affine bgTrans;
     private Canvas canvas;
     private transient Color bgColor;
+    private transient Color scaleColor;
     private final Controller controller;
     private GraphicsContext graphicsContext;
-    private Scene scene;
+    private final Scene scene;
     private final Stage stage;
     private boolean firstTimeDrawingMap;
     private Tilegrid tilegrid;
     ///Extra objects outside the grid that are included in draw method. Objects are added in {@link #addObjectToDraw(MapObject)}
-    private Set<MapObject> extraDrawObjects;
+    private final Set<MapObject> extraDrawObjects;
     //endregion
 
     //region Constructor(s)
@@ -88,8 +87,9 @@ public class View {
         trans = new Affine();
         bgTrans = new Affine();
         bgColor = Color.LIGHTBLUE;
+        scaleColor = Color.BLACK;
         graphicsContext.setTransform(trans);
-        controller.bindZoomBar();
+        //TODO %% controller.bindZoomBar();
 
         //Canvas højde og bredde bindes til vinduets
         canvas.widthProperty().bind(scene.widthProperty());
@@ -105,7 +105,7 @@ public class View {
         assert graphicsContext != null && canvas != null;
 
         //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
-        graphicsContext.setTransform(bgTrans);
+        //TODO %% graphicsContext.setTransform(bgTrans);
         graphicsContext.setFill(bgColor);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setTransform(trans);
@@ -125,6 +125,8 @@ public class View {
             object.draw(graphicsContext);
         }
 
+        updateScale();
+
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
             firstTimeDrawingMap = false;
@@ -133,8 +135,13 @@ public class View {
 
     ///Saves the object given as parameter and includes it in {@link #drawMap()}.
     public void addObjectToDraw(MapObject mapObject) {
-        extraDrawObjects.add(mapObject);
+        if (mapObject != null) {
+            extraDrawObjects.add(mapObject);
+        }
     }
+
+    /// Removes the object given as parameter
+    public void removeObjectToDraw(MapObject mapObject) { extraDrawObjects.remove(mapObject); }
 
     /// Method pans on the canvas
     public void pan(double dx, double dy) {
@@ -156,7 +163,6 @@ public class View {
         drawMap();
     }
 
-
     ///Zooms in on the coords given as parameter
     public void zoomTo(float x, float y) {
         //Finds how much we need to zoom in/out by dividing the target with the currentZoom level
@@ -174,13 +180,33 @@ public class View {
     /// Changes the current zoom level to a range from 0 to 4 (needed for the LOD). 0 is minimum amount of details, 4 is maximum
     private int getLOD() {
         double zoomLevel = trans.getMxx();
-        System.out.println(zoomLevel);
         if (zoomLevel > 550) return 5;
         if (zoomLevel > 160) return 4;
         if (zoomLevel > 85) return 3;
         if (zoomLevel > 8)  return 2;
         if (zoomLevel > 4)  return 1;
         else return 0;
+    }
+
+    private void updateScale() {
+        graphicsContext.setTransform(bgTrans);
+        graphicsContext.setLineWidth(3);
+        graphicsContext.setStroke(scaleColor);
+
+        double scalePosX = scene.getWidth() - 25;
+        double scalePosY = scene.getHeight() - 15;
+        graphicsContext.strokeLine(scalePosX, scalePosY, scalePosX-100, scalePosY);
+        graphicsContext.strokeLine(scalePosX, scalePosY+5, scalePosX, scalePosY-5);
+        graphicsContext.strokeLine(scalePosX-100, scalePosY+5, scalePosX-100, scalePosY-5);
+
+        double scaleOrigin = 67;
+        double currentScale = scaleOrigin / trans.getMxx();
+
+        String text;
+        if (currentScale < 1) { text = String.format("%.2f", currentScale * 1_000) + " m"; }
+        else { text = String.format("%.2f", currentScale) + " km"; }
+
+        controller.getScaleText().setText(text);
     }
     //endregion
 
@@ -194,5 +220,6 @@ public class View {
     }
     public void setTilegrid(Tilegrid tilegrid) { this.tilegrid = tilegrid; }
     public void setBgColor(Color bgColor) { this.bgColor = bgColor; }
+    public void setScaleColor(Color scaleColor) { this.scaleColor = scaleColor; }
     //endregion
 }

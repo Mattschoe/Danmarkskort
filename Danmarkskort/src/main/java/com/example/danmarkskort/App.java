@@ -12,7 +12,6 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        System.out.println(System.getProperties());
         stage.setTitle("Rats' Map of Denmark");
 
         Image icon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("icon.png")));

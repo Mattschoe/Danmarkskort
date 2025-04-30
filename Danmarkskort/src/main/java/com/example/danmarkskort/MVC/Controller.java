@@ -17,6 +17,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Affine;
@@ -40,6 +41,11 @@ public class Controller implements Initializable {
     private MouseEvent mouseEvent; //Used to pan
     private POI startPOI;
     private POI endPOI;
+    private Point2D POIMark;
+    private Map<String,POI> favoritePOIs = new HashMap<>();
+    private List<POI> oldPOIs = new ArrayList<>();
+    private List<POI> deletedPOIs = new ArrayList<>();
+
     private final List<String> POIList = List.of("En", "TO", "Tre");
     List<Node> autoSuggestResults;
 
@@ -48,19 +54,27 @@ public class Controller implements Initializable {
 
     //region FXML fields
     @FXML private Canvas canvas;
+    @FXML private AnchorPane poiGroup;
     @FXML private CheckMenuItem fpsButton;
     @FXML private CheckMenuItem guideButton;
     @FXML private ListView<String> listView;
-    @FXML private Slider zoomBar;
     @FXML private Text fpsText;
-    @FXML private Text zoomText;
+    @FXML private Text scaleText;
     @FXML private TextField searchBar;
     @FXML private TextArea guideText;
     @FXML private Button switchSearch;
     @FXML private Button findRoute;
-    @FXML private TextField destination;
+    @FXML private Button removePOIButton;
+    @FXML private Button savePOIButton;
     @FXML private MenuItem POIMenuButton;
+    @FXML private TextField destination;
     @FXML private Menu POIMenu;
+    @FXML private TextField addNamePOI;
+    @FXML private Button addToPOIsUI;
+    @FXML private Button POIClose;
+    @FXML private TextArea addPOIBox;
+
+
     //endregion
     //endregion
 
@@ -117,18 +131,13 @@ public class Controller implements Initializable {
      *  configures something(???) for an object in the mapOverlay.fxml scene
      */
     @Override public void initialize(URL url, ResourceBundle resourceBundle) {
-        if(POIMenu != null) {
-            POIMenu.getItems().clear();
-            for (String poi : POIList) {
-                Menu subMenu = new Menu(poi);
-
-                MenuItem detailItem = new MenuItem("Details for " + poi);
-                detailItem.setOnAction(e -> System.out.println("Clicked on: " + poi));
-                subMenu.getItems().add(detailItem);
-
-                POIMenu.getItems().add(subMenu);
+        listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
+                String selected = listView.getSelectionModel().getSelectedItem();
+                searchBar.setText(selected);
             }
-        }
+        });
     }
 
     //region Start-up scene methods
@@ -160,6 +169,7 @@ public class Controller implements Initializable {
         if (selectedFile != null) {
             //Loads View and model
             view = new View(view.getStage(), "mapOverlay.fxml");
+            view.getStage().setTitle("Rats' Map of Denmark - "+ selectedFile.getName());
             loadFile(selectedFile);
             assert view != null;
 
@@ -198,24 +208,6 @@ public class Controller implements Initializable {
 
             framesThisSec = 0;
             lastSystemTime = systemTime;
-        }
-    }
-
-    /// Adds a listener on View's Affine "trans" which updates the zoomBar based on trans' zoom-factor
-    public void bindZoomBar() {
-        if (zoomBar != null) {
-            view.getTrans().mxxProperty().addListener(_ -> {
-                double currentZoom = view.getTrans().getMxx();
-                if (currentZoom < 1) {
-                    zoomBar.setValue(0);
-                    zoomText.setText("Zoom-factor: >1");
-                }
-                else {
-                    if (currentZoom > 100) zoomBar.setValue(100);
-                    else zoomBar.setValue(currentZoom);
-                    zoomText.setText(String.format("Zoom-factor: %.0f", currentZoom));
-                }
-            });
         }
     }
 
@@ -289,11 +281,68 @@ public class Controller implements Initializable {
         }
     }
 
-    /// Method opens af list of points of interests so the user can edit it.
-    @FXML protected void POIMenuAction(){
-        //der skal være en liste der bliver opdateret når man tilføjer og fjerne POI's som bliver vist når man klikker på menuen
-        System.out.println("Så skal man kunne skfite her");
-        System.out.println(POIList);
+    /// This metod is used to save the current POI to a map and add it as a menuitem to the POI menubar to give it delete and find adress as options.
+    /// when deleting the POI it removes it from favoritePOI and adds it to a deletedPOI list whitch is used to clean the map later.
+    @FXML protected void savePOIToHashMap(){
+        if(startPOI == null){return;}
+        String name = addNamePOI.getText();
+        favoritePOIs.put(name, startPOI);
+        oldPOIs.remove(startPOI);
+        view.addObjectToDraw(startPOI);
+
+
+        closePOIMenu();
+
+        Menu POIMenuItem = new Menu(name);
+        POIMenu.getItems().add(POIMenuItem);
+
+        MenuItem deletePOI = new MenuItem("Delete");
+        deletePOI.setOnAction(e -> {
+            view.removeObjectToDraw(startPOI);
+            POI poi = favoritePOIs.get(name);
+            favoritePOIs.remove(name);
+            deletedPOIs.add(poi);
+            POIMenu.getItems().remove(POIMenuItem);
+            view.removeObjectToDraw(poi);
+            model.removePOI(poi);
+            view.drawMap();
+        });
+
+        MenuItem showAddress = new MenuItem("Show Address");
+        showAddress.setOnAction(e -> {
+            POI poi = favoritePOIs.get(name);
+            if (poi != null) {
+                String address = poi.getNodeAddress();
+                    searchBar.setText(address);
+            }
+        });
+        POIMenuItem.getItems().addAll(showAddress, deletePOI);
+        System.out.println("Saved POI!: " + startPOI + " with name: " + name);
+    }
+
+    @FXML protected void openPOIMenu(){
+        poiGroup.setVisible(true);
+        addPOIBox.setVisible(true);
+        addNamePOI.setVisible(true);
+        addNamePOI.clear();
+        addToPOIsUI.setVisible(true);
+        POIClose.setVisible(true);
+    }
+
+    @FXML protected void closePOIMenu(){
+        poiGroup.setVisible(false);
+        addPOIBox.setVisible(false);
+        addNamePOI.setVisible(false);
+        addToPOIsUI.setVisible(false);
+        POIClose.setVisible(false);
+    }
+
+
+    //Metode til at fjerne den røde markering på kortet for en POI. virker kun for den POI, der senest er placeret
+    @FXML public void removePOIMarker(POI poi){
+        //sæt knappen til visible og kald denne metode et sted
+        model.removePOI(poi);
+        view.drawMap();
     }
 
     /// Method to export a route as PDF
@@ -311,7 +360,7 @@ public class Controller implements Initializable {
                 System.out.println("PDF-export failed! Error: "+ e.getMessage());
             }
         }
-        else System.out.println("PDF-export failed! Error: latestRoute is null");
+        else System.out.println("PDF-export failed; no route has been set yet!");
     }
 
     /// Method to open a textbox with a written guide when "Guide" is pressed
@@ -326,7 +375,7 @@ public class Controller implements Initializable {
         zoomRequest = true;
     }
 
-    /** Metode køres når man slipper sit klik på Canvas'et */
+    /// Method runs upon releasing a press on the Canvas
     @FXML protected void onCanvasClick(MouseEvent e) {
         if (e.getClickCount() == 1) {
             double x, y;
@@ -364,8 +413,9 @@ public class Controller implements Initializable {
             Affine transform = view.getTrans();
             POI POI = null;
             try {
-                Point2D point = transform.inverseTransform(e.getX(), e.getY());
-                POI = model.createPOI((float) point.getX(), (float) point.getY(), "Test");
+                POIMark = transform.inverseTransform(e.getX(), e.getY()); //ændret point til et felt, POIMark
+                POI = model.createPOI((float) POIMark.getX(), (float) POIMark.getY(), "Test");
+                savePOIButton.setVisible(true);
             } catch (NonInvertibleTransformException exception) {
                 System.out.println("Error inversion mouseclick coords!" + exception.getMessage());
             }
@@ -376,21 +426,38 @@ public class Controller implements Initializable {
                 onActivateSearch();
                 if (searchBar.getText().trim().isEmpty() || !destination.isVisible()) {
                     startPOI = POI;
+                    oldPOIs.add(POI);
                 } else {
                     endPOI = POI;
+                    oldPOIs.add(POI);
                 }
+
                 updateSearchText();
+            }
+            //Removes old POI from the map if they are not added to the list of favorites so there are no more than 2 active at once.
+
+            if (oldPOIs.size() > 2) {
+                while (oldPOIs.size() > 2) {
+                    System.out.println(oldPOIs);
+                    POI removed = oldPOIs.remove(0);
+
+                    if (!favoritePOIs.containsValue(removed)) {
+                        oldPOIs.remove(removed);
+                        removePOIMarker(removed);
+                    }
+                    //Removes the deleted POI's from the map after they have been deleted via the savePOIToHashMap function
+                }
             }
         }
         //endregion
     }
 
-    ///Opens the search menu when activated. If both start- and endPOI are initialized, this button is used for activating the route finding between the two POI's.
+    /// Opens the search menu when activated. If both start- and endPOI are initialized, this button is used for activating the route finding between the two POI's.
     @FXML public void onActivateSearch() {
         findRoute.setVisible(true);
     }
 
-    ///"Find Route" button on UI
+    /// "Find Route" button on UI
     @FXML public void onRouteSearchStart() {
         if (startPOI != null && endPOI != null && !searchBar.getText().trim().isEmpty() && !destination.getText().trim().isEmpty()) {
             startSearch();
@@ -416,7 +483,7 @@ public class Controller implements Initializable {
         if (endPOI != null) destination.setText(endPOI.getNodeAddress());
     }
 
-    /** Metode køres idet man klikker ned på Canvas'et */
+    /// Method runs upon pressing down on the Canvas
     @FXML protected  void onCanvasPressed(MouseEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked xd
         lastX = e.getX();
@@ -435,8 +502,7 @@ public class Controller implements Initializable {
         if (model == null) model = Model.getInstance();
 
         view.setBgColor(Color.LIGHTBLUE);
-        fpsText.setFill(Color.BLACK);
-        zoomText.setFill(Color.BLACK);
+        setMiscColors(Color.BLACK);
         for (Tile tile : model.getTilegrid().getGridList()) {
             for (MapObject mo : tile.getObjectsInTile()) {
                 if (mo instanceof Road road) road.setPalette("default");
@@ -450,8 +516,7 @@ public class Controller implements Initializable {
         if (model == null) model = Model.getInstance();
 
         view.setBgColor(Color.rgb(23, 3, 63));
-        fpsText.setFill(Color.WHITE);
-        zoomText.setFill(Color.WHITE);
+        setMiscColors(Color.ANTIQUEWHITE);
         for (Tile tile : model.getTilegrid().getGridList()) {
             for (MapObject mo : tile.getObjectsInTile()) {
                 if (mo instanceof Road road) road.setPalette("midnight");
@@ -465,8 +530,7 @@ public class Controller implements Initializable {
         if (model == null) model = Model.getInstance();
 
         view.setBgColor(Color.GHOSTWHITE);
-        fpsText.setFill(Color.INDIGO);
-        zoomText.setFill(Color.INDIGO);
+        setMiscColors(Color.INDIGO);
         for (Tile tile : model.getTilegrid().getGridList()) {
             for (MapObject mo : tile.getObjectsInTile()) {
                 if (mo instanceof Road road) road.setPalette("basic");
@@ -474,6 +538,12 @@ public class Controller implements Initializable {
             }
         }
         view.drawMap();
+    }
+
+    private void setMiscColors(Color color) {
+        view.setScaleColor(color);
+        scaleText.setFill(color);
+        fpsText.setFill(color);
     }
     //endregion
 
@@ -488,5 +558,7 @@ public class Controller implements Initializable {
      *  @return Controllerens canvas-felt
      */
     public Canvas getCanvas() { return canvas; }
+
+    public Text getScaleText() { return scaleText; }
     //endregion
 }

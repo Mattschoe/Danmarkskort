@@ -227,6 +227,7 @@ public class Tile implements MapObject, Serializable {
     public Set<MapObject> getTrunk() { return trunk; }
     public Set<MapObject> getCoastline() { return coastline; }
     public Set<Road> getRoads() { return roads; }
+    public Set<POI> getPOIs() { return POIs; }
     @Override
     public float[] getBoundingBox() { return bounds; }
     public boolean isEmpty() { return objectsInTile.isEmpty(); }

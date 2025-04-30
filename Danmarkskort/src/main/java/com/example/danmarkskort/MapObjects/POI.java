@@ -2,6 +2,7 @@ package com.example.danmarkskort.MapObjects;
 
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
@@ -12,11 +13,13 @@ public class POI implements MapObject {
     Node closestNodeWithRoad;
     float x, y;
     String name;
-
+    private static final Image pinImage = new Image(
+            POI.class.getResource("/com/example/danmarkskort/pin.png").toExternalForm()
+    );
     /**
      *
      * @param name the name of the POI, usually given by the user
-     * @param tile the tile that the POI locates in
+     * @param tile the tile that the POI is located in
      */
     public POI(float x, float y, String name, Tile tile) {
         this.x = x;
@@ -28,10 +31,10 @@ public class POI implements MapObject {
 
     @Override
     public void draw(GraphicsContext graphicsContext) {
-        graphicsContext.setStroke(Color.RED);
-        graphicsContext.setLineWidth(0.01);
-        graphicsContext.strokeLine(x, y, x, y);
+        double size = 0.06;
+        graphicsContext.drawImage(pinImage, x - size / 2, y - size, size, size);
     }
+
 
     @Override
     public float[] getBoundingBox() {
@@ -74,6 +77,10 @@ public class POI implements MapObject {
         return closestNode;
     }
 
+    @Override
+    public String toString() {
+        return "placeholder name";
+    }
     //region getters and setters
     ///Returns the name of this POI
     public String getName() { return name;}
@@ -85,5 +92,8 @@ public class POI implements MapObject {
         return closestNodeToPOI.getAddress();
     }
 
+
+    public float getX() { return x; }
+    public float getY() { return y; }
     //endregion
 }

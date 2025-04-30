@@ -85,6 +85,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
         y = (1 - yNorm) * height; //Makes sure Y isn't mirrored
     }
 
+
     public void draw(GraphicsContext graphicsContext) {
         if (partOfRoute) {
             graphicsContext.setStroke(Color.RED);

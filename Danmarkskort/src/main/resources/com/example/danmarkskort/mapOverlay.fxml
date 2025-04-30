@@ -8,7 +8,6 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -34,26 +33,23 @@
           </Menu>
       </items>
     </MenuButton>
-   <Text fx:id="zoomText" layoutX="484.0" layoutY="363.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Zoom-factor: 1" AnchorPane.bottomAnchor="36.0" AnchorPane.rightAnchor="42.0">
-      <font>
-         <Font size="11.0" />
-      </font></Text>
-
-    <Slider fx:id="zoomBar" layoutX="445.0" layoutY="348.0" minorTickCount="5" mouseTransparent="true" showTickMarks="true" value="1.0" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="15.0" />
-
+   
     <ListView fx:id="listView" layoutX="15.0" layoutY="61.0" onMouseClicked="#onAddressPickedFromList" onMouseExited="#mouseExitedListView" prefHeight="72.0" prefWidth="150.0" visible="false" />
 
-    <Text fx:id="fpsText" layoutX="497.00000000000006" layoutY="52.14921875" strokeType="OUTSIDE" strokeWidth="0.0" text="FPS" AnchorPane.rightAnchor="84.044921875" AnchorPane.topAnchor="39.2" />
+    <Text fx:id="fpsText" layoutX="497.00000000000006" layoutY="52.14921875" strokeType="OUTSIDE" strokeWidth="0.0" text="FPS" AnchorPane.rightAnchor="84.044921875" AnchorPane.topAnchor="39.2">
+      <font>
+         <Font name="System Bold" size="12.0" />
+      </font></Text>
 
     <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onKeyPressed="#onActivateSearch" onKeyTyped="#searchBarTyped" promptText="Search..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
     <TextField fx:id="destination" layoutX="15.0" layoutY="71.0" onKeyTyped="#searchBarTyped" promptText="Choose Destination..." visible="false" />
     <MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <Menu mnemonicParsing="false" text="File">
-            <MenuItem mnemonicParsing="false" onAction="#standardInputButton" text="Load Standart" />
+            <MenuItem mnemonicParsing="false" onAction="#standardInputButton" text="Load Standard" />
             <MenuItem mnemonicParsing="false" onAction="#exportAsPDF" text="Export as PDF" />
         </Menu>
         <Menu mnemonicParsing="false" text="Edit">
-            <Menu fx:id="POIMenu" mnemonicParsing="false" onAction="#POIMenuAction" text="Points of interest" />
+            <Menu fx:id="POIMenu" mnemonicParsing="false" text="Points of interest" />
         </Menu>
         <Menu mnemonicParsing="false" text="Help">
             <CheckMenuItem fx:id="guideButton" mnemonicParsing="false" onAction="#guideTextButton" text="Guide" />
@@ -65,5 +61,16 @@
    <Button fx:id="findRoute" layoutX="172.0" layoutY="35.0" mnemonicParsing="false" onMouseClicked="#onRouteSearchStart" text="Find Route" visible="false" />
    <Button fx:id="switchSearch" layoutX="172.0" layoutY="71.0" mnemonicParsing="false" onMouseClicked="#switchDestinationAndStart" text="Switch" visible="false" />
    <TextArea fx:id="guideText" editable="false" layoutY="25.0" prefHeight="376.0" prefWidth="600.0" text="To load the standard map of Denmark, choose the option in the File tab.&#10;&#10;To print instructions as a PDF, select the option under the File tab.&#10;&#10;To choose points of interest, search via the search bar or select them on the map.&#10;&#10;To access and edit points of interest, use the Edit tab.&#10;&#10;To show the FPS counter, toggle it on via the Show tab.&#10;&#10;To change the color scheme, choose one of the options in the Filter tab.&#10;&#10;To close the guide, toggle it off in the Help menu." visible="false" />
+   <Button fx:id="savePOIButton" layoutX="249.0" layoutY="35.0" mnemonicParsing="false" onMouseClicked="#openPOIMenu" text="Save POI" visible="false" />
+    <AnchorPane fx:id="poiGroup" layoutX="210.0" layoutY="142.0" visible="false" AnchorPane.bottomAnchor="115.6" AnchorPane.topAnchor="141.6">
+        <TextArea fx:id="addPOIBox" editable="false" prefHeight="142.0" prefWidth="181.0" />
+        <TextField fx:id="addNamePOI" layoutX="10.0" layoutY="48.0" promptText="Add name to POI..." />
+        <Button fx:id="addToPOIsUI" layoutX="71.0" layoutY="94.0" mnemonicParsing="false" onMouseClicked="#savePOIToHashMap" text="Add" />
+        <Button fx:id="POIClose" layoutX="154.0" layoutY="3.0" mnemonicParsing="false" onMouseClicked="#closePOIMenu" prefHeight="13.0" prefWidth="23.0" text="x" />
+    </AnchorPane>
    <TextField fx:id="closestRoadBar" layoutX="445.0" layoutY="71.0" prefHeight="26.0" prefWidth="140.0" promptText="Closest Road..." AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="71.0" />
+   <Text fx:id="scaleText" layoutX="526.0" layoutY="358.0" strokeType="OUTSIDE" strokeWidth="0.0" AnchorPane.bottomAnchor="32.0" AnchorPane.rightAnchor="32.0">
+      <font>
+         <Font name="System Bold" size="12.0" />
+      </font></Text>
 </AnchorPane>
