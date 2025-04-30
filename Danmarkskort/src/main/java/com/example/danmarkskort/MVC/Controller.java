@@ -17,6 +17,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Affine;
@@ -53,6 +54,7 @@ public class Controller implements Initializable {
 
     //region FXML fields
     @FXML private Canvas canvas;
+    @FXML private AnchorPane poiGroup;
     @FXML private CheckMenuItem fpsButton;
     @FXML private CheckMenuItem guideButton;
     @FXML private ListView<String> listView;
@@ -320,6 +322,9 @@ public class Controller implements Initializable {
             favoritePOIs.remove(name);
             deletedPOIs.add(poi);
             POIMenu.getItems().remove(POIMenuItem);
+            view.removeObjectToDraw(poi);
+            model.removePOI(poi);
+            view.drawMap();
         });
 
         MenuItem showAddress = new MenuItem("Show Address");
@@ -335,6 +340,7 @@ public class Controller implements Initializable {
     }
 
     @FXML protected void openPOIMenu(){
+        poiGroup.setVisible(true);
         addPOIBox.setVisible(true);
         addNamePOI.setVisible(true);
         addNamePOI.clear();
@@ -343,6 +349,7 @@ public class Controller implements Initializable {
     }
 
     @FXML protected void closePOIMenu(){
+        poiGroup.setVisible(false);
         addPOIBox.setVisible(false);
         addNamePOI.setVisible(false);
         addToPOIsUI.setVisible(false);
@@ -458,12 +465,6 @@ public class Controller implements Initializable {
                         removePOIMarker(removed);
                     }
                     //Removes the deleted POI's from the map after they have been deleted via the savePOIToHashMap function
-                    while (!deletedPOIs.isEmpty()) {
-                        POI deleted = deletedPOIs.remove(0);
-                        view.removeObjectToDraw(deleted);
-                        model.removePOI(deleted);
-                        view.drawMap();
-                    }
                 }
             }
         }
