@@ -50,9 +50,7 @@ public class Controller implements Initializable {
     private Map<String,POI> favoritePOIs = new HashMap<>();
     private List<POI> oldPOIs = new ArrayList<>();
     private List<POI> deletedPOIs = new ArrayList<>();
-
-    private final List<String> POIList = List.of("En", "TO", "Tre");
-    List<Node> autoSuggestResults;
+    private List<Node> autoSuggestResults;
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
@@ -63,6 +61,7 @@ public class Controller implements Initializable {
     @FXML private CheckMenuItem fpsButton;
     @FXML private CheckMenuItem guideButton;
     @FXML private ListView<String> listView;
+    @FXML private Text closestRoadText;
     @FXML private Text fpsText;
     @FXML private Text scaleText;
     @FXML private TextField searchBar;
@@ -78,8 +77,6 @@ public class Controller implements Initializable {
     @FXML private Button addToPOIsUI;
     @FXML private Button POIClose;
     @FXML private TextArea addPOIBox;
-
-
     //endregion
     //endregion
 
@@ -240,7 +237,8 @@ public class Controller implements Initializable {
     }
 
     /**
-     * Auto-suggests roads and cities in a drop-down menu from the search-bar. Will auto-suggest cities, unless there are non, then it will suggest potentiel streets.
+     * Auto-suggests roads and cities in a drop-down menu from the search-bar.
+     * Will auto-suggest cities, unless there are none, then suggests potentiel streets.
      */
     private List<Node> autoSuggest(String input) {
         List<Node> cities = model.getCitiesFromPrefix(input);
@@ -276,7 +274,7 @@ public class Controller implements Initializable {
     //endregion
 
     //region Canvas methods
-    ///When user chooses a node in the autosuggestion we override the searchbar, and zoom in on the node
+    /// When user chooses a node in the autosuggestion we override the searchbar, and zoom in on the node
     @FXML protected void onAddressPickedFromList(MouseEvent event) {
         if (event.getClickCount() == 2) {
             Node chosenNode = autoSuggestResults.get(listView.getSelectionModel().getSelectedIndex());
@@ -285,8 +283,10 @@ public class Controller implements Initializable {
         }
     }
 
-    /// This method is used to save the current POI to a map and add it as a menuitem to the POI menubar to give it delete and find address as options.
-    /// when deleting the POI it removes it from favoritePOI and adds it to a deletedPOI list which is used to clean the map later.
+    /**
+     * This method is used to save the current POI to a map and add it as a menuitem to the POI menubar to give it delete and find address as options.
+     * when deleting the POI it removes it from favoritePOI and adds it to a deletedPOI list which is used to clean the map later.
+     */
     @FXML protected void savePOIToHashMap(){
         if(startPOI == null){return;}
         String name = addNamePOI.getText();
@@ -341,8 +341,7 @@ public class Controller implements Initializable {
         POIClose.setVisible(false);
     }
 
-
-    //Metode til at fjerne den røde markering på kortet for en POI. Virker kun for den POI, der senest er placeret
+    /// Metode til at fjerne den røde markering på kortet for en POI. Virker kun for den POI, der senest er placeret
     @FXML public void removePOIMarker(POI poi){
         //sæt knappen til visible og kald denne metode et sted
         model.removePOI(poi);
@@ -381,37 +380,6 @@ public class Controller implements Initializable {
 
     /// Method runs upon releasing a press on the Canvas
     @FXML protected void onCanvasClick(MouseEvent e) {
-        if (e.getClickCount() == 1) {
-            double x, y;
-
-            try {
-                Point2D point = view.getTrans().inverseTransform(e.getX(), e.getY());
-                x = point.getX();
-                y = point.getY();
-            } catch (Exception exception) {
-                return;
-            }
-
-            Tile tile = model.getTilegrid().getTileFromXY((float) x, (float) y);
-            if (tile == null) return;
-            double closestDistance = Double.MAX_VALUE;
-            Node closestNode = null;
-            for (Node node : tile.getNodesInTile()) {
-                if (node.getEdges().isEmpty()) continue;
-                double nodeX = node.getX();
-                double nodeY = node.getY();
-                double distance = Math.sqrt(Math.pow((nodeX - x), 2) + Math.pow((nodeY - y), 2)); //Afstandsformlen ser cooked ud i Java wth -MN
-                if (distance < closestDistance) {
-                    closestDistance = distance;
-                    closestNode = node;
-                }
-            }
-
-            if (closestNode == null) System.out.println("No node in close proximity!");
-            else System.out.println(closestNode);
-        }
-        //endregion
-
         //region DOUBLE CLICK (Searching)
         if (e.getClickCount() == 2) {
             //Makes POI
@@ -479,7 +447,7 @@ public class Controller implements Initializable {
         updateSearchText();
     }
 
-    ///Updates the text in the search. Call this after changing the POI responsible for the text
+    /// Updates the text in the search. Call this after changing the POI responsible for the text
     private void updateSearchText() {
         searchBar.clear();
         destination.clear();
@@ -489,10 +457,60 @@ public class Controller implements Initializable {
     }
 
     /// Method runs upon pressing down on the Canvas
-    @FXML protected  void onCanvasPressed(MouseEvent e) {
-        if (model == null) model = Model.getInstance(); //Det her er even mere cooked xd
+    @FXML protected void onCanvasPressed(MouseEvent e) {
+        if (model == null) model = Model.getInstance();
         lastX = e.getX();
         lastY = e.getY();
+    }
+
+    /**
+     * Methods runs upon hovering the mouse on the Canvas. Finds the nearest Road, if any,
+     * and changes the display text in the bottom left corner of the application.
+     */
+    @FXML protected void onCanvasHover(MouseEvent e) {
+        double x, y;
+        Tile tile;
+
+        try {
+            Point2D point = view.getTrans().inverseTransform(e.getX(), e.getY());
+            x = point.getX();
+            y = point.getY();
+            tile = model.getTilegrid().getTileFromXY((float) x, (float) y);
+        } catch (Exception exception) { return; }
+
+        if (tile == null) {
+            closestRoadText.setText("Closest road: N/A");
+            return;
+        }
+
+        Road closestRoad = getClosestRoad(tile, x, y);
+        if (closestRoad != null && !closestRoad.getRoadName().isEmpty()) {
+            closestRoadText.setText("Closest road: "+ closestRoad.getRoadName());
+        }
+        else closestRoadText.setText("Closest road: N/A");
+    }
+
+    /**
+     * Method determines the closest Road, given a Tile and a set of coordinates in the Tile
+     * @return {@code null} if there are no nodes in the Tile
+     */
+    private static Road getClosestRoad(Tile tile, double x, double y) {
+        double closestDistance = Double.MAX_VALUE;
+        Road closestRoad = null;
+
+        for (Road road : tile.getRoads()) {
+            for (Node node : road.getNodes()) {
+                double nodeX = node.getX();
+                double nodeY = node.getY();
+                double distance = Math.sqrt(Math.pow((nodeX - x), 2) + Math.pow((nodeY - y), 2)); //Jeg har stjålet MN's afstandsformel 3:) -OFS. a^2 + b^2 = c^2 type shit
+                if (distance < closestDistance) {
+                    closestDistance = distance;
+                    closestRoad = road;
+                }
+            }
+        }
+
+        return closestRoad;
     }
 
     /// Method runs upon dragging on the canvas
@@ -502,7 +520,8 @@ public class Controller implements Initializable {
     }
     //endregion
 
-    //region ColorSheet toggles
+    //region Palette methods
+    /// Switches to the default palette
     @FXML private void paletteDefault() {
         if (model == null) model = Model.getInstance();
 
@@ -517,6 +536,7 @@ public class Controller implements Initializable {
         view.drawMap();
     }
 
+    /// Switches to the Midnight palette
     @FXML private void paletteMidnight() {
         if (model == null) model = Model.getInstance();
 
@@ -531,6 +551,7 @@ public class Controller implements Initializable {
         view.drawMap();
     }
 
+    /// Switches to the Basic palette
     @FXML private void paletteBasic() {
         if (model == null) model = Model.getInstance();
 
@@ -545,22 +566,27 @@ public class Controller implements Initializable {
         view.drawMap();
     }
 
+    /// Adjusts a few colors in the interface
     private void setMiscColors(Color color) {
         view.setScaleColor(color);
         scaleText.setFill(color);
         fpsText.setFill(color);
+        closestRoadText.setFill(color);
     }
     //endregion
 
     //region Getters and setters
-    /** Sætter Controllerens view-felt til et givent View
-     *  (Denne metode bruges kun af View-klassen en enkelt gang, så View og Controller kan snakke sammen)
-     *  @param view View'et som Controllerens view-felt sættes til
+    /**
+     * Sætter Controllerens view-felt til et givent View
+     * (Denne metode bruges kun af View-klassen en enkelt gang, så View og Controller kan snakke sammen)
+     * @param view View'et som Controllerens view-felt sættes til
      */
     public void setView(View view) { this.view = view; }
-    /** Returnerer Controllerens canvas-felt, der "populates" direkte idet en scene FXML-loades
-     *  (Denne metode bruges kun af View-klassen en enkelt gang, så View kan få Canvas'et af Controlleren)
-     *  @return Controllerens canvas-felt
+
+    /**
+     * Returnerer Controllerens canvas-felt, der "populates" direkte idet en scene FXML-loades
+     * (Denne metode bruges kun af View-klassen en enkelt gang, så View kan få Canvas'et af Controlleren)
+     * @return Controllerens canvas-felt
      */
     public Canvas getCanvas() { return canvas; }
 

@@ -444,7 +444,7 @@ public enum ColorSheet {
             case ROAD_ROUTE      -> Color.rgb(255, 255, 255, 0.2);
             case ROAD_DEFAULT    -> Color.DIMGREY;
             case POLY_BOUNDARY   -> Color.TRANSPARENT;
-            default -> Color.rgb(206, 169, 128, 0.4);
+            default -> Color.rgb(175, 175, 175, 0.3); /*Color.rgb(206, 169, 128, 0.4);*/
         };
     }
     //endregion

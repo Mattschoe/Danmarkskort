@@ -13,6 +13,8 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         stage.setTitle("Rats' Map of Denmark");
+        stage.setMinWidth(428);
+        stage.setMinHeight(312);
 
         Image icon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("icon.png")));
         stage.getIcons().add(icon);
