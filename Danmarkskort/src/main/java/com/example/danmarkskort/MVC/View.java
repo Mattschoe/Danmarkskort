@@ -23,6 +23,7 @@ public class View {
     private Affine bgTrans;
     private Canvas canvas;
     private transient Color bgColor;
+    private transient Color scaleColor;
     private final Controller controller;
     private GraphicsContext graphicsContext;
     private final Scene scene;
@@ -30,7 +31,7 @@ public class View {
     private boolean firstTimeDrawingMap;
     private Tilegrid tilegrid;
     ///Extra objects outside the grid that are included in draw method. Objects are added in {@link #addObjectToDraw(MapObject)}
-    private Set<MapObject> extraDrawObjects;
+    private final Set<MapObject> extraDrawObjects;
     //endregion
 
     //region Constructor(s)
@@ -86,8 +87,9 @@ public class View {
         trans = new Affine();
         bgTrans = new Affine();
         bgColor = Color.LIGHTBLUE;
+        scaleColor = Color.BLACK;
         graphicsContext.setTransform(trans);
-        controller.bindZoomBar();
+        //TODO %% controller.bindZoomBar();
 
         //Canvas højde og bredde bindes til vinduets
         canvas.widthProperty().bind(scene.widthProperty());
@@ -103,7 +105,7 @@ public class View {
         assert graphicsContext != null && canvas != null;
 
         //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
-        graphicsContext.setTransform(bgTrans);
+        //TODO %% graphicsContext.setTransform(bgTrans);
         graphicsContext.setFill(bgColor);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
         graphicsContext.setTransform(trans);
@@ -122,6 +124,8 @@ public class View {
         for (MapObject object : extraDrawObjects) {
             object.draw(graphicsContext);
         }
+
+        updateScale();
 
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
@@ -159,7 +163,6 @@ public class View {
         drawMap();
     }
 
-
     ///Zooms in on the coords given as parameter
     public void zoomTo(float x, float y) {
         //Finds how much we need to zoom in/out by dividing the target with the currentZoom level
@@ -184,6 +187,27 @@ public class View {
         if (zoomLevel > 4)  return 1;
         else return 0;
     }
+
+    private void updateScale() {
+        graphicsContext.setTransform(bgTrans);
+        graphicsContext.setLineWidth(3);
+        graphicsContext.setStroke(scaleColor);
+
+        double scalePosX = scene.getWidth() - 25;
+        double scalePosY = scene.getHeight() - 15;
+        graphicsContext.strokeLine(scalePosX, scalePosY, scalePosX-100, scalePosY);
+        graphicsContext.strokeLine(scalePosX, scalePosY+5, scalePosX, scalePosY-5);
+        graphicsContext.strokeLine(scalePosX-100, scalePosY+5, scalePosX-100, scalePosY-5);
+
+        double scaleOrigin = 67;
+        double currentScale = scaleOrigin / trans.getMxx();
+
+        String text;
+        if (currentScale < 1) { text = String.format("%.2f", currentScale * 1_000) + " m"; }
+        else { text = String.format("%.2f", currentScale) + " km"; }
+
+        controller.getScaleText().setText(text);
+    }
     //endregion
 
     //region Getters and setters
@@ -196,5 +220,6 @@ public class View {
     }
     public void setTilegrid(Tilegrid tilegrid) { this.tilegrid = tilegrid; }
     public void setBgColor(Color bgColor) { this.bgColor = bgColor; }
+    public void setScaleColor(Color scaleColor) { this.scaleColor = scaleColor; }
     //endregion
 }

@@ -8,7 +8,6 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -34,16 +33,13 @@
           </Menu>
       </items>
     </MenuButton>
-   <Text fx:id="zoomText" layoutX="484.0" layoutY="363.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Zoom-factor: 1" AnchorPane.bottomAnchor="36.0" AnchorPane.rightAnchor="42.0">
-      <font>
-         <Font size="11.0" />
-      </font></Text>
-
-    <Slider fx:id="zoomBar" layoutX="445.0" layoutY="348.0" minorTickCount="5" mouseTransparent="true" showTickMarks="true" value="1.0" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="15.0" />
-
+   
     <ListView fx:id="listView" layoutX="15.0" layoutY="61.0" onMouseClicked="#onAddressPickedFromList" onMouseExited="#mouseExitedListView" prefHeight="72.0" prefWidth="150.0" visible="false" />
 
-    <Text fx:id="fpsText" layoutX="497.00000000000006" layoutY="52.14921875" strokeType="OUTSIDE" strokeWidth="0.0" text="FPS" AnchorPane.rightAnchor="84.044921875" AnchorPane.topAnchor="39.2" />
+    <Text fx:id="fpsText" layoutX="497.00000000000006" layoutY="52.14921875" strokeType="OUTSIDE" strokeWidth="0.0" text="FPS" AnchorPane.rightAnchor="84.044921875" AnchorPane.topAnchor="39.2">
+      <font>
+         <Font name="System Bold" size="12.0" />
+      </font></Text>
 
     <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onKeyPressed="#onActivateSearch" onKeyTyped="#searchBarTyped" promptText="Search..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
     <TextField fx:id="destination" layoutX="15.0" layoutY="71.0" onKeyTyped="#searchBarTyped" promptText="Choose Destination..." visible="false" />
@@ -73,4 +69,8 @@
         <Button fx:id="POIClose" layoutX="154.0" layoutY="3.0" mnemonicParsing="false" onMouseClicked="#closePOIMenu" prefHeight="13.0" prefWidth="23.0" text="x" />
     </AnchorPane>
    <TextField fx:id="closestRoadBar" layoutX="445.0" layoutY="71.0" prefHeight="26.0" prefWidth="140.0" promptText="Closest Road..." AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="71.0" />
+   <Text fx:id="scaleText" layoutX="526.0" layoutY="358.0" strokeType="OUTSIDE" strokeWidth="0.0" AnchorPane.bottomAnchor="32.0" AnchorPane.rightAnchor="32.0">
+      <font>
+         <Font name="System Bold" size="12.0" />
+      </font></Text>
 </AnchorPane>

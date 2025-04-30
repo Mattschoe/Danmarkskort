@@ -58,9 +58,8 @@ public class Controller implements Initializable {
     @FXML private CheckMenuItem fpsButton;
     @FXML private CheckMenuItem guideButton;
     @FXML private ListView<String> listView;
-    @FXML private Slider zoomBar;
     @FXML private Text fpsText;
-    @FXML private Text zoomText;
+    @FXML private Text scaleText;
     @FXML private TextField searchBar;
     @FXML private TextArea guideText;
     @FXML private Button switchSearch;
@@ -209,24 +208,6 @@ public class Controller implements Initializable {
 
             framesThisSec = 0;
             lastSystemTime = systemTime;
-        }
-    }
-
-    /// Adds a listener on View's Affine "trans" which updates the zoomBar based on trans' zoom-factor
-    public void bindZoomBar() {
-        if (zoomBar != null) {
-            view.getTrans().mxxProperty().addListener(_ -> {
-                double currentZoom = view.getTrans().getMxx();
-                if (currentZoom < 1) {
-                    zoomBar.setValue(0);
-                    zoomText.setText("Zoom-factor: >1");
-                }
-                else {
-                    if (currentZoom > 100) zoomBar.setValue(100);
-                    else zoomBar.setValue(currentZoom);
-                    zoomText.setText(String.format("Zoom-factor: %.0f", currentZoom));
-                }
-            });
         }
     }
 
@@ -493,8 +474,6 @@ public class Controller implements Initializable {
         updateSearchText();
     }
 
-
-
     ///Updates the text in the search. Call this after changing the POI responsible for the text
     private void updateSearchText() {
         searchBar.clear();
@@ -523,8 +502,7 @@ public class Controller implements Initializable {
         if (model == null) model = Model.getInstance();
 
         view.setBgColor(Color.LIGHTBLUE);
-        fpsText.setFill(Color.BLACK);
-        zoomText.setFill(Color.BLACK);
+        setMiscColors(Color.BLACK);
         for (Tile tile : model.getTilegrid().getGridList()) {
             for (MapObject mo : tile.getObjectsInTile()) {
                 if (mo instanceof Road road) road.setPalette("default");
@@ -538,8 +516,7 @@ public class Controller implements Initializable {
         if (model == null) model = Model.getInstance();
 
         view.setBgColor(Color.rgb(23, 3, 63));
-        fpsText.setFill(Color.WHITE);
-        zoomText.setFill(Color.WHITE);
+        setMiscColors(Color.ANTIQUEWHITE);
         for (Tile tile : model.getTilegrid().getGridList()) {
             for (MapObject mo : tile.getObjectsInTile()) {
                 if (mo instanceof Road road) road.setPalette("midnight");
@@ -553,8 +530,7 @@ public class Controller implements Initializable {
         if (model == null) model = Model.getInstance();
 
         view.setBgColor(Color.GHOSTWHITE);
-        fpsText.setFill(Color.INDIGO);
-        zoomText.setFill(Color.INDIGO);
+        setMiscColors(Color.INDIGO);
         for (Tile tile : model.getTilegrid().getGridList()) {
             for (MapObject mo : tile.getObjectsInTile()) {
                 if (mo instanceof Road road) road.setPalette("basic");
@@ -562,6 +538,12 @@ public class Controller implements Initializable {
             }
         }
         view.drawMap();
+    }
+
+    private void setMiscColors(Color color) {
+        view.setScaleColor(color);
+        scaleText.setFill(color);
+        fpsText.setFill(color);
     }
     //endregion
 
@@ -577,5 +559,6 @@ public class Controller implements Initializable {
      */
     public Canvas getCanvas() { return canvas; }
 
+    public Text getScaleText() { return scaleText; }
     //endregion
 }

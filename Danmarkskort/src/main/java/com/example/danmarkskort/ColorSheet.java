@@ -279,7 +279,7 @@ public enum ColorSheet {
             case POLY_HOT_SPRING -> Color.RED;
             case POLY_ISTHMUS    -> Color.RED;
             case POLY_MUD        -> Color.rgb(230, 220, 210);
-            case POLY_PENINSULA  -> Color.RED;
+            case POLY_PENINSULA  -> Color.rgb(157, 199, 159, 0.3);
             case POLY_REEF       -> Color.RED;
             case POLY_SHINGLE    -> Color.rgb(237, 228, 220);
             case POLY_SHOAL      -> Color.rgb(255, 241, 186);
@@ -427,7 +427,7 @@ public enum ColorSheet {
             case ROAD_TREE_ROW   -> Color.MEDIUMSEAGREEN;
             case ROAD_ROUTE      -> Color.rgb(255, 255, 255, 0.3);
             case ROAD_DEFAULT    -> Color.LIGHTGREY;
-            case POLY_BOUNDARY       -> Color.TRANSPARENT;
+            case POLY_BOUNDARY   -> Color.TRANSPARENT;
             default              -> Color.rgb(255, 255, 255, 0.2);
         };
     }
@@ -443,7 +443,7 @@ public enum ColorSheet {
             case ROAD_TREE_ROW   -> Color.LIGHTGREEN;
             case ROAD_ROUTE      -> Color.rgb(255, 255, 255, 0.3);
             case ROAD_DEFAULT    -> Color.DIMGREY;
-            case POLY_BOUNDARY       -> Color.TRANSPARENT;
+            case POLY_BOUNDARY   -> Color.TRANSPARENT;
             default -> Color.rgb(206, 169, 128, 0.4);
         };
     }
