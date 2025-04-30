@@ -383,8 +383,8 @@ public class Parser implements Serializable {
                 if (node.isIntersection() || i == nodes.size() - 1) {
                     //We hit an intersection, or the end, so we make a road
                     Road newRoad;
-                    if (road.hasMaxSpeed()) newRoad = new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getMaxSpeed(), road.getType(), road.getRoadName());
-                    else newRoad = new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDrivable(), road.getType(), road.getRoadName());
+                    if (road.hasMaxSpeed()) newRoad = new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDriveable(), road.getMaxSpeed(), road.getType(), road.getRoadName());
+                    else newRoad = new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDriveable(), road.getType(), road.getRoadName());
 
                     for (Node roadNode : newRoad.getNodes()) {
                         roadNode.addEdge(newRoad);
