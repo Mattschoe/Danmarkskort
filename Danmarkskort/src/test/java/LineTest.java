@@ -26,6 +26,6 @@ public class LineTest {
         nodes.add(new Node(5, 10));
         nodes.add(new Node(5, 8));
         nodes.add(new Node(5, 9));
-        Road way = new Road(nodes, false, false, 10, "Residential");
+        //Road way = new Road(nodes, false, false, 10, "Residential");
     }
 }

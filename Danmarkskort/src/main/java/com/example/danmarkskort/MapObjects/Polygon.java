@@ -533,7 +533,7 @@ public class Polygon implements Serializable, MapObject{
 
     //region Getters and setters
     public String getType() { return type;            }
-    public boolean hasType() { return !type.isEmpty(); }
+    public List<Node> getNodes() { return nodes; }
     @Override public float[] getBoundingBox() { return boundingBox; }
 
     public void setType(String type) {

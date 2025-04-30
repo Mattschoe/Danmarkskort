@@ -188,8 +188,6 @@ public class Road implements Serializable, MapObject {
     public boolean hasMaxSpeed() { return maxSpeed != 0; }
     public boolean isWalkable() { return foot; }
     public boolean isBicycle() { return bicycle; }
-    ///Returns whether the given node is either the start or the endNode of this road
-    public boolean isStartOrEndNode(Node node) { return nodes.getFirst().equals(node) || nodes.getLast().equals(node); }
 
     /**
      * Returns the opposite of the Node given. So if given the roads startNode it will return the roads endNode (and reverse).

@@ -14,6 +14,7 @@ import java.io.Serial;
 import java.io.Serializable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,12 +37,11 @@ public class Parser implements Serializable {
     private transient TLongObjectHashMap<Node> id2Node; //map for storing a Node and the id used to refer to it
     private transient TLongObjectHashMap<Road> id2Road;
     private transient TLongObjectHashMap<Polygon> id2Polygon;
-    private transient Set<Road> roads;
+    private transient Set<Road> roads; //Used when loading standard file
+    private transient Set<Polygon> polygons; //Used when loading standard file
     private final File file; //The file that's loaded in
     ///\[0] = minLat <br> \[1] = minLong <br> \[2] = maxLat <br> \[3] = maxLong
     private final double[] bounds;
-    private final Set<Road> significantHighways;
-    private final Set<Node> addressNodes;
 
     private int failedWays;
     private int failedRelations;
@@ -57,12 +57,9 @@ public class Parser implements Serializable {
     public Parser(File file) throws NullPointerException, IOException, XMLStreamException, FactoryConfigurationError {
         this.file = file;
         id2Node = new TLongObjectHashMap<>(66_289_558);
-        //id2Node = new HashMap<>(49_721_049);
         id2Road = new TLongObjectHashMap<>(2_214_235);
         id2Polygon = new TLongObjectHashMap<>(6_168_995);
         bounds = new double[4];
-        significantHighways = new HashSet<>();
-        addressNodes = new HashSet<>();
 
         failedWays = 0; failedNodes = 0; failedRelations = 0; outOfBoundsNodes = 0;
 
@@ -171,7 +168,6 @@ public class Parser implements Serializable {
             id2Node.put(id, new Node(lat, lon)); //Instantiates a new node (node containing no child-elements)
         } else {
             Node complexNode = new Node(lat, lon, city, houseNumber, postcode, street);
-            addressNodes.add(complexNode);
             id2Node.put(id, complexNode);
         }
     }
@@ -354,8 +350,6 @@ public class Parser implements Serializable {
             }
         }
 
-
-
         //Instantierer en ny Road en road og tager stilling til om den har en maxSpeed eller ej.
         Road road;
         if (hasMaxSpeed) road = new Road(nodes, foot, bicycle, drivable, maxSpeed, roadType, roadName);
@@ -421,11 +415,18 @@ public class Parser implements Serializable {
     public File getFile() { return file; }
     public TLongObjectHashMap<Node> getNodes() { return id2Node; }
     public Set<Road> getRoads() { return roads; }
-    public TLongObjectHashMap<Polygon> getPolygons() { return id2Polygon; }
+    public Collection<Polygon> getPolygons() { if (polygons == null) return id2Polygon.valueCollection(); return polygons; }
     public void setNodes(TLongObjectHashMap<Node> nodes) { id2Node = nodes; }
-    public void setRoads(TLongObjectHashMap<Road> roads) { id2Road = roads; }
-    public void setPolygons(TLongObjectHashMap<Polygon> polygons) { id2Polygon = polygons; }
+    public void setRoads(Set<Road> roads) { this.roads = roads; }
+    public void setPolygons(Set<Polygon> polygons) { this.polygons = polygons; }
     public Set<Node> getAddressNodes() {
+        Set<Node> addressNodes = new HashSet<>();
+        for (Node node : id2Node.valueCollection()) {
+            if (node.getCity() == null) continue;
+            if (node.getHouseNumber() == null) continue;
+            if (node.getStreet() == null) continue;
+            else if (node.getPostcode() != 0) addressNodes.add(node);
+        }
         return addressNodes;
     }
     //endregion

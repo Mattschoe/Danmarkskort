@@ -1,19 +1,20 @@
 package com.example.danmarkskort.MVC;
 
-import com.example.danmarkskort.AddressSearch.Street;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import com.example.danmarkskort.Exceptions.ParserSavingException;
 import com.example.danmarkskort.MapObjects.*;
 import com.example.danmarkskort.Parser;
 import com.example.danmarkskort.Searching.Search;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.map.hash.TObjectLongHashMap;
 import javafx.scene.canvas.Canvas;
 
 import java.io.*;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 ///A Model is a Singleton class that stores the map in a tile-grid. It also stores the parser which parses the .osm data. Call {@link #getInstance()} to get the Model
 public class Model {
@@ -21,15 +22,14 @@ public class Model {
     private static Model modelInstance;
     private final File file;
     private Parser parser;
-    private File outputFile; //The output .obj file
     private int numberOfTilesX, numberOfTilesY;
-    private Tilegrid tilegrid;
-    private Search search;
+    private final Tilegrid tilegrid;
+    private final Search search;
     private List<Road> latestRoute;
     private TrieST trieCity;
     private TrieST trieStreet;
-    Set<String> streets;
-    Map<String, Node> citiesToNode;
+    private Map<String, Node> citiesToNode;
+    private int numberOfChunks;
     //endregion
 
     //region Constructor(s)
@@ -41,6 +41,8 @@ public class Model {
 
         file = new File(filePath);
         assert file.exists();
+
+        numberOfChunks = 8;
 
         //region Parser
         //If .obj file
@@ -70,7 +72,7 @@ public class Model {
         //Converts into tilegrid if we haven't loaded a tilegrid in via OBJ
         System.out.println("Starting on tilegrid!");
         int tileSize = 11;
-        float[] tileGridBounds = getMinMaxCoords();
+        float[] tileGridBounds = getMinMaxCoords(parser.getNodes().valueCollection());
         Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
@@ -110,13 +112,12 @@ public class Model {
 
     /// Parses a .obj file. This method is called in the Parser constructor if the given filepath ends with .obj
     private void parseOBJToParser() {
-        TLongObjectHashMap<Node> id2Node = new TLongObjectHashMap<>(66_289_558);
-        TLongObjectHashMap<Road> id2Road = new TLongObjectHashMap<>(2_214_235);
-        TLongObjectHashMap<Polygon> id2Polygon = new TLongObjectHashMap<>(6_168_995);
+        TLongObjectHashMap<Node> ID2Node = new TLongObjectHashMap<>(); //Avoids resizing
+
 
         System.out.println("Deserializing parser...");
         //region Reading .obj files
-        //Parser
+        //region Parser
         try {
             ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
             parser = (Parser) input.readObject();
@@ -124,141 +125,250 @@ public class Model {
         } catch (Exception e) {
             System.out.println("Error reading parser!: " + e.getMessage());
         }
+        //endregion
 
-        //Nodes
+        //region Nodes
         try {
-            File folder = new File("data/StandardMap");
-            File[] nodeFiles = folder.listFiles((dir, name) -> name.startsWith("nodes_") && name.endsWith(".obj"));
-            assert nodeFiles != null;
+            ExecutorService executor = Executors.newFixedThreadPool(numberOfChunks); //Spawn a thread for each chunk
+            List<Future<TLongObjectHashMap<Node>>> futures = new ArrayList<>(numberOfChunks);
 
-            ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-            List<Future<TLongObjectHashMap<Node>>> futureMap = new ArrayList<>();
-
-            //Runs through each nodefile and makes a thread serialize it
-            for (File file : nodeFiles) {
-                futureMap.add(executor.submit(() -> {
-                    TLongObjectHashMap<Node> localMap = new TLongObjectHashMap<>();
-                    try {
-                        ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
-                        int chunkSize = input.readInt();
-                        for (int i = 0; i < chunkSize; i++) {
-                            long nodeID = input.readLong();
-                            Node node = (Node) input.readObject();
-                            localMap.put(nodeID, node);
-                        }
-                    } catch (Exception e) {
-                        System.out.println("Error reading file: " + file.getName() + ", with error: " + e.getMessage());
-                    }
-                    return localMap;
-                }));
-            }
-
-            //Adds each localMap from the threads into the collected map
-            for (Future<TLongObjectHashMap<Node>> future : futureMap) {
-                id2Node.putAll(future.get());
+            //Makes each thread deserialize a chunk
+            for (int i = 0; i < numberOfChunks; i++) {
+                final String path = "data/StandardMap/nodes_" + i + ".bin";
+                futures.add(executor.submit(() -> deserializeNodeChunk(path)));
             }
             executor.shutdown();
-            System.out.println("- Finished reading nodes!");
+
+            //region Collects results
+            //First ensures that we have space for the data
+            List<TLongObjectHashMap<Node>> partialResults = new ArrayList<>();
+            int totalNodeCount = 0;
+            for (Future<TLongObjectHashMap<Node>> future : futures) {
+                TLongObjectHashMap<Node> result = future.get();
+                partialResults.add(result);
+                totalNodeCount += result.size();
+            }
+            ID2Node.ensureCapacity(totalNodeCount);
+
+            // Then we merge results
+            for (TLongObjectHashMap<Node> partialNodes : partialResults) {
+                for (long key : partialNodes.keys()) {
+                    ID2Node.put(key, partialNodes.get(key));
+                }
+                partialNodes.clear();
+            }
+            //Cleanup
+            partialResults.clear();
+            futures.clear();
+            System.out.println("- Finished Deserializing nodes!");
+            //endregion
         } catch (Exception e) {
-            System.out.println("Error reading nodes!: " + e.getMessage());
+            System.out.println("Error reading nodes! " + e.getMessage());
+        }
+        //endregion
+
+        float[] minMax = getMinMaxCoords(ID2Node.valueCollection());
+
+        Set<Road> roads = new HashSet<>();
+        //region Roads
+        try {
+            ExecutorService executor = Executors.newFixedThreadPool(numberOfChunks);
+            List<Future<Set<Road>>> futures = new ArrayList<>(numberOfChunks);
+
+            //Makes each thread deserialize a chunk
+            for (int i = 0; i < numberOfChunks; i++) {
+                final String path = "data/StandardMap/roads_" + i + ".bin";
+                futures.add(executor.submit(() -> deserializeRoadChunk(path, ID2Node)));
+            }
+            executor.shutdown();
+
+            //region Collects results
+            //First ensures that we have space for the data
+            List<Set<Road>> partialResults = new ArrayList<>();
+            int totalRoadCount = 0;
+            for (Future<Set<Road>> future : futures) {
+                Set<Road> result = future.get();
+                partialResults.add(result);
+                totalRoadCount += result.size();
+            }
+            ID2Node.ensureCapacity(totalRoadCount);
+
+            //Then we merge results
+            for (Set<Road> partialRoads : partialResults) {
+                roads.addAll(partialRoads);
+                partialRoads.clear();
+            }
+            //Cleanup
+            partialResults.clear();
+            futures.clear();
+            //endregion
+            System.out.println("- Finished Deserializing roads!");
+        } catch (Exception e) {
+            System.out.println("Error reading Roads! " + e.getMessage());
         }
 
-        //Roads
+        //endregion
+
+        //region Polygons
+        Set<Polygon> polygons = new HashSet<>();
         try {
-            File folder = new File("data/StandardMap");
-            File[] roadFiles = folder.listFiles((dir, name) -> name.startsWith("roads_") && name.endsWith(".obj"));
-            assert roadFiles != null;
+            ExecutorService executor = Executors.newFixedThreadPool(numberOfChunks);
+            List<Future<Set<Polygon>>> futures = new ArrayList<>(numberOfChunks);
 
-            ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-            List<Future<TLongObjectHashMap<Road>>> futureMap = new ArrayList<>();
-
-            //Runs through each nodefile and makes a thread serialize it
-            for (File file : roadFiles) {
-                futureMap.add(executor.submit(() -> {
-                    TLongObjectHashMap<Road> localMap = new TLongObjectHashMap<>();
-                    try {
-                        ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
-                        int chunkSize = input.readInt();
-                        for (int i = 0; i < chunkSize; i++) {
-                            long roadID = input.readLong();
-                            Road road = (Road) input.readObject();
-                            localMap.put(roadID, road);
-                        }
-                    } catch (Exception e) {
-                        System.out.println("Error reading file: " + file.getName() + ", with error: " + e.getMessage());
-                    }
-                    return localMap;
-                }));
-            }
-
-            //Adds each localMap from the threads into the collected map
-            for (Future<TLongObjectHashMap<Road>> future : futureMap) {
-                id2Road.putAll(future.get());
+            //Makes each thread deserialize a chunk
+            for (int i = 0; i < numberOfChunks; i++) {
+                final String path = "data/StandardMap/polygons_" + i + ".bin";
+                futures.add(executor.submit(() -> deserializePolygonChunk(path, ID2Node)));
             }
             executor.shutdown();
-            System.out.println("- Finished reading roads!");
-        } catch (Exception e) {
-            System.out.println("Error reading roads!: " + e.getMessage());
-        }
 
-        //Polygons
-        //Roads
-        try {
-            File folder = new File("data/StandardMap");
-            File[] polygonFiles = folder.listFiles((dir, name) -> name.startsWith("polygons_") && name.endsWith(".obj"));
-            assert polygonFiles != null;
-
-            ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-            List<Future<TLongObjectHashMap<Polygon>>> futureMap = new ArrayList<>();
-
-            //Runs through each nodefile and makes a thread serialize it
-            for (File file : polygonFiles) {
-                futureMap.add(executor.submit(() -> {
-                    TLongObjectHashMap<Polygon> localMap = new TLongObjectHashMap<>();
-                    try {
-                        ObjectInputStream input = new ObjectInputStream(new BufferedInputStream(new FileInputStream(file)));
-                        int chunkSize = input.readInt();
-                        for (int i = 0; i < chunkSize; i++) {
-                            long polygonID = input.readLong();
-                            Polygon polygon = (Polygon) input.readObject();
-                            localMap.put(polygonID, polygon);
-                        }
-                    } catch (Exception e) {
-                        System.out.println("Error reading file: " + file.getName() + ", with error: " + e.getMessage());
-                    }
-                    return localMap;
-                }));
+            //region Collects results
+            //First ensures that we have space for the data
+            List<Set<Polygon>> partialResults = new ArrayList<>();
+            int totalPolygonCount = 0;
+            for (Future<Set<Polygon>> future : futures) {
+                Set<Polygon> result = future.get();
+                partialResults.add(result);
+                totalPolygonCount += result.size();
             }
+            ID2Node.ensureCapacity(totalPolygonCount);
 
-            //Adds each localMap from the threads into the collected map
-            for (Future<TLongObjectHashMap<Polygon>> future : futureMap) {
-                id2Polygon.putAll(future.get());
+            //Then we merge results
+            for (Set<Polygon> partialRoads : partialResults) {
+                polygons.addAll(partialRoads);
+                partialRoads.clear();
             }
-            executor.shutdown();
-            System.out.println("- Finished reading polygons!");
+            //Cleanup
+            partialResults.clear();
+            futures.clear();
+            //endregion
+            System.out.println("- Finished Deserializing polygon!");
         } catch (Exception e) {
-            System.out.println("Error reading polygons!: " + e.getMessage());
+            System.out.println("Error reading Roads! " + e.getMessage());
         }
         //endregion
 
 
         //Inserts into parser
-        parser.setNodes(id2Node);
-        parser.setRoads(id2Road);
-        parser.setPolygons(id2Polygon);
+        parser.setNodes(ID2Node);
+        parser.setRoads(roads);
+        parser.setPolygons(polygons);
 
         //Closes input and checks for errors
         assert parser != null && parser.getNodes() != null && parser.getRoads() != null && parser.getPolygons() != null;
 
         //Loads polygons colors after serialization
-        for (Polygon polygon : parser.getPolygons().valueCollection()) {
+        for (Polygon polygon : parser.getPolygons()) {
             polygon.determineColor();
         }
+
+        //Adds roads back into nodes adjacency list
+        for (Road road : parser.getRoads()) {
+            for (Node node : road.getNodes()) {
+                node.addEdge(road);
+            }
+        }
+    }
+
+    ///Deserializes a single node chunk of a ".bin" file
+    private TLongObjectHashMap<Node> deserializeNodeChunk(String path) throws IOException {
+        FileChannel fileChannel = new RandomAccessFile(path, "r").getChannel();
+        MappedByteBuffer inputBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+        int nodeCount = inputBuffer.getInt();
+
+        TLongObjectHashMap<Node> ID2Node = new TLongObjectHashMap<>();
+        ID2Node.ensureCapacity(nodeCount);
+        for (int i = 0; i < nodeCount; i++) {
+            long ID = inputBuffer.getLong();
+            float x = inputBuffer.getFloat();
+            float y = inputBuffer.getFloat();
+
+            String city = readString(inputBuffer);
+            String houseNumber = readString(inputBuffer);
+            short postcode = inputBuffer.getShort();
+            String street = readString(inputBuffer);
+            double distanceTo = inputBuffer.getDouble();
+
+            Node newNode = new Node(x, y, city, houseNumber, postcode, street, distanceTo);
+            ID2Node.put(ID, newNode);
+        }
+        return ID2Node;
+    }
+
+    ///Deserializes a single road chunk of a ".bin" file
+    private Set<Road> deserializeRoadChunk(String path, TLongObjectHashMap<Node> ID2Node) throws IOException {
+        FileChannel fileChannel = new RandomAccessFile(path, "r").getChannel();
+        MappedByteBuffer inputBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+        int roadCount = inputBuffer.getInt();
+
+        Set<Road> roads = new HashSet<>(roadCount);
+        for (int i = 0; i < roadCount; i++) {
+            //Finds all nodes in road
+            List<Node> nodesInRoad = new ArrayList<>();
+            int nodeCount = inputBuffer.getInt();
+            for (int j = 0; j < nodeCount; j++) {
+                long nodeID = inputBuffer.getLong();
+                nodesInRoad.add(ID2Node.get(nodeID));
+            }
+
+            //Bools
+            boolean walkable = inputBuffer.get() != 0;
+            boolean bicycle = inputBuffer.get() != 0;
+            boolean drivable = inputBuffer.get() != 0;
+
+            int maxSpeed = inputBuffer.getInt();
+
+            try {
+                String roadType = readString(inputBuffer);
+                String roadName = readString(inputBuffer);
+                roads.add(new Road(nodesInRoad, walkable, bicycle, drivable, maxSpeed, roadType, roadName));
+            } catch (NoSuchElementException e) {
+                System.out.println("Ø=");
+            }
+        }
+        return roads;
+    }
+
+    private Set<Polygon> deserializePolygonChunk(String path, TLongObjectHashMap<Node> ID2Node) throws IOException {
+        FileChannel fileChannel = new RandomAccessFile(path, "r").getChannel();
+        MappedByteBuffer inputBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+        int polygonCount = inputBuffer.getInt();
+
+        Set<Polygon> polygons = new HashSet<>(polygonCount);
+        for (int i = 0; i < polygonCount; i++) {
+            //Finds all nodes in road
+            List<Node> nodesInPolygon = new ArrayList<>();
+            int nodeCount = inputBuffer.getInt();
+            for (int j = 0; j < nodeCount; j++) {
+                long nodeID = inputBuffer.getLong();
+                nodesInPolygon.add(ID2Node.get(nodeID));
+            }
+
+            String polygonType = readString(inputBuffer);
+            polygons.add(new Polygon(nodesInPolygon, polygonType));
+        }
+        return polygons;
+    }
+
+    ///Reads the string saved in the parser. Can return null if marked by "-1" in binary file (See write method)
+    private String readString(MappedByteBuffer inputBuffer) {
+        int length = inputBuffer.getInt();
+        if (length < 0) return null;
+        byte[] data = new byte[length];
+        inputBuffer.get(data);
+        return new String(data, StandardCharsets.UTF_8);
     }
 
     /// Saves the parser to a .obj file so it can be called later. Method is called in {@link #Model} if the file isn't a .obj
     public void saveParserToOBJ() {
-        //Saves parser
+        //Reverse HashMap needed to store node ID in roads. reverses the map so we can store the ID correctly
+        TLongObjectHashMap<Node> ID2Node = parser.getNodes();
+        TObjectLongHashMap<Node> node2ID = new TObjectLongHashMap(ID2Node.size());
+        for (long ID : ID2Node.keys()) {
+            node2ID.put(ID2Node.get(ID), ID);
+        }
+
+        //region Saves parser
         try {
             ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/parser.obj"));
             System.out.println("Saving parser...");
@@ -269,100 +379,232 @@ public class Model {
         } catch (Exception e) {
             throw new ParserSavingException("Error saving parser to OBJ!: " + e.getMessage());
         }
+        //endregion
 
-        //Saves nodes
+
+        //region Nodes
         try {
             System.out.println("Saving nodes...");
-            int numberOfChunks = 8;
-            TLongObjectHashMap<Node> nodes = parser.getNodes();
-            long[] nodeIDs = nodes.keySet().toArray(); //Need this to split it into chunks
-            int amountOfNodes = nodes.size();
+            //List<Node> nodes = new ArrayList<>(parser.getNodes().valueCollection());
+            long[] nodeIDs = ID2Node.keySet().toArray();
+            int amountOfNodes = ID2Node.size();
             int chunkSize = (int) Math.ceil((double) amountOfNodes / numberOfChunks); //Splits all nodes into chunks
 
+            //Saves nodes into chunks
             for (int i = 0; i < numberOfChunks; i++) {
-                //Determines the start and end indexes for each chunks
                 int start = i * chunkSize;
-                int end = Math.min(start + chunkSize, amountOfNodes);
+                int end = Math.min(start + chunkSize, ID2Node.size());
+                if (start >= end) break; //Edgecase
 
-                ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/nodes_" + i + ".obj"));
-                outputStream.writeInt(end - start); //Amount of nodes in this chunk
+                //Initializes a Chunk
+                List<Long> chunk = new ArrayList<>(chunkSize);
+                for (int j = start; j < end; j++) chunk.add(nodeIDs[j]);
 
-                //Saves all nodes that the chunk have space for
-                for (int j = start; j < end; j++) {
-                    long id = nodeIDs[j];
-                    outputStream.writeLong(id);
-                    outputStream.writeObject(nodes.get(id));
+                long totalBytes = Integer.BYTES + computeNodeChunkSize(chunk, ID2Node); //Int is for chunk size
+
+                FileChannel fileChannel = new RandomAccessFile(("data/StandardMap/nodes_" + i + ".bin"), "rw").getChannel();
+                MappedByteBuffer outputBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, totalBytes);
+
+                //Serializing chunk:
+                outputBuffer.putInt(chunk.size()); //So we now how much to loop through later
+                for (Long ID : chunk) {
+                    Node node = ID2Node.get(ID);
+                    //ID
+                    outputBuffer.putLong(ID);
+
+                    //XY
+                    outputBuffer.putFloat(node.getX());
+                    outputBuffer.putFloat(node.getY());
+
+                    //region Address. If address is null we parse -1 so we know later that its a null.
+                    //City
+                    if (node.getCity() == null) outputBuffer.putInt(-1);
+                    else {
+                        byte[] data = node.getCity().getBytes(StandardCharsets.UTF_8);
+                        outputBuffer.putInt(data.length);
+                        outputBuffer.put(data);
+                    }
+
+                    //House number
+                    if (node.getHouseNumber() == null) outputBuffer.putInt(-1);
+                    else {
+                        byte[] data = node.getHouseNumber().getBytes(StandardCharsets.UTF_8);
+                        outputBuffer.putInt(data.length);
+                        outputBuffer.put(data);
+                    }
+
+                    outputBuffer.putShort(node.getPostcode()); //Postcode
+
+                    //Street
+                    if (node.getStreet() == null) outputBuffer.putInt(-1);
+                    else {
+                        byte[] data = node.getStreet().getBytes(StandardCharsets.UTF_8);
+                        outputBuffer.putInt(data.length);
+                        outputBuffer.put(data);
+                    }
+                    //endregion
+
+                    //Other
+                    outputBuffer.putDouble(node.getDistanceTo());
                 }
-                outputStream.close();
-                System.out.println("Saved chunk " + i + " with " + (end - start) + " amount of nodes");
+                outputBuffer.force(); //Flushes to disk
+                System.out.println("Saved chunk " + i + " with " + (end - start) + " amount of nodes!");
             }
         } catch (Exception e) {
             throw new ParserSavingException("Error saving nodes to OBJ!: " + e.getMessage());
         }
+        //endregion
 
-        //Saves Roads
-        /* try {
+        //region Roads
+        try {
             System.out.println("Saving roads...");
-            int numberOfChunks = 8;
-            TLongObjectHashMap<Road> roads = parser.getRoads();
-            long[] roadIDs = roads.keySet().toArray(); //Need this to split it into chunks
+            List<Road> roads = new ArrayList<>(parser.getRoads()) ;
             int amountOfRoads = roads.size();
             int chunkSize = (int) Math.ceil((double) amountOfRoads / numberOfChunks); //Splits all nodes into chunks
 
+            //Saves roads into chunks
             for (int i = 0; i < numberOfChunks; i++) {
-                //Determines the start and end indexes for each chunks
                 int start = i * chunkSize;
-                int end = Math.min(start + chunkSize, amountOfRoads);
+                int end = Math.min(start + chunkSize, roads.size());
+                if (start >= end) break; //Edgecase
 
-                ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/roads_" + i + ".obj"));
-                outputStream.writeInt(end - start); //Amount of nodes in this chunk
+                List<Road> chunk = roads.subList(start, end);
+                long totalBytes = Integer.BYTES + computeRoadChunkSize(chunk); //Int is for chunk size
 
-                //Saves all nodes that the chunk have space for
-                for (int j = start; j < end; j++) {
-                    long id = roadIDs[j];
-                    outputStream.writeLong(id);
-                    outputStream.writeObject(roads.get(id));
+                FileChannel fileChannel = new RandomAccessFile(("data/StandardMap/roads_" + i + ".bin"), "rw").getChannel();
+                MappedByteBuffer outputBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, totalBytes);
+
+                //Serializing chunk:
+                outputBuffer.putInt(chunk.size()); //So we now how much to loop through later
+                for (Road road : chunk) {
+                    //Saves node ID for later
+                    outputBuffer.putInt(road.getNodes().size()); //So we know how nodes are in road later
+                    for (Node node : road.getNodes()) outputBuffer.putLong(node2ID.get(node));
+
+                    //Boolean value, order is: 1. Walkable 2. Bicycle 3. Drivable
+                    if (road.isWalkable()) outputBuffer.put((byte) 1);
+                    else outputBuffer.put((byte) 0);
+                    if (road.isBicycle()) outputBuffer.put((byte) 1);
+                    else outputBuffer.put((byte) 0);
+                    if (road.isDrivable()) outputBuffer.put((byte) 1);
+                    else outputBuffer.put((byte) 0);
+
+                    //Maxspeed
+                    outputBuffer.putInt(road.getMaxSpeed());
+
+                    //RoadTime
+                    if (road.getType() == null) outputBuffer.putInt(-1);
+                    else {
+                        byte[] data = road.getType().getBytes(StandardCharsets.UTF_8);
+                        outputBuffer.putInt(data.length);
+                        outputBuffer.put(data);
+                    }
+
+                    //RoadName
+                    if (road.getRoadName() == null) outputBuffer.putInt(-1);
+                    else {
+                        byte[] data = road.getRoadName().getBytes(StandardCharsets.UTF_8);
+                        outputBuffer.putInt(data.length);
+                        outputBuffer.put(data);
+                    }
                 }
-                outputStream.close();
+                outputBuffer.force(); //Flushes to disk
                 System.out.println("Saved chunk " + i + " with " + (end - start) + " amount of roads!");
             }
         } catch (Exception e) {
             throw new ParserSavingException("Error saving roads to OBJ!: " + e.getMessage());
         }
+        //endregion
 
-         */
-
-
-        //Saves Polygons
+        //region Polygons
         try {
             System.out.println("Saving polygons...");
-            int numberOfChunks = 16;
-            TLongObjectHashMap<Polygon> polygons = parser.getPolygons();
-            long[] polygonID = polygons.keySet().toArray(); //Need this to split it into chunks
+            List<Polygon> polygons = new ArrayList<>(parser.getPolygons()) ;
             int amountOfPolygons = polygons.size();
             int chunkSize = (int) Math.ceil((double) amountOfPolygons / numberOfChunks); //Splits all nodes into chunks
 
+            //Saves polygons into chunks
             for (int i = 0; i < numberOfChunks; i++) {
-                //Determines the start and end indexes for each chunks
                 int start = i * chunkSize;
-                int end = Math.min(start + chunkSize, amountOfPolygons);
+                int end = Math.min(start + chunkSize, polygons.size());
+                if (start >= end) break; //Edgecase
 
-                ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/polygons_" + i + ".obj"));
-                outputStream.writeInt(end - start); //Amount of nodes in this chunk
+                List<Polygon> chunk = polygons.subList(start, end);
+                long totalBytes = Integer.BYTES + computePolygonChunkSize(chunk); //Int is for chunk size
 
-                //Saves all nodes that the chunk have space for
-                for (int j = start; j < end; j++) {
-                    long id = polygonID[j];
-                    outputStream.writeLong(id);
-                    outputStream.writeObject(polygons.get(id));
+                FileChannel fileChannel = new RandomAccessFile(("data/StandardMap/polygons_" + i + ".bin"), "rw").getChannel();
+                MappedByteBuffer outputBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, totalBytes);
+
+                //Serializing chunk:
+                outputBuffer.putInt(chunk.size()); //So we now how much to loop through later
+                for (Polygon polygon : chunk) {
+                    //Nodes
+                    outputBuffer.putInt(polygon.getNodes().size());
+                    for (Node node : polygon.getNodes()) outputBuffer.putLong(node2ID.get(node));
+
+                    //Type
+                    if (polygon.getType() == null) outputBuffer.putInt(-1);
+                    else {
+                        byte[] data = polygon.getType().getBytes(StandardCharsets.UTF_8);
+                        outputBuffer.putInt(data.length);
+                        outputBuffer.put(data);
+                    }
                 }
-                outputStream.close();
+                outputBuffer.force(); //Flushes to disk
                 System.out.println("Saved chunk " + i + " with " + (end - start) + " amount of polygons!");
             }
         } catch (Exception e) {
             throw new ParserSavingException("Error saving polygons to OBJ!: " + e.getMessage());
         }
+        //endregion
+
         System.exit(0);
+    }
+
+    ///Computes how much space is needed to be allocated in the chunk
+    private long computeNodeChunkSize(List<Long> nodeIDs, TLongObjectHashMap<Node> ID2Node) {
+        long size = 0;
+        for (Long ID : nodeIDs) {
+            Node node = ID2Node.get(ID);
+            size += Long.BYTES; //ID
+            size += Float.BYTES*2; //XY
+            if (node.getCity() != null) size += Integer.BYTES + node.getCity().getBytes(StandardCharsets.UTF_8).length; //Int for reading amount of bytes
+            else size += Integer.BYTES; //Space for "-1"
+            if (node.getHouseNumber() != null) size += Integer.BYTES + node.getHouseNumber().getBytes(StandardCharsets.UTF_8).length;
+            else size += Integer.BYTES; //Space for "-1"
+            size += Short.BYTES; //Postcode
+            if (node.getStreet() != null) size += Integer.BYTES + node.getStreet().getBytes(StandardCharsets.UTF_8).length;
+            else size += Integer.BYTES; //Space for "-1"
+            size += Double.BYTES; //distanceTo
+        }
+        return size;
+    }
+
+    ///Computes how much space is needed to be allocated in the chunk
+    private long computeRoadChunkSize(List<Road> roads) {
+        long size = 0;
+        for (Road road : roads) {
+            size += Integer.BYTES; //Length of road.getNodes
+            size += road.getNodes().size() * Long.BYTES; size += 3; //foot, bicycle, isDrivable
+            size += Integer.BYTES; //MaxSpeed
+            if (road.getType() != null) size += Integer.BYTES + road.getType().getBytes(StandardCharsets.UTF_8).length; //RoadType
+            else size += Integer.BYTES; //Space for "-1"
+            if (road.getRoadName() != null) size += Integer.BYTES + road.getRoadName().getBytes(StandardCharsets.UTF_8).length; //RoadName
+            else size += Integer.BYTES; //Space for "-1"
+        }
+        return size;
+    }
+
+    ///Computes how much space is needed to be allocated in the chunk
+    private long computePolygonChunkSize(List<Polygon> polygons) {
+        long size = 0;
+        for (Polygon polygon : polygons) {
+            size += Integer.BYTES; //Length of polygon.getNodes
+            size += polygon.getNodes().size() * Long.BYTES; //For each node we add storage for their ID (so a Long)
+            if (polygon.getType() != null) size += Integer.BYTES + polygon.getType().getBytes(StandardCharsets.UTF_8).length;
+            else size += Integer.BYTES; //space for "-1"
+        }
+        return size;
     }
 
     ///Creates a POI and stores it into its given Tile
@@ -444,7 +686,7 @@ public class Model {
          //endregion
 
          //region Adds Polygons
-         for (Polygon polygon : parser.getPolygons().valueCollection()) {
+         for (Polygon polygon : parser.getPolygons()) {
              //Converts start- and endXY to tile sizes
              float[] boundingBox = polygon.getBoundingBox();
              int startTileX = (int) ((boundingBox[0] - minX) / tileSize);
@@ -477,7 +719,7 @@ public class Model {
     }
 
     /// @return the minimum x and y coordinate and the maximum. Used for splitting that box into tiles}
-    private float[] getMinMaxCoords() {
+    private float[] getMinMaxCoords(Collection<Node> nodes) {
         float[] minMaxCoords = new float[4];
         float minX = Float.POSITIVE_INFINITY;
         float minY = Float.POSITIVE_INFINITY;
@@ -485,7 +727,7 @@ public class Model {
         float maxY = Float.NEGATIVE_INFINITY;
 
         //Loops through each node and gets the minimum and maximum node
-        for (Node node : parser.getNodes().valueCollection()) {
+        for (Node node : nodes) {
             float nodeX = node.getX();
             float nodeY = node.getY();
 
@@ -510,7 +752,6 @@ public class Model {
         minMaxCoords[3] = maxY;
         return minMaxCoords;
     }
-
 
     /**
      * Inserts all streets and cities of the complex nodes to Tries

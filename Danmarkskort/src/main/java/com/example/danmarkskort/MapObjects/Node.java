@@ -1,9 +1,7 @@
 package com.example.danmarkskort.MapObjects;
 
-import com.example.danmarkskort.Exceptions.InvalidAddressException;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -20,7 +18,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     private String street;
     private double distanceTo;
     private int edges;
-    private List<Road> roadEdges;
+    private transient List<Road> roadEdges;
     //endregion
 
     //region Constructor(s)
@@ -50,6 +48,18 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
         this.postcode = postcode;
         this.street = street;
         calculateXY(latitude, longitude);
+    }
+
+    ///A Node read from a binary file.
+    public Node(float x, float y, String city, String houseNumber, short postcode, String street, double distanceTo) {
+        this.x = x;
+        this.y = y;
+        this.city = city;
+        this.houseNumber = houseNumber;
+        this.postcode = postcode;
+        this.street = street;
+        this.distanceTo = distanceTo;
+        roadEdges = new ArrayList<>();
     }
     //endregion
 
