@@ -8,6 +8,7 @@ import com.example.danmarkskort.Parser;
 import com.example.danmarkskort.Searching.Search;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
+import gnu.trove.procedure.TObjectObjectProcedure;
 import javafx.scene.canvas.Canvas;
 
 import java.io.*;
@@ -26,7 +27,7 @@ public class Model {
     private Parser parser;
     private int numberOfTilesX, numberOfTilesY;
     private final Tilegrid tilegrid;
-    private final Search search;
+    //private final Search search;
     private List<Road> latestRoute;
     private TrieST trieCity;
     private TrieST trieStreet;
@@ -74,17 +75,18 @@ public class Model {
         //Converts into tilegrid if we haven't loaded a tilegrid in via OBJ
         System.out.println("Starting on tilegrid!");
         int tileSize = 11;
-        float[] tileGridBounds = getMinMaxCoords();
+        float[] tileGridBounds = getMinMaxCoords(parser.getNodes().valueCollection());
         Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
 
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
         System.out.println("Finished creating Tilegrid!");
+        //parser = null; //Fjerner reference til parser så den bliver GC'et
         //endregion
 
-        loadAddressNodes();
+        //loadAddressNodes();
 
-        search = new Search(parser.getNodes().valueCollection());
-        //parser = null; //Fjerner reference til parser så den bliver GC'et
+        //search = new Search(parser.getNodes().valueCollection());
+
     }
     //endregion
 
@@ -162,12 +164,14 @@ public class Model {
             //Cleanup
             partialResults.clear();
             futures.clear();
+            System.out.println("- Finished Deserializing nodes!");
             //endregion
         } catch (Exception e) {
             System.out.println("Error reading nodes! " + e.getMessage());
         }
-        System.out.println("- Deserialized nodes!");
         //endregion
+
+        float[] minMax = getMinMaxCoords(ID2Node.valueCollection());
 
         Set<Road> roads = new HashSet<>();
         //region Roads
@@ -202,44 +206,47 @@ public class Model {
             partialResults.clear();
             futures.clear();
             //endregion
+            System.out.println("- Finished Deserializing roads!");
         } catch (Exception e) {
             System.out.println("Error reading Roads! " + e.getMessage());
         }
+
         //endregion
 
         //region Polygons
         Set<Polygon> polygons = new HashSet<>();
         try {
             ExecutorService executor = Executors.newFixedThreadPool(numberOfChunks);
-            List<Future<Set<Road>>> futures = new ArrayList<>(numberOfChunks);
+            List<Future<Set<Polygon>>> futures = new ArrayList<>(numberOfChunks);
 
             //Makes each thread deserialize a chunk
             for (int i = 0; i < numberOfChunks; i++) {
-                final String path = "data/StandardMap/roads_" + i + ".bin";
-                futures.add(executor.submit(() -> deserializeRoadChunk(path, ID2Node)));
+                final String path = "data/StandardMap/polygons_" + i + ".bin";
+                futures.add(executor.submit(() -> deserializePolygonChunk(path, ID2Node)));
             }
             executor.shutdown();
 
             //region Collects results
             //First ensures that we have space for the data
-            List<Set<Road>> partialResults = new ArrayList<>();
-            int totalRoadCount = 0;
-            for (Future<Set<Road>> future : futures) {
-                Set<Road> result = future.get();
+            List<Set<Polygon>> partialResults = new ArrayList<>();
+            int totalPolygonCount = 0;
+            for (Future<Set<Polygon>> future : futures) {
+                Set<Polygon> result = future.get();
                 partialResults.add(result);
-                totalRoadCount += result.size();
+                totalPolygonCount += result.size();
             }
-            ID2Node.ensureCapacity(totalRoadCount);
+            ID2Node.ensureCapacity(totalPolygonCount);
 
             //Then we merge results
-            for (Set<Road> partialRoads : partialResults) {
-                roads.addAll(partialRoads);
+            for (Set<Polygon> partialRoads : partialResults) {
+                polygons.addAll(partialRoads);
                 partialRoads.clear();
             }
             //Cleanup
             partialResults.clear();
             futures.clear();
             //endregion
+            System.out.println("- Finished Deserializing polygon!");
         } catch (Exception e) {
             System.out.println("Error reading Roads! " + e.getMessage());
         }
@@ -249,13 +256,13 @@ public class Model {
         //Inserts into parser
         parser.setNodes(ID2Node);
         parser.setRoads(roads);
-        //parser.setPolygons(polygons);
+        parser.setPolygons(polygons);
 
         //Closes input and checks for errors
         assert parser != null && parser.getNodes() != null && parser.getRoads() != null && parser.getPolygons() != null;
 
         //Loads polygons colors after serialization
-        for (Polygon polygon : parser.getPolygons().valueCollection()) {
+        for (Polygon polygon : parser.getPolygons()) {
             polygon.determineColor();
         }
 
@@ -279,14 +286,14 @@ public class Model {
             long ID = inputBuffer.getLong();
             float x = inputBuffer.getFloat();
             float y = inputBuffer.getFloat();
+
             String city = readString(inputBuffer);
             String houseNumber = readString(inputBuffer);
             short postcode = inputBuffer.getShort();
             String street = readString(inputBuffer);
             double distanceTo = inputBuffer.getDouble();
 
-            Node newNode = new Node(x, y, city, houseNumber, postcode, street);
-            newNode.setDistanceTo(distanceTo);
+            Node newNode = new Node(x, y, city, houseNumber, postcode, street, distanceTo);
             ID2Node.put(ID, newNode);
         }
         return ID2Node;
@@ -340,7 +347,9 @@ public class Model {
                 long nodeID = inputBuffer.getLong();
                 nodesInPolygon.add(ID2Node.get(nodeID));
             }
+
             String polygonType = readString(inputBuffer);
+            polygons.add(new Polygon(nodesInPolygon, polygonType));
         }
         return polygons;
     }
@@ -377,7 +386,7 @@ public class Model {
         //endregion
 
 
-        //region Saves nodes
+        //region Nodes
         try {
             System.out.println("Saving nodes...");
             //List<Node> nodes = new ArrayList<>(parser.getNodes().valueCollection());
@@ -511,14 +520,14 @@ public class Model {
         }
         //endregion
 
-        //region
+        //region Polygons
         try {
             System.out.println("Saving polygons...");
-            List<Polygon> polygons = new ArrayList<>(parser.getPolygons().valueCollection()) ;
+            List<Polygon> polygons = new ArrayList<>(parser.getPolygons()) ;
             int amountOfPolygons = polygons.size();
             int chunkSize = (int) Math.ceil((double) amountOfPolygons / numberOfChunks); //Splits all nodes into chunks
 
-            //Saves roads into chunks
+            //Saves polygons into chunks
             for (int i = 0; i < numberOfChunks; i++) {
                 int start = i * chunkSize;
                 int end = Math.min(start + chunkSize, polygons.size());
@@ -527,7 +536,7 @@ public class Model {
                 List<Polygon> chunk = polygons.subList(start, end);
                 long totalBytes = Integer.BYTES + computePolygonChunkSize(chunk); //Int is for chunk size
 
-                FileChannel fileChannel = new RandomAccessFile(("data/StandardMap/roads_" + i + ".bin"), "rw").getChannel();
+                FileChannel fileChannel = new RandomAccessFile(("data/StandardMap/polygons_" + i + ".bin"), "rw").getChannel();
                 MappedByteBuffer outputBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, totalBytes);
 
                 //Serializing chunk:
@@ -616,8 +625,9 @@ public class Model {
      * @return A structured list of all roads in the route. Returns null if route not found
      */
     public List<Road> search(Node startNode, Node endNode) {
-        search.route(startNode, endNode);
-        return search.getRoute();
+        //search.route(startNode, endNode);
+        //return search.getRoute();
+        return null;
     }
 
     /// Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile
@@ -674,7 +684,7 @@ public class Model {
          //endregion
 
          //region Adds Polygons
-         for (Polygon polygon : parser.getPolygons().valueCollection()) {
+         for (Polygon polygon : parser.getPolygons()) {
              //Converts start- and endXY to tile sizes
              float[] boundingBox = polygon.getBoundingBox();
              int startTileX = (int) ((boundingBox[0] - minX) / tileSize);
@@ -707,7 +717,7 @@ public class Model {
     }
 
     /// @return the minimum x and y coordinate and the maximum. Used for splitting that box into tiles}
-    private float[] getMinMaxCoords() {
+    private float[] getMinMaxCoords(Collection<Node> nodes) {
         float[] minMaxCoords = new float[4];
         float minX = Float.POSITIVE_INFINITY;
         float minY = Float.POSITIVE_INFINITY;
@@ -715,7 +725,7 @@ public class Model {
         float maxY = Float.NEGATIVE_INFINITY;
 
         //Loops through each node and gets the minimum and maximum node
-        for (Node node : parser.getNodes().valueCollection()) {
+        for (Node node : nodes) {
             float nodeX = node.getX();
             float nodeY = node.getY();
 
@@ -740,7 +750,6 @@ public class Model {
         minMaxCoords[3] = maxY;
         return minMaxCoords;
     }
-
 
     /**
      * Inserts all streets and cities of the complex nodes to Tries

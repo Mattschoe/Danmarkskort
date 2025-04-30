@@ -24,7 +24,8 @@ public class Parser implements Serializable {
     private transient TLongObjectHashMap<Road> id2Road;
     private transient TLongObjectHashMap<Polygon> id2Polygon;
     private transient final Set<Node> addressNodes;
-    private transient Set<Road> roads;
+    private transient Set<Road> roads; //Used when loading standard file
+    private transient Set<Polygon> polygons; //Used when loading standard file
     private final File file; //The file that's loaded in
     ///\[0] = minLat <br> \[1] = minLong <br> \[2] = maxLat <br> \[3] = maxLong
     private final double[] bounds;
@@ -438,10 +439,10 @@ public class Parser implements Serializable {
     public File getFile() { return file; }
     public TLongObjectHashMap<Node> getNodes() { return id2Node; }
     public Set<Road> getRoads() { return roads; }
-    public TLongObjectHashMap<Polygon> getPolygons() { return id2Polygon; }
+    public Collection<Polygon> getPolygons() { if (polygons == null) return id2Polygon.valueCollection(); return polygons; }
     public void setNodes(TLongObjectHashMap<Node> nodes) { id2Node = nodes; }
     public void setRoads(Set<Road> roads) { this.roads = roads; }
-    public void setPolygons(TLongObjectHashMap<Polygon> polygons) { id2Polygon = polygons; }
+    public void setPolygons(Set<Polygon> polygons) { this.polygons = polygons; }
     public Set<Node> getAddressNodes() {
         return addressNodes;
     }
