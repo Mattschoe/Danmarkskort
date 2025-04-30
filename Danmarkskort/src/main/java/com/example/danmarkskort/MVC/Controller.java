@@ -1,11 +1,10 @@
 package com.example.danmarkskort.MVC;
 
-import com.example.danmarkskort.AddressParser;
 import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.*;
 import com.example.danmarkskort.PDFOutput;
+
 import javafx.animation.AnimationTimer;
-import com.example.danmarkskort.AddressSearch.TrieST;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -13,7 +12,6 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -28,8 +26,15 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.net.URL;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
     //region Fields
@@ -85,7 +90,6 @@ public class Controller implements Initializable {
      */
     public Controller() {
         canvas = new Canvas(400, 600);
-        System.out.println("Controller created!");
 
         listView = new ListView<>();
         autoSuggestResults = new ArrayList<>();
@@ -131,7 +135,7 @@ public class Controller implements Initializable {
      *  configures something(???) for an object in the mapOverlay.fxml scene
      */
     @Override public void initialize(URL url, ResourceBundle resourceBundle) {
-        listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<String>() {
+        listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<>() {
             @Override
             public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
                 String selected = listView.getSelectionModel().getSelectedItem();
@@ -281,8 +285,8 @@ public class Controller implements Initializable {
         }
     }
 
-    /// This metod is used to save the current POI to a map and add it as a menuitem to the POI menubar to give it delete and find adress as options.
-    /// when deleting the POI it removes it from favoritePOI and adds it to a deletedPOI list whitch is used to clean the map later.
+    /// This method is used to save the current POI to a map and add it as a menuitem to the POI menubar to give it delete and find address as options.
+    /// when deleting the POI it removes it from favoritePOI and adds it to a deletedPOI list which is used to clean the map later.
     @FXML protected void savePOIToHashMap(){
         if(startPOI == null){return;}
         String name = addNamePOI.getText();
@@ -297,7 +301,7 @@ public class Controller implements Initializable {
         POIMenu.getItems().add(POIMenuItem);
 
         MenuItem deletePOI = new MenuItem("Delete");
-        deletePOI.setOnAction(e -> {
+        deletePOI.setOnAction(_ -> {
             view.removeObjectToDraw(startPOI);
             POI poi = favoritePOIs.get(name);
             favoritePOIs.remove(name);
@@ -309,7 +313,7 @@ public class Controller implements Initializable {
         });
 
         MenuItem showAddress = new MenuItem("Show Address");
-        showAddress.setOnAction(e -> {
+        showAddress.setOnAction(_ -> {
             POI poi = favoritePOIs.get(name);
             if (poi != null) {
                 String address = poi.getNodeAddress();
@@ -338,7 +342,7 @@ public class Controller implements Initializable {
     }
 
 
-    //Metode til at fjerne den røde markering på kortet for en POI. virker kun for den POI, der senest er placeret
+    //Metode til at fjerne den røde markering på kortet for en POI. Virker kun for den POI, der senest er placeret
     @FXML public void removePOIMarker(POI poi){
         //sæt knappen til visible og kald denne metode et sted
         model.removePOI(poi);
@@ -402,8 +406,9 @@ public class Controller implements Initializable {
                     closestNode = node;
                 }
             }
-            assert closestNode != null;
-            System.out.println(closestNode);
+
+            if (closestNode == null) System.out.println("No node in close proximity!");
+            else System.out.println(closestNode);
         }
         //endregion
 
@@ -439,7 +444,7 @@ public class Controller implements Initializable {
             if (oldPOIs.size() > 2) {
                 while (oldPOIs.size() > 2) {
                     System.out.println(oldPOIs);
-                    POI removed = oldPOIs.remove(0);
+                    POI removed = oldPOIs.removeFirst();
 
                     if (!favoritePOIs.containsValue(removed)) {
                         oldPOIs.remove(removed);

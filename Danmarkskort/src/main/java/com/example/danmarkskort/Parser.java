@@ -5,15 +5,29 @@ import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.Polygon;
 import com.example.danmarkskort.MapObjects.Road;
 
-import javax.xml.stream.*;
-import java.io.*;
-import java.util.*;
-import java.util.zip.ZipEntry;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipInputStream;
 
-import gnu.trove.map.TLongIntMap;
-import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
+
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 public class Parser implements Serializable {
     @Serial private static final long serialVersionUID = 8838055424703291984L;
@@ -184,8 +198,7 @@ public class Parser implements Serializable {
                 else if (input.getLocalName().equals("tag")) {
                     String key = input.getAttributeValue(null, "k");
                     String val = input.getAttributeValue(null, "v");
-                    if (key == null || val == null) continue; //If k or v are null we skip the element
-                    else if (key.equals("amenity") || key.equals("building") || key.equals("surface")) {
+                    if (key.equals("amenity") || key.equals("building") || key.equals("surface")) {
                         type = key;
                     }
                     else if (key.equals("landuse") || key.equals("leisure") || key.equals("natural") || key.equals("route")) {
@@ -265,7 +278,7 @@ public class Parser implements Serializable {
             if (nextInput == XMLStreamConstants.END_ELEMENT && input.getLocalName().equals("way")) {
                 if (road) id2Road.put(wayID, parseRoad(nodesInWay, tagsKeyToValue));
                 else if (building) id2Polygon.put(wayID, parsePolygon(nodesInWay, tagsKeyToValue));
-                else if (isCycle) id2Polygon.put(wayID, parsePolygon(nodesInWay, tagsKeyToValue)); //If a cycle but no "highway" tag, its very likely a building
+                else if (isCycle) id2Polygon.put(wayID, parsePolygon(nodesInWay, tagsKeyToValue)); //If it's a cycle with no "highway" tag, it's very likely a building
                 else id2Road.put(wayID, parseRoad(nodesInWay, tagsKeyToValue)); //If we don't register if building or road, we parse as road (Lot of roads don't have "Highway" tags)
                 return; //Returns out se we don't keep looping through OSM file
             }
@@ -368,7 +381,7 @@ public class Parser implements Serializable {
             List<Node> currentRoad = new ArrayList<>();
 
             //Runs through every node, checks if intersection, and makes a road on every intersection. Road 'ABCDE' therefore becomes 'ABC' & 'CDE' if 'C' is an intersection
-            currentRoad.add(nodes.getFirst()); //Adds first node to avoid edgecase where start node is an intersection
+            currentRoad.add(nodes.getFirst()); //Adds first node to avoid edge-case where start node is an intersection
             for (int i = 1; i < nodes.size(); i++) {
                 Node node = nodes.get(i);
                 currentRoad.add(node);
