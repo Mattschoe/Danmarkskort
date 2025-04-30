@@ -464,7 +464,7 @@ public class Controller implements Initializable {
     }
 
     /**
-     * Methods runs upon hovering the mouse on the Canvas. Finds the nearest Road, if any,
+     * Methods runs upon hovering the mouse on the Canvas. Finds the nearest Road
      * and changes the display text in the bottom left corner of the application.
      */
     @FXML protected void onCanvasHover(MouseEvent e) {
@@ -478,16 +478,15 @@ public class Controller implements Initializable {
             tile = model.getTilegrid().getTileFromXY((float) x, (float) y);
         } catch (Exception exception) { return; }
 
-        if (tile == null) {
+        if (tile != null) {
+            Road closestRoad = getClosestRoad(tile, x, y);
+            if (closestRoad != null) {
+                closestRoadText.setText("Closest road: "+ closestRoad.getRoadName());
+            }
+        }
+        else {
             closestRoadText.setText("Closest road: N/A");
-            return;
         }
-
-        Road closestRoad = getClosestRoad(tile, x, y);
-        if (closestRoad != null && !closestRoad.getRoadName().isEmpty()) {
-            closestRoadText.setText("Closest road: "+ closestRoad.getRoadName());
-        }
-        else closestRoadText.setText("Closest road: N/A");
     }
 
     /**
@@ -499,6 +498,7 @@ public class Controller implements Initializable {
         Road closestRoad = null;
 
         for (Road road : tile.getRoads()) {
+            if (road.getRoadName().isEmpty()) continue;
             for (Node node : road.getNodes()) {
                 double nodeX = node.getX();
                 double nodeY = node.getY();
