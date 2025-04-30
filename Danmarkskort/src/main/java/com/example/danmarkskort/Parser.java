@@ -23,7 +23,6 @@ public class Parser implements Serializable {
     private transient TLongObjectHashMap<Node> id2Node; //map for storing a Node and the id used to refer to it
     private transient TLongObjectHashMap<Road> id2Road;
     private transient TLongObjectHashMap<Polygon> id2Polygon;
-    private transient final Set<Node> addressNodes;
     private transient Set<Road> roads; //Used when loading standard file
     private transient Set<Polygon> polygons; //Used when loading standard file
     private final File file; //The file that's loaded in
@@ -47,7 +46,6 @@ public class Parser implements Serializable {
         id2Road = new TLongObjectHashMap<>(2_214_235);
         id2Polygon = new TLongObjectHashMap<>(6_168_995);
         bounds = new double[4];
-        addressNodes = new HashSet<>();
 
         failedWays = 0; failedNodes = 0; failedRelations = 0; outOfBoundsNodes = 0;
 
@@ -156,7 +154,6 @@ public class Parser implements Serializable {
             id2Node.put(id, new Node(lat, lon)); //Instantiates a new node (node containing no child-elements)
         } else {
             Node complexNode = new Node(lat, lon, city, houseNumber, postcode, street);
-            addressNodes.add(complexNode);
             id2Node.put(id, complexNode);
         }
     }
@@ -412,6 +409,13 @@ public class Parser implements Serializable {
     public void setRoads(Set<Road> roads) { this.roads = roads; }
     public void setPolygons(Set<Polygon> polygons) { this.polygons = polygons; }
     public Set<Node> getAddressNodes() {
+        Set<Node> addressNodes = new HashSet<>();
+        for (Node node : id2Node.valueCollection()) {
+            if (node.getCity() == null) continue;
+            if (node.getHouseNumber() == null) continue;
+            if (node.getStreet() == null) continue;
+            else if (node.getPostcode() != 0) addressNodes.add(node);
+        }
         return addressNodes;
     }
     //endregion

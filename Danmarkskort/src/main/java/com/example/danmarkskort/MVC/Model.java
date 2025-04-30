@@ -1,6 +1,5 @@
 package com.example.danmarkskort.MVC;
 
-import com.example.danmarkskort.AddressSearch.Street;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import com.example.danmarkskort.Exceptions.ParserSavingException;
 import com.example.danmarkskort.MapObjects.*;
@@ -8,14 +7,12 @@ import com.example.danmarkskort.Parser;
 import com.example.danmarkskort.Searching.Search;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
-import gnu.trove.procedure.TObjectObjectProcedure;
 import javafx.scene.canvas.Canvas;
 
 import java.io.*;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
-import java.sql.Time;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -27,7 +24,7 @@ public class Model {
     private Parser parser;
     private int numberOfTilesX, numberOfTilesY;
     private final Tilegrid tilegrid;
-    //private final Search search;
+    private final Search search;
     private List<Road> latestRoute;
     private TrieST trieCity;
     private TrieST trieStreet;
@@ -80,13 +77,12 @@ public class Model {
 
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
         System.out.println("Finished creating Tilegrid!");
-        //parser = null; //Fjerner reference til parser så den bliver GC'et
         //endregion
 
-        //loadAddressNodes();
+        loadAddressNodes();
 
-        //search = new Search(parser.getNodes().valueCollection());
-
+        search = new Search(parser.getNodes().valueCollection());
+        parser = null; //Fjerner reference til parser så den bliver GC'et
     }
     //endregion
 
@@ -632,9 +628,8 @@ public class Model {
      * @return A structured list of all roads in the route. Returns null if route not found
      */
     public List<Road> search(Node startNode, Node endNode) {
-        //search.route(startNode, endNode);
-        //return search.getRoute();
-        return null;
+        search.route(startNode, endNode);
+        return search.getRoute();
     }
 
     /// Initializes the maps tile-grid and puts alle the MapObjects in their respective Tile
