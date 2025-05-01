@@ -16,7 +16,6 @@ public class Polygon implements Serializable, MapObject{
     //region Fields
     private float[] xPoints;
     private float[] yPoints;
-    private int nodesSize;
     private String type; //The type of polygon, fx: "Building", "Coastline", etc.
     private String palette;
     private ColorSheet cs;
@@ -52,7 +51,7 @@ public class Polygon implements Serializable, MapObject{
     //region Methods
     ///Skaber to Arrays til stroke- og fillPolygon-metoderne der kaldes ved tegning
     private void createArrays(List<Node> nodes) {
-        nodesSize = nodes.size();
+        int nodesSize = nodes.size();
 
         xPoints = new float[nodesSize];
         yPoints = new float[nodesSize];
@@ -67,28 +66,29 @@ public class Polygon implements Serializable, MapObject{
     @Override public void draw(GraphicsContext gc) { draw(gc, false); }
 
     public void draw(GraphicsContext gc, boolean drawLines) {
+        int pointSize = xPoints.length;
         //Converts our array into temporary double arrays to preserve space
-        double[] tempXPoints = new double[nodesSize];
-        double[] tempYPoints = new double[nodesSize];
+        double[] tempXPoints = new double[pointSize];
+        double[] tempYPoints = new double[pointSize];
 
-        for (int i = 0; i < nodesSize; i++) {
+        for (int i = 0; i < pointSize; i++) {
             tempXPoints[i] = xPoints[i];
             tempYPoints[i] = yPoints[i];
         }
 
         if (drawLines) {
             gc.setStroke(color.darker().darker());
-            gc.strokePolygon(tempXPoints, tempYPoints, nodesSize);
+            gc.strokePolygon(tempXPoints, tempYPoints, pointSize);
         }
 
         gc.setFill(color);
-        gc.fillPolygon(tempXPoints, tempYPoints, nodesSize);
+        gc.fillPolygon(tempXPoints, tempYPoints, pointSize);
 
         //TODO %% FARVER KANTEN RUNDT OM COAST-POLYGONER PÅ SAMME MÅDE SOM COAST-ROAD; might be labour intensive??
         if (type.equals("coastline")) {
             gc.setStroke(Color.BLACK);
             gc.setLineWidth(1.5/Math.sqrt(gc.getTransform().determinant()));
-            gc.strokePolygon(tempXPoints, tempYPoints, nodesSize);
+            gc.strokePolygon(tempXPoints, tempYPoints, pointSize);
             gc.setLineWidth(1/Math.sqrt(gc.getTransform().determinant()));
         }
     }
