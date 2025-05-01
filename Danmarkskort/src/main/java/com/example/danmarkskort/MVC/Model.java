@@ -82,8 +82,8 @@ public class Model {
         loadAddressNodes();
 
         search = new Search(parser.getNodes().valueCollection());
-        parser = null; //Fjerner reference til parser så den bliver GC'et
-        System.gc();
+        //parser = null; //Fjerner reference til parser så den bliver GC'et
+        //System.gc();
     }
     //endregion
 
@@ -211,7 +211,7 @@ public class Model {
         //endregion
 
         //region Polygons
-        Set<Polygon> polygons = new HashSet<>();
+        Set<Polygon> polygons = Collections.emptySet(); //Instantiates to empty so java doesn't get angry
         try {
             ExecutorService executor = Executors.newFixedThreadPool(numberOfChunks);
             List<Future<Set<Polygon>>> futures = new ArrayList<>(numberOfChunks);
@@ -219,7 +219,7 @@ public class Model {
             //Makes each thread deserialize a chunk
             for (int i = 0; i < numberOfChunks; i++) {
                 final String path = "data/StandardMap/polygons_" + i + ".bin";
-                futures.add(executor.submit(() -> deserializePolygonChunk(path, ID2Node)));
+                futures.add(executor.submit(() -> deserializePolygonChunk(path)));
             }
             executor.shutdown();
 
@@ -232,7 +232,7 @@ public class Model {
                 partialResults.add(result);
                 totalPolygonCount += result.size();
             }
-            ID2Node.ensureCapacity(totalPolygonCount);
+            polygons = new HashSet<>((int) (1 + totalPolygonCount/0.75)); //Instantiates polygons into a HashSet with the proper space for what we are about to add
 
             //Then we merge results
             for (Set<Polygon> partialRoads : partialResults) {
@@ -245,7 +245,7 @@ public class Model {
             //endregion
             System.out.println("- Finished Deserializing polygon!");
         } catch (Exception e) {
-            System.out.println("Error reading Roads! " + e.getMessage());
+            System.out.println("Error reading Polygons! " + e.getMessage());
         }
         //endregion
 
@@ -330,7 +330,7 @@ public class Model {
         return roads;
     }
 
-    private Set<Polygon> deserializePolygonChunk(String path, TLongObjectHashMap<Node> ID2Node) throws IOException {
+    private Set<Polygon> deserializePolygonChunk(String path) throws IOException {
         FileChannel fileChannel = new RandomAccessFile(path, "r").getChannel();
         MappedByteBuffer inputBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
         int polygonCount = inputBuffer.getInt();
