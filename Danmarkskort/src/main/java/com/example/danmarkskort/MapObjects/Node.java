@@ -43,10 +43,10 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     public Node(double latitude, double longitude, String city, String houseNumber, short postcode, String street) {
         distanceTo = Double.MAX_VALUE;
         roadEdges = new ArrayList<>();
-        this.city = city;
-        this.houseNumber = houseNumber;
+        this.city = city.intern();
+        this.houseNumber = houseNumber.intern();
         this.postcode = postcode;
-        this.street = street;
+        this.street = street.intern();
         calculateXY(latitude, longitude);
     }
 
@@ -54,10 +54,10 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     public Node(float x, float y, String city, String houseNumber, short postcode, String street, double distanceTo) {
         this.x = x;
         this.y = y;
-        this.city = city;
-        this.houseNumber = houseNumber;
+        this.city = city.intern();
+        this.houseNumber = houseNumber.intern();
         this.postcode = postcode;
-        this.street = street;
+        this.street = street.intern();
         this.distanceTo = distanceTo;
         roadEdges = new ArrayList<>();
     }

@@ -50,8 +50,8 @@ public class Road implements Serializable, MapObject {
         this.bicycle = bicycle;
         this.isDriveable = isDriveable;
         this.maxSpeed = maxSpeed;
-        this.roadType = roadType;
-        this.roadName = roadName;
+        this.roadType = roadType.intern();
+        this.roadName = roadName.intern();
 
         calculateWeight();
         calculateBoundingBox();
@@ -72,8 +72,8 @@ public class Road implements Serializable, MapObject {
         this.foot = foot;
         this.bicycle = bicycle;
         this.isDriveable = isDriveable;
-        this.roadType = roadType;
-        this.roadName = roadName;
+        this.roadType = roadType.intern();
+        this.roadName = roadName.intern();
 
         calculateWeight();
         calculateBoundingBox();

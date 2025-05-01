@@ -83,6 +83,7 @@ public class Model {
 
         search = new Search(parser.getNodes().valueCollection());
         parser = null; //Fjerner reference til parser så den bliver GC'et
+        System.gc();
     }
     //endregion
 
