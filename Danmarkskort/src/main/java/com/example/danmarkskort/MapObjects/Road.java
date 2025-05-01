@@ -101,7 +101,7 @@ public class Road implements Serializable, MapObject {
 
         //Loops through the nodes drawing the lines between them
         Node startNode = nodes.getFirst();
-        if (startNode.partOfRoute) System.out.println("Route from startNode: " + startNode.getAddress() + " to endNode: " + nodes.getLast().getAddress() + " drawn!");
+        //if (startNode.partOfRoute) System.out.println("Route from startNode: " + startNode.getAddress() + " to endNode: " + nodes.getLast().getAddress() + " drawn!");
 
         for (int i = 1; i < nodes.size(); i++) {
             Node endNode = nodes.get(i);

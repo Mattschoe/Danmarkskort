@@ -47,7 +47,7 @@ public abstract class PDFOutput {
         paragraph = new Paragraph("1. Start along "+originRoad, normalFont);
         document.add(paragraph);
 
-        int step = 1; //Tilføjer alle andre veje med højre/venstre-angivelser
+        int step = 2; //Tilføjer alle andre veje med højre/venstre-angivelser
         for (int i=1; i < roads.size(); ++i) {
             Road road = roads.get(i);
             Road previousRoad = roads.get(i-1);

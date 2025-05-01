@@ -339,7 +339,7 @@ public enum ColorSheet {
             case POLY_SAUNA               -> Color.rgb(14, 133, 23);
             case POLY_SLIPWAY             -> Color.rgb(0, 146, 128);
             case POLY_SPORTS_CENTRE       -> Color.rgb(223, 252, 226);
-            case POLY_SPORTS_HALL         -> Color.RED;
+            case POLY_SPORTS_HALL         -> Color.rgb(161, 127, 255, 0.2);
             case POLY_STADIUM             -> Color.rgb(161, 219, 166, 0.2);
             case POLY_SUMMER_CAMP         -> Color.RED;
             case POLY_SWIMMING_AREA       -> Color.rgb(14, 133, 23);
@@ -444,7 +444,7 @@ public enum ColorSheet {
             case ROAD_ROUTE      -> Color.rgb(255, 255, 255, 0.2);
             case ROAD_DEFAULT    -> Color.DIMGREY;
             case POLY_BOUNDARY   -> Color.TRANSPARENT;
-            default -> Color.rgb(206, 169, 128, 0.4);
+            default -> Color.rgb(175, 175, 175, 0.3); /*Color.rgb(206, 169, 128, 0.4);*/
         };
     }
     //endregion

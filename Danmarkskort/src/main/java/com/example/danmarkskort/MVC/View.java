@@ -125,7 +125,7 @@ public class View {
             object.draw(graphicsContext);
         }
 
-        updateScale();
+        if (controller.getScaleText() != null) updateScale();
 
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
