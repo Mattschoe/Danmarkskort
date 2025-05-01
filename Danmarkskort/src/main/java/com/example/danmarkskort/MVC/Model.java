@@ -518,6 +518,7 @@ public class Model {
         //endregion
 
         //region Polygons
+        /*
         try {
             System.out.println("Saving polygons...");
             List<Polygon> polygons = new ArrayList<>(parser.getPolygons()) ;
@@ -558,7 +559,7 @@ public class Model {
             throw new ParserSavingException("Error saving polygons to OBJ!: " + e.getMessage());
         }
         //endregion
-
+        */
         System.exit(0);
     }
 
@@ -598,6 +599,7 @@ public class Model {
 
     ///Computes how much space is needed to be allocated in the chunk
     private long computePolygonChunkSize(List<Polygon> polygons) {
+        /*
         long size = 0;
         for (Polygon polygon : polygons) {
             size += Integer.BYTES; //Length of polygon.getNodes
@@ -606,6 +608,8 @@ public class Model {
             else size += Integer.BYTES; //space for "-1"
         }
         return size;
+        */
+        return 0;
     }
 
     ///Creates a POI and stores it into its given Tile

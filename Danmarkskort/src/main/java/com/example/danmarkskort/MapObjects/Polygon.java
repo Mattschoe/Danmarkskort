@@ -14,7 +14,6 @@ public class Polygon implements Serializable, MapObject{
     @Serial private static final long serialVersionUID = 1444149606229887777L;
 
     //region Fields
-    private final List<Node> nodes;
     private float[] xPoints;
     private float[] yPoints;
     private int nodesSize;
@@ -31,19 +30,18 @@ public class Polygon implements Serializable, MapObject{
      */
     public Polygon(List<Node> nodes, String type) {
         assert nodes.size() != 1;
-        this.nodes = nodes;
-        this.type = type;
+        this.type = type.intern();
         this.palette = "default";
         determineColor();
 
-        createArrays();
+        createArrays(nodes);
         calculateBoundingBox();
     }
     //endregion
 
     //region Methods
     ///Skaber to Arrays til stroke- og fillPolygon-metoderne der kaldes ved tegning
-    private void createArrays() {
+    private void createArrays(List<Node> nodes) {
         nodesSize = nodes.size();
 
         xPoints = new float[nodesSize];
@@ -532,8 +530,7 @@ public class Polygon implements Serializable, MapObject{
     //endregion
 
     //region Getters and setters
-    public String getType() { return type;            }
-    public List<Node> getNodes() { return nodes; }
+    public String getType() { return type; }
     @Override public float[] getBoundingBox() { return boundingBox; }
 
     public void setType(String type) {
