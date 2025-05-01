@@ -87,11 +87,10 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
 
 
     public void draw(GraphicsContext graphicsContext) {
-        if (partOfRoute) {
             graphicsContext.setStroke(Color.RED);
             graphicsContext.setLineWidth(0.01);
             graphicsContext.strokeLine(x, y, x, y);
-        }
+
     }
 
     /**Compares the node given as parameter with this node.
@@ -115,6 +114,9 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     ///Returns whether this node is an intersection or not
     public boolean isIntersection() {  return edges > 1; }
     public List<Road> getEdges() { return roadEdges; }
+    public String toString(){
+        return "Node with coordinates " + "x: " + getX() + " y: " + getY();
+    }
 
     //region Address
     public String getCity() { return city; }

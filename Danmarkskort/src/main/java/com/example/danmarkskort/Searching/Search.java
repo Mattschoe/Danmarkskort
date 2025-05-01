@@ -33,13 +33,14 @@ public class Search {
         startNode = from;
         endNode = to;
         endRoads = new ArrayList<>(endNode.getEdges());
-
+        System.out.println("StartNode: " + startNode.toString() + " EndNode: " + endNode.toString());
         assert startNode != null && endNode != null;
 
         startNode.setPartOfRoute(true);
         endNode.setPartOfRoute(true);
         startNode.setDistanceTo(0);
         findPath();
+
     }
 
     private void findPath() {
@@ -50,6 +51,7 @@ public class Search {
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
             currentNode.setPartOfRoute(true);
+            System.out.println("Found node in path :" + currentNode.toString());
             if (currentNode == endNode) { //Reached endNode
                 System.out.println("Reached EndNode!");
                 foundRoute = true;
@@ -59,6 +61,8 @@ public class Search {
                 relax(road, road.getStartOrEndNodeFromRoad(currentNode));
             }
         }
+
+
         if (foundRoute) {
             drawPath(); //Only draws path if we actually found a path.
             Model.getInstance().setLatestRoute(route);
@@ -76,11 +80,15 @@ public class Search {
 
         double newDistanceTo = currentNode.getDistanceTo() + road.getWeight();
         Node nextNode = road.getOppositeNode(currentNode);
+
         if (nextNode.getDistanceTo() > newDistanceTo) {
+            System.out.println("evaluated distance for nextNode to be bigger than newDistanceTo");
             nextNode.setDistanceTo(newDistanceTo);
             cameFrom.put(nextNode, currentNode);
-            priorityQueue.add(nextNode);
+             priorityQueue.add(nextNode);
+             System.out.println("Added node to priorityQueue: " + nextNode.toString());
         }
+        System.out.println("Didn't add nextNode to PQ!");
     }
 
     private void drawPath() {

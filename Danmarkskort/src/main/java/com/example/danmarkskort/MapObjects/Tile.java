@@ -96,9 +96,16 @@ public class Tile implements MapObject, Serializable {
         for (MapObject object : POIs) {
             object.draw(graphicsContext);
         }
+
     }
 
     //region draw-methods
+    public void drawNodes(GraphicsContext graphicsContext) {
+        for (MapObject mapObject : nodes) {
+            mapObject.draw(graphicsContext);
+        }
+    }
+
     ///All big Motorways
     public void drawMotorway(GraphicsContext graphicsContext) {
         for (MapObject mapObject : motorway) {
@@ -170,11 +177,6 @@ public class Tile implements MapObject, Serializable {
         }
     }
 
-    public void drawNodes(GraphicsContext graphicsContext) {
-        for (MapObject mapObject : nodes) {
-            mapObject.draw(graphicsContext);
-        }
-    }
 
     public void drawPOIs(GraphicsContext graphicsContext) {
         for (POI POI : POIs) {
