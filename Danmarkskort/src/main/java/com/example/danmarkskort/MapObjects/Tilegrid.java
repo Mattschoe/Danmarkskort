@@ -94,6 +94,7 @@ public class Tilegrid implements Serializable {
     private void drawLOD5(Tile tile, GraphicsContext graphicsContext) {
         tile.drawBuildings(graphicsContext);
         tile.drawPOIs(graphicsContext);
+        tile.drawNodes(graphicsContext);
     }
 
     //endregion

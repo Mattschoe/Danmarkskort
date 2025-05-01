@@ -82,7 +82,7 @@ public class Model {
         loadAddressNodes();
 
         search = new Search(parser.getNodes().valueCollection());
-        parser = null; //Fjerner reference til parser så den bliver GC'et
+        //parser = null; //Fjerner reference til parser så den bliver GC'et
     }
     //endregion
 
@@ -287,9 +287,8 @@ public class Model {
             String houseNumber = readString(inputBuffer);
             short postcode = inputBuffer.getShort();
             String street = readString(inputBuffer);
-            double distanceTo = inputBuffer.getDouble();
 
-            Node newNode = new Node(x, y, city, houseNumber, postcode, street, distanceTo);
+            Node newNode = new Node(x, y, city, houseNumber, postcode, street);
             ID2Node.put(ID, newNode);
         }
         return ID2Node;
@@ -318,13 +317,9 @@ public class Model {
 
             int maxSpeed = inputBuffer.getInt();
 
-            try {
-                String roadType = readString(inputBuffer);
-                String roadName = readString(inputBuffer);
-                roads.add(new Road(nodesInRoad, walkable, bicycle, drivable, maxSpeed, roadType, roadName));
-            } catch (NoSuchElementException e) {
-                System.out.println("Ø=");
-            }
+            String roadType = readString(inputBuffer);
+            String roadName = readString(inputBuffer);
+            roads.add(new Road(nodesInRoad, walkable, bicycle, drivable, maxSpeed, roadType, roadName));
         }
         return roads;
     }
@@ -443,9 +438,6 @@ public class Model {
                         outputBuffer.put(data);
                     }
                     //endregion
-
-                    //Other
-                    outputBuffer.putDouble(node.getDistanceTo());
                 }
                 outputBuffer.force(); //Flushes to disk
                 System.out.println("Saved chunk " + i + " with " + (end - start) + " amount of nodes!");
@@ -575,7 +567,6 @@ public class Model {
             size += Short.BYTES; //Postcode
             if (node.getStreet() != null) size += Integer.BYTES + node.getStreet().getBytes(StandardCharsets.UTF_8).length;
             else size += Integer.BYTES; //Space for "-1"
-            size += Double.BYTES; //distanceTo
         }
         return size;
     }

@@ -45,6 +45,7 @@ public class Search {
         priorityQueue.add(startNode);
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
+            currentNode.setPartOfRoute(true);
             if (currentNode == endNode) { //Reached endNode
                 System.out.println("Reached EndNode!");
                 foundRoute = true;
