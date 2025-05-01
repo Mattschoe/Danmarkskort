@@ -19,6 +19,9 @@ public class Search {
     private boolean foundRoute;
     PriorityQueue<Node> priorityQueue;
     private Map<Node, Node> cameFrom;
+    List<Road> endRoads;
+    /// den sidste vej inden slutnoden i rutesøgningen
+    Road destinationRoad;
 
     public Search(Collection<Node> nodes) {
         assert !nodes.isEmpty();
@@ -29,11 +32,12 @@ public class Search {
         route = new ArrayList<>();
         startNode = from;
         endNode = to;
+        endRoads = new ArrayList<>(endNode.getEdges());
+
         assert startNode != null && endNode != null;
 
         startNode.setPartOfRoute(true);
         endNode.setPartOfRoute(true);
-
         startNode.setDistanceTo(0);
         findPath();
     }
@@ -65,6 +69,11 @@ public class Search {
 
     /// Relaxes the edge. {@code currentNode} HAS to be either the roads start- or endNode, otherwise an error will be thrown.
     private void relax(Road road, Node currentNode) {
+       if(endRoads.contains(road)){
+           this.destinationRoad = road;
+           cameFrom.put(endNode, currentNode);
+       }
+
         double newDistanceTo = currentNode.getDistanceTo() + road.getWeight();
         Node nextNode = road.getOppositeNode(currentNode);
         if (nextNode.getDistanceTo() > newDistanceTo) {
@@ -92,8 +101,17 @@ public class Search {
             Node next = path.get(i);
             for (Road road : current.getEdges()) {
                 if (road.getNodes().contains(next)) {
-                    route.add(road);
-                    road.setPartOfRoute(true);
+                    if(next.equals(endNode)){
+                        List<Node> nodesInNewRoad= new ArrayList<>();
+                        nodesInNewRoad.add(current);
+                        nodesInNewRoad.add(endNode);
+                       Road finalRoad= new Road(nodesInNewRoad,road.isWalkable(), road.isBicycle(),road.isDriveable(), road.getMaxSpeed(), road.getType(), road.getRoadName());
+                        route.add(finalRoad);
+                        finalRoad.setPartOfRoute(true);
+                    }else{
+                        route.add(road);
+                        road.setPartOfRoute(true);
+                    }
                 }
             }
             current = next;
