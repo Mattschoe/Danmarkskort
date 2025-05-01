@@ -37,6 +37,16 @@ public class Polygon implements Serializable, MapObject{
         createArrays(nodes);
         calculateBoundingBox();
     }
+
+    ///A polygon loaded from a binary file
+    public Polygon (float[] xPoints, float[] yPoints, String type) {
+        this.xPoints = xPoints;
+        this.yPoints = yPoints;
+        this.type = type;
+        this.palette = "default";
+        determineColor();
+        calculateBoundingBox();
+    }
     //endregion
 
     //region Methods
@@ -532,6 +542,9 @@ public class Polygon implements Serializable, MapObject{
     //region Getters and setters
     public String getType() { return type; }
     @Override public float[] getBoundingBox() { return boundingBox; }
+
+    public float[] getXPoints() { return xPoints; }
+    public float[] getYPoints() { return yPoints; }
 
     public void setType(String type) {
         this.type = type;

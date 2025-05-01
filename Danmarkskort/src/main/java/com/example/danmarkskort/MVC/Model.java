@@ -337,16 +337,19 @@ public class Model {
 
         Set<Polygon> polygons = new HashSet<>(polygonCount);
         for (int i = 0; i < polygonCount; i++) {
-            //Finds all nodes in road
-            List<Node> nodesInPolygon = new ArrayList<>();
-            int nodeCount = inputBuffer.getInt();
-            for (int j = 0; j < nodeCount; j++) {
-                long nodeID = inputBuffer.getLong();
-                nodesInPolygon.add(ID2Node.get(nodeID));
-            }
+            //X Points
+            int amountOfXPoints = inputBuffer.getInt();
+            float[] xPoints = new float[amountOfXPoints];
+            for (int x = 0; x < amountOfXPoints; x++) xPoints[x] = inputBuffer.getFloat();
 
+            //Y Poibts
+            int amountOfYPoints = inputBuffer.getInt();
+            float[] yPoints = new float[amountOfYPoints];
+            for (int y = 0; y < amountOfYPoints; y++) yPoints[y] = inputBuffer.getFloat();
+
+            //Type
             String polygonType = readString(inputBuffer);
-            polygons.add(new Polygon(nodesInPolygon, polygonType));
+            polygons.add(new Polygon(xPoints, yPoints, polygonType));
         }
         return polygons;
     }
@@ -518,7 +521,6 @@ public class Model {
         //endregion
 
         //region Polygons
-        /*
         try {
             System.out.println("Saving polygons...");
             List<Polygon> polygons = new ArrayList<>(parser.getPolygons()) ;
@@ -540,9 +542,12 @@ public class Model {
                 //Serializing chunk:
                 outputBuffer.putInt(chunk.size()); //So we now how much to loop through later
                 for (Polygon polygon : chunk) {
-                    //Nodes
-                    outputBuffer.putInt(polygon.getNodes().size());
-                    for (Node node : polygon.getNodes()) outputBuffer.putLong(node2ID.get(node));
+                    //XY Points
+                    outputBuffer.putInt(polygon.getXPoints().length);
+                    for (float xPoint : polygon.getXPoints()) outputBuffer.putFloat(xPoint);
+
+                    outputBuffer.putInt(polygon.getYPoints().length);
+                    for (float yPoint : polygon.getYPoints()) outputBuffer.putFloat(yPoint);
 
                     //Type
                     if (polygon.getType() == null) outputBuffer.putInt(-1);
@@ -559,7 +564,6 @@ public class Model {
             throw new ParserSavingException("Error saving polygons to OBJ!: " + e.getMessage());
         }
         //endregion
-        */
         System.exit(0);
     }
 
@@ -599,17 +603,18 @@ public class Model {
 
     ///Computes how much space is needed to be allocated in the chunk
     private long computePolygonChunkSize(List<Polygon> polygons) {
-        /*
         long size = 0;
         for (Polygon polygon : polygons) {
-            size += Integer.BYTES; //Length of polygon.getNodes
-            size += polygon.getNodes().size() * Long.BYTES; //For each node we add storage for their ID (so a Long)
+            size += Integer.BYTES; //Amount of xPoint floats
+            size += Float.BYTES*polygon.getXPoints().length; //Makes space for all x points
+
+            size += Integer.BYTES; //Amount of yPoint floats
+            size += Float.BYTES*polygon.getYPoints().length; //Makes space for all y points
+
             if (polygon.getType() != null) size += Integer.BYTES + polygon.getType().getBytes(StandardCharsets.UTF_8).length;
             else size += Integer.BYTES; //space for "-1"
         }
         return size;
-        */
-        return 0;
     }
 
     ///Creates a POI and stores it into its given Tile
