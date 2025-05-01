@@ -327,7 +327,7 @@ public enum ColorSheet {
             case POLY_HACKERSPACE         -> Color.RED;
             case POLY_HORSE_RIDING        -> Color.rgb(242, 239, 233);
             case POLY_ICE_RINK            -> Color.rgb(222, 237, 237);
-            case POLY_MARINA              -> Color.rgb(139, 173, 228, 2);
+            case POLY_MARINA              -> Color.rgb(139, 173, 228, 0.2);
             case POLY_MINIATURE_GOLF      -> Color.rgb(222, 246, 192);
             case POLY_NATURE_RESERVE      -> Color.rgb(157, 199, 159, 0.2);
             case POLY_OUTDOOR_SEATING     -> Color.rgb(14, 133, 23);

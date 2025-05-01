@@ -82,8 +82,8 @@ public class Model {
         loadAddressNodes();
 
         search = new Search(parser.getNodes().valueCollection());
-        //parser = null; //Fjerner reference til parser så den bliver GC'et
-        //System.gc();
+        parser = null; //Fjerner reference til parser så den bliver GC'et
+        System.gc();
     }
     //endregion
 
@@ -257,11 +257,6 @@ public class Model {
 
         //Closes input and checks for errors
         assert parser != null && parser.getNodes() != null && parser.getRoads() != null && parser.getPolygons() != null;
-
-        //Loads polygons colors after serialization
-        for (Polygon polygon : parser.getPolygons()) {
-            polygon.determineColor();
-        }
 
         //Adds roads back into nodes adjacency list
         for (Road road : parser.getRoads()) {
