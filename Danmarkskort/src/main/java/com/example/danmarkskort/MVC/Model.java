@@ -654,7 +654,9 @@ public class Model {
          }
 
          //region Adds Nodes
-         for (Node node : parser.getNodes().valueCollection()) {
+        parser.getNodes().valueCollection().removeIf(node -> node.getEdges().isEmpty()); //IMPORTANT: Removes nodes if they dont have any edges, since they now are useless
+        System.gc();
+        for (Node node : parser.getNodes().valueCollection()) {
              int tileX = (int) ((node.getX() - minX) / tileSize);
              int tileY = (int) ((node.getY() - minY) / tileSize);
 
