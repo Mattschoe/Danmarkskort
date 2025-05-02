@@ -51,17 +51,17 @@ public class Search {
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
             currentNode.setPartOfRoute(true);
-            System.out.println("Found node in path :" + currentNode.toString());
+           // System.out.println("Polled node from PQ :" + currentNode.toString());
             if (currentNode == endNode) { //Reached endNode
                 System.out.println("Reached EndNode!");
                 foundRoute = true;
+                System.out.println("Route found!");
                 break;
             }
             for (Road road : currentNode.getEdges()) {
                 relax(road, road.getStartOrEndNodeFromRoad(currentNode));
             }
         }
-
 
         if (foundRoute) {
             drawPath(); //Only draws path if we actually found a path.
@@ -76,19 +76,20 @@ public class Search {
        if(endRoads.contains(road)){
            this.destinationRoad = road;
            cameFrom.put(endNode, currentNode);
+           System.out.println("Found destination road: " + destinationRoad.toString());
        }
 
         double newDistanceTo = currentNode.getDistanceTo() + road.getWeight();
         Node nextNode = road.getOppositeNode(currentNode);
 
         if (nextNode.getDistanceTo() > newDistanceTo) {
-            System.out.println("evaluated distance for nextNode to be bigger than newDistanceTo");
+            //System.out.println("evaluated distance for nextNode to be bigger than newDistanceTo");
             nextNode.setDistanceTo(newDistanceTo);
             cameFrom.put(nextNode, currentNode);
              priorityQueue.add(nextNode);
-             System.out.println("Added node to priorityQueue: " + nextNode.toString());
+            // System.out.println("Added NextNode to priorityQueue: " + nextNode.toString());
         }
-        System.out.println("Didn't add nextNode to PQ!");
+       // System.out.println("Didn't add NextNode to PQ!");
     }
 
     private void drawPath() {
@@ -99,6 +100,7 @@ public class Search {
         while (cameFrom.containsKey(currentNode)) {
             path.add(currentNode);
             currentNode = cameFrom.get(currentNode);
+
         }
         path.add(currentNode); //Adds the start node since it isn't included in the loop
         Collections.reverse(path);
