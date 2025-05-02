@@ -411,7 +411,7 @@ public class Controller implements Initializable {
 
             if (oldPOIs.size() > 2) {
                 while (oldPOIs.size() > 2) {
-                    System.out.println(oldPOIs);
+                   // System.out.println(oldPOIs);
                     POI removed = oldPOIs.removeFirst();
 
                     if (!favoritePOIs.containsValue(removed)) {

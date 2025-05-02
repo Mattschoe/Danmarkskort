@@ -21,7 +21,6 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     private transient List<Road> roadEdges;
     //endregion
 
-    //region Constructor(s)
     /** A {@link Node} is a point in a (x, y) space. {@link Node} calculates the (x, y) point
      *  itself in the {@link #calculateXY} method when being instantiated
      */

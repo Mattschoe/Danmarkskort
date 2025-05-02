@@ -50,6 +50,9 @@ public class Search {
         priorityQueue.add(startNode);
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
+            if(currentNode.equals(endNode)){
+                System.out.println("Polled endnode!:" + currentNode.toString());
+            }
             currentNode.setPartOfRoute(true);
            // System.out.println("Polled node from PQ :" + currentNode.toString());
             if (currentNode == endNode) { //Reached endNode
@@ -76,7 +79,7 @@ public class Search {
        if(endRoads.contains(road)){
            this.destinationRoad = road;
            cameFrom.put(endNode, currentNode);
-           System.out.println("Found destination road: " + destinationRoad.toString());
+           System.out.println("Found destination road!");
        }
 
         double newDistanceTo = currentNode.getDistanceTo() + road.getWeight();
@@ -87,7 +90,7 @@ public class Search {
             nextNode.setDistanceTo(newDistanceTo);
             cameFrom.put(nextNode, currentNode);
              priorityQueue.add(nextNode);
-            // System.out.println("Added NextNode to priorityQueue: " + nextNode.toString());
+             System.out.println("Added NextNode to priorityQueue: " + nextNode.toString());
         }
        // System.out.println("Didn't add NextNode to PQ!");
     }
@@ -99,6 +102,7 @@ public class Search {
         Node currentNode = endNode;
         while (cameFrom.containsKey(currentNode)) {
             path.add(currentNode);
+            System.out.println("Tilføjede currentNode til path: " + currentNode.toString());
             currentNode = cameFrom.get(currentNode);
 
         }
