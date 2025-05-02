@@ -297,8 +297,6 @@ public class Polygon implements Serializable, MapObject{
             case "sport"      -> POLY_SPORT;
             case "yes"        -> POLY_YES;
             case "paved"      -> POLY_PAVED;
-            case "forestØsterled" -> POLY_forestOesterled;
-            case "scrubStrandvejenStrandvejen" -> POLY_scrubStrandvejenStrandvejen;
             //endregion
             default -> POLY_DEFAULT;
         };

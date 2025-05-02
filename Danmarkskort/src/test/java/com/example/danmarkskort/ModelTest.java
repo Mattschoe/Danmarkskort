@@ -12,25 +12,37 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ModelTest {
     Canvas canvas;
 
-    /**
-     * No idea if this is correct
-     */
     @BeforeEach
     public void setup() {
         canvas = new Canvas(400, 600);
     }
 
-    /*@Test
-    public void saveParserAsOBJ() {
-        Model model = Model.getInstance("./data/small.osm", canvas);
-        File file = new File("./data/small.osm.obj");
-        assertTrue(file.exists());
-        file.delete();
-    }*/
+    @Test
+    public void generateOBJTest() {
+        //TODO %% DENNE TEST VIRKER KUN HVIS "PARSER = NULL" BLIVER UDKOMMENTERET I MODEL. KAN BRUGES TIL AT GENERERE OBJ-FILER
+        /*Model model = Model.getInstance("./data/small.osm", canvas);
+        model.saveParserToOBJ();
 
-    /**
-     * Checks if model can correctly load .obj to a parser class
-     */
+        File file;
+        file = new File("data/generated/small/parser.obj");
+        assertTrue(file.exists());
+
+        file = new File("data/generated/small/nodes_0.bin");
+        assertTrue(file.exists());
+
+        file = new File("data/generated/small/roads_0.bin");
+        assertTrue(file.exists());
+
+        file = new File("data/generated/small/polygons_0.bin");
+        assertTrue(file.exists());*/
+    }
+
+    @Test
+    protected void loadOBJFileTest() {
+        Model.getInstance("data/generated/small/parser.obj", canvas);
+    }
+
+    /// Checks if model can correctly load .obj to a parser class
     @Test
     public void loadParserAsOBJ() {
         File objFile = new File("./data/small.osm.obj");
