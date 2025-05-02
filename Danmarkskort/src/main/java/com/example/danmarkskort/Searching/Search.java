@@ -3,6 +3,7 @@ package com.example.danmarkskort.Searching;
 import com.example.danmarkskort.MVC.Model;
 import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.Road;
+import com.example.danmarkskort.MapObjects.Tile;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,13 +35,14 @@ public class Search {
         endNode = to;
         endRoads = new ArrayList<>(endNode.getEdges());
         System.out.println("StartNode: " + startNode.toString() + " EndNode: " + endNode.toString());
+        System.out.println("Start edges: " + startNode.getEdges().size());
+        System.out.println("End edges: " + endNode.getEdges().size());
         assert startNode != null && endNode != null;
 
         startNode.setPartOfRoute(true);
         endNode.setPartOfRoute(true);
         startNode.setDistanceTo(0);
-        findPath();
-
+        
     }
 
     private void findPath() {
@@ -51,11 +53,11 @@ public class Search {
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
             if(currentNode.equals(endNode)){
-                System.out.println("Polled endnode!:" + currentNode.toString());
+               // System.out.println("Polled endnode!:" + currentNode.toString());
             }
             currentNode.setPartOfRoute(true);
            // System.out.println("Polled node from PQ :" + currentNode.toString());
-            if (currentNode == endNode) { //Reached endNode
+            if (currentNode.equals(endNode)) { //Reached endNode
                 System.out.println("Reached EndNode!");
                 foundRoute = true;
                 System.out.println("Route found!");
@@ -63,6 +65,7 @@ public class Search {
             }
             for (Road road : currentNode.getEdges()) {
                 relax(road, road.getStartOrEndNodeFromRoad(currentNode));
+
             }
         }
 
@@ -70,6 +73,7 @@ public class Search {
             drawPath(); //Only draws path if we actually found a path.
             Model.getInstance().setLatestRoute(route);
         } else {
+            System.out.println("PQ Size: " + priorityQueue.size());
             System.out.println("No path found!");
         }
     }
@@ -83,14 +87,15 @@ public class Search {
        }
 
         double newDistanceTo = currentNode.getDistanceTo() + road.getWeight();
+        System.out.println("Current node distance: " + currentNode.getDistanceTo());
         Node nextNode = road.getOppositeNode(currentNode);
 
-        if (nextNode.getDistanceTo() > newDistanceTo) {
-            //System.out.println("evaluated distance for nextNode to be bigger than newDistanceTo");
+        if (nextNode.getDistanceTo() > newDistanceTo || (nextNode.getEdges().size()==1)) {
             nextNode.setDistanceTo(newDistanceTo);
+            System.out.println("NextNode edges: " + nextNode.getEdges().size());
+            System.out.println("Relaxing " + currentNode + " → " + nextNode + ", newDistance: " + newDistanceTo);
             cameFrom.put(nextNode, currentNode);
              priorityQueue.add(nextNode);
-             System.out.println("Added NextNode to priorityQueue: " + nextNode.toString());
         }
        // System.out.println("Didn't add NextNode to PQ!");
     }
@@ -102,7 +107,7 @@ public class Search {
         Node currentNode = endNode;
         while (cameFrom.containsKey(currentNode)) {
             path.add(currentNode);
-            System.out.println("Tilføjede currentNode til path: " + currentNode.toString());
+           // System.out.println("Tilføjede currentNode til path: " + currentNode.toString());
             currentNode = cameFrom.get(currentNode);
 
         }

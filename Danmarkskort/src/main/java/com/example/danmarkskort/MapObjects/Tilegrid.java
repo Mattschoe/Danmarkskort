@@ -177,5 +177,15 @@ public class Tilegrid implements Serializable {
         for (Tile[] tileRow : grid) { tiles.addAll(Arrays.asList(tileRow)); }
         return tiles;
     }
+
+    public Set<Node> getAllNodes(){
+        Set<Node> nodes = new HashSet<>();
+        for(Tile[] tileRow : grid){
+            for(Tile tile : tileRow){
+                nodes.addAll(tile.getNodesInTile());
+            }
+        }
+        return nodes;
+    }
     //endregion
 }
