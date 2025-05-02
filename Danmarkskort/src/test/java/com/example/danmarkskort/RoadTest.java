@@ -1,18 +1,20 @@
+package com.example.danmarkskort;
+
 import com.example.danmarkskort.MapObjects.Node;
-import com.example.danmarkskort.MapObjects.Polygon;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PolygonTest {
-    HashSet<Node> nodes;
+public class RoadTest {
+    List<Node> nodes;
 
     @BeforeEach
     public void setup() {
-        nodes = new HashSet<>();
+        nodes = new ArrayList<>();
     }
 
     /**
@@ -23,8 +25,7 @@ public class PolygonTest {
         nodes.add(new Node(5, 10));
         nodes.add(new Node(5, 8));
         nodes.add(new Node(6, 9));
-        //Polygon polygon = new Polygon(nodes);
-        //assertEquals(polygon.getLines().size(), 2);
+        //Road way = new Road(nodes, false, false, 10, "Residential");
+        //assertEquals(way.getLines().size(), 2);
     }
-
 }

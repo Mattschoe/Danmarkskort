@@ -1,9 +1,6 @@
-import com.example.danmarkskort.MVC.Model;
-import com.example.danmarkskort.PDFOutput;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+package com.example.danmarkskort;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class    PDFOutputTest {
     /**

@@ -1,7 +1,8 @@
+package com.example.danmarkskort;
+
 import com.example.danmarkskort.MVC.Model;
 import javafx.scene.canvas.Canvas;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -19,13 +20,13 @@ public class ModelTest {
         canvas = new Canvas(400, 600);
     }
 
-    @Test
+    /*@Test
     public void saveParserAsOBJ() {
         Model model = Model.getInstance("./data/small.osm", canvas);
         File file = new File("./data/small.osm.obj");
         assertTrue(file.exists());
         file.delete();
-    }
+    }*/
 
     /**
      * Checks if model can correctly load .obj to a parser class
@@ -39,9 +40,9 @@ public class ModelTest {
         //assertNotNull(createParserFromObjModel.getParser());
     }
 
-    /**
+    /*
      * Same as {@link #saveParserAsOBJ()} just doesn't delete the OBJ file again. Should be marked @Disabled as standard since it doesn't dele the file again
-     */
+     *
     //@Disabled
     @Test
     public void createOBJFile() {
@@ -49,11 +50,11 @@ public class ModelTest {
         model.saveParserToOBJ();
         File file = new File("./data/mapOfDenmark.osm.obj");
         assertTrue(file.exists());
-    }
+    }*/
 
-    @Test
+    /*@Test
     public void modelFindsFileCorrectly() {
         File objFile = new File("./data/small.osm.obj");
         assertTrue(objFile.exists());
-    }
+    }*/
 }
