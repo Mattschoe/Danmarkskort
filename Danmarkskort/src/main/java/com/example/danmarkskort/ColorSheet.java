@@ -182,8 +182,6 @@ public enum ColorSheet {
     POLY_ROUTE,
     POLY_YES,
     POLY_PAVED,
-    POLY_forestOesterled,
-    POLY_scrubStrandvejenStrandvejen,
     POLY_DEFAULT;
     //endregion
 
@@ -409,8 +407,6 @@ public enum ColorSheet {
             case POLY_SPORT      -> Color.RED;
             case POLY_YES        -> Color.TRANSPARENT;
             case POLY_PAVED      -> Color.RED;
-            case POLY_forestOesterled -> Color.RED;
-            case POLY_scrubStrandvejenStrandvejen -> Color.RED;
             case POLY_DEFAULT         -> Color.rgb(0, 74, 127, 0.2);
             //endregion
         };

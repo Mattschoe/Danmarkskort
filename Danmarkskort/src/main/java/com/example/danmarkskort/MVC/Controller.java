@@ -510,7 +510,7 @@ public class Controller implements Initializable {
      * Method determines the closest Road, given a Tile and a set of coordinates in the Tile
      * @return {@code null} if there are no nodes in the Tile
      */
-    private static Road getClosestRoad(Tile tile, double x, double y) {
+    private Road getClosestRoad(Tile tile, double x, double y) {
         double closestDistance = Double.MAX_VALUE;
         Road closestRoad = null;
 

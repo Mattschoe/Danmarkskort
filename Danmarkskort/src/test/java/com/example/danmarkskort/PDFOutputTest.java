@@ -28,13 +28,14 @@ public class PDFOutputTest {
         List<Road> route = List.of(road_1, road_3, road_2);
 
         try {
-            PDFOutput.generateRoute(route, true);
+            PDFOutput.generateRoute(route, false);
         } catch (Exception e) {
             System.out.println(e.getClass() +" --> "+ e.getMessage());
         }
 
         File file = new File("output/Road-1-to-Road-2.pdf");
         assertTrue(file.exists());
+        assertTrue(file.delete());
     }
 
     @Test

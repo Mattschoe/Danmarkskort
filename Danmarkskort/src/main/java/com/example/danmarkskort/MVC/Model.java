@@ -16,11 +16,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
 
-///A Model is a Singleton class that stores the map in a tile-grid. It also stores the parser which parses the .osm data. Call {@link #getInstance()} to get the Model
+/**
+ * A Model is a Singleton class that stores the map in a tile-grid.
+ * It also stores the parser which parses the .osm data.
+ * Call {@link #getInstance()} to get the Model
+ */
 public class Model {
     //region Fields
     private static Model modelInstance;
-    private final File file;
+    private File file;
     private Parser parser;
     private int numberOfTilesX, numberOfTilesY;
     private final Tilegrid tilegrid;
@@ -33,8 +37,9 @@ public class Model {
     //endregion
 
     //region Constructor(s)
-    /** Checks what filetype the filepath parameter is.
-     *  Calls {@link #parseOBJToParser()} if it's an OBJ-file, if not, creates a new {@link Parser} class and propagates the responsibility
+    /**
+     * Checks what filetype the filepath parameter is.
+     * Calls {@link #parseOBJToParser()} if it's an OBJ-file, if not, creates a new {@link Parser} class and propagates the responsibility
      */
     public Model(String filePath, Canvas canvas) {
         assert canvas != null;
@@ -42,12 +47,20 @@ public class Model {
         file = new File(filePath);
         assert file.exists();
 
+        String filename = file.getName().split("\\.")[0];
+        File possibleOBJ = new File("data/generated/"+ filename +"/parser.obj");
+        if (possibleOBJ.exists()) {
+            System.out.println("Found OBJ-file! Using that instead...");
+            file = possibleOBJ;
+        }
+
         numberOfChunks = 8;
 
         //region Parser
-        //If .obj file
-        if (filePath.endsWith(".obj")) {
+        //If .obj-file
+        if (file.getPath().endsWith(".obj")) {
             try {
+                System.out.println("Detected OBJ-file! Attempting to parse...");
                 parseOBJToParser();
                 System.out.println("Finished deserializing parser!");
             } catch (Exception e) {
@@ -56,13 +69,16 @@ public class Model {
                 e.getStackTrace();
             }
         } else {
-            //If anything else it creates a new parser and tries saves it as .obj
+            //If anything else, creates a new parser and tries to save it as .obj
             try {
+                if (file.getPath().endsWith(".osm")) System.out.println("Detected OSM-file! Attempting to parse...");
+                if (file.getPath().endsWith(".zip")) System.out.println("Detected ZIP-file! Attempting to parse...");
+
                 parser = new Parser(file);
             } catch (ParserSavingException e) {
                 System.out.println(e.getMessage());
             } catch (Exception e) {
-                System.out.println("Error loading in the parser: " + e.getMessage() + " | with the exception being: " + e.getClass());
+                System.out.println("Error loading the parser: "+ e.getClass() +": "+ e.getMessage());
             }
         }
         assert parser != null;
@@ -70,7 +86,7 @@ public class Model {
 
         //region Tilegrid
         //Converts into tilegrid if we haven't loaded a tilegrid in via OBJ
-        System.out.println("Starting on tilegrid!");
+        System.out.println("Starting on Tilegrid!");
         int tileSize = 11;
         float[] tileGridBounds = getMinMaxCoords(parser.getNodes().valueCollection());
         Tile[][] tileGrid = initializeTileGrid(tileGridBounds[0], tileGridBounds[1], tileGridBounds[2], tileGridBounds[3], tileSize);
@@ -88,10 +104,11 @@ public class Model {
     //endregion
 
     //region Methods
-    /** Method used to initialize the singleton Model. Method is only meant to be called once, for getting the instance, call {@link #getInstance()}
-     *  @param filePath the path where the file that needs parsing is loaded (ex.: "/data/small.osm")
-     *  @param canvas the Canvas which the scene is drawn upon
-     *  @return Model (Singleton)
+    /**
+     * Method used to initialize the singleton Model. Method is only meant to be called once, for getting the instance, call {@link #getInstance()}
+     * @param filePath the path where the file that needs parsing is loaded (ex.: "/data/small.osm")
+     * @param canvas the Canvas which the scene is drawn upon
+     * @return Model (Singleton)
      */
     public static Model getInstance(String filePath, Canvas canvas) {
         if (modelInstance == null) {
@@ -100,13 +117,14 @@ public class Model {
         return modelInstance;
     }
 
-    /** Method used to get the singleton Model. The method {@link #getInstance(String, Canvas)} HAS to be called first to initialize the singleton
-     *  @return Model (Singleton)
-     *  @throws IllegalStateException if the singleton is not initialized
+    /**
+     * Method used to get the singleton Model. The method {@link #getInstance(String, Canvas)} HAS to be called first to initialize the singleton
+     * @return Model (Singleton)
+     * @throws IllegalStateException if the singleton is not initialized
      */
     public static Model getInstance() {
         if (modelInstance == null) {
-            throw new IllegalStateException("Singleton is not initialized, Call getInstance(String filePath, Canvas canvas) first.");
+            throw new IllegalStateException("Singleton is not initialized, call getInstance(String filePath, Canvas canvas) first.");
         }
         return modelInstance;
     }
@@ -114,7 +132,8 @@ public class Model {
     /// Parses a .obj file. This method is called in the Parser constructor if the given filepath ends with .obj
     private void parseOBJToParser() {
         TLongObjectHashMap<Node> ID2Node = new TLongObjectHashMap<>(); //Avoids resizing
-
+        String[] filePath = file.getPath().split("\\\\");
+        String folder = filePath[filePath.length - 2];
 
         System.out.println("Deserializing parser...");
         //region Reading .obj files
@@ -135,7 +154,9 @@ public class Model {
 
             //Makes each thread deserialize a chunk
             for (int i = 0; i < numberOfChunks; i++) {
-                final String path = "data/StandardMap/nodes_" + i + ".bin";
+                final String path;
+                if (file.getPath().contains("StandardMap")) path = "data/StandardMap/nodes_" + i + ".bin";
+                else path = "data/generated/"+ folder +"/nodes_"+ i +".bin";
                 futures.add(executor.submit(() -> deserializeNodeChunk(path)));
             }
             executor.shutdown();
@@ -161,7 +182,7 @@ public class Model {
             //Cleanup
             partialResults.clear();
             futures.clear();
-            System.out.println("- Finished Deserializing nodes!");
+            System.out.println("- Finished deserializing nodes!");
             //endregion
         } catch (Exception e) {
             System.out.println("Error reading nodes! " + e.getMessage());
@@ -178,7 +199,9 @@ public class Model {
 
             //Makes each thread deserialize a chunk
             for (int i = 0; i < numberOfChunks; i++) {
-                final String path = "data/StandardMap/roads_" + i + ".bin";
+                final String path;
+                if (file.getPath().contains("StandardMap")) path = "data/StandardMap/roads_" + i + ".bin";
+                else path = "data/generated/"+ folder +"/roads_"+ i +".bin";
                 futures.add(executor.submit(() -> deserializeRoadChunk(path, ID2Node)));
             }
             executor.shutdown();
@@ -203,7 +226,7 @@ public class Model {
             partialResults.clear();
             futures.clear();
             //endregion
-            System.out.println("- Finished Deserializing roads!");
+            System.out.println("- Finished deserializing roads!");
         } catch (Exception e) {
             System.out.println("Error reading Roads! " + e.getMessage());
         }
@@ -218,7 +241,9 @@ public class Model {
 
             //Makes each thread deserialize a chunk
             for (int i = 0; i < numberOfChunks; i++) {
-                final String path = "data/StandardMap/polygons_" + i + ".bin";
+                final String path;
+                if (file.getPath().contains("StandardMap")) path = "data/StandardMap/polygons_" + i + ".bin";
+                else path = "data/generated/"+ folder +"/polygons_"+ i +".bin";
                 futures.add(executor.submit(() -> deserializePolygonChunk(path)));
             }
             executor.shutdown();
@@ -243,7 +268,7 @@ public class Model {
             partialResults.clear();
             futures.clear();
             //endregion
-            System.out.println("- Finished Deserializing polygon!");
+            System.out.println("- Finished deserializing polygons!");
         } catch (Exception e) {
             System.out.println("Error reading Polygons! " + e.getMessage());
         }
@@ -266,7 +291,7 @@ public class Model {
         }
     }
 
-    ///Deserializes a single node chunk of a ".bin" file
+    /// Deserializes a single node chunk of a ".bin" file
     private TLongObjectHashMap<Node> deserializeNodeChunk(String path) throws IOException {
         FileChannel fileChannel = new RandomAccessFile(path, "r").getChannel();
         MappedByteBuffer inputBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
@@ -291,7 +316,7 @@ public class Model {
         return ID2Node;
     }
 
-    ///Deserializes a single road chunk of a ".bin" file
+    /// Deserializes a single road chunk of a ".bin" file
     private Set<Road> deserializeRoadChunk(String path, TLongObjectHashMap<Node> ID2Node) throws IOException {
         FileChannel fileChannel = new RandomAccessFile(path, "r").getChannel();
         MappedByteBuffer inputBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
@@ -349,7 +374,7 @@ public class Model {
         return polygons;
     }
 
-    ///Reads the string saved in the parser. Can return null if marked by "-1" in binary file (See write method)
+    /// Reads the string saved in the parser. Can return null if marked by "-1" in binary file (See write method)
     private String readString(MappedByteBuffer inputBuffer) {
         int length = inputBuffer.getInt();
         if (length < 0) return null;
@@ -360,6 +385,8 @@ public class Model {
 
     /// Saves the parser to a .obj file so it can be called later. Method is called in {@link #Model} if the file isn't a .obj
     public void saveParserToOBJ() {
+        String filename = file.getName().split("\\.")[0];
+
         //Reverse HashMap needed to store node ID in roads. reverses the map so we can store the ID correctly
         TLongObjectHashMap<Node> ID2Node = parser.getNodes();
         TObjectLongHashMap<Node> node2ID = new TObjectLongHashMap(ID2Node.size());
@@ -369,7 +396,10 @@ public class Model {
 
         //region Saves parser
         try {
-            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/parser.obj"));
+            File folder = new File("data/generated/"+ filename);
+            if (!folder.exists()) //noinspection ResultOfMethodCallIgnored
+                folder.mkdir();
+            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/generated/"+filename+"/parser.obj"));
             System.out.println("Saving parser...");
             outputStream.writeObject(parser);
             System.out.println("Finished saving parser!");
@@ -379,7 +409,6 @@ public class Model {
             throw new ParserSavingException("Error saving parser to OBJ!: " + e.getMessage());
         }
         //endregion
-
 
         //region Nodes
         try {
@@ -401,7 +430,7 @@ public class Model {
 
                 long totalBytes = Integer.BYTES + computeNodeChunkSize(chunk, ID2Node); //Int is for chunk size
 
-                FileChannel fileChannel = new RandomAccessFile(("data/StandardMap/nodes_" + i + ".bin"), "rw").getChannel();
+                FileChannel fileChannel = new RandomAccessFile(("data/generated/"+ filename +"/nodes_" + i + ".bin"), "rw").getChannel();
                 MappedByteBuffer outputBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, totalBytes);
 
                 //Serializing chunk:
@@ -447,7 +476,7 @@ public class Model {
                     outputBuffer.putDouble(node.getDistanceTo());
                 }
                 outputBuffer.force(); //Flushes to disk
-                System.out.println("Saved chunk " + i + " with " + (end - start) + " amount of nodes!");
+                System.out.println("- Saved chunk " + i + " with " + (end - start) + " nodes!");
             }
         } catch (Exception e) {
             throw new ParserSavingException("Error saving nodes to OBJ!: " + e.getMessage());
@@ -470,7 +499,7 @@ public class Model {
                 List<Road> chunk = roads.subList(start, end);
                 long totalBytes = Integer.BYTES + computeRoadChunkSize(chunk); //Int is for chunk size
 
-                FileChannel fileChannel = new RandomAccessFile(("data/StandardMap/roads_" + i + ".bin"), "rw").getChannel();
+                FileChannel fileChannel = new RandomAccessFile(("data/generated/"+ filename +"/roads_" + i + ".bin"), "rw").getChannel();
                 MappedByteBuffer outputBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, totalBytes);
 
                 //Serializing chunk:
@@ -508,7 +537,7 @@ public class Model {
                     }
                 }
                 outputBuffer.force(); //Flushes to disk
-                System.out.println("Saved chunk " + i + " with " + (end - start) + " amount of roads!");
+                System.out.println("- Saved chunk " + i + " with " + (end - start) + " roads!");
             }
         } catch (Exception e) {
             throw new ParserSavingException("Error saving roads to OBJ!: " + e.getMessage());
@@ -531,7 +560,7 @@ public class Model {
                 List<Polygon> chunk = polygons.subList(start, end);
                 long totalBytes = Integer.BYTES + computePolygonChunkSize(chunk); //Int is for chunk size
 
-                FileChannel fileChannel = new RandomAccessFile(("data/StandardMap/polygons_" + i + ".bin"), "rw").getChannel();
+                FileChannel fileChannel = new RandomAccessFile(("data/generated/"+ filename +"/polygons_" + i + ".bin"), "rw").getChannel();
                 MappedByteBuffer outputBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, totalBytes);
 
                 //Serializing chunk:
@@ -553,16 +582,16 @@ public class Model {
                     }
                 }
                 outputBuffer.force(); //Flushes to disk
-                System.out.println("Saved chunk " + i + " with " + (end - start) + " amount of polygons!");
+                System.out.println("- Saved chunk " + i + " with " + (end - start) + " polygons!");
             }
         } catch (Exception e) {
             throw new ParserSavingException("Error saving polygons to OBJ!: " + e.getMessage());
         }
         //endregion
-        System.exit(0);
+        //System.exit(0); //What the fuck? -OFS
     }
 
-    ///Computes how much space is needed to be allocated in the chunk
+    /// Computes how much space is needed to be allocated in the chunk
     private long computeNodeChunkSize(List<Long> nodeIDs, TLongObjectHashMap<Node> ID2Node) {
         long size = 0;
         for (Long ID : nodeIDs) {
@@ -581,7 +610,7 @@ public class Model {
         return size;
     }
 
-    ///Computes how much space is needed to be allocated in the chunk
+    /// Computes how much space is needed to be allocated in the chunk
     private long computeRoadChunkSize(List<Road> roads) {
         long size = 0;
         for (Road road : roads) {
@@ -596,7 +625,7 @@ public class Model {
         return size;
     }
 
-    ///Computes how much space is needed to be allocated in the chunk
+    /// Computes how much space is needed to be allocated in the chunk
     private long computePolygonChunkSize(List<Polygon> polygons) {
         long size = 0;
         for (Polygon polygon : polygons) {
@@ -612,7 +641,7 @@ public class Model {
         return size;
     }
 
-    ///Creates a POI and stores it into its given Tile
+    /// Creates a POI and stores it into its given Tile
     public POI createPOI(float localX, float localY, String name) {
         Tile tile = tilegrid.getTileFromXY(localX, localY);
         if (tile == null) return null; //No tile within point
@@ -621,7 +650,7 @@ public class Model {
         return POI;
     }
 
-    //fjern en given POI fra dens tile
+    /// Fjern en given POI fra dens Tile
     public void removePOI(POI poi){
         Tile tile = tilegrid.getTileFromXY(poi.getX(), poi.getY());
         tile.getPOIs().remove(poi);
@@ -760,9 +789,7 @@ public class Model {
         return minMaxCoords;
     }
 
-    /**
-     * Inserts all streets and cities of the complex nodes to Tries
-     */
+    /// Inserts all streets and cities of the complex nodes to Tries
     private void loadAddressNodes() {
         trieCity = new TrieST();
         trieStreet = new TrieST();
@@ -783,12 +810,12 @@ public class Model {
         }
     }
 
-    ///Returns a list of city-nodes that are correlated with the given {@code prefix} from the trie
+    /// Returns a list of city-nodes that are correlated with the given {@code prefix} from the trie
     public List<Node> getCitiesFromPrefix(String prefix) {
         return trieCity.keysWithPrefix(prefix);
     }
 
-    ///Returns a list of street-nodes that are correlated with the given {@code prefix} from the trie
+    /// Returns a list of street-nodes that are correlated with the given {@code prefix} from the trie
     public List<Node> getStreetsFromPrefix(String prefix) {
         return trieStreet.keysWithPrefix(prefix);
     }

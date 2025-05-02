@@ -24,8 +24,9 @@ public class Polygon implements Serializable, MapObject{
     //endregion
 
     //region Constructor(s)
-    /** A {@link Polygon} is a collection of {@link Node}'s with the same start- and end {@link Node}
-     *  @param nodes the collection of nodes belonging to the Polygon
+    /**
+     * A {@link Polygon} is a collection of {@link Node}'s with the same start- and end {@link Node}
+     * @param nodes the collection of nodes belonging to the Polygon
      */
     public Polygon(List<Node> nodes, String type) {
         assert nodes.size() != 1;
@@ -37,7 +38,7 @@ public class Polygon implements Serializable, MapObject{
         calculateBoundingBox();
     }
 
-    ///A polygon loaded from a binary file
+    /// A polygon loaded from a binary file
     public Polygon (float[] xPoints, float[] yPoints, String type) {
         this.xPoints = xPoints;
         this.yPoints = yPoints;
@@ -49,7 +50,7 @@ public class Polygon implements Serializable, MapObject{
     //endregion
 
     //region Methods
-    ///Skaber to Arrays til stroke- og fillPolygon-metoderne der kaldes ved tegning
+    /// Skaber to Arrays til stroke- og fillPolygon-metoderne der kaldes ved tegning
     private void createArrays(List<Node> nodes) {
         int nodesSize = nodes.size();
 
@@ -296,8 +297,6 @@ public class Polygon implements Serializable, MapObject{
             case "sport"      -> POLY_SPORT;
             case "yes"        -> POLY_YES;
             case "paved"      -> POLY_PAVED;
-            case "forestØsterled" -> POLY_forestOesterled;
-            case "scrubStrandvejenStrandvejen" -> POLY_scrubStrandvejenStrandvejen;
             //endregion
             default -> POLY_DEFAULT;
         };

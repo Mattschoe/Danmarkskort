@@ -1,9 +1,7 @@
 package com.example.danmarkskort.MapObjects;
 
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
-import java.io.Serial;
 import java.io.Serializable;
 import java.util.*;
 
@@ -99,71 +97,71 @@ public class Tile implements MapObject, Serializable {
     }
 
     //region draw-methods
-    ///All big Motorways
+    /// All big Motorways
     public void drawMotorway(GraphicsContext graphicsContext) {
         for (MapObject mapObject : motorway) {
             mapObject.draw(graphicsContext);
         }
     }
-    ///All important roads that aren't motorways
+    /// All important roads that aren't motorways
     public void drawTrunk(GraphicsContext graphicsContext) {
         for (MapObject mapObject : trunk) {
             mapObject.draw(graphicsContext);
         }
     }
-    ///All next important roads (Big town to big town)
+    /// All next important roads (Big town to big town)
     public void drawPrimary(GraphicsContext graphicsContext) {
         for (MapObject mapObject : primary) {
             mapObject.draw(graphicsContext);
         }
     }
-    ///All next most important roads (town to town)
+    /// All next most important roads (town to town)
     public void drawSecondary(GraphicsContext graphicsContext) {
         for (MapObject mapObject : secondary) {
             mapObject.draw(graphicsContext);
         }
     }
-    ///All next most important roads
+    /// All next most important roads
     public void drawTertiary(GraphicsContext graphicsContext) {
         for (MapObject mapObject : tertiary) {
             mapObject.draw(graphicsContext);
         }
     }
-    ///Least most important roads
+    /// Least most important roads
     public void drawUnclassified(GraphicsContext graphicsContext) {
         for (MapObject mapObject : unclassified) {
             mapObject.draw(graphicsContext);
         }
     }
-    ///Roads which serve acces to housing
+    /// Roads which serve acces to housing
     public void drawResidential(GraphicsContext graphicsContext) {
         for (MapObject mapObject : residential) {
             mapObject.draw(graphicsContext);
         }
     }
 
-    ///Roads without a type
+    /// Roads without a type
     public void drawDefaultRoad(GraphicsContext graphicsContext) {
         for (MapObject mapObject : defaultRoad) {
             mapObject.draw(graphicsContext);
         }
     }
 
-    ///Buildings
+    /// Buildings
     public void drawBuildings(GraphicsContext graphicsContext) {
         for (MapObject mapObject : buildings) {
             mapObject.draw(graphicsContext);
         }
     }
 
-    ///Area colors
+    /// Area colors
     public void drawArea(GraphicsContext graphicsContext) {
         for (MapObject mapObject : area) {
             mapObject.draw(graphicsContext);
         }
     }
 
-    ///Area colors
+    /// Area colors
     public void drawCoastline(GraphicsContext graphicsContext) {
         for (MapObject mapObject : coastline) {
             mapObject.draw(graphicsContext);
@@ -183,9 +181,7 @@ public class Tile implements MapObject, Serializable {
     }
     //endregion
 
-    /**
-     * Initializes all the draw methods so we later can call them in
-     */
+    /// Initializes all the draw methods so we later can call them in
     public void initializeDrawMethods() {
         for (MapObject mapObject : objectsInTile) {
             if (mapObject instanceof Road road) {
@@ -204,17 +200,15 @@ public class Tile implements MapObject, Serializable {
                 }
             } else if (mapObject instanceof Polygon polygon) {
                 String polygonType = polygon.getType();
-                switch (polygonType) {
-                    case "building" -> buildings.add(mapObject);
-                    default -> area.add(mapObject);
-                }
+                if (polygonType.equals("building")) { buildings.add(mapObject); }
+                else { area.add(mapObject); }
             } else if (mapObject instanceof Node node) {
                 nodes.add(node);
             }
         }
     }
 
-    ///Returns whether a given point is within this tile
+    /// Returns whether a given point is within this tile
     public boolean contains(float x, float y) {
         return x >= bounds[0] && x <= bounds[2] && y >= bounds[1] && y <= bounds[3];
     }
@@ -228,8 +222,7 @@ public class Tile implements MapObject, Serializable {
     public Set<MapObject> getCoastline() { return coastline; }
     public Set<Road> getRoads() { return roads; }
     public Set<POI> getPOIs() { return POIs; }
-    @Override
-    public float[] getBoundingBox() { return bounds; }
+    @Override public float[] getBoundingBox() { return bounds; }
     public boolean isEmpty() { return objectsInTile.isEmpty(); }
     public void setMotorway(Set<MapObject> motorway) { this.motorway = motorway; }
     public void setTrunk(Set<MapObject> trunk) { this.trunk = trunk; }
