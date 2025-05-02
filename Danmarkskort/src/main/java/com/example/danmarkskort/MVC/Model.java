@@ -79,10 +79,10 @@ public class Model {
         System.out.println("Finished creating Tilegrid!");
         //endregion
 
+        System.out.println("Loading nodes into address and road searching!");
         loadAddressNodes();
-
         search = new Search(parser.getNodes().valueCollection());
-        parser = null; //Fjerner reference til parser så den bliver GC'et
+        //parser = null; //Fjerner reference til parser så den bliver GC'et
         System.gc();
     }
     //endregion
@@ -337,7 +337,7 @@ public class Model {
             float[] xPoints = new float[amountOfXPoints];
             for (int x = 0; x < amountOfXPoints; x++) xPoints[x] = inputBuffer.getFloat();
 
-            //Y Poibts
+            //Y Points
             int amountOfYPoints = inputBuffer.getInt();
             float[] yPoints = new float[amountOfYPoints];
             for (int y = 0; y < amountOfYPoints; y++) yPoints[y] = inputBuffer.getFloat();
@@ -654,7 +654,7 @@ public class Model {
          }
 
          //region Adds Nodes
-        parser.getNodes().valueCollection().removeIf(node -> node.getEdges().isEmpty()); //IMPORTANT: Removes nodes if they dont have any edges, since they now are useless
+        parser.getNodes().valueCollection().removeIf(node -> node.getEdges().isEmpty() && !hasFullAddress(node)); //IMPORTANT: Removes nodes if they dont have any edges, since they now are useless
         System.gc();
         for (Node node : parser.getNodes().valueCollection()) {
              int tileX = (int) ((node.getX() - minX) / tileSize);
@@ -791,6 +791,11 @@ public class Model {
     ///Returns a list of street-nodes that are correlated with the given {@code prefix} from the trie
     public List<Node> getStreetsFromPrefix(String prefix) {
         return trieStreet.keysWithPrefix(prefix);
+    }
+
+    ///Checks whether the given {@code node} has a full address
+    public boolean hasFullAddress(Node node) {
+        return node.getCity() != null && node.getHouseNumber() != null && node.getPostcode() != 0 && node.getStreet() != null;
     }
     //endregion
 

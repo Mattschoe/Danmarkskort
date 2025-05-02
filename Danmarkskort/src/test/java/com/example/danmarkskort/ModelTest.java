@@ -42,7 +42,7 @@ public class ModelTest {
 
     /*
      * Same as {@link #saveParserAsOBJ()} just doesn't delete the OBJ file again. Should be marked @Disabled as standard since it doesn't dele the file again
-     *
+     */
     //@Disabled
     @Test
     public void createOBJFile() {
@@ -50,7 +50,7 @@ public class ModelTest {
         model.saveParserToOBJ();
         File file = new File("./data/mapOfDenmark.osm.obj");
         assertTrue(file.exists());
-    }*/
+    }
 
     /*@Test
     public void modelFindsFileCorrectly() {
