@@ -41,8 +41,12 @@ public class Search {
 
         startNode.setPartOfRoute(true);
         endNode.setPartOfRoute(true);
+
+        for(){
+
+        }
         startNode.setDistanceTo(0);
-        
+        findPath();
     }
 
     private void findPath() {
@@ -65,10 +69,8 @@ public class Search {
             }
             for (Road road : currentNode.getEdges()) {
                 relax(road, road.getStartOrEndNodeFromRoad(currentNode));
-
             }
         }
-
         if (foundRoute) {
             drawPath(); //Only draws path if we actually found a path.
             Model.getInstance().setLatestRoute(route);
@@ -88,10 +90,12 @@ public class Search {
 
         double newDistanceTo = currentNode.getDistanceTo() + road.getWeight();
         System.out.println("Current node distance: " + currentNode.getDistanceTo());
+
         Node nextNode = road.getOppositeNode(currentNode);
 
         if (nextNode.getDistanceTo() > newDistanceTo || (nextNode.getEdges().size()==1)) {
             nextNode.setDistanceTo(newDistanceTo);
+            System.out.println("NextNode distance: " + nextNode.getDistanceTo());
             System.out.println("NextNode edges: " + nextNode.getEdges().size());
             System.out.println("Relaxing " + currentNode + " → " + nextNode + ", newDistance: " + newDistanceTo);
             cameFrom.put(nextNode, currentNode);
