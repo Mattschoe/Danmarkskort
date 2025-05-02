@@ -1,7 +1,11 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.MapObjects.MapObject;
 import com.example.danmarkskort.MapObjects.Node;
-import com.example.danmarkskort.MapObjects.*;
+import com.example.danmarkskort.MapObjects.POI;
+import com.example.danmarkskort.MapObjects.Polygon;
+import com.example.danmarkskort.MapObjects.Road;
+import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.PDFOutput;
 
 import javafx.animation.AnimationTimer;
@@ -11,7 +15,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -24,6 +34,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 
@@ -120,6 +131,12 @@ public class Controller implements Initializable {
     //endregion
 
     //region Methods
+    /// MIDLERTIDIG METODE FOR AT GØRE DET NEMT AT ÅBNE COVERAGE-RAPPORTEN.
+    @FXML protected void openTestCoverage() { //TODO %% SKAL FJERNES SENERE
+        try { Desktop.getDesktop().open(new File("build/reports/jacoco/test/html/index.html")); }
+        catch (Exception e) { System.out.println("No test coverage report exists! Try building the app"); }
+    }
+
     /** Passes the given file into a Model class that starts parsing it
      *  @param mapFile the file which the map is contained. Given by user when choosing file
      */
