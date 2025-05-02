@@ -373,7 +373,7 @@ public class Controller implements Initializable {
 
         if (latestRoute != null) {
             try {
-                PDFOutput.generateRoute(latestRoute);
+                PDFOutput.generateRoute(latestRoute, true);
                 System.out.println("PDF-export successful!");
             }
             catch (Exception e) {
