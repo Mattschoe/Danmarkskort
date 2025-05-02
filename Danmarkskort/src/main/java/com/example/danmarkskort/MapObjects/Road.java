@@ -85,9 +85,11 @@ public class Road implements Serializable, MapObject {
     //endregion
 
     //region Methods
-    /** Draws the road.
-     *  @param gc the GraphicsContext in which the road will be drawn
+    /**
+     * Draws the road.
+     * @param gc the GraphicsContext in which the road will be drawn
      */
+    @Override
     public void draw(GraphicsContext gc) {
         if (!isDriveable) return; //Skipper lige ikke-bil veje for nu
 

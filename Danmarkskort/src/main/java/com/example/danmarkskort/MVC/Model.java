@@ -45,7 +45,7 @@ public class Model {
         numberOfChunks = 8;
 
         //region Parser
-        //If .obj file
+        //If .obj-file
         if (filePath.endsWith(".obj")) {
             try {
                 parseOBJToParser();
@@ -56,7 +56,7 @@ public class Model {
                 e.getStackTrace();
             }
         } else {
-            //If anything else it creates a new parser and tries saves it as .obj
+            //If anything else, creates a new parser and tries to save it as .obj
             try {
                 parser = new Parser(file);
             } catch (ParserSavingException e) {
@@ -114,7 +114,6 @@ public class Model {
     /// Parses a .obj file. This method is called in the Parser constructor if the given filepath ends with .obj
     private void parseOBJToParser() {
         TLongObjectHashMap<Node> ID2Node = new TLongObjectHashMap<>(); //Avoids resizing
-
 
         System.out.println("Deserializing parser...");
         //region Reading .obj files
@@ -369,7 +368,7 @@ public class Model {
 
         //region Saves parser
         try {
-            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/StandardMap/parser.obj"));
+            ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/generated/parser.obj"));
             System.out.println("Saving parser...");
             outputStream.writeObject(parser);
             System.out.println("Finished saving parser!");
@@ -379,7 +378,6 @@ public class Model {
             throw new ParserSavingException("Error saving parser to OBJ!: " + e.getMessage());
         }
         //endregion
-
 
         //region Nodes
         try {

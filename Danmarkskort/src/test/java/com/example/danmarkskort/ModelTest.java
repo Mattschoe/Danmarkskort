@@ -35,7 +35,7 @@ public class ModelTest {
     public void loadParserAsOBJ() {
         File objFile = new File("./data/small.osm.obj");
 
-        Model createObjFileModel = Model.getInstance("./data/small.osm", canvas);
+        Model createObjFileModel = Model.getInstance("./data/Bornholm.zip", canvas);
         Model createParserFromObjModel = Model.getInstance(objFile.getPath(), canvas);
         //assertNotNull(createParserFromObjModel.getParser());
     }
