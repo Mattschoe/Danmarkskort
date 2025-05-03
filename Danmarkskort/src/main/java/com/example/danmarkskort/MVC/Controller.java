@@ -16,6 +16,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
@@ -26,6 +27,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Affine;
@@ -69,6 +71,7 @@ public class Controller implements Initializable {
     //region FXML fields
     @FXML private Canvas canvas;
     @FXML private AnchorPane poiGroup;
+    @FXML private CheckBox checkBoxOBJ;
     @FXML private CheckMenuItem fpsButton;
     @FXML private CheckMenuItem guideButton;
     @FXML private ListView<String> listView;
@@ -159,9 +162,10 @@ public class Controller implements Initializable {
     }
 
     //region Start-up scene methods
-    /** Method runs upon clicking the "Upload file"-button in the start-up scene.
-     *  Lets the user pick a file and tries to parse it as a map. If successful,
-     *  switches the scene to a canvas with the map drawn.
+    /**
+     * Method runs upon clicking the "Upload file"-button in the start-up scene.
+     * Lets the user pick a file and tries to parse it as a map. If successful,
+     * switches the scene to a canvas with the map drawn.
      */
     @FXML protected void uploadInputButton() throws IOException {
         //Laver en FileChooser til at åbne en stifinder når brugeren klikker 'Upload fil'
@@ -207,11 +211,25 @@ public class Controller implements Initializable {
         view.drawMap();
     }
 
-    ///Disables the list view if we have picked one and then moves the mouse out of the listview
+    @FXML protected void toggleCreateOBJ() {
+        if (checkBoxOBJ.getChildrenUnmodifiable().isEmpty()) return;
+        StackPane box = (StackPane) checkBoxOBJ.getChildrenUnmodifiable().getLast();
+        StackPane mark = (StackPane) box.getChildrenUnmodifiable().getFirst();
+
+        if (checkBoxOBJ.isSelected()) {
+            box.setStyle("-fx-border-color: darkgreen; -fx-background-color: green");
+            mark.setStyle("-fx-background-color: #ffffff");
+        }
+        else {
+            box.setStyle("-fx-border-color: darkgrey; -fx-background-color: grey");
+            mark.setStyle("-fx-background-color: darkgrey");
+        }
+    }
+
+    /// Disables the list view if we have picked one and then moves the mouse out of the listview
     @FXML protected void mouseExitedListView() {
         listView.setVisible(false);
     }
-
     //endregion
 
     //region mapOverlay.fxml scene methods
@@ -608,5 +626,6 @@ public class Controller implements Initializable {
     public Canvas getCanvas() { return canvas; }
 
     public Text getScaleText() { return scaleText; }
+    public CheckBox getCheckBoxOBJ() { return checkBoxOBJ; }
     //endregion
 }
