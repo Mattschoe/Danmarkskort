@@ -12,20 +12,22 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ModelTest {
     Canvas canvas;
+    Model model;
 
     @BeforeEach
-    public void setup() {
-        canvas = new Canvas(400, 600);
+    protected void setup() {
+        canvas = new Canvas(600, 400);
     }
 
     @AfterEach
-    public void afterEach() {
-        System.gc();
+    protected void afterEach() {
+        canvas = null;
+        model = null;
     }
 
     @Test
-    public void generateOBJTest() {
-        Model.getInstance("./data/small.osm", canvas, true);
+    protected void createOBJTest() {
+        model = new Model("./data/small.osm", canvas, true);
 
         //Tester at diverse filer er blevet skabt
         File file;
@@ -54,11 +56,40 @@ public class ModelTest {
     }
 
     @Test
-    protected void loadOBJFileTest() {
-        Model.getInstance("data/generated/small/parser.obj", canvas, false);
+    protected void loadOSMFileTest() {
+        assertDoesNotThrow(() ->
+            model = new Model("data/small.osm", canvas, false)
+        );
     }
 
-    /// Checks if model can correctly load .obj to a parser class
+    @Test
+    protected void loadZIPFileTest() {
+        assertDoesNotThrow(() ->
+            model = new Model("data/small.zip", canvas, false)
+        );
+    }
+
+    @Test
+    protected void loadOBJFileTest() {
+        assertDoesNotThrow(() ->
+            model = new Model("data/generated/bornholm/parser.obj", canvas, false)
+        );
+    }
+
+    @Test
+    protected void findPreexistingOBJTest() {
+        model = new Model("data/bornholm.zip", canvas, false);
+        assertTrue(model.getFile().getPath().endsWith(".obj"));
+    }
+
+    @Test
+    protected void loadStandardMapTest() {
+        assertDoesNotThrow(() ->
+            model = new Model("data/StandardMap/parser.obj", canvas, false)
+        );
+    }
+
+    /* /// Checks if model can correctly load .obj to a parser class
     @Test
     public void loadParserAsOBJ() {
         File objFile = new File("./data/small.osm.obj");
@@ -66,7 +97,7 @@ public class ModelTest {
         Model createObjFileModel = Model.getInstance("./data/Bornholm.zip", canvas, false);
         Model createParserFromObjModel = Model.getInstance(objFile.getPath(), canvas, false);
         //assertNotNull(createParserFromObjModel.getParser());
-    }
+    }*/
 
     /*
      * Same as {@link #saveParserAsOBJ()} just doesn't delete the OBJ file again. Should be marked @Disabled as standard since it doesn't dele the file again

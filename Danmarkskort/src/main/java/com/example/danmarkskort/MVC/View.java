@@ -77,8 +77,8 @@ public class View {
         //Sætter scenen og fremviser
         stage.setScene(scene);
         stage.show();
-        initializeCanvas();
 
+        if (controller.getCanvas() != null) initializeCanvas();
         if (controller.getCheckBoxOBJ() != null) fixCheckBox();
     }
     //endregion

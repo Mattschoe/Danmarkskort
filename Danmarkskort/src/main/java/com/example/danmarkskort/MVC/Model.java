@@ -828,6 +828,7 @@ public class Model {
     //endregion
 
     //region Getters and setters
+    public File getFile() { return file; }
     public Tilegrid getTilegrid() { return tilegrid; }
     public List<Road> getLatestRoute() { return latestRoute; }
     public void setLatestRoute(List<Road> route) { latestRoute = route; }
