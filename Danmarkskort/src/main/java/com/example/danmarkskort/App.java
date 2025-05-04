@@ -19,7 +19,7 @@ public class App extends Application {
         Image icon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("icon.png")));
         stage.getIcons().add(icon);
 
-        new View(stage, "startup.fxml");
+        new View(stage, "newStart.fxml");
     }
 
     public static void main(String[] args) { launch(); }

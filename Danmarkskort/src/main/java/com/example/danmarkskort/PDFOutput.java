@@ -23,7 +23,7 @@ public abstract class PDFOutput {
      * Generates and opens a PDF describing a given route
      * @param roads the list Roads in the route
      */
-    public static void generateRoute(List<Road> roads) throws FileNotFoundException, DocumentException {
+    public static void generateRoute(List<Road> roads, boolean openPDF) throws FileNotFoundException, DocumentException {
         Document document = new Document();
 
         String path = createFilePath(roads);
@@ -81,13 +81,15 @@ public abstract class PDFOutput {
                 direction = determineDirection(prevLast, prevFirst, crntFirst);
             }
             else if (prevLast.equals(crntFirst)) {
-                direction = determineDirection(prevLast, prevFirst, crntLast);
+                //direction = determineDirection(prevLast, prevFirst, crntLast);
+                direction = determineDirection(prevLast, crntLast, prevFirst);
             }
             else {
-                System.out.println("prevFirst: "+prevFirst+" -- ("+prevFirst.getX()+", "+prevFirst.getY()+")");
-                System.out.println("prevLast:  "+prevLast +" -- ("+prevLast.getX() +", "+prevLast.getY() +")");
-                System.out.println("crntFirst: "+crntFirst+" -- ("+crntFirst.getX()+", "+crntFirst.getY()+")");
-                System.out.println("crntLast:  "+crntLast +" -- ("+crntLast.getX() +", "+crntLast.getY() +")");
+                //System.out.println("prevFirst: "+prevFirst+" -- ("+prevFirst.getX()+", "+prevFirst.getY()+")");
+                //System.out.println("prevLast:  "+prevLast +" -- ("+prevLast.getX() +", "+prevLast.getY() +")");
+                //System.out.println("crntFirst: "+crntFirst+" -- ("+crntFirst.getX()+", "+crntFirst.getY()+")");
+                //System.out.println("crntLast:  "+crntLast +" -- ("+crntLast.getX() +", "+crntLast.getY() +")");
+                document.close();
                 throw new RuntimeException("Cursed vectors -- they do not relate as expected! :(");
             }
 
@@ -101,8 +103,10 @@ public abstract class PDFOutput {
 
         document.close(); //Lukker dokumentet; vi er færdige med at skrive
 
-        try { Desktop.getDesktop().open(new File("./output/"+ path +".pdf")); } //Forsøger at åbne dokumentet
-        catch (IOException e) { System.out.println("Couldn't open file! Error: "+ e.getMessage()); }
+        if (openPDF) {
+            try { Desktop.getDesktop().open(new File("./output/"+ path +".pdf")); } //Forsøger at åbne dokumentet
+            catch (IOException e) { System.out.println("Couldn't open file! Error: "+ e.getMessage()); }
+        }
     }
 
     /**

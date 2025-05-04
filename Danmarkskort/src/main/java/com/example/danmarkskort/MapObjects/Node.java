@@ -21,6 +21,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     private transient List<Road> roadEdges;
     //endregion
 
+    //region Constructor(s)
     /** A {@link Node} is a point in a (x, y) space. {@link Node} calculates the (x, y) point
      *  itself in the {@link #calculateXY} method when being instantiated
      */
@@ -42,10 +43,10 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     public Node(double latitude, double longitude, String city, String houseNumber, short postcode, String street) {
         distanceTo = Double.MAX_VALUE;
         roadEdges = new ArrayList<>();
-        this.city = city;
-        this.houseNumber = houseNumber;
+        if (city != null) this.city = city.intern();
+        if (houseNumber != null) this.houseNumber = houseNumber.intern();
         this.postcode = postcode;
-        this.street = street;
+        if (street != null) this.street = street.intern();
         calculateXY(latitude, longitude);
     }
 
@@ -53,10 +54,10 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     public Node(float x, float y, String city, String houseNumber, short postcode, String street) {
         this.x = x;
         this.y = y;
-        this.city = city;
-        this.houseNumber = houseNumber;
+        if (city != null) this.city = city.intern();
+        if (houseNumber != null) this.houseNumber = houseNumber.intern();
         this.postcode = postcode;
-        this.street = street;
+        if (street != null) this.street = street.intern();
         roadEdges = new ArrayList<>();
         distanceTo = Double.MAX_VALUE;
     }
@@ -86,10 +87,11 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
 
 
     public void draw(GraphicsContext graphicsContext) {
+        if (partOfRoute) {
             graphicsContext.setStroke(Color.RED);
             graphicsContext.setLineWidth(0.01);
             graphicsContext.strokeLine(x, y, x, y);
-
+        }
     }
 
     /**Compares the node given as parameter with this node.
@@ -113,9 +115,6 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     ///Returns whether this node is an intersection or not
     public boolean isIntersection() {  return edges > 1; }
     public List<Road> getEdges() { return roadEdges; }
-    public String toString(){
-        return "Node with coordinates " + "x: " + getX() + " y: " + getY();
-    }
 
     //region Address
     public String getCity() { return city; }

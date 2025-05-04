@@ -65,7 +65,7 @@ public class Parser implements Serializable {
 
         parseOSM(file);
 
-        System.out.println("Finished parsing file. With: " + failedNodes + " nodes | " + failedWays + " ways | " + failedRelations + " relations, that failed! And with " + outOfBoundsNodes + " nodes out of bounds!");
+        System.out.println("Finished parsing file! ("+ failedNodes +" node(s), "+ failedWays +" way(s) and "+ failedRelations +" relation(s) failed, and "+ outOfBoundsNodes +" node(s) are out of bounds)");
     }
     //endregion
 

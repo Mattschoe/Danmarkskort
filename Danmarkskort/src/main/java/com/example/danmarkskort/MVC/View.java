@@ -7,6 +7,8 @@ import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.CheckBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
@@ -30,15 +32,16 @@ public class View {
     private final Stage stage;
     private boolean firstTimeDrawingMap;
     private Tilegrid tilegrid;
-    ///Extra objects outside the grid that are included in draw method. Objects are added in {@link #addObjectToDraw(MapObject)}
+    /// Extra objects outside the grid that are included in draw method. Objects are added in {@link #addObjectToDraw(MapObject)}
     private final Set<MapObject> extraDrawObjects;
     //endregion
 
     //region Constructor(s)
-    /** The View-constructor switches the scene from a given stage and a filepath to an FXML-file
-     *  @param stage the given stage -- usually coming from the window we're in, as to not open a new window
-     *  @param filename the given filepath -- fx. "startup.fxml" for the start-up scene
-     *  @throws IOException thrown if the program fails to load the FXML-file
+    /**
+     * The View-constructor switches the scene from a given stage and a filepath to an FXML-file
+     * @param stage the given stage -- usually coming from the window we're in, as to not open a new window
+     * @param filename the given filepath -- fx. "startup.fxml" for the start-up scene
+     * @throws IOException thrown if the program fails to load the FXML-file
      */
     public View(Stage stage, String filename) throws IOException {
         extraDrawObjects = new HashSet<>();
@@ -57,7 +60,7 @@ public class View {
 
         //Hvis det er start-scenen, får vinduet en forudbestemt størrelse, ellers sættes den dynamisk
         double width, height;
-        if (filename.equals("startup.fxml")) {
+        if (filename.equals("newStart.fxml")) {
             width = 600;
             height = 400;
         } else {
@@ -74,7 +77,9 @@ public class View {
         //Sætter scenen og fremviser
         stage.setScene(scene);
         stage.show();
-        initializeCanvas();
+
+        if (controller.getCanvas() != null) initializeCanvas();
+        if (controller.getCheckBoxOBJ() != null) fixCheckBox();
     }
     //endregion
 
@@ -133,7 +138,7 @@ public class View {
         }
     }
 
-    ///Saves the object given as parameter and includes it in {@link #drawMap()}.
+    /// Saves the object given as parameter and includes it in {@link #drawMap()}.
     public void addObjectToDraw(MapObject mapObject) {
         if (mapObject != null) {
             extraDrawObjects.add(mapObject);
@@ -150,10 +155,11 @@ public class View {
         drawMap();
     }
 
-    /** Zooms in and out, zoom level is limited by {@code minZoom} and {@code maxZoom} which can be changed in the constructor
-     *  @param dx deltaX
-     *  @param dy deltaY
-     *  @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
+    /**
+     * Zooms in and out, zoom level is limited by {@code minZoom} and {@code maxZoom} which can be changed in the constructor
+     * @param dx deltaX
+     * @param dy deltaY
+     * @param factor of zooming in. 1 = same level, >1 = Zoom in, <1 = Zoom out
      */
     public void zoom(double dx, double dy, double factor) {
         //Zooms
@@ -163,7 +169,7 @@ public class View {
         drawMap();
     }
 
-    ///Zooms in on the coords given as parameter
+    /// Zooms in on the coords given as parameter
     public void zoomTo(float x, float y) {
         //Finds how much we need to zoom in/out by dividing the target with the currentZoom level
         Point2D pivot = trans.transform(x, y);
@@ -188,6 +194,7 @@ public class View {
         else return 0;
     }
 
+    /// Method updates the scale-bar on the map based on the zoom-level of the map
     private void updateScale() {
         graphicsContext.setTransform(bgTrans);
         graphicsContext.setLineWidth(3);
@@ -199,7 +206,7 @@ public class View {
         graphicsContext.strokeLine(scalePosX, scalePosY+5, scalePosX, scalePosY-5);
         graphicsContext.strokeLine(scalePosX-100, scalePosY+5, scalePosX-100, scalePosY-5);
 
-        double scaleOrigin = 67;
+        double scaleOrigin = 67; //NB! Magic number...
         double currentScale = scaleOrigin / trans.getMxx();
 
         String text;
@@ -207,6 +214,16 @@ public class View {
         else { text = String.format("%.2f", currentScale) + " km"; }
 
         controller.getScaleText().setText(text);
+    }
+
+    /// Method updates the look of the checkbox for creating an OBJ-file on the start-up scene
+    private void fixCheckBox() {
+        CheckBox checkBoxOBJ = controller.getCheckBoxOBJ();
+        StackPane box = (StackPane) checkBoxOBJ.getChildrenUnmodifiable().getLast();
+        StackPane mark = (StackPane) box.getChildrenUnmodifiable().getFirst();
+
+        box.setStyle("-fx-border-color: darkgrey; -fx-background-color: grey");
+        mark.setStyle("-fx-background-color: darkgrey");
     }
     //endregion
 

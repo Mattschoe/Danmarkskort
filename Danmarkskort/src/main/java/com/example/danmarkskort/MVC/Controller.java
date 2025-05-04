@@ -1,7 +1,11 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.MapObjects.MapObject;
 import com.example.danmarkskort.MapObjects.Node;
-import com.example.danmarkskort.MapObjects.*;
+import com.example.danmarkskort.MapObjects.POI;
+import com.example.danmarkskort.MapObjects.Polygon;
+import com.example.danmarkskort.MapObjects.Road;
+import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.PDFOutput;
 
 import javafx.animation.AnimationTimer;
@@ -11,11 +15,19 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Affine;
@@ -24,6 +36,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 
@@ -58,6 +71,7 @@ public class Controller implements Initializable {
     //region FXML fields
     @FXML private Canvas canvas;
     @FXML private AnchorPane poiGroup;
+    @FXML private CheckBox checkBoxOBJ;
     @FXML private CheckMenuItem fpsButton;
     @FXML private CheckMenuItem guideButton;
     @FXML private ListView<String> listView;
@@ -120,11 +134,22 @@ public class Controller implements Initializable {
     //endregion
 
     //region Methods
+    /// MIDLERTIDIG METODE FOR AT GØRE DET NEMT AT ÅBNE COVERAGE-RAPPORTEN.
+    @FXML protected void openTestCoverage() { //TODO %% SKAL FJERNES SENERE
+        try { Desktop.getDesktop().open(new File("build/reports/jacoco/test/html/index.html")); }
+        catch (Exception e) { System.out.println("No test coverage report exists! Try building the app"); }
+    }
+
     /** Passes the given file into a Model class that starts parsing it
      *  @param mapFile the file which the map is contained. Given by user when choosing file
      */
     private void loadFile(File mapFile) {
-        model = Model.getInstance(mapFile.getPath(), canvas);
+        if (checkBoxOBJ != null) {
+            model = Model.getInstance(mapFile.getPath(), canvas, checkBoxOBJ.isSelected());
+        } else {
+            model = Model.getInstance(mapFile.getPath(), canvas, false);
+        }
+
         view.setTilegrid(model.getTilegrid());
     }
 
@@ -142,9 +167,10 @@ public class Controller implements Initializable {
     }
 
     //region Start-up scene methods
-    /** Method runs upon clicking the "Upload file"-button in the start-up scene.
-     *  Lets the user pick a file and tries to parse it as a map. If successful,
-     *  switches the scene to a canvas with the map drawn.
+    /**
+     * Method runs upon clicking the "Upload file"-button in the start-up scene.
+     * Lets the user pick a file and tries to parse it as a map. If successful,
+     * switches the scene to a canvas with the map drawn.
      */
     @FXML protected void uploadInputButton() throws IOException {
         //Laver en FileChooser til at åbne en stifinder når brugeren klikker 'Upload fil'
@@ -190,11 +216,25 @@ public class Controller implements Initializable {
         view.drawMap();
     }
 
-    ///Disables the list view if we have picked one and then moves the mouse out of the listview
+    @FXML protected void toggleCreateOBJ() {
+        if (checkBoxOBJ.getChildrenUnmodifiable().isEmpty()) return;
+        StackPane box = (StackPane) checkBoxOBJ.getChildrenUnmodifiable().getLast();
+        StackPane mark = (StackPane) box.getChildrenUnmodifiable().getFirst();
+
+        if (checkBoxOBJ.isSelected()) {
+            box.setStyle("-fx-border-color: darkgreen; -fx-background-color: green");
+            mark.setStyle("-fx-background-color: #ffffff");
+        }
+        else {
+            box.setStyle("-fx-border-color: darkgrey; -fx-background-color: grey");
+            mark.setStyle("-fx-background-color: darkgrey");
+        }
+    }
+
+    /// Disables the list view if we have picked one and then moves the mouse out of the listview
     @FXML protected void mouseExitedListView() {
         listView.setVisible(false);
     }
-
     //endregion
 
     //region mapOverlay.fxml scene methods
@@ -356,7 +396,7 @@ public class Controller implements Initializable {
 
         if (latestRoute != null) {
             try {
-                PDFOutput.generateRoute(latestRoute);
+                PDFOutput.generateRoute(latestRoute, true);
                 System.out.println("PDF-export successful!");
             }
             catch (Exception e) {
@@ -493,7 +533,7 @@ public class Controller implements Initializable {
      * Method determines the closest Road, given a Tile and a set of coordinates in the Tile
      * @return {@code null} if there are no nodes in the Tile
      */
-    private static Road getClosestRoad(Tile tile, double x, double y) {
+    private Road getClosestRoad(Tile tile, double x, double y) {
         double closestDistance = Double.MAX_VALUE;
         Road closestRoad = null;
 
@@ -591,5 +631,6 @@ public class Controller implements Initializable {
     public Canvas getCanvas() { return canvas; }
 
     public Text getScaleText() { return scaleText; }
+    public CheckBox getCheckBoxOBJ() { return checkBoxOBJ; }
     //endregion
 }
