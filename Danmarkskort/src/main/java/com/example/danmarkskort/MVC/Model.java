@@ -98,7 +98,7 @@ public class Model {
         System.out.println("Loading nodes into address and road searching!");
         loadAddressNodes();
         search = new Search(parser.getNodes().valueCollection());
-        //parser = null; //Fjerner reference til parser så den bliver GC'et
+        parser = null; //Fjerner reference til parser så den bliver GC'et
         System.gc();
     }
     //endregion
