@@ -19,7 +19,7 @@ public class MiscTests {
 
     @Test
     protected void changePaletteTest() {
-        Model model = Model.getInstance("data/bornholm.zip", canvas);
+        Model model = Model.getInstance("data/bornholm.zip", canvas, false);
         assertNotNull(model);
 
         for (Tile tile : model.getTilegrid().getGridList()) {
@@ -39,7 +39,7 @@ public class MiscTests {
 
     @Test
     protected void drawNodesTest() {
-        Model model = Model.getInstance("data/Bornholm.zip", canvas);
+        Model model = Model.getInstance("data/Bornholm.zip", canvas, false);
         assertNotNull(model);
 
         GraphicsContext gc = canvas.getGraphicsContext2D();

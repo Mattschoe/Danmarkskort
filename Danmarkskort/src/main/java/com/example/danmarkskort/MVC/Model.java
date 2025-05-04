@@ -41,7 +41,7 @@ public class Model {
      * Checks what filetype the filepath parameter is.
      * Calls {@link #parseOBJToParser()} if it's an OBJ-file, if not, creates a new {@link Parser} class and propagates the responsibility
      */
-    public Model(String filePath, Canvas canvas) {
+    public Model(String filePath, Canvas canvas, boolean createOBJ) {
         assert canvas != null;
 
         file = new File(filePath);
@@ -98,6 +98,12 @@ public class Model {
         System.out.println("Loading nodes into address and road searching!");
         loadAddressNodes();
         search = new Search(parser.getNodes().valueCollection());
+        if (createOBJ) {
+            if (file.getPath().endsWith(".obj")) {
+                System.out.println("OBJ-file already exists, won't build a new one...");
+            }
+            else saveParserToOBJ();
+        }
         parser = null; //Fjerner reference til parser så den bliver GC'et
         System.gc();
     }
@@ -110,15 +116,15 @@ public class Model {
      * @param canvas the Canvas which the scene is drawn upon
      * @return Model (Singleton)
      */
-    public static Model getInstance(String filePath, Canvas canvas) {
+    public static Model getInstance(String filePath, Canvas canvas, boolean createOBJ) {
         if (modelInstance == null) {
-            modelInstance = new Model(filePath, canvas);
+            modelInstance = new Model(filePath, canvas, createOBJ);
         }
         return modelInstance;
     }
 
     /**
-     * Method used to get the singleton Model. The method {@link #getInstance(String, Canvas)} HAS to be called first to initialize the singleton
+     * Method used to get the singleton Model. The method {@link #getInstance(String, Canvas, boolean)} HAS to be called first to initialize the singleton
      * @return Model (Singleton)
      * @throws IllegalStateException if the singleton is not initialized
      */
@@ -827,6 +833,7 @@ public class Model {
     //endregion
 
     //region Getters and setters
+    public File getFile() { return file; }
     public Tilegrid getTilegrid() { return tilegrid; }
     public List<Road> getLatestRoute() { return latestRoute; }
     public void setLatestRoute(List<Road> route) { latestRoute = route; }
