@@ -41,10 +41,7 @@ public class Search {
 
         startNode.setPartOfRoute(true);
         endNode.setPartOfRoute(true);
-
-        for(){
-
-        }
+        
         startNode.setDistanceTo(0);
         findPath();
     }
@@ -56,15 +53,10 @@ public class Search {
         priorityQueue.add(startNode);
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
-            if(currentNode.equals(endNode)){
-               // System.out.println("Polled endnode!:" + currentNode.toString());
-            }
             currentNode.setPartOfRoute(true);
-           // System.out.println("Polled node from PQ :" + currentNode.toString());
             if (currentNode.equals(endNode)) { //Reached endNode
-                System.out.println("Reached EndNode!");
+                System.out.println("Reached EndNode! Route found!");
                 foundRoute = true;
-                System.out.println("Route found!");
                 break;
             }
             for (Road road : currentNode.getEdges()) {
@@ -75,33 +67,25 @@ public class Search {
             drawPath(); //Only draws path if we actually found a path.
             Model.getInstance().setLatestRoute(route);
         } else {
-            System.out.println("PQ Size: " + priorityQueue.size());
             System.out.println("No path found!");
         }
     }
 
     /// Relaxes the edge. {@code currentNode} HAS to be either the roads start- or endNode, otherwise an error will be thrown.
     private void relax(Road road, Node currentNode) {
-       if(endRoads.contains(road)){
+       if (endRoads.contains(road)) {
            this.destinationRoad = road;
            cameFrom.put(endNode, currentNode);
-           System.out.println("Found destination road!");
        }
 
-        double newDistanceTo = currentNode.getDistanceTo() + road.getWeight();
-        System.out.println("Current node distance: " + currentNode.getDistanceTo());
+       double newDistanceTo = currentNode.getDistanceTo() + road.getWeight();
+       Node nextNode = road.getOppositeNode(currentNode);
 
-        Node nextNode = road.getOppositeNode(currentNode);
-
-        if (nextNode.getDistanceTo() > newDistanceTo || (nextNode.getEdges().size()==1)) {
+       if (nextNode.getDistanceTo() > newDistanceTo || (nextNode.getEdges().size()==1)) {
             nextNode.setDistanceTo(newDistanceTo);
-            System.out.println("NextNode distance: " + nextNode.getDistanceTo());
-            System.out.println("NextNode edges: " + nextNode.getEdges().size());
-            System.out.println("Relaxing " + currentNode + " → " + nextNode + ", newDistance: " + newDistanceTo);
             cameFrom.put(nextNode, currentNode);
              priorityQueue.add(nextNode);
-        }
-       // System.out.println("Didn't add NextNode to PQ!");
+       }
     }
 
     private void drawPath() {
@@ -124,14 +108,14 @@ public class Search {
             Node next = path.get(i);
             for (Road road : current.getEdges()) {
                 if (road.getNodes().contains(next)) {
-                    if(next.equals(endNode)){
+                    if (next.equals(endNode)){
                         List<Node> nodesInNewRoad= new ArrayList<>();
                         nodesInNewRoad.add(current);
                         nodesInNewRoad.add(endNode);
                        Road finalRoad= new Road(nodesInNewRoad,road.isWalkable(), road.isBicycle(),road.isDriveable(), road.getMaxSpeed(), road.getType(), road.getRoadName());
                         route.add(finalRoad);
                         finalRoad.setPartOfRoute(true);
-                    }else{
+                    } else{
                         route.add(road);
                         road.setPartOfRoute(true);
                     }
