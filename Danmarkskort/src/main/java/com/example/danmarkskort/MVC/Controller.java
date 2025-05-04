@@ -467,6 +467,13 @@ public class Controller implements Initializable {
 
     /// Opens the search menu when activated. If both start- and endPOI are initialized, this button is used for activating the route finding between the two POI's.
     @FXML public void onActivateSearch() {
+        //TESTING
+        for (Tile tile :  model.getTilegrid().getVisibleTiles()) {
+            for (Road road : tile.getRoads()) {
+                road.getNodes().getFirst().setPartOfRoute(true);
+                road.getNodes().getLast().setPartOfRoute(true);
+            }
+        }
         findRoute.setVisible(true);
     }
 

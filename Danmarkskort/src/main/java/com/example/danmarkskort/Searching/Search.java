@@ -31,12 +31,9 @@ public class Search {
     /// Start a route from the Node {@code from} to the Node {@code to}.
     public void route(Node from, Node to) {
         route = new ArrayList<>();
-        startNode = from;
+        startNode = from.getEdges().getFirst().getStartOrEndNodeFromRoad(from); //Makes sure that we start on a start- or endNode otherwise the algorithm gets stuck in "relax"
         endNode = to;
         endRoads = new ArrayList<>(endNode.getEdges());
-        System.out.println("StartNode: " + startNode.toString() + " EndNode: " + endNode.toString());
-        System.out.println("Start edges: " + startNode.getEdges().size());
-        System.out.println("End edges: " + endNode.getEdges().size());
         assert startNode != null && endNode != null;
 
         startNode.setPartOfRoute(true);
@@ -60,7 +57,7 @@ public class Search {
                 break;
             }
             for (Road road : currentNode.getEdges()) {
-                relax(road, road.getStartOrEndNodeFromRoad(currentNode));
+                relax(road, currentNode);
             }
         }
         if (foundRoute) {
@@ -81,10 +78,10 @@ public class Search {
        double newDistanceTo = currentNode.getDistanceTo() + road.getWeight();
        Node nextNode = road.getOppositeNode(currentNode);
 
-       if (nextNode.getDistanceTo() > newDistanceTo || (nextNode.getEdges().size()==1)) {
+       if (nextNode.getDistanceTo() > newDistanceTo) {
             nextNode.setDistanceTo(newDistanceTo);
             cameFrom.put(nextNode, currentNode);
-             priorityQueue.add(nextNode);
+            priorityQueue.add(nextNode);
        }
     }
 
