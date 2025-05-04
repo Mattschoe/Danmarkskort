@@ -172,15 +172,14 @@ public class Road implements Serializable, MapObject {
         weight = distance / speedLimit;
        } else {
            /* Hvis fartgrænsen er ukendt, skal denne road nedprioriteres. Dette vil dog skulle ændres, så snart
-           vi skal have implementeret cykelruter
-           */
+           vi skal have implementeret cykelruter */
            weight= distance * 10;
        }
     }
     //endregion
 
     //region Getters and setters
-    ///Returns whether this piece of road is drivable or not (not in this case means walkable/cyclable)
+    /// Returns whether this piece of road is driveable or not (not in this case means walkable/cyclable)
     public boolean isDriveable() { return isDriveable;  }
     public int getMaxSpeed() { return maxSpeed; }
     public List<Node> getNodes() { return nodes;    }
@@ -189,6 +188,8 @@ public class Road implements Serializable, MapObject {
     public boolean hasMaxSpeed() { return maxSpeed != 0; }
     public boolean isWalkable() { return foot; }
     public boolean isBicycle() { return bicycle; }
+    public float getWeight() { return weight; }
+    public void setPartOfRoute(boolean partOfRoute) { this.partOfRoute = partOfRoute; }
 
     /**
      * Returns the opposite of the Node given. So if given the roads startNode it will return the roads endNode (and reverse).
@@ -200,14 +201,10 @@ public class Road implements Serializable, MapObject {
         return null;
     }
 
-    public void setType(String type) {
-        roadType = type;
-        determineVisuals();
-    }
-    public float getWeight() { return weight; }
     @Override
     public float[] getBoundingBox() { return boundingBox; }
-    ///Returns either the start- or endNode. Which one is decided from the given {@code node}'s XY
+
+    /// Returns either the start- or endNode. Which one is decided from the given {@code node}'s XY
     public Node getStartOrEndNodeFromRoad(Node node) {
         Node startNode = nodes.getFirst();
         Node endNode = nodes.getLast();
@@ -225,7 +222,10 @@ public class Road implements Serializable, MapObject {
         else return endNode;
     }
 
-    public void setPartOfRoute(boolean partOfRoute) { this.partOfRoute = partOfRoute; }
+    public void setType(String type) {
+        roadType = type;
+        determineVisuals();
+    }
 
     public void setPalette(String palette) {
         this.palette = palette;

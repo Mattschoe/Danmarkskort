@@ -144,11 +144,8 @@ public class Controller implements Initializable {
      *  @param mapFile the file which the map is contained. Given by user when choosing file
      */
     private void loadFile(File mapFile) {
-        if (checkBoxOBJ != null) {
-            model = Model.getInstance(mapFile.getPath(), canvas, checkBoxOBJ.isSelected());
-        } else {
-            model = Model.getInstance(mapFile.getPath(), canvas, false);
-        }
+        boolean createOBJ = checkBoxOBJ != null && checkBoxOBJ.isSelected();
+        model = Model.getInstance(mapFile.getPath(), canvas, createOBJ);
 
         view.setTilegrid(model.getTilegrid());
     }
