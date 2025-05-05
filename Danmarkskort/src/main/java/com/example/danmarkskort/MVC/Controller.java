@@ -135,6 +135,20 @@ public class Controller implements Initializable {
     //endregion
 
     //region Methods
+    /**
+     * Runs right after a Controller is created -- configures
+     * something(???) for an object in the mapOverlay.fxml scene
+     */
+    @Override public void initialize(URL url, ResourceBundle resourceBundle) {
+        listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
+                String selected = listView.getSelectionModel().getSelectedItem();
+                searchingSource.setText(selected);
+            }
+        });
+    }
+
     /// MIDLERTIDIG METODE FOR AT GØRE DET NEMT AT ÅBNE COVERAGE-RAPPORTEN.
     @FXML protected void openTestCoverage() { //TODO %% SKAL FJERNES SENERE
         try { Desktop.getDesktop().open(new File("build/reports/jacoco/test/html/index.html")); }
@@ -150,20 +164,6 @@ public class Controller implements Initializable {
         model = Model.getInstance(mapFile.getPath(), canvas, createOBJ);
 
         view.setTilegrid(model.getTilegrid());
-    }
-
-    /**
-     * Runs right after a Controller is created -- configures
-     * something(???) for an object in the mapOverlay.fxml scene
-     */
-    @Override public void initialize(URL url, ResourceBundle resourceBundle) {
-        listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
-                String selected = listView.getSelectionModel().getSelectedItem();
-                searchingSource.setText(selected);
-            }
-        });
     }
 
     //region Start-up scene methods
@@ -253,7 +253,7 @@ public class Controller implements Initializable {
     }
 
     /// Methods runs upon modifying the {@code searchbar} in the UI.
-    @FXML protected void searchBarTyped(KeyEvent event) {
+    @FXML protected void searchBarsTyped(KeyEvent event) {
         if (model == null) model = Model.getInstance();
 
         TextField source = (TextField) event.getSource();
@@ -264,6 +264,7 @@ public class Controller implements Initializable {
 
         if (event.getCharacter().equals("\r")) {
             if (!autoSuggestResults.isEmpty()) {
+                findRoute.setVisible(true);
                 listView.setVisible(false);
 
                 Node selection = autoSuggestResults.getFirst();
@@ -323,6 +324,23 @@ public class Controller implements Initializable {
         }*/
     }
 
+    /// When the user presses 'DOWN' in a searchbar, focus shifts to the ListView if it is visible
+    @FXML protected void searchBarsPressed(KeyEvent event) {
+        if (event.getCode().toString().equals("DOWN")) {
+            if (listView.isVisible()) {
+                listView.requestFocus();
+            }
+        }
+    }
+
+    /// When the user presses 'Enter' on the ListView, the ListView is disabled and the Find Route-button is enabled
+    @FXML protected void onListViewTyped(KeyEvent event) {
+        if (event.getCharacter().equals("\r")) {
+            listView.setVisible(false);
+            findRoute.setVisible(true);
+        }
+    }
+
     /**
      * Auto-suggests roads and cities in a drop-down menu from the search-bar.
      * Will auto-suggest cities, unless there are none, then suggests potential streets.
@@ -350,7 +368,6 @@ public class Controller implements Initializable {
         return Collections.emptyList();
     }
 
-
     private void startSearch(Node from, Node to) {
         //First removes the last route from the draws
         if (!latestRoute.isEmpty()) {
@@ -374,7 +391,7 @@ public class Controller implements Initializable {
     //endregion
 
     //region Canvas methods
-    /// When user chooses a node in the autosuggestion we override the searchbar, and zoom in on the node
+    /// When the user chooses a node from the suggestions, overrides the searchbar and zooms onto the Node
     @FXML protected void onAddressPickedFromList(MouseEvent event) {
         if (event.getClickCount() == 2) {
             Node chosenNode = autoSuggestResults.get(listView.getSelectionModel().getSelectedIndex());
@@ -482,20 +499,19 @@ public class Controller implements Initializable {
         //region DOUBLE CLICK (Searching)
         if (e.getClickCount() == 2) {
             //Makes POI
-            Affine transform = view.getTrans();
             POI poi = null;
             try {
-                Point2D POIMark = transform.inverseTransform(e.getX(), e.getY()); //ændret point til et felt, POIMark
+                Point2D POIMark = view.getTrans().inverseTransform(e.getX(), e.getY()); //ændret point til et felt, POIMark
                 poi = model.createPOI((float) POIMark.getX(), (float) POIMark.getY(), "Test");
                 savePOIButton.setVisible(true);
             } catch (NonInvertibleTransformException exception) {
-                System.out.println("Error inversion mouseclick coords!" + exception.getMessage());
+                System.out.println("An error occurred trying to invert mouseclick coords!" + exception.getMessage());
             }
             view.drawMap(); //Makes sure that the POI is shown instantly
 
             //Assigns spot for POI. Sets as start if empty or if "find route" has not been activated, if else, else we set it as the destination
             if (poi != null) {
-                onActivateSearch();
+                findRoute.setVisible(true);
                 if (searchBar.getText().trim().isEmpty() || !destination.isVisible()) {
                     startPOI = poi;
                     oldPOIs.add(poi);
@@ -524,13 +540,7 @@ public class Controller implements Initializable {
         //endregion
     }
 
-    /// Opens the search menu when activated. If both start- and endPOI are initialized, this button is used for activating the route finding between the two POI's.
-    @FXML public void onActivateSearch() {
-        findRoute.setVisible(true);
-    }
-
-    /// "Find Route" button on UI
-    @FXML public void onRouteSearchStart() {
+    @FXML public void findRouteButton() {
         if (!switchSearch.isVisible() && !destination.isVisible()) {
             switchSearch.setVisible(true);
             destination.setVisible(true);
@@ -540,28 +550,40 @@ public class Controller implements Initializable {
             String termin = destination.getText().toLowerCase();
 
             Node from = model.getStreetsFromPrefix(origin).getFirst();
-            from = getClosestRoadNode(from);
+            //from = getClosestRoadNode(from); IKKE SLET LÆS getClosestRoadNode
+            startPOI = model.createPOI(from.getX(), from.getY(), "Test1");
 
             Node to = model.getStreetsFromPrefix(termin).getFirst();
-            to = getClosestRoadNode(to);
+            //to = getClosestRoadNode(to); IKKE SLET LÆS getClosestRoadNode
+            endPOI = model.createPOI((float) to.getX(), (float) to.getY(), "Test2");
 
-            startSearch(from, to);
+            //startSearch(from, to); IKKE SLET LÆS getClosestRoadNode
+            startSearch(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
         }
         else {
             System.out.println("Cannot search for a route without both a start- AND an endpoint!");
         }
-
-        /*if (startPOI != null && endPOI != null && !searchBar.getText().trim().isEmpty() && !destination.getText().trim().isEmpty()) {
-            startSearch();
-        } else {
-            switchSearch.setVisible(true);
-            destination.setVisible(true);
-        }*/
     }
 
-    private Node getClosestRoadNode(Node node) {
-        Tile tile = model.getTilegrid().getTileFromXY(node.getX(), node.getY());
-        Road closestRoad = getClosestRoad(tile, node.getX(), node.getY());
+    /// Returns the closest Node which is in a Road, from the given Node
+    @Deprecated private Node getClosestRoadNode(Node node) {
+        /*
+         * Metoden er @Deprecated fordi jeg ikke kunne få ruten til at se ligeså lækker ud,
+         * uden at bruge POIs, som med. Samme begrundelse for den udkommenterede -men ikke
+         * slettede!- kode i findRouteButton-metoden. Var varsom med at bruge POIs til rute-
+         * søgningen fordi de virkede til at drille Joakim's POIs, når man havde andre/lav-
+         * ede flere POIs idet/efter man lavede en rutesøgning...
+         * SLET IKKE METODEN IN CASE VI PRØVER AT LAVE RUTESØGNINGEN IGEN UDEN POIs!!!!!!!
+         */
+
+        Point2D localPoint;
+        try { localPoint = view.getTrans().inverseTransform(node.getX(), node.getY()); }
+        catch (NonInvertibleTransformException e) { throw new RuntimeException(e); }
+        double localX = localPoint.getX();
+        double localY = localPoint.getY();
+
+        Tile tile = model.getTilegrid().getTileFromXY((float) localX, (float) localY);
+        Road closestRoad = getClosestRoad(tile, localX, localY);
         double closestDistance = Double.POSITIVE_INFINITY;
 
         for (Node n : closestRoad.getNodes()) {
@@ -576,15 +598,11 @@ public class Controller implements Initializable {
         return node;
     }
 
+    /// Switches the text in the 'From' and 'To' search-bars
     @FXML public void switchDestinationAndStart() {
         String temp = searchBar.getText();
         searchBar.setText(destination.getText());
         destination.setText(temp);
-
-        /*POI temp = startPOI;
-        startPOI = endPOI;
-        endPOI = temp;
-        updateSearchText();*/
     }
 
     /// Updates the text in the search. Call this after changing the POI responsible for the text
