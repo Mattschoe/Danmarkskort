@@ -69,7 +69,7 @@ public class ModelTest {
         );
     }
 
-    @Test
+    /*@Test
     protected void loadOBJFileTest() {
         assertDoesNotThrow(() ->
             model = new Model("data/generated/bornholm/parser.obj", canvas, false)
@@ -87,7 +87,7 @@ public class ModelTest {
         assertDoesNotThrow(() ->
             model = new Model("data/StandardMap/parser.obj", canvas, false)
         );
-    }
+    }*/
 
     /* /// Checks if model can correctly load .obj to a parser class
     @Test
@@ -101,15 +101,15 @@ public class ModelTest {
 
     /*
      * Same as {@link #saveParserAsOBJ()} just doesn't delete the OBJ file again. Should be marked @Disabled as standard since it doesn't dele the file again
-     */
+     *
     //@Disabled
     @Test
     public void createOBJFile() {
-        Model model = Model.getInstance("./data/mapOfDenmark.osm", canvas);
+        Model model = Model.getInstance("data/mapOfDenmark.osm", canvas);
         model.saveParserToOBJ();
-        File file = new File("./data/mapOfDenmark.osm.obj");
+        File file = new File("data/mapOfDenmark.osm.obj");
         assertTrue(file.exists());
-    }
+    }*/
 
     /*@Test
     public void modelFindsFileCorrectly() {

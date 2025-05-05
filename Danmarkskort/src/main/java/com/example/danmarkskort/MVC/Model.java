@@ -139,7 +139,9 @@ public class Model {
     /// Parses a .obj file. This method is called in the Parser constructor if the given filepath ends with .obj
     private void parseOBJToParser() {
         TLongObjectHashMap<Node> ID2Node = new TLongObjectHashMap<>(); //Avoids resizing
-        String[] filePath = file.getPath().split("\\\\");
+        String[] filePath = new String[0];
+        if (System.getProperty("os.name").startsWith("Windows")) filePath = file.getPath().split("\\\\");
+        else if (System.getProperty("os.name").startsWith("MAC")) filePath = file.getPath().split("/");
         String folder = filePath[filePath.length - 2];
 
         System.out.println("Deserializing binary files...");
