@@ -158,23 +158,25 @@ public class Road implements Serializable, MapObject {
         }
     }
 
-    ///TO DO: THIS METHOD NEEDS TO BE FIXED TO ADJUST FOR SPEEDLIMIT BUT IT HAS TO ACCOUNT FOR WHERE THE NODES ARE LOCATED IN XY SPACE
+    ///Calculates the weight of the road. {@code Weight} being defined as: The time to cross the road given its length and speedlimit
     private void calculateWeight() {
-        float deltaX = nodes.getFirst().getX() - nodes.getLast().getX();
-        float deltaY = nodes.getFirst().getY() - nodes.getLast().getY();
+        //Loops through all the nodes in the road calculating the total distance between them all
+        double distance = 0;
+        Node currentNode = nodes.getFirst();
+        for (int i = 1; i < nodes.size(); i++) {
+            Node nextNode = nodes.get(i);
+            distance += Math.hypot((currentNode.getX() - nextNode.getX()), (currentNode.getY() - nextNode.getY()));
+            currentNode = nextNode;
+        }
 
-       double distance = Math.hypot(deltaX, deltaY);
-
-
-
-       //edge weight udregnes nu som tiden det vil tage at komme fra startnode til slutnode på den givne road
-       if(maxSpeed > 0) weight = (float) distance / maxSpeed;
-       else {
-           //Else we see if we can calculate the weight from the roadtype (Motorvej/Motortrafikvej), if not, we set the standard speed as 50
-           if (roadType.equals("motorway")) weight = (float) distance / 130;
-           else if (roadType.equals("trunk")) weight = (float) distance / 80;
-           else weight = (float) distance/ 50;
-       }
+        //Calculates the time it takes to cross the distance via distance/maxSpeed
+        if (maxSpeed > 0) weight = (float) distance / maxSpeed;
+        else {
+            //Else we see if we can calculate the weight from the roadtype (Motorvej/Motortrafikvej), if not, we set the standard speed as 50
+            if (roadType.equals("motorway")) weight = (float) distance / 130;
+            else if (roadType.equals("trunk")) weight = (float) distance / 80;
+            else weight = (float) distance/ 50;
+        }
     }
     //endregion
 
@@ -190,7 +192,6 @@ public class Road implements Serializable, MapObject {
     public boolean isBicycle() { return bicycle; }
     public float getWeight() { return weight; }
     public void setPartOfRoute(boolean partOfRoute) { this.partOfRoute = partOfRoute; }
-
     /**
      * Returns the opposite of the Node given. So if given the roads startNode it will return the roads endNode (and reverse).
      * @param node HAS TO BE EITHER THE ROADS START- OR END-NODE. WILL RETURN NULL ELSE
@@ -200,10 +201,7 @@ public class Road implements Serializable, MapObject {
         if (node.equals(nodes.getLast())) return nodes.getFirst();
         return null;
     }
-
-    @Override
-    public float[] getBoundingBox() { return boundingBox; }
-
+    @Override public float[] getBoundingBox() { return boundingBox; }
     /// Returns either the start- or endNode. Which one is decided from the given {@code node}'s XY
     public Node getStartOrEndNodeFromRoad(Node node) {
         Node startNode = nodes.getFirst();
@@ -221,12 +219,10 @@ public class Road implements Serializable, MapObject {
         if (distanceToStart < distanceToEnd) return startNode;
         else return endNode;
     }
-
     public void setType(String type) {
         roadType = type;
         determineVisuals();
     }
-
     public void setPalette(String palette) {
         this.palette = palette;
         determineVisuals();
