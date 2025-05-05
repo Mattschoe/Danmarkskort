@@ -3,6 +3,8 @@ package com.example.danmarkskort.Searching;
 import com.example.danmarkskort.MVC.Model;
 import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.Road;
+import com.example.danmarkskort.MapObjects.Tile;
+import gnu.trove.map.hash.TDoubleObjectHashMap;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,6 +21,11 @@ public class Search {
     private boolean foundRoute;
     PriorityQueue<Node> priorityQueue;
     private Map<Node, Node> cameFrom;
+    ///For A*, fScore = node.distanceTo + heuristic(node)
+    private TDoubleObjectHashMap<Node> fScore;
+    List<Road> endRoads;
+    /// den sidste vej inden slutnoden i rutesøgningen
+    Road destinationRoad;
 
     public Search(Collection<Node> nodes) {
         assert !nodes.isEmpty();
@@ -27,13 +34,14 @@ public class Search {
     /// Start a route from the Node {@code from} to the Node {@code to}.
     public void route(Node from, Node to) {
         route = new ArrayList<>();
-        startNode = from;
+        startNode = from.getEdges().getFirst().getStartOrEndNodeFromRoad(from); //Makes sure that we start on a start- or endNode otherwise the algorithm gets stuck in "relax"
         endNode = to;
+        endRoads = new ArrayList<>(endNode.getEdges());
         assert startNode != null && endNode != null;
 
         startNode.setPartOfRoute(true);
         endNode.setPartOfRoute(true);
-
+        
         startNode.setDistanceTo(0);
         findPath();
     }
@@ -45,13 +53,13 @@ public class Search {
         priorityQueue.add(startNode);
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
-            if (currentNode == endNode) { //Reached endNode
-                System.out.println("Reached EndNode!");
+            if (currentNode.equals(endNode)) { //Reached endNode
+                System.out.println("Reached EndNode! Route found!");
                 foundRoute = true;
                 break;
             }
             for (Road road : currentNode.getEdges()) {
-                relax(road, road.getStartOrEndNodeFromRoad(currentNode));
+                if (road.isDriveable()) relax(road, currentNode); //Relaxes the road if its drivable
             }
         }
         if (foundRoute) {
@@ -60,17 +68,24 @@ public class Search {
         } else {
             System.out.println("No path found!");
         }
+        cleanup();
     }
 
     /// Relaxes the edge. {@code currentNode} HAS to be either the roads start- or endNode, otherwise an error will be thrown.
     private void relax(Road road, Node currentNode) {
-        double newDistanceTo = currentNode.getDistanceTo() + road.getWeight();
-        Node nextNode = road.getOppositeNode(currentNode);
-        if (nextNode.getDistanceTo() > newDistanceTo) {
+       if (endRoads.contains(road)) {
+           this.destinationRoad = road;
+           cameFrom.put(endNode, currentNode);
+       }
+
+       double newDistanceTo = currentNode.getDistanceTo() + road.getWeight();
+       Node nextNode = road.getOppositeNode(currentNode);
+
+       if (nextNode.getDistanceTo() > newDistanceTo) {
             nextNode.setDistanceTo(newDistanceTo);
             cameFrom.put(nextNode, currentNode);
             priorityQueue.add(nextNode);
-        }
+       }
     }
 
     private void drawPath() {
@@ -80,7 +95,9 @@ public class Search {
         Node currentNode = endNode;
         while (cameFrom.containsKey(currentNode)) {
             path.add(currentNode);
+           // System.out.println("Tilføjede currentNode til path: " + currentNode.toString());
             currentNode = cameFrom.get(currentNode);
+
         }
         path.add(currentNode); //Adds the start node since it isn't included in the loop
         Collections.reverse(path);
@@ -91,14 +108,37 @@ public class Search {
             Node next = path.get(i);
             for (Road road : current.getEdges()) {
                 if (road.getNodes().contains(next)) {
-                    route.add(road);
-                    road.setPartOfRoute(true);
+                    if (next.equals(endNode)){
+                        List<Node> nodesInNewRoad= new ArrayList<>();
+                        nodesInNewRoad.add(current);
+                        nodesInNewRoad.add(endNode);
+                       Road finalRoad= new Road(nodesInNewRoad,road.isWalkable(), road.isBicycle(),road.isDriveable(), road.getMaxSpeed(), road.getType(), road.getRoadName());
+                        route.add(finalRoad);
+                        finalRoad.setPartOfRoute(true);
+                    } else{
+                        route.add(road);
+                        road.setPartOfRoute(true);
+                    }
                 }
             }
             current = next;
         }
     }
 
+    ///Cleans up the mapObjects used in the search so they are ready for another search
+    public void cleanup() {
+        for (Node node : cameFrom.keySet()) {
+            node.setPartOfRoute(false);
+            node.setDistanceTo(Double.MAX_VALUE);
+        }
+    }
+
     ///Returns route, returns null if haven't found route
     public List<Road> getRoute() { return route; }
+
+    ///The heuristic that's added on top of a Node's {@code distanceTo} to implement A*
+    private double heuristic(Node a, Node b) {
+        //Euclidean distance
+        return Math.hypot(Math.pow(a.getX() - b.getX(), 2), Math.pow(a.getY() - b.getY(), 2));
+    }
 }

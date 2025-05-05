@@ -389,7 +389,7 @@ public class Parser implements Serializable {
                     for (Node roadNode : newRoad.getNodes()) {
                         roadNode.addEdge(newRoad);
                     }
-                    roads.add(road);
+                    roads.add(newRoad);
 
                     //Starts a new segment from the intersection
                     currentRoad.clear();

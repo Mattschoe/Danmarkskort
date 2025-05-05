@@ -51,15 +51,15 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     }
 
     ///A Node read from a binary file.
-    public Node(float x, float y, String city, String houseNumber, short postcode, String street, double distanceTo) {
+    public Node(float x, float y, String city, String houseNumber, short postcode, String street) {
         this.x = x;
         this.y = y;
         if (city != null) this.city = city.intern();
         if (houseNumber != null) this.houseNumber = houseNumber.intern();
         this.postcode = postcode;
         if (street != null) this.street = street.intern();
-        this.distanceTo = distanceTo;
         roadEdges = new ArrayList<>();
+        distanceTo = Double.MAX_VALUE;
     }
     //endregion
 

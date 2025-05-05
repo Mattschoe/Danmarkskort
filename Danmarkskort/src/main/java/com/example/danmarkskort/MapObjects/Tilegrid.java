@@ -50,6 +50,9 @@ public class Tilegrid implements Serializable {
 
             //Then we go through each tile and draw their different roads/buildings given the levelOfDetail
             for (Tile tile : visibleTiles) {
+                for(Node node : tile.getNodesInTile()){
+                    node.draw(graphicsContext); //ÆNDRET HER!!!!
+                }
                 if (tile.isEmpty()) continue;
                 drawLOD1(tile, graphicsContext);
                 if (levelOfDetail > 1) {
@@ -94,6 +97,7 @@ public class Tilegrid implements Serializable {
     private void drawLOD5(Tile tile, GraphicsContext graphicsContext) {
         tile.drawBuildings(graphicsContext);
         tile.drawPOIs(graphicsContext);
+        tile.drawNodes(graphicsContext);
     }
 
     //endregion
@@ -172,6 +176,16 @@ public class Tilegrid implements Serializable {
         List<Tile> tiles = new ArrayList<>();
         for (Tile[] tileRow : grid) { tiles.addAll(Arrays.asList(tileRow)); }
         return tiles;
+    }
+
+    public Set<Node> getAllNodes(){
+        Set<Node> nodes = new HashSet<>();
+        for(Tile[] tileRow : grid){
+            for(Tile tile : tileRow){
+                nodes.addAll(tile.getNodesInTile());
+            }
+        }
+        return nodes;
     }
     //endregion
 }
