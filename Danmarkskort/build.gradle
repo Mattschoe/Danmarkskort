@@ -51,6 +51,13 @@ dependencies {
 
     implementation 'com.itextpdf:itextpdf:5.5.13.3'
     implementation 'net.sf.trove4j:trove4j:3.0.3'
+    
+    testImplementation 'org.testfx:testfx-core:4.0.17'
+    testImplementation 'org.testfx:testfx-junit5:4.0.17'
+    testImplementation 'org.testfx:openjfx-monocle:jdk-12.0.1+2' // Headless testing support
+    testImplementation 'org.hamcrest:hamcrest:2.2' // For assertions
+
+
 }
 
 run {
@@ -68,6 +75,12 @@ sourceSets {
 test {
     useJUnitPlatform()
     finalizedBy(jacocoTestReport)
+    jvmArgs = [
+            '--add-exports=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED',
+            '--add-exports=javafx.graphics/com.sun.glass.ui=ALL-UNNAMED',
+            '--add-opens', 'javafx.graphics/com.sun.glass.ui=ALL-UNNAMED',
+            '--add-opens', 'javafx.graphics/com.sun.glass.ui.delegate=ALL-UNNAMED'
+    ]
 }
 
 jlink {

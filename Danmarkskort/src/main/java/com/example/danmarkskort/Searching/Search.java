@@ -5,13 +5,11 @@ import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Tile;
 import gnu.trove.map.hash.TDoubleObjectHashMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
+import gnu.trove.map.hash.TObjectLongHashMap;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.SQLOutput;
+import java.util.*;
 import java.util.PriorityQueue;
 
 public class Search {
@@ -22,7 +20,7 @@ public class Search {
     PriorityQueue<Node> priorityQueue;
     private Map<Node, Node> cameFrom;
     ///For A*, fScore = node.distanceTo + heuristic(node)
-    private TDoubleObjectHashMap<Node> fScore;
+    private TObjectDoubleHashMap<Node> fScore;
     List<Road> endRoads;
     /// den sidste vej inden slutnoden i rutesøgningen
     Road destinationRoad;
@@ -47,28 +45,39 @@ public class Search {
     }
 
     private void findPath() {
-        priorityQueue = new java.util.PriorityQueue<>();
+        fScore = new TObjectDoubleHashMap<>(); //distanceTo + heuristic(node)
+        priorityQueue = new java.util.PriorityQueue<>(Comparator.comparingDouble(fScore::get)); //Retrieves the nodes fScore and uses that in the PQ instead of its "distanceTo" (A*)
         cameFrom = new HashMap<>();
+        HashSet<Node> closedNodes = new HashSet<>(); //When we're certain we have the lowest distanceTo this node we add it to this set to avoid relaxing the same roads
 
         priorityQueue.add(startNode);
+        fScore.put(startNode, heuristic(startNode, endNode));
+        int count = 0;
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
+            closedNodes.add(currentNode);
+            count++;
             if (currentNode.equals(endNode)) { //Reached endNode
                 System.out.println("Reached EndNode! Route found!");
                 foundRoute = true;
                 break;
             }
             for (Road road : currentNode.getEdges()) {
+                System.out.println(road.getWeight());
+                if (closedNodes.contains(road.getOppositeNode(currentNode))) continue; //If we have already looked at the node and relaxed its edges we skip it (This avoids relooking at nodes)
                 if (road.isDriveable()) relax(road, currentNode); //Relaxes the road if its drivable
             }
         }
+        System.out.println("Amount of nodes looked at: " + count);
         if (foundRoute) {
             drawPath(); //Only draws path if we actually found a path.
             Model.getInstance().setLatestRoute(route);
         } else {
             System.out.println("No path found!");
         }
+        System.out.println("Cleaning up:");
         cleanup();
+        System.out.println("Finished cleaning up!");
     }
 
     /// Relaxes the edge. {@code currentNode} HAS to be either the roads start- or endNode, otherwise an error will be thrown.
@@ -78,12 +87,16 @@ public class Search {
            cameFrom.put(endNode, currentNode);
        }
 
-       double newDistanceTo = currentNode.getDistanceTo() + road.getWeight();
+       double newDistanceToNextNode = currentNode.getDistanceTo() + road.getWeight();
        Node nextNode = road.getOppositeNode(currentNode);
 
-       if (nextNode.getDistanceTo() > newDistanceTo) {
-            nextNode.setDistanceTo(newDistanceTo);
+       if (nextNode.getDistanceTo() > newDistanceToNextNode) {
+            nextNode.setDistanceTo(newDistanceToNextNode);
             cameFrom.put(nextNode, currentNode);
+            fScore.put(nextNode, newDistanceToNextNode + heuristic(nextNode, endNode));
+
+            //Removes node (if in the pq already) and adds it again now with its new fScore
+            priorityQueue.remove(nextNode);
             priorityQueue.add(nextNode);
        }
     }
@@ -138,7 +151,6 @@ public class Search {
 
     ///The heuristic that's added on top of a Node's {@code distanceTo} to implement A*
     private double heuristic(Node a, Node b) {
-        //Euclidean distance
-        return Math.hypot(Math.pow(a.getX() - b.getX(), 2), Math.pow(a.getY() - b.getY(), 2));
+        return Math.hypot((a.getX() - b.getX()), (a.getY() - b.getY())) / 130; //Distance formula divided by speedlimit in DK
     }
 }

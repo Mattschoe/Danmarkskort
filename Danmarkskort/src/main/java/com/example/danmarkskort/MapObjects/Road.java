@@ -163,17 +163,17 @@ public class Road implements Serializable, MapObject {
         float deltaX = nodes.getFirst().getX() - nodes.getLast().getX();
         float deltaY = nodes.getFirst().getY() - nodes.getLast().getY();
 
-       float distance = (float) Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+       double distance = Math.hypot(deltaX, deltaY);
 
-       float speedLimit = this.getMaxSpeed();
+
 
        //edge weight udregnes nu som tiden det vil tage at komme fra startnode til slutnode på den givne road
-       if(speedLimit > 0) {
-        weight = distance / speedLimit;
-       } else {
-           /* Hvis fartgrænsen er ukendt, skal denne road nedprioriteres. Dette vil dog skulle ændres, så snart
-           vi skal have implementeret cykelruter */
-           weight= distance * 10;
+       if(maxSpeed > 0) weight = (float) distance / maxSpeed;
+       else {
+           //Else we see if we can calculate the weight from the roadtype (Motorvej/Motortrafikvej), if not, we set the standard speed as 50
+           if (roadType.equals("motorway")) weight = (float) distance / 130;
+           else if (roadType.equals("trunk")) weight = (float) distance / 80;
+           else weight = (float) distance/ 50;
        }
     }
     //endregion

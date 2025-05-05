@@ -4,6 +4,7 @@ import com.example.danmarkskort.MVC.Model;
 import javafx.scene.canvas.Canvas;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -82,14 +83,14 @@ public class ModelTest {
         assertTrue(model.getFile().getPath().endsWith(".obj"));
     }
 
-    /*@Test
+    @Test
     protected void loadStandardMapTest() {
         assertDoesNotThrow(() ->
             model = new Model("data/StandardMap/parser.obj", canvas, false)
         );
-    }*/
+    }
 
-    /* /// Checks if model can correctly load .obj to a parser class
+     /// Checks if model can correctly load .obj to a parser class
     @Test
     public void loadParserAsOBJ() {
         File objFile = new File("./data/small.osm.obj");
@@ -97,23 +98,23 @@ public class ModelTest {
         Model createObjFileModel = Model.getInstance("./data/Bornholm.zip", canvas, false);
         Model createParserFromObjModel = Model.getInstance(objFile.getPath(), canvas, false);
         //assertNotNull(createParserFromObjModel.getParser());
-    }*/
+    }
 
     /*
      * Same as {@link #saveParserAsOBJ()} just doesn't delete the OBJ file again. Should be marked @Disabled as standard since it doesn't dele the file again
-     *
-    //@Disabled
+   */
+   /* @Disabled
     @Test
     public void createOBJFile() {
         Model model = Model.getInstance("data/mapOfDenmark.osm", canvas);
         model.saveParserToOBJ();
         File file = new File("data/mapOfDenmark.osm.obj");
         assertTrue(file.exists());
-    }*/
-
-    /*@Test
+    }
+*/
+    @Test
     public void modelFindsFileCorrectly() {
         File objFile = new File("./data/small.osm.obj");
         assertTrue(objFile.exists());
-    }*/
+    }
 }
