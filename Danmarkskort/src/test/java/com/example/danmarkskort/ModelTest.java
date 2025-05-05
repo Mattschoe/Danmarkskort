@@ -69,7 +69,7 @@ public class ModelTest {
         );
     }
 
-    /*@Test
+    @Test
     protected void loadOBJFileTest() {
         assertDoesNotThrow(() ->
             model = new Model("data/generated/bornholm/parser.obj", canvas, false)
@@ -82,7 +82,7 @@ public class ModelTest {
         assertTrue(model.getFile().getPath().endsWith(".obj"));
     }
 
-    @Test
+    /*@Test
     protected void loadStandardMapTest() {
         assertDoesNotThrow(() ->
             model = new Model("data/StandardMap/parser.obj", canvas, false)
