@@ -35,6 +35,7 @@ public class View {
     /// Extra objects outside the grid that are included in draw method. Objects are added in {@link #addObjectToDraw(MapObject)}
     private final Set<MapObject> extraDrawObjects;
     private double zoomLevel;
+    private FXMLLoader root;
     //endregion
 
     //region Constructor(s)
@@ -57,7 +58,7 @@ public class View {
         //Skaber en FXMLLoader, klar til at loade den specificerede FXML-fil
         URL url = getClass().getResource(fxmlLocation);
         assert url != null;
-        FXMLLoader root = new FXMLLoader(url);
+        root = new FXMLLoader(url);
 
         //Hvis det er start-scenen, får vinduet en forudbestemt størrelse, ellers sættes den dynamisk
         double width, height;
@@ -238,5 +239,6 @@ public class View {
     public void setScaleColor(Color scaleColor) { this.scaleColor = scaleColor; }
     public boolean isFirstTimeDrawingMap() { return firstTimeDrawingMap; } //for tests
     public double getZoomLevel(){ return zoomLevel; } //used for tests
+    public FXMLLoader getFXMLLoader(){return root;}
     //endregion
 }

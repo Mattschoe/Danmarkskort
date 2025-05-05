@@ -19,11 +19,26 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ViewTest extends ApplicationTest {
     private View view;
+    private Stage primaryStage;
+    String fxmlLocation;
+    Controller controller;
 
     @Override
     public void start(Stage stage) throws Exception {
-        // Adjust filename if needed
-        view = new View(stage, "newStart.fxml");
+       Controller controller = new Controller();
+        this.primaryStage = stage;
+        //view = new View(stage, "newStart.fxml");
+
+    }
+
+    private void setUpView(String fxmlFile) {
+        interact(() -> {
+            try {
+                view = new View(primaryStage, fxmlFile);
+            } catch (IOException e) {
+                fail("Failed to load FXML: " + fxmlFile);
+            }
+        });
     }
 
     /***
@@ -35,6 +50,28 @@ public class ViewTest extends ApplicationTest {
     }
 
     @Test
+    public void testViewWithStartScene() {
+        setUpView("newStart.fxml");
+        assertNotNull(view);
+        assertTrue(view.getStage().isShowing());
+    }
+
+   @Test
+    public void testViewWithAnotherScene() throws IOException {
+        try {
+                setUpView("mapOverlay.fxml");
+                assertFalse(view.isFirstTimeDrawingMap()); //make sure the map is drawn when mapOverlay is the stage
+                assertNotNull(view);
+                assertTrue(view.getStage().isShowing());
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+
+
+    }
+
+
+    @Test
     protected void testDrawMap(){
         interact(() -> {
             view.drawMap();
@@ -43,7 +80,8 @@ public class ViewTest extends ApplicationTest {
     }
 
     @Test
-    protected void LODTest(){
+    //test to check that
+    protected void zoomToTest(){
 
     }
 }
