@@ -103,8 +103,7 @@ public class Parser implements Serializable {
                         failedNodes++;
                     }
                 } else if (tagName.equals("way")) {
-                    try { parseWay(input); } catch (Exception e) {failedWays++;
-                    }
+                    try { parseWay(input); } catch (Exception e) {failedWays++;}
                 } else if (tagName.equals("relation")) {
                     try { parseRelation(input); } catch (Exception e) {
                         failedRelations++;
@@ -208,7 +207,9 @@ public class Parser implements Serializable {
             Polygon polygon = id2Polygon.get(memberID);
             Road road = id2Road.get(memberID);
             if (polygon != null && polygon.getType().isEmpty()) polygon.setType(type);
-            else if (road != null && road.getType().isEmpty()) road.setType(type);
+            else if (road != null && road.getType().isEmpty()) {
+                road.setType(type);
+            }
         }
     }
 
@@ -265,6 +266,7 @@ public class Parser implements Serializable {
         if (nodesInWay.size() == 1) {
             throw new IllegalArgumentException("Only 1 node in way");
         }
+
         boolean road = false, building = false;
 
         Map<String, String> tagsKeyToValue = new HashMap<>();
