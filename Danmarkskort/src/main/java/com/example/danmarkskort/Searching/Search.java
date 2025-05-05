@@ -44,14 +44,16 @@ public class Search {
     }
 
     private void findPath() {
+        fScore = new TObjectDoubleHashMap<>(); //distanceTo + heuristic(node)
         priorityQueue = new java.util.PriorityQueue<>(Comparator.comparingDouble(fScore::get)); //Retrieves the nodes fScore and uses that in the PQ instead of its "distanceTo" (A*)
         cameFrom = new HashMap<>();
-        fScore = new TObjectDoubleHashMap<>();
 
         priorityQueue.add(startNode);
         fScore.put(startNode, heuristic(startNode, endNode));
+        int count = 0;
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
+            count++;
             if (currentNode.equals(endNode)) { //Reached endNode
                 System.out.println("Reached EndNode! Route found!");
                 foundRoute = true;
@@ -61,6 +63,7 @@ public class Search {
                 if (road.isDriveable()) relax(road, currentNode); //Relaxes the road if its drivable
             }
         }
+        System.out.println("Amount of nodes looked at: " + count);
         if (foundRoute) {
             drawPath(); //Only draws path if we actually found a path.
             Model.getInstance().setLatestRoute(route);
