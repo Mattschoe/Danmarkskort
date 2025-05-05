@@ -35,8 +35,15 @@ public class ViewTest extends ApplicationTest {
     }
 
     @Test
-    public void testDrawMap(){
-        view.drawMap();
-        assertFalse(view.isFirstTimeDrawingMap());
+    protected void testDrawMap(){
+        interact(() -> {
+            view.drawMap();
+            assertFalse(view.isFirstTimeDrawingMap());
+        });
+    }
+
+    @Test
+    protected void LODTest(){
+
     }
 }

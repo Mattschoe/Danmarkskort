@@ -34,6 +34,7 @@ public class View {
     private Tilegrid tilegrid;
     /// Extra objects outside the grid that are included in draw method. Objects are added in {@link #addObjectToDraw(MapObject)}
     private final Set<MapObject> extraDrawObjects;
+    private double zoomLevel;
     //endregion
 
     //region Constructor(s)
@@ -183,7 +184,7 @@ public class View {
 
     /// Changes the current zoom level to a range from 0 to 4 (needed for the LOD). 0 is minimum amount of details, 4 is maximum
     private int getLOD() {
-        double zoomLevel = trans.getMxx();
+       zoomLevel = trans.getMxx();
         if (zoomLevel > 550) return 5;
         if (zoomLevel > 160) return 4;
         if (zoomLevel > 85) return 3;
@@ -236,5 +237,6 @@ public class View {
     public void setBgColor(Color bgColor) { this.bgColor = bgColor; }
     public void setScaleColor(Color scaleColor) { this.scaleColor = scaleColor; }
     public boolean isFirstTimeDrawingMap() { return firstTimeDrawingMap; } //for tests
+    public double getZoomLevel(){ return zoomLevel; } //used for tests
     //endregion
 }
