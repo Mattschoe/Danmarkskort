@@ -142,6 +142,7 @@ public class Model {
         String[] filePath = new String[0];
         if (System.getProperty("os.name").startsWith("Windows")) filePath = file.getPath().split("\\\\");
         else if (System.getProperty("os.name").startsWith("MAC")) filePath = file.getPath().split("/");
+        else throw new RuntimeException("UNSUPPORTED OPERATING SYSTEM");
         String folder = filePath[filePath.length - 2];
 
         System.out.println("Deserializing binary files...");
