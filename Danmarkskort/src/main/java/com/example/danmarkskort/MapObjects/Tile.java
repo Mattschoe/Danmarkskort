@@ -46,9 +46,7 @@ public class Tile implements MapObject, Serializable {
     //endregion
 
     //region (Public) Methods
-    public void addMapObject(MapObject object) {
-        objectsInTile.add(object);
-    }
+    public void addMapObject(MapObject object) { objectsInTile.add(object); }
 
     public void addPOI(POI POI) { POIs.add(POI); }
 

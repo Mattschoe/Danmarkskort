@@ -117,9 +117,10 @@ public class Model {
      * @return Model (Singleton)
      */
     public static Model getInstance(String filePath, Canvas canvas, boolean createOBJ) {
-        if (modelInstance == null) {
-            modelInstance = new Model(filePath, canvas, createOBJ);
-        }
+        modelInstance = null;
+        System.gc();
+
+        modelInstance = new Model(filePath, canvas, createOBJ);
         return modelInstance;
     }
 
