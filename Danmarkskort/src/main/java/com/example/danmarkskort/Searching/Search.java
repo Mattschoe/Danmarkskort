@@ -8,6 +8,7 @@ import gnu.trove.map.hash.TDoubleObjectHashMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 
+import java.sql.SQLOutput;
 import java.util.*;
 import java.util.PriorityQueue;
 
@@ -47,12 +48,14 @@ public class Search {
         fScore = new TObjectDoubleHashMap<>(); //distanceTo + heuristic(node)
         priorityQueue = new java.util.PriorityQueue<>(Comparator.comparingDouble(fScore::get)); //Retrieves the nodes fScore and uses that in the PQ instead of its "distanceTo" (A*)
         cameFrom = new HashMap<>();
+        HashSet<Node> closedNodes = new HashSet<>(); //When we're certain we have the lowest distanceTo this node we add it to this set to avoid relaxing the same roads
 
         priorityQueue.add(startNode);
         fScore.put(startNode, heuristic(startNode, endNode));
         int count = 0;
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
+            closedNodes.add(currentNode);
             count++;
             if (currentNode.equals(endNode)) { //Reached endNode
                 System.out.println("Reached EndNode! Route found!");
@@ -60,6 +63,8 @@ public class Search {
                 break;
             }
             for (Road road : currentNode.getEdges()) {
+                System.out.println(road.getWeight());
+                if (closedNodes.contains(road.getOppositeNode(currentNode))) continue; //If we have already looked at the node and relaxed its edges we skip it (This avoids relooking at nodes)
                 if (road.isDriveable()) relax(road, currentNode); //Relaxes the road if its drivable
             }
         }
@@ -70,7 +75,9 @@ public class Search {
         } else {
             System.out.println("No path found!");
         }
+        System.out.println("Cleaning up:");
         cleanup();
+        System.out.println("Finished cleaning up!");
     }
 
     /// Relaxes the edge. {@code currentNode} HAS to be either the roads start- or endNode, otherwise an error will be thrown.
@@ -86,7 +93,7 @@ public class Search {
        if (nextNode.getDistanceTo() > newDistanceToNextNode) {
             nextNode.setDistanceTo(newDistanceToNextNode);
             cameFrom.put(nextNode, currentNode);
-            fScore.put(nextNode, newDistanceToNextNode + heuristic(nextNode, currentNode));
+            fScore.put(nextNode, newDistanceToNextNode + heuristic(nextNode, endNode));
 
             //Removes node (if in the pq already) and adds it again now with its new fScore
             priorityQueue.remove(nextNode);
@@ -144,7 +151,6 @@ public class Search {
 
     ///The heuristic that's added on top of a Node's {@code distanceTo} to implement A*
     private double heuristic(Node a, Node b) {
-        //Euclidean distance
-        return Math.hypot(Math.pow(a.getX() - b.getX(), 2), Math.pow(a.getY() - b.getY(), 2));
+        return Math.hypot((a.getX() - b.getX()), (a.getY() - b.getY())); //Distance formula divided by speedlimit in DK
     }
 }
