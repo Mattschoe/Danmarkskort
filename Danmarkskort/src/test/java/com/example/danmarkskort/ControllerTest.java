@@ -6,4 +6,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ControllerTest {
     //...
+
+    @Test
+    protected void controllerTest() {
+        Controller controller = new Controller();
+        assertNotNull(controller);
+    }
 }
