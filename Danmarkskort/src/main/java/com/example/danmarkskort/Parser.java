@@ -325,7 +325,7 @@ public class Parser implements Serializable {
         //region node parameters
         boolean foot = true;
         boolean bicycle = true;
-        boolean drivable = false;
+        boolean drivable = true;
         int maxSpeed = 0;
         String roadType = "";
         String roadName = "";
@@ -335,9 +335,12 @@ public class Parser implements Serializable {
         for (String key : tagsInWay.keySet()) {
             String value = tagsInWay.get(key);
             switch (key) {
+                case "access" -> {
+                    if (value.equals("private")) drivable = false;
+                }
                 case "highway", "natural", "area:highway" -> {
                     roadType = value;
-                    drivable = !value.equals("footway") && !value.equals("bridleway") && !value.equals("steps") && !value.equals("corridor") && !value.equals("path") && !value.equals("cycleway");
+                    if (value.equals("footway") || value.equals("bridleway") || value.equals("steps") || value.equals("corridor") || value.equals("path") || value.equals("cycleway")) drivable = false;
                 }
                 case "maxspeed" -> {
                     maxSpeed = Integer.parseInt(value);
@@ -350,7 +353,7 @@ public class Parser implements Serializable {
             }
         }
 
-        //Instantierer en ny Road en road og tager stilling til om den har en maxSpeed eller ej.
+        //Instantierer en ny Road en road og tager stilling til om den har en maxSpeed eller ej. || value.equals("steps")
         Road road;
         if (hasMaxSpeed) road = new Road(nodes, foot, bicycle, drivable, maxSpeed, roadType, roadName);
         else road = new Road(nodes, foot, bicycle, drivable, roadType, roadName);
