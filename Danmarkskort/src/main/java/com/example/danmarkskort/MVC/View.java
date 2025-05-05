@@ -235,5 +235,6 @@ public class View {
     public void setTilegrid(Tilegrid tilegrid) { this.tilegrid = tilegrid; }
     public void setBgColor(Color bgColor) { this.bgColor = bgColor; }
     public void setScaleColor(Color scaleColor) { this.scaleColor = scaleColor; }
+    public boolean isFirstTimeDrawingMap() { return firstTimeDrawingMap; } //for tests
     //endregion
 }
