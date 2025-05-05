@@ -22,7 +22,7 @@ public class Search {
     ///For A*, fScore = node.distanceTo + heuristic(node)
     private TObjectDoubleHashMap<Node> fScore;
     List<Road> endRoads;
-    /// den sidste vej inden slutnoden i rutesøgningen
+    ///The list of roads that contain endNode. Used for ending the search early to make sure we find the endNode even if it cant be found by .getOppositeNode()
     Road destinationRoad;
 
     public Search(Collection<Node> nodes) {
