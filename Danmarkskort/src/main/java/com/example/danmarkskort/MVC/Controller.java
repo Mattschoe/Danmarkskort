@@ -30,7 +30,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
@@ -259,15 +258,18 @@ public class Controller implements Initializable {
         TextField source = (TextField) event.getSource();
         searchingSource = source;
 
+        //Changes the position of the ListView depending on which searchbar is being written in
         if (source.getId().equals("searchBar")) listView.setLayoutY(58);
         if (source.getId().equals("destination")) listView.setLayoutY(94);
 
         if (event.getCharacter().equals("\r")) {
             if (!autoSuggestResults.isEmpty()) {
+                listView.setVisible(false);
                 findRoute.setVisible(true);
                 findRoute.requestFocus();
-                listView.setVisible(false);
 
+                //When the user presses enter on a searchbar, it gets
+                //updated with the best(first) match from the suggestions
                 Node selection = autoSuggestResults.getFirst();
                 source.setText(selection.getAddress());
 
@@ -286,7 +288,7 @@ public class Controller implements Initializable {
                 input = input.toLowerCase();
             }
 
-            listView.getItems().clear(); //Potential cleanup from earlier search
+            listView.getItems().clear(); //Cleans up earlier search
             listView.setVisible(true); //Make the trie-matches visible
 
             autoSuggestResults = autoSuggest(input); //Dynamically auto-suggest from user input
@@ -296,33 +298,6 @@ public class Controller implements Initializable {
             if (listView.getItems().size() == 2) listView.setPrefHeight(65);
             if (listView.getItems().size() == 1) listView.setPrefHeight(41);
         }
-
-        //If user wants to search we pick the top node
-        /*if (event.getCharacter().equals("\r")) { //If "Enter" is pressed
-            Node selection = autoSuggestResults.getFirst();
-            view.zoomTo(selection.getX(), selection.getY());
-        } else {
-            listView.getItems().clear(); //Potential cleanup from earlier search
-            String input = searchBar.getText().toLowerCase();
-
-            //if search-bar is empty we return out
-            if (input == null || input.isEmpty()) {
-                listView.setVisible(false);
-                return;
-            }
-
-            //Auto suggests dynamically every user input
-            listView.setVisible(true);
-            autoSuggestResults = autoSuggest(input);
-
-            //Handle look and position of listView
-            TextField source = (TextField) event.getSource();
-            if (source.getId().equals("searchBar")) listView.setLayoutY(58);
-            if (source.getId().equals("destination")) listView.setLayoutY(94);
-            if (listView.getItems().size() >= 3) listView.setPrefHeight(88);
-            if (listView.getItems().size() == 2) listView.setPrefHeight(51);
-            if (listView.getItems().size() == 1) listView.setPrefHeight(27);
-        }*/
     }
 
     /// When the user presses 'DOWN' in a searchbar, focus shifts to the ListView if it is visible
@@ -562,7 +537,7 @@ public class Controller implements Initializable {
 
             Node to = model.getStreetsFromPrefix(termin).getFirst();
             //to = getClosestRoadNode(to); IKKE SLET LÆS getClosestRoadNode
-            endPOI = model.createPOI((float) to.getX(), (float) to.getY(), "Test2");
+            endPOI = model.createPOI(to.getX(), to.getY(), "Test2");
 
             //startSearch(from, to); IKKE SLET LÆS getClosestRoadNode
             startSearch(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
