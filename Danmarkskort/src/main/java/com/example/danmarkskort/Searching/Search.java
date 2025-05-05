@@ -109,26 +109,19 @@ public class Search {
         List<Node> path = new ArrayList<>();
 
         //Loops back through the map of nodes until we have a reverse list of route
-        Node currentNode = endNode;
-        while (cameFrom.containsKey(currentNode)) {
-            path.add(currentNode);
-           // System.out.println("Tilføjede currentNode til path: " + currentNode.toString());
-            currentNode = cameFrom.get(currentNode);
-
+        for (Node current = endNode; current != null; current = cameFrom.get(current)) {
+            path.add(current);
         }
-        path.add(currentNode); //Adds the start node since it isn't included in the loop
         Collections.reverse(path);
 
         //Makes a new road between the endNode and the next in the path, this road is always a subset of "destinationRoad"
         int from = destinationRoad.getNodes().indexOf(cameFrom.get(endNode));
         int to = destinationRoad.getNodes().indexOf(endNode);
-        System.out.println("From: " + from + " To: " + to);
         if (from > to) { //Reverses if indexposition is off
             int temp = from;
             from = to;
             to = temp;
         }
-        System.out.println("From: " + from + " To: " + to);
         List<Node> newRoadNodes = destinationRoad.getNodes().subList(from, to + 1);
         Road newRoad = new Road(newRoadNodes, destinationRoad.isWalkable(), destinationRoad.isBicycle(), destinationRoad.isDriveable(), destinationRoad.getMaxSpeed(), destinationRoad.getType(), destinationRoad.getRoadName());
         newRoad.setPartOfRoute(true);
@@ -138,12 +131,21 @@ public class Search {
         Node current = path.getFirst();
         for (int i = 1; i < path.size(); i++) {
             Node next = path.get(i);
+            List<Road> currentRoads = new ArrayList<>();
             for (Road road : current.getEdges()) { //Runs through all edges of the path
                 if (road.equals(destinationRoad)) continue; //Skips the last road since we made "newRoad" earlier to represent the last road
-                if (road.getNodes().contains(next)) { //Else we add those that are linked by the current node and next node
-                    route.add(road);
-                    road.setPartOfRoute(true);
+                if (road.getOppositeNode(current).equals(next)) { //Else we add those that are linked by the current node and next node
+                    currentRoads.add(road);
                 }
+            }
+            if (!currentRoads.isEmpty()) {
+                //Goes through all roads that are eligible for being part of the route and chooses the one with the smallest weight
+                Road roadWithSmallestWeight = currentRoads.getFirst();
+                for (int j = 1; j < currentRoads.size(); j++) {
+                    if (currentRoads.get(j).getWeight() < roadWithSmallestWeight.getWeight()) roadWithSmallestWeight = currentRoads.get(j);
+                }
+                roadWithSmallestWeight.setPartOfRoute(true);
+                route.add(roadWithSmallestWeight);
             }
             current = next;
         }
