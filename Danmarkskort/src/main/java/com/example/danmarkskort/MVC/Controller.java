@@ -65,6 +65,7 @@ public class Controller implements Initializable {
     private List<POI> deletedPOIs = new ArrayList<>();
     List<Road> latestRoute = new ArrayList<>();
     private List<Node> autoSuggestResults;
+    private boolean switched = false;
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
@@ -85,6 +86,8 @@ public class Controller implements Initializable {
     @FXML private Button findRoute;
     @FXML private Button removePOIButton;
     @FXML private Button savePOIButton;
+    @FXML private MenuItem fastestRoute;
+    @FXML private MenuItem shortestRoute;
     @FXML private MenuItem POIMenuButton;
     @FXML private TextField destination;
     @FXML private Menu POIMenu;
@@ -304,7 +307,7 @@ public class Controller implements Initializable {
         if (!latestRoute.isEmpty()) {
             for (Road road : latestRoute) {
                 road.setPartOfRoute(false);
-                view.removeObjectToDraw(road);
+                view.removeObjectFromDraw(road);
             }
         }
 
@@ -341,7 +344,7 @@ public class Controller implements Initializable {
         oldPOIs.remove(startPOI);
         view.addObjectToDraw(startPOI);
 
-
+        view.drawMap();
         closePOIMenu();
 
         Menu POIMenuItem = new Menu(name);
@@ -349,12 +352,12 @@ public class Controller implements Initializable {
 
         MenuItem deletePOI = new MenuItem("Delete");
         deletePOI.setOnAction(_ -> {
-            view.removeObjectToDraw(startPOI);
+            view.removeObjectFromDraw(startPOI);
             POI poi = favoritePOIs.get(name);
             favoritePOIs.remove(name);
             deletedPOIs.add(poi);
             POIMenu.getItems().remove(POIMenuItem);
-            view.removeObjectToDraw(poi);
+            view.removeObjectFromDraw(poi);
             model.removePOI(poi);
             view.drawMap();
         });
@@ -394,6 +397,12 @@ public class Controller implements Initializable {
         view.drawMap();
     }
 
+    /// Mangler logic for at finde korteste vej
+    @FXML public void shortestRoute(){}
+
+    ///  Mangler logic for at finde hurtigste vej
+    @FXML public void fastestRoute(){}
+
     /// Method to export a route as PDF
     @FXML protected void exportAsPDF(){
         System.out.println("Attempting to export as PDF!");
@@ -416,6 +425,7 @@ public class Controller implements Initializable {
 @FXML protected void guideTextButton(){
         guideText.setVisible(guideButton.isSelected());
     }
+
     /// Method runs upon zooming/scrolling on the Canvas
     @FXML protected void onCanvasScroll(ScrollEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked
@@ -430,6 +440,7 @@ public class Controller implements Initializable {
             //Makes POI
             Affine transform = view.getTrans();
             POI POI = null;
+            switched = true;
             try {
                 POIMark = transform.inverseTransform(e.getX(), e.getY()); //ændret point til et felt, POIMark
                 POI = model.createPOI((float) POIMark.getX(), (float) POIMark.getY(), "Test");
@@ -451,7 +462,7 @@ public class Controller implements Initializable {
                     oldPOIs.clear();
                 }
 
-                if (searchBar.getText().trim().isEmpty() || !destination.isVisible()) {
+                if (searchBar.getText().trim().isEmpty() || !destination.isVisible() || !switched) {
                     startPOI = POI;
                     oldPOIs.add(POI);
                 } else {
@@ -460,6 +471,7 @@ public class Controller implements Initializable {
                 }
 
                 updateSearchText();
+                switched = !switched;
             }
             //Removes old POI from the map if they are not added to the list of favorites so there are no more than 2 active at once.
 
