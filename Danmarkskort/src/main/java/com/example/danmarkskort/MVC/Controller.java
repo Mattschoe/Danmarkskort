@@ -390,7 +390,6 @@ public class Controller implements Initializable {
 
     /// Metode til at fjerne den røde markering på kortet for en POI. Virker kun for den POI, der senest er placeret
     @FXML public void removePOIMarker(POI poi){
-        //sæt knappen til visible og kald denne metode et sted
         model.removePOI(poi);
         view.drawMap();
     }
@@ -414,10 +413,9 @@ public class Controller implements Initializable {
     }
 
     /// Method to open a textbox with a written guide when "Guide" is pressed
-    @FXML protected void guideTextButton(){
+@FXML protected void guideTextButton(){
         guideText.setVisible(guideButton.isSelected());
     }
-
     /// Method runs upon zooming/scrolling on the Canvas
     @FXML protected void onCanvasScroll(ScrollEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked
@@ -444,6 +442,15 @@ public class Controller implements Initializable {
             //Assigns spot for POI. Sets as start if empty or if "find route" has not been activated, if else, else we set it as the destination
             if (POI != null) {
                 onActivateSearch();
+
+                // If the destination bar is not vissible we know we only need to have one POI at a time, this ensures that only one will be on the map
+                if (!destination.isVisible() && favoritePOIs.isEmpty()) {
+                    for (POI old : oldPOIs) {
+                        removePOIMarker(old);
+                    }
+                    oldPOIs.clear();
+                }
+
                 if (searchBar.getText().trim().isEmpty() || !destination.isVisible()) {
                     startPOI = POI;
                     oldPOIs.add(POI);
@@ -457,15 +464,11 @@ public class Controller implements Initializable {
             //Removes old POI from the map if they are not added to the list of favorites so there are no more than 2 active at once.
 
             if (oldPOIs.size() > 2) {
-                while (oldPOIs.size() > 2) {
-                   // System.out.println(oldPOIs);
-                    POI removed = oldPOIs.removeFirst();
-
-                    if (!favoritePOIs.containsValue(removed)) {
-                        oldPOIs.remove(removed);
-                        removePOIMarker(removed);
+                        while (oldPOIs.size() > 2) {
+                            POI removed = oldPOIs.removeFirst();
+                            if (!favoritePOIs.containsValue(removed)) {
+                                removePOIMarker(removed);
                     }
-                    //Removes the deleted POI's from the map after they have been deleted via the savePOIToHashMap function
                 }
             }
         }
@@ -491,6 +494,7 @@ public class Controller implements Initializable {
         POI temp = startPOI;
         startPOI = endPOI;
         endPOI = temp;
+
         updateSearchText();
     }
 
