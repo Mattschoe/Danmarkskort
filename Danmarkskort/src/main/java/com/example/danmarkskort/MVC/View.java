@@ -109,10 +109,8 @@ public class View {
         assert graphicsContext != null && canvas != null;
 
         //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
-        graphicsContext.setTransform(bgTrans);
         graphicsContext.setFill(bgColor);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        if (controller.getScaleText() != null) updateScale();
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
@@ -129,6 +127,8 @@ public class View {
         for (MapObject object : extraDrawObjects) {
             object.draw(graphicsContext);
         }
+
+        if (controller.getScaleText() != null) updateScale();
 
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
@@ -194,6 +194,7 @@ public class View {
 
     /// Method updates the scale-bar on the map based on the zoom-level of the map
     private void updateScale() {
+        canvas.getGraphicsContext2D().setTransform(bgTrans);
         graphicsContext.setLineWidth(3);
         graphicsContext.setStroke(scaleColor);
 

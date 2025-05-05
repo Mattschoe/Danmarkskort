@@ -265,6 +265,7 @@ public class Controller implements Initializable {
         if (event.getCharacter().equals("\r")) {
             if (!autoSuggestResults.isEmpty()) {
                 findRoute.setVisible(true);
+                findRoute.requestFocus();
                 listView.setVisible(false);
 
                 Node selection = autoSuggestResults.getFirst();
@@ -393,10 +394,14 @@ public class Controller implements Initializable {
     //region Canvas methods
     /// When the user chooses a node from the suggestions, overrides the searchbar and zooms onto the Node
     @FXML protected void onAddressPickedFromList(MouseEvent event) {
+        Node chosenNode = autoSuggestResults.get(listView.getSelectionModel().getSelectedIndex());
+        searchBar.setText(chosenNode.getAddress());
+        view.zoomTo(chosenNode.getX(), chosenNode.getY());
+        listView.setVisible(false);
+        findRoute.setVisible(true);
+
         if (event.getClickCount() == 2) {
-            Node chosenNode = autoSuggestResults.get(listView.getSelectionModel().getSelectedIndex());
-            searchBar.setText(chosenNode.getAddress());
-            view.zoomTo(chosenNode.getX(), chosenNode.getY());
+            //Method used to be in here but testing on my gf showed it was unintuitive
         }
     }
 
@@ -495,6 +500,7 @@ public class Controller implements Initializable {
     }
 
     /// Method runs upon releasing a press on the Canvas
+    //TODO er stadig freaky as shit med UI'et. FIX.
     @FXML protected void onCanvasClick(MouseEvent e) {
         //region DOUBLE CLICK (Searching)
         if (e.getClickCount() == 2) {
@@ -540,10 +546,11 @@ public class Controller implements Initializable {
         //endregion
     }
 
-    @FXML public void findRouteButton() {
+    @FXML public void findRouteClicked() {
         if (!switchSearch.isVisible() && !destination.isVisible()) {
             switchSearch.setVisible(true);
             destination.setVisible(true);
+            destination.requestFocus();
         }
         else if (!searchBar.getText().trim().isEmpty() && !destination.getText().trim().isEmpty()) {
             String origin = searchBar.getText().toLowerCase();

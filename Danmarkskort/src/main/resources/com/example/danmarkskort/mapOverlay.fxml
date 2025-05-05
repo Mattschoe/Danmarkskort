@@ -30,6 +30,7 @@
       </font></Text>
 
     <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onKeyPressed="#searchBarsPressed" onKeyTyped="#searchBarsTyped" promptText="Search..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
+   <Button fx:id="findRoute" layoutX="172.0" layoutY="35.0" mnemonicParsing="false" onAction="#findRouteClicked" text="Find Route" visible="false" />
     <TextField fx:id="destination" layoutX="15.0" layoutY="71.0" onKeyPressed="#searchBarsPressed" onKeyTyped="#searchBarsTyped" promptText="Choose Destination..." visible="false" />
    
     <ListView fx:id="listView" layoutX="15.0" layoutY="61.0" onKeyTyped="#onListViewTyped" onMouseClicked="#onAddressPickedFromList" onMouseExited="#mouseExitedListView" prefHeight="72.0" prefWidth="150.0" visible="false" />
@@ -48,7 +49,6 @@
             <CheckMenuItem fx:id="fpsButton" mnemonicParsing="false" text="FPS" />
         </Menu>
     </MenuBar>
-   <Button fx:id="findRoute" layoutX="172.0" layoutY="35.0" mnemonicParsing="false" onAction="#findRouteButton" text="Find Route" visible="false" />
    <Button fx:id="switchSearch" layoutX="172.0" layoutY="71.0" mnemonicParsing="false" onAction="#switchDestinationAndStart" text="Switch" visible="false" />
    <TextArea fx:id="guideText" editable="false" layoutY="25.0" prefHeight="376.0" prefWidth="600.0" text="To load the standard map of Denmark, choose the option in the File tab.&#10;&#10;To print instructions as a PDF, select the option under the File tab.&#10;&#10;To choose points of interest, search via the search bar or select them on the map.&#10;&#10;To access and edit points of interest, use the Edit tab.&#10;&#10;To show the FPS counter, toggle it on via the Show tab.&#10;&#10;To change the color scheme, choose one of the options in the Filter tab.&#10;&#10;To close the guide, toggle it off in the Help menu." visible="false" />
    <Button fx:id="savePOIButton" layoutX="249.0" layoutY="35.0" mnemonicParsing="false" onMouseClicked="#openPOIMenu" text="Save POI" visible="false" />
