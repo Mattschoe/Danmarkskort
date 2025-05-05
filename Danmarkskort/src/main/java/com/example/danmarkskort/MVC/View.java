@@ -94,7 +94,6 @@ public class View {
         bgColor = Color.LIGHTBLUE;
         scaleColor = Color.BLACK;
         graphicsContext.setTransform(trans);
-        //TODO %% controller.bindZoomBar();
 
         //Canvas højde og bredde bindes til vinduets
         canvas.widthProperty().bind(scene.widthProperty());
@@ -110,9 +109,10 @@ public class View {
         assert graphicsContext != null && canvas != null;
 
         //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
-        //TODO %% graphicsContext.setTransform(bgTrans);
+        graphicsContext.setTransform(bgTrans);
         graphicsContext.setFill(bgColor);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        if (controller.getScaleText() != null) updateScale();
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
@@ -129,8 +129,6 @@ public class View {
         for (MapObject object : extraDrawObjects) {
             object.draw(graphicsContext);
         }
-
-        if (controller.getScaleText() != null) updateScale();
 
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
@@ -196,7 +194,6 @@ public class View {
 
     /// Method updates the scale-bar on the map based on the zoom-level of the map
     private void updateScale() {
-        graphicsContext.setTransform(bgTrans);
         graphicsContext.setLineWidth(3);
         graphicsContext.setStroke(scaleColor);
 
