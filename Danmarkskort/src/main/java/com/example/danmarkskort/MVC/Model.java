@@ -142,7 +142,7 @@ public class Model {
         String[] filePath = file.getPath().split("\\\\");
         String folder = filePath[filePath.length - 2];
 
-        System.out.println("Deserializing parser...");
+        System.out.println("Deserializing binary files...");
         //region Reading .obj files
         //region Parser
         try {
@@ -152,6 +152,7 @@ public class Model {
         } catch (Exception e) {
             System.out.println("Error reading parser!: " + e.getMessage());
         }
+        System.out.println("- Finished deserializing parser!");
         //endregion
 
         //region Nodes
@@ -315,10 +316,8 @@ public class Model {
             String houseNumber = readString(inputBuffer);
             short postcode = inputBuffer.getShort();
             String street = readString(inputBuffer);
-            double distanceTo = inputBuffer.getDouble();
 
-            Node newNode = new Node(x, y, city, houseNumber, postcode, street, distanceTo);
-            ID2Node.put(ID, newNode);
+            ID2Node.put(ID, new Node(x, y, city, houseNumber, postcode, street));
         }
         return ID2Node;
     }
@@ -346,13 +345,9 @@ public class Model {
 
             int maxSpeed = inputBuffer.getInt();
 
-            try {
-                String roadType = readString(inputBuffer);
-                String roadName = readString(inputBuffer);
-                roads.add(new Road(nodesInRoad, walkable, bicycle, drivable, maxSpeed, roadType, roadName));
-            } catch (NoSuchElementException e) {
-                System.out.println("Ø=");
-            }
+            String roadType = readString(inputBuffer);
+            String roadName = readString(inputBuffer);
+            roads.add(new Road(nodesInRoad, walkable, bicycle, drivable, maxSpeed, roadType, roadName));
         }
         return roads;
     }
@@ -478,9 +473,6 @@ public class Model {
                         outputBuffer.put(data);
                     }
                     //endregion
-
-                    //Other
-                    outputBuffer.putDouble(node.getDistanceTo());
                 }
                 outputBuffer.force(); //Flushes to disk
                 System.out.println("- Saved chunk " + i + " with " + (end - start) + " nodes!");
@@ -595,7 +587,6 @@ public class Model {
             throw new ParserSavingException("Error saving polygons to OBJ!: " + e.getMessage());
         }
         //endregion
-        //System.exit(0); //What the fuck? -OFS
     }
 
     /// Computes how much space is needed to be allocated in the chunk
@@ -605,14 +596,13 @@ public class Model {
             Node node = ID2Node.get(ID);
             size += Long.BYTES; //ID
             size += Float.BYTES*2; //XY
-            if (node.getCity() != null) size += Integer.BYTES + node.getCity().getBytes(StandardCharsets.UTF_8).length; //Int for reading amount of bytes
+            if (node.getCity() != null) size += Integer.BYTES + node.getCity().getBytes(StandardCharsets.UTF_8).length; //Int is for reading amount of bytes
             else size += Integer.BYTES; //Space for "-1"
             if (node.getHouseNumber() != null) size += Integer.BYTES + node.getHouseNumber().getBytes(StandardCharsets.UTF_8).length;
             else size += Integer.BYTES; //Space for "-1"
             size += Short.BYTES; //Postcode
             if (node.getStreet() != null) size += Integer.BYTES + node.getStreet().getBytes(StandardCharsets.UTF_8).length;
             else size += Integer.BYTES; //Space for "-1"
-            size += Double.BYTES; //distanceTo
         }
         return size;
     }
