@@ -63,7 +63,6 @@ public class Search {
                 break;
             }
             for (Road road : currentNode.getEdges()) {
-                System.out.println(road.getWeight());
                 if (closedNodes.contains(road.getOppositeNode(currentNode))) continue; //If we have already looked at the node and relaxed its edges we skip it (This avoids relooking at nodes)
                 if (road.isDriveable()) relax(road, currentNode); //Relaxes the road if its drivable
             }
