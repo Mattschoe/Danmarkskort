@@ -63,6 +63,7 @@ public class Controller implements Initializable {
     private Map<String,POI> favoritePOIs = new HashMap<>();
     private List<POI> oldPOIs = new ArrayList<>();
     private List<POI> deletedPOIs = new ArrayList<>();
+    List<Road> latestRoute = new ArrayList<>();
     private List<Node> autoSuggestResults;
 
     private long lastSystemTime; //Used to calculate FPS
@@ -300,12 +301,21 @@ public class Controller implements Initializable {
         return Collections.emptyList();
     }
 
+
     private void startSearch() {
+        //First removes the last route from the draws i
+        if (!latestRoute.isEmpty()) {
+            for (Road road : latestRoute) {
+                road.setPartOfRoute(false);
+                view.removeObjectToDraw(road);
+            }
+        }
+
         System.out.println("Starting search...");
-        List<Road> route = model.search(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
+        latestRoute = model.search(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
 
         //Adds route to the view so it gets drawn
-        for (Road road : route) {
+        for (Road road : latestRoute) {
             view.addObjectToDraw(road);
         }
         view.drawMap(); //Draws to refresh instantly
@@ -467,13 +477,6 @@ public class Controller implements Initializable {
 
     /// Opens the search menu when activated. If both start- and endPOI are initialized, this button is used for activating the route finding between the two POI's.
     @FXML public void onActivateSearch() {
-        //TESTING
-        for (Tile tile :  model.getTilegrid().getVisibleTiles()) {
-            for (Road road : tile.getRoads()) {
-                road.getNodes().getFirst().setPartOfRoute(true);
-                road.getNodes().getLast().setPartOfRoute(true);
-            }
-        }
         findRoute.setVisible(true);
     }
 

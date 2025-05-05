@@ -4,6 +4,7 @@ import com.example.danmarkskort.MVC.Model;
 import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Tile;
+import gnu.trove.map.hash.TDoubleObjectHashMap;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,6 +21,8 @@ public class Search {
     private boolean foundRoute;
     PriorityQueue<Node> priorityQueue;
     private Map<Node, Node> cameFrom;
+    ///For A*, fScore = node.distanceTo + heuristic(node)
+    private TDoubleObjectHashMap<Node> fScore;
     List<Road> endRoads;
     /// den sidste vej inden slutnoden i rutesøgningen
     Road destinationRoad;
@@ -50,14 +53,13 @@ public class Search {
         priorityQueue.add(startNode);
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
-            currentNode.setPartOfRoute(true);
             if (currentNode.equals(endNode)) { //Reached endNode
                 System.out.println("Reached EndNode! Route found!");
                 foundRoute = true;
                 break;
             }
             for (Road road : currentNode.getEdges()) {
-                relax(road, currentNode);
+                if (road.isDriveable()) relax(road, currentNode); //Relaxes the road if its drivable
             }
         }
         if (foundRoute) {
@@ -66,6 +68,7 @@ public class Search {
         } else {
             System.out.println("No path found!");
         }
+        cleanup();
     }
 
     /// Relaxes the edge. {@code currentNode} HAS to be either the roads start- or endNode, otherwise an error will be thrown.
@@ -122,6 +125,20 @@ public class Search {
         }
     }
 
+    ///Cleans up the mapObjects used in the search so they are ready for another search
+    public void cleanup() {
+        for (Node node : cameFrom.keySet()) {
+            node.setPartOfRoute(false);
+            node.setDistanceTo(Double.MAX_VALUE);
+        }
+    }
+
     ///Returns route, returns null if haven't found route
     public List<Road> getRoute() { return route; }
+
+    ///The heuristic that's added on top of a Node's {@code distanceTo} to implement A*
+    private double heuristic(Node a, Node b) {
+        //Euclidean distance
+        return Math.hypot(Math.pow(a.getX() - b.getX(), 2), Math.pow(a.getY() - b.getY(), 2));
+    }
 }
