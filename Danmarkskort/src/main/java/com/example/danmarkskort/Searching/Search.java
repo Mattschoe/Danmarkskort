@@ -5,13 +5,10 @@ import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Tile;
 import gnu.trove.map.hash.TDoubleObjectHashMap;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
+import gnu.trove.map.hash.TObjectLongHashMap;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.PriorityQueue;
 
 public class Search {
@@ -22,7 +19,7 @@ public class Search {
     PriorityQueue<Node> priorityQueue;
     private Map<Node, Node> cameFrom;
     ///For A*, fScore = node.distanceTo + heuristic(node)
-    private TDoubleObjectHashMap<Node> fScore;
+    private TObjectDoubleHashMap<Node> fScore;
     List<Road> endRoads;
     /// den sidste vej inden slutnoden i rutesøgningen
     Road destinationRoad;
@@ -47,10 +44,12 @@ public class Search {
     }
 
     private void findPath() {
-        priorityQueue = new java.util.PriorityQueue<>();
+        priorityQueue = new java.util.PriorityQueue<>(Comparator.comparingDouble(fScore::get)); //Retrieves the nodes fScore and uses that in the PQ instead of its "distanceTo" (A*)
         cameFrom = new HashMap<>();
+        fScore = new TObjectDoubleHashMap<>();
 
         priorityQueue.add(startNode);
+        fScore.put(startNode, heuristic(startNode, endNode));
         while (!priorityQueue.isEmpty()) {
             Node currentNode = priorityQueue.poll();
             if (currentNode.equals(endNode)) { //Reached endNode
@@ -78,12 +77,16 @@ public class Search {
            cameFrom.put(endNode, currentNode);
        }
 
-       double newDistanceTo = currentNode.getDistanceTo() + road.getWeight();
+       double newDistanceToNextNode = currentNode.getDistanceTo() + road.getWeight();
        Node nextNode = road.getOppositeNode(currentNode);
 
-       if (nextNode.getDistanceTo() > newDistanceTo) {
-            nextNode.setDistanceTo(newDistanceTo);
+       if (nextNode.getDistanceTo() > newDistanceToNextNode) {
+            nextNode.setDistanceTo(newDistanceToNextNode);
             cameFrom.put(nextNode, currentNode);
+            fScore.put(nextNode, newDistanceToNextNode + heuristic(nextNode, currentNode));
+
+            //Removes node (if in the pq already) and adds it again now with its new fScore
+            priorityQueue.remove(nextNode);
             priorityQueue.add(nextNode);
        }
     }

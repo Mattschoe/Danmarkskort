@@ -105,8 +105,7 @@ public class ModelTest {
     //@Disabled
     @Test
     public void createOBJFile() {
-        Model model = Model.getInstance("./data/mapOfDenmark.osm", canvas);
-        model.saveParserToOBJ();
+        Model model = Model.getInstance("./data/mapOfDenmark.osm", canvas, true);
         File file = new File("./data/mapOfDenmark.osm.obj");
         assertTrue(file.exists());
     }

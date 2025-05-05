@@ -385,7 +385,7 @@ public class Model {
     }
 
     /// Saves the parser to a .obj file so it can be called later. Method is called in {@link #Model} if the file isn't a .obj
-    public void saveParserToOBJ() {
+    private void saveParserToOBJ() {
         String filename = file.getName().split("\\.")[0];
 
         //Reverse HashMap needed to store node ID in roads. reverses the map so we can store the ID correctly
