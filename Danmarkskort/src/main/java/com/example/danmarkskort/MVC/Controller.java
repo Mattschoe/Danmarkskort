@@ -519,6 +519,7 @@ public class Controller implements Initializable {
      * and changes the display text in the bottom left corner of the application.
      */
     @FXML protected void onCanvasHover(MouseEvent e) {
+        if (model == null) model = Model.getInstance();
         double x, y;
         Tile tile;
 

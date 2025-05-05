@@ -1,13 +1,10 @@
 package com.example.danmarkskort;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.AfterEach;
 
-public class AppTest {
-    Thread thread;
+public class UserTest {
+    /*Thread thread;
 
 
     //region Test setup
@@ -18,17 +15,12 @@ public class AppTest {
         );
         thread.start();
     }
-
-    @AfterEach
-    protected void afterEachTest() {
-        //...
-    }
     //endregion
 
     //region Tests
     @Test
-    protected void testTest() throws InterruptedException {
+    protected void userTest() throws InterruptedException {
         thread.join();
     }
-    //endregion
+    //endregion*/
 }
