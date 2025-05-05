@@ -59,12 +59,12 @@ public class Controller implements Initializable {
     private MouseEvent mouseEvent; //Used to pan
     private POI startPOI;
     private POI endPOI;
-    private Point2D POIMark;
     private Map<String,POI> favoritePOIs = new HashMap<>();
     private List<POI> oldPOIs = new ArrayList<>();
     private List<POI> deletedPOIs = new ArrayList<>();
     List<Road> latestRoute = new ArrayList<>();
     private List<Node> autoSuggestResults;
+    private TextField searchingSource;
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
@@ -80,13 +80,13 @@ public class Controller implements Initializable {
     @FXML private Text fpsText;
     @FXML private Text scaleText;
     @FXML private TextField searchBar;
+    @FXML private TextField destination;
     @FXML private TextArea guideText;
     @FXML private Button switchSearch;
     @FXML private Button findRoute;
     @FXML private Button removePOIButton;
     @FXML private Button savePOIButton;
     @FXML private MenuItem POIMenuButton;
-    @FXML private TextField destination;
     @FXML private Menu POIMenu;
     @FXML private TextField addNamePOI;
     @FXML private Button addToPOIsUI;
@@ -141,8 +141,9 @@ public class Controller implements Initializable {
         catch (Exception e) { System.out.println("No test coverage report exists! Try building the app"); }
     }
 
-    /** Passes the given file into a Model class that starts parsing it
-     *  @param mapFile the file which the map is contained. Given by user when choosing file
+    /**
+     * Passes the given file into a Model class that starts parsing it
+     * @param mapFile the file which the map is contained. Given by user when choosing file
      */
     private void loadFile(File mapFile) {
         boolean createOBJ = checkBoxOBJ != null && checkBoxOBJ.isSelected();
@@ -151,15 +152,16 @@ public class Controller implements Initializable {
         view.setTilegrid(model.getTilegrid());
     }
 
-    /** Runs right after a Controller is created --
-     *  configures something(???) for an object in the mapOverlay.fxml scene
+    /**
+     * Runs right after a Controller is created -- configures
+     * something(???) for an object in the mapOverlay.fxml scene
      */
     @Override public void initialize(URL url, ResourceBundle resourceBundle) {
         listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<>() {
             @Override
             public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
                 String selected = listView.getSelectionModel().getSelectedItem();
-                searchBar.setText(selected);
+                searchingSource.setText(selected);
             }
         });
     }
@@ -254,8 +256,47 @@ public class Controller implements Initializable {
     @FXML protected void searchBarTyped(KeyEvent event) {
         if (model == null) model = Model.getInstance();
 
+        TextField source = (TextField) event.getSource();
+        searchingSource = source;
+
+        if (source.getId().equals("searchBar")) listView.setLayoutY(58);
+        if (source.getId().equals("destination")) listView.setLayoutY(94);
+
+        if (event.getCharacter().equals("\r")) {
+            if (!autoSuggestResults.isEmpty()) {
+                listView.setVisible(false);
+
+                Node selection = autoSuggestResults.getFirst();
+                source.setText(selection.getAddress());
+
+                view.zoomTo(selection.getX(), selection.getY());
+            }
+        }
+        else {
+            String input = source.getText();
+
+            //If search-bar is empty we return out
+            if (input == null || input.isEmpty()) {
+                listView.setVisible(false);
+                return;
+            }
+            else {
+                input = input.toLowerCase();
+            }
+
+            listView.getItems().clear(); //Potential cleanup from earlier search
+            listView.setVisible(true); //Make the trie-matches visible
+
+            autoSuggestResults = autoSuggest(input); //Dynamically auto-suggest from user input
+
+            //Changes listView size dynamically
+            if (listView.getItems().size() >= 3) listView.setPrefHeight(88);
+            if (listView.getItems().size() == 2) listView.setPrefHeight(65);
+            if (listView.getItems().size() == 1) listView.setPrefHeight(41);
+        }
+
         //If user wants to search we pick the top node
-        if (event.getCharacter().equals("\r")) { //If "Enter" is pressed
+        /*if (event.getCharacter().equals("\r")) { //If "Enter" is pressed
             Node selection = autoSuggestResults.getFirst();
             view.zoomTo(selection.getX(), selection.getY());
         } else {
@@ -263,7 +304,7 @@ public class Controller implements Initializable {
             String input = searchBar.getText().toLowerCase();
 
             //if search-bar is empty we return out
-            if (input.isEmpty()) {
+            if (input == null || input.isEmpty()) {
                 listView.setVisible(false);
                 return;
             }
@@ -271,12 +312,21 @@ public class Controller implements Initializable {
             //Auto suggests dynamically every user input
             listView.setVisible(true);
             autoSuggestResults = autoSuggest(input);
-        }
+
+            //Handle look and position of listView
+            TextField source = (TextField) event.getSource();
+            if (source.getId().equals("searchBar")) listView.setLayoutY(58);
+            if (source.getId().equals("destination")) listView.setLayoutY(94);
+            if (listView.getItems().size() >= 3) listView.setPrefHeight(88);
+            if (listView.getItems().size() == 2) listView.setPrefHeight(51);
+            if (listView.getItems().size() == 1) listView.setPrefHeight(27);
+        }*/
     }
 
     /**
      * Auto-suggests roads and cities in a drop-down menu from the search-bar.
-     * Will auto-suggest cities, unless there are none, then suggests potentiel streets.
+     * Will auto-suggest cities, unless there are none, then suggests potential streets.
+     * @return list of nodes which match the search-input
      */
     private List<Node> autoSuggest(String input) {
         List<Node> cities = model.getCitiesFromPrefix(input);
@@ -288,19 +338,21 @@ public class Controller implements Initializable {
                 listView.getItems().add(node.getCity());
             }
             return cities;
-        } else if (!streets.isEmpty()) {
-            //If no city found we show streets
+        }
+        else if (!streets.isEmpty()) { //If no city found we show streets
             for (Node node : streets) {
                 listView.getItems().add(node.getAddress());
             }
             return streets;
         }
+
+        listView.setVisible(false);
         return Collections.emptyList();
     }
 
 
-    private void startSearch() {
-        //First removes the last route from the draws i
+    private void startSearch(Node from, Node to) {
+        //First removes the last route from the draws
         if (!latestRoute.isEmpty()) {
             for (Road road : latestRoute) {
                 road.setPartOfRoute(false);
@@ -309,7 +361,8 @@ public class Controller implements Initializable {
         }
 
         System.out.println("Starting search...");
-        latestRoute = model.search(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
+        //latestRoute = model.search(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
+        latestRoute = model.search(from, to);
 
         //Adds route to the view so it gets drawn
         for (Road road : latestRoute) {
@@ -340,7 +393,6 @@ public class Controller implements Initializable {
         favoritePOIs.put(name, startPOI);
         oldPOIs.remove(startPOI);
         view.addObjectToDraw(startPOI);
-
 
         closePOIMenu();
 
@@ -407,7 +459,7 @@ public class Controller implements Initializable {
                 System.out.println("PDF-export successful!");
             }
             catch (Exception e) {
-                System.out.println("PDF-export failed! Error: "+ e.getMessage());
+                System.out.println("PDF-export failed; "+ e.getMessage());
             }
         }
         else System.out.println("PDF-export failed; no route has been successfully set yet!");
@@ -431,10 +483,10 @@ public class Controller implements Initializable {
         if (e.getClickCount() == 2) {
             //Makes POI
             Affine transform = view.getTrans();
-            POI POI = null;
+            POI poi = null;
             try {
-                POIMark = transform.inverseTransform(e.getX(), e.getY()); //ændret point til et felt, POIMark
-                POI = model.createPOI((float) POIMark.getX(), (float) POIMark.getY(), "Test");
+                Point2D POIMark = transform.inverseTransform(e.getX(), e.getY()); //ændret point til et felt, POIMark
+                poi = model.createPOI((float) POIMark.getX(), (float) POIMark.getY(), "Test");
                 savePOIButton.setVisible(true);
             } catch (NonInvertibleTransformException exception) {
                 System.out.println("Error inversion mouseclick coords!" + exception.getMessage());
@@ -442,14 +494,14 @@ public class Controller implements Initializable {
             view.drawMap(); //Makes sure that the POI is shown instantly
 
             //Assigns spot for POI. Sets as start if empty or if "find route" has not been activated, if else, else we set it as the destination
-            if (POI != null) {
+            if (poi != null) {
                 onActivateSearch();
                 if (searchBar.getText().trim().isEmpty() || !destination.isVisible()) {
-                    startPOI = POI;
-                    oldPOIs.add(POI);
+                    startPOI = poi;
+                    oldPOIs.add(poi);
                 } else {
-                    endPOI = POI;
-                    oldPOIs.add(POI);
+                    endPOI = poi;
+                    oldPOIs.add(poi);
                 }
 
                 updateSearchText();
@@ -479,19 +531,60 @@ public class Controller implements Initializable {
 
     /// "Find Route" button on UI
     @FXML public void onRouteSearchStart() {
-        if (startPOI != null && endPOI != null && !searchBar.getText().trim().isEmpty() && !destination.getText().trim().isEmpty()) {
+        if (!switchSearch.isVisible() && !destination.isVisible()) {
+            switchSearch.setVisible(true);
+            destination.setVisible(true);
+        }
+        else if (!searchBar.getText().trim().isEmpty() && !destination.getText().trim().isEmpty()) {
+            String origin = searchBar.getText().toLowerCase();
+            String termin = destination.getText().toLowerCase();
+
+            Node from = model.getStreetsFromPrefix(origin).getFirst();
+            from = getClosestRoadNode(from);
+
+            Node to = model.getStreetsFromPrefix(termin).getFirst();
+            to = getClosestRoadNode(to);
+
+            startSearch(from, to);
+        }
+        else {
+            System.out.println("Cannot search for a route without both a start- AND an endpoint!");
+        }
+
+        /*if (startPOI != null && endPOI != null && !searchBar.getText().trim().isEmpty() && !destination.getText().trim().isEmpty()) {
             startSearch();
         } else {
             switchSearch.setVisible(true);
             destination.setVisible(true);
+        }*/
+    }
+
+    private Node getClosestRoadNode(Node node) {
+        Tile tile = model.getTilegrid().getTileFromXY(node.getX(), node.getY());
+        Road closestRoad = getClosestRoad(tile, node.getX(), node.getY());
+        double closestDistance = Double.POSITIVE_INFINITY;
+
+        for (Node n : closestRoad.getNodes()) {
+            double nodeX = n.getX();
+            double nodeY = n.getY();
+            double distance = Math.sqrt(Math.pow((nodeX - node.getX()), 2) + Math.pow((nodeY - node.getY()), 2)); //Jeg har stjålet MN's afstandsformel 3:) -OFS. a^2 + b^2 = c^2 type shit
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                node = n;
+            }
         }
+        return node;
     }
 
     @FXML public void switchDestinationAndStart() {
-        POI temp = startPOI;
+        String temp = searchBar.getText();
+        searchBar.setText(destination.getText());
+        destination.setText(temp);
+
+        /*POI temp = startPOI;
         startPOI = endPOI;
         endPOI = temp;
-        updateSearchText();
+        updateSearchText();*/
     }
 
     /// Updates the text in the search. Call this after changing the POI responsible for the text
