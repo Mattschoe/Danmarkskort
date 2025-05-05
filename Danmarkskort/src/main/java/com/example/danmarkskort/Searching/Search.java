@@ -151,6 +151,6 @@ public class Search {
 
     ///The heuristic that's added on top of a Node's {@code distanceTo} to implement A*
     private double heuristic(Node a, Node b) {
-        return Math.hypot((a.getX() - b.getX()), (a.getY() - b.getY())); //Distance formula divided by speedlimit in DK
+        return Math.hypot((a.getX() - b.getX()), (a.getY() - b.getY())) / 130; //Distance formula divided by speedlimit in DK
     }
 }

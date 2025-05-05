@@ -350,6 +350,7 @@ public class Parser implements Serializable {
                 case "foot" -> foot = value.equals("yes");
                 case "route" -> roadType = key;
                 case "name" -> roadName = value;
+                case "railway" -> drivable = false;
             }
         }
 
