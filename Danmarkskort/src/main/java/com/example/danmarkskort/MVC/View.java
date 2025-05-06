@@ -17,7 +17,6 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Set;
 
 public class View {
@@ -35,6 +34,8 @@ public class View {
     private Tilegrid tilegrid;
     /// Extra objects outside the grid that are included in draw method. Objects are added in {@link #addObjectToDraw(MapObject)}
     private final Set<MapObject> extraDrawObjects;
+    private double zoomLevel;
+    private FXMLLoader root;
     //endregion
 
     //region Constructor(s)
@@ -57,7 +58,7 @@ public class View {
         //Skaber en FXMLLoader, klar til at loade den specificerede FXML-fil
         URL url = getClass().getResource(fxmlLocation);
         assert url != null;
-        FXMLLoader root = new FXMLLoader(url);
+        root = new FXMLLoader(url);
 
         //Hvis det er start-scenen, får vinduet en forudbestemt størrelse, ellers sættes den dynamisk
         double width, height;
@@ -110,10 +111,8 @@ public class View {
         assert graphicsContext != null && canvas != null;
 
         //Preps the graphicsContext for drawing the map (paints background and sets transform and standard line-width)
-        graphicsContext.setTransform(bgTrans);
         graphicsContext.setFill(bgColor);
         graphicsContext.fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        if (controller.getScaleText() != null) updateScale();
         graphicsContext.setTransform(trans);
         graphicsContext.setLineWidth(1/Math.sqrt(graphicsContext.getTransform().determinant()));
 
@@ -131,6 +130,8 @@ public class View {
             object.draw(graphicsContext);
         }
 
+        if (controller.getScaleText() != null) updateScale();
+
         if (firstTimeDrawingMap) {
             System.out.println("Finished first time drawing!");
             firstTimeDrawingMap = false;
@@ -145,7 +146,7 @@ public class View {
     }
 
     /// Removes the object given as parameter
-    public void removeObjectToDraw(MapObject mapObject) { extraDrawObjects.remove(mapObject); }
+    public void removeObjectFromDraw(MapObject mapObject) { extraDrawObjects.remove(mapObject); }
 
     /// Method pans on the canvas
     public void pan(double dx, double dy) {
@@ -184,7 +185,7 @@ public class View {
 
     /// Changes the current zoom level to a range from 0 to 4 (needed for the LOD). 0 is minimum amount of details, 4 is maximum
     private int getLOD() {
-        double zoomLevel = trans.getMxx();
+       zoomLevel = trans.getMxx();
         if (zoomLevel > 550) return 5;
         if (zoomLevel > 160) return 4;
         if (zoomLevel > 85) return 3;
@@ -195,6 +196,7 @@ public class View {
 
     /// Method updates the scale-bar on the map based on the zoom-level of the map
     private void updateScale() {
+        canvas.getGraphicsContext2D().setTransform(bgTrans);
         graphicsContext.setLineWidth(3);
         graphicsContext.setStroke(scaleColor);
 
@@ -237,6 +239,8 @@ public class View {
     public void setBgColor(Color bgColor) { this.bgColor = bgColor; }
     public void setScaleColor(Color scaleColor) { this.scaleColor = scaleColor; }
     public boolean isFirstTimeDrawingMap() { return firstTimeDrawingMap; } //for tests
+    public double getZoomLevel(){ return zoomLevel; } //used for tests
+    public FXMLLoader getFXMLLoader(){return root;}
 
     public Scene getScene() {
     return scene;

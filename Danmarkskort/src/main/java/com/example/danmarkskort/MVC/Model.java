@@ -354,12 +354,13 @@ public class Model {
             boolean walkable = inputBuffer.get() != 0;
             boolean bicycle = inputBuffer.get() != 0;
             boolean drivable = inputBuffer.get() != 0;
+            boolean oneway = inputBuffer.get() != 0;
 
             int maxSpeed = inputBuffer.getInt();
 
             String roadType = readString(inputBuffer);
             String roadName = readString(inputBuffer);
-            roads.add(new Road(nodesInRoad, walkable, bicycle, drivable, maxSpeed, roadType, roadName));
+            roads.add(new Road(nodesInRoad, walkable, bicycle, drivable, oneway, maxSpeed, roadType, roadName));
         }
         return roads;
     }
@@ -527,6 +528,8 @@ public class Model {
                     else outputBuffer.put((byte) 0);
                     if (road.isDriveable()) outputBuffer.put((byte) 1);
                     else outputBuffer.put((byte) 0);
+                    if (road.isOneway()) outputBuffer.put((byte) 1);
+                    else outputBuffer.put((byte) 0);
 
                     //Maxspeed
                     outputBuffer.putInt(road.getMaxSpeed());
@@ -624,7 +627,7 @@ public class Model {
         long size = 0;
         for (Road road : roads) {
             size += Integer.BYTES; //Length of road.getNodes
-            size += road.getNodes().size() * Long.BYTES; size += 3; //foot, bicycle, isDriveable
+            size += road.getNodes().size() * Long.BYTES; size += 4; //foot, bicycle, isDriveable, oneway
             size += Integer.BYTES; //MaxSpeed
             if (road.getType() != null) size += Integer.BYTES + road.getType().getBytes(StandardCharsets.UTF_8).length; //RoadType
             else size += Integer.BYTES; //Space for "-1"
@@ -833,6 +836,19 @@ public class Model {
     public boolean hasFullAddress(Node node) {
         return node.getCity() != null && node.getHouseNumber() != null && node.getPostcode() != 0 && node.getStreet() != null;
     }
+
+    ///Sets the type of search algorithm that will be used. <br> true = Quickest Route <br> false = Shortest Route
+    public void setSearchType(boolean quickestRoute) {
+        Tile[][] grid = tilegrid.getGrid();
+        for (int x = 0; x < numberOfTilesX; x++) {
+            for (int y = 0; y < numberOfTilesY; y++) {
+                for (Road road : grid[x][y].getRoads()) {
+                    road.changeWeight(quickestRoute);
+                }
+            }
+        }
+        search.changeRouteSettings(quickestRoute);
+    }
     //endregion
 
     //region Getters and setters
@@ -840,5 +856,6 @@ public class Model {
     public Tilegrid getTilegrid() { return tilegrid; }
     public List<Road> getLatestRoute() { return latestRoute; }
     public void setLatestRoute(List<Road> route) { latestRoute = route; }
+    public Search getSearch() { return search; }
     //endregion
 }

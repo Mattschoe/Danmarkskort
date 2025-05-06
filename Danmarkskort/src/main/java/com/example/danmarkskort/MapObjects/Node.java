@@ -115,6 +115,13 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     ///Returns whether this node is an intersection or not
     public boolean isIntersection() {  return edges > 1; }
     public List<Road> getEdges() { return roadEdges; }
+    ///Returns whether this node has any edges that are drivable
+    public boolean hasDrivableEdges() {
+        for (Road road : roadEdges) {
+            if (road.isDriveable()) return true;
+        }
+        return false;
+    }
 
     //region Address
     public String getCity() { return city; }

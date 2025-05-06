@@ -23,6 +23,7 @@ public class Road implements Serializable, MapObject {
     private final boolean foot;
     private final boolean bicycle;
     private final boolean isDriveable;
+    private final boolean isOneway;
     private int maxSpeed;
     private String roadType;
     private final String roadName;
@@ -44,16 +45,17 @@ public class Road implements Serializable, MapObject {
      *  @param maxSpeed the max speed on the road
      *  @param roadType the type of road
      */
-    public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDriveable, int maxSpeed, String roadType, String roadName) {
+    public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDriveable, boolean isOneway, int maxSpeed, String roadType, String roadName) {
         this.nodes = nodes;
         this.foot = foot;
         this.bicycle = bicycle;
         this.isDriveable = isDriveable;
+        this.isOneway = isOneway;
         this.maxSpeed = maxSpeed;
         this.roadType = roadType.intern();
         this.roadName = roadName.intern();
 
-        calculateWeight();
+        calculateWeight(true);
         calculateBoundingBox();
 
         assignColorSheetProp();
@@ -72,10 +74,11 @@ public class Road implements Serializable, MapObject {
         this.foot = foot;
         this.bicycle = bicycle;
         this.isDriveable = isDriveable;
+        isOneway = false;
         this.roadType = roadType.intern();
         this.roadName = roadName.intern();
 
-        calculateWeight();
+        calculateWeight(true);
         calculateBoundingBox();
 
         assignColorSheetProp();
@@ -123,6 +126,7 @@ public class Road implements Serializable, MapObject {
             case "track", "path" -> ROAD_TRACK_PATH;
             case "tree_row"  -> ROAD_TREE_ROW;
             case "route"     -> ROAD_ROUTE;
+            case "river" -> POLY_WATERWAY;
             default          -> ROAD_DEFAULT;
         };
     }
@@ -158,24 +162,35 @@ public class Road implements Serializable, MapObject {
         }
     }
 
-    ///TO DO: THIS METHOD NEEDS TO BE FIXED TO ADJUST FOR SPEEDLIMIT BUT IT HAS TO ACCOUNT FOR WHERE THE NODES ARE LOCATED IN XY SPACE
-    private void calculateWeight() {
-        float deltaX = nodes.getFirst().getX() - nodes.getLast().getX();
-        float deltaY = nodes.getFirst().getY() - nodes.getLast().getY();
+    /**
+     * Calculates the weight of the Road. The {@code weight} being defined by the parameter
+     * @param quickestRoute chooses the method of calculating the weight. <br> True = Quickest <br> False = Shortest <br>
+     */
+    private void calculateWeight(boolean quickestRoute) {
+        //Loops through all the nodes in the road calculating the total distance between them all
+        double distance = 0;
+        Node currentNode = nodes.getFirst();
+        for (int i = 1; i < nodes.size(); i++) {
+            Node nextNode = nodes.get(i);
+            distance += Math.hypot((currentNode.getX() - nextNode.getX()), (currentNode.getY() - nextNode.getY()));
+            currentNode = nextNode;
+        }
 
-       double distance = Math.hypot(deltaX, deltaY);
-
-
-
-       //edge weight udregnes nu som tiden det vil tage at komme fra startnode til slutnode på den givne road
-       if(maxSpeed > 0) weight = (float) distance / maxSpeed;
-       else {
-           //Else we see if we can calculate the weight from the roadtype (Motorvej/Motortrafikvej), if not, we set the standard speed as 50
-           if (roadType.equals("motorway")) weight = (float) distance / 130;
-           else if (roadType.equals("trunk")) weight = (float) distance / 80;
-           else weight = (float) distance/ 50;
-       }
+        if (quickestRoute) {
+            //Calculates the time it takes to cross the distance via distance/maxSpeed
+            if (maxSpeed > 0) weight = (float) distance / maxSpeed;
+            else {
+                //Else we see if we can calculate the weight from the roadtype (Motorvej/Motortrafikvej), if not, we set the standard speed as 50
+                if (roadType.equals("motorway")) weight = (float) distance / 130;
+                else if (roadType.equals("trunk")) weight = (float) distance / 80;
+                else weight = (float) distance / 50;
+            }
+        } else {
+            //Shortest path
+            weight = (float) distance;
+        }
     }
+
     //endregion
 
     //region Getters and setters
@@ -188,9 +203,9 @@ public class Road implements Serializable, MapObject {
     public boolean hasMaxSpeed() { return maxSpeed != 0; }
     public boolean isWalkable() { return foot; }
     public boolean isBicycle() { return bicycle; }
+    public boolean isOneway() { return isOneway; }
     public float getWeight() { return weight; }
     public void setPartOfRoute(boolean partOfRoute) { this.partOfRoute = partOfRoute; }
-
     /**
      * Returns the opposite of the Node given. So if given the roads startNode it will return the roads endNode (and reverse).
      * @param node HAS TO BE EITHER THE ROADS START- OR END-NODE. WILL RETURN NULL ELSE
@@ -200,10 +215,9 @@ public class Road implements Serializable, MapObject {
         if (node.equals(nodes.getLast())) return nodes.getFirst();
         return null;
     }
-
-    @Override
-    public float[] getBoundingBox() { return boundingBox; }
-
+    ///Returns the last node in the road. Used for going the right of way if the road is oneway in searching
+    public Node getEndNode() { return nodes.getLast(); }
+    @Override public float[] getBoundingBox() { return boundingBox; }
     /// Returns either the start- or endNode. Which one is decided from the given {@code node}'s XY
     public Node getStartOrEndNodeFromRoad(Node node) {
         Node startNode = nodes.getFirst();
@@ -221,15 +235,13 @@ public class Road implements Serializable, MapObject {
         if (distanceToStart < distanceToEnd) return startNode;
         else return endNode;
     }
-
-    public void setType(String type) {
-        roadType = type;
-        determineVisuals();
-    }
-
     public void setPalette(String palette) {
         this.palette = palette;
         determineVisuals();
+    }
+    ///Sets the type of search algorithm that will be used. <br> true = Quickest Route <br> false = Shortest Route
+    public void changeWeight(boolean quickestRoute) {
+        calculateWeight(quickestRoute);
     }
     //endregion
 }
