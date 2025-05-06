@@ -345,12 +345,13 @@ public class Model {
             boolean walkable = inputBuffer.get() != 0;
             boolean bicycle = inputBuffer.get() != 0;
             boolean drivable = inputBuffer.get() != 0;
+            boolean oneway = inputBuffer.get() != 0;
 
             int maxSpeed = inputBuffer.getInt();
 
             String roadType = readString(inputBuffer);
             String roadName = readString(inputBuffer);
-            roads.add(new Road(nodesInRoad, walkable, bicycle, drivable, maxSpeed, roadType, roadName));
+            roads.add(new Road(nodesInRoad, walkable, bicycle, drivable, oneway, maxSpeed, roadType, roadName));
         }
         return roads;
     }
@@ -518,6 +519,8 @@ public class Model {
                     else outputBuffer.put((byte) 0);
                     if (road.isDriveable()) outputBuffer.put((byte) 1);
                     else outputBuffer.put((byte) 0);
+                    if (road.isOneway()) outputBuffer.put((byte) 1);
+                    else outputBuffer.put((byte) 0);
 
                     //Maxspeed
                     outputBuffer.putInt(road.getMaxSpeed());
@@ -615,7 +618,7 @@ public class Model {
         long size = 0;
         for (Road road : roads) {
             size += Integer.BYTES; //Length of road.getNodes
-            size += road.getNodes().size() * Long.BYTES; size += 3; //foot, bicycle, isDriveable
+            size += road.getNodes().size() * Long.BYTES; size += 4; //foot, bicycle, isDriveable, oneway
             size += Integer.BYTES; //MaxSpeed
             if (road.getType() != null) size += Integer.BYTES + road.getType().getBytes(StandardCharsets.UTF_8).length; //RoadType
             else size += Integer.BYTES; //Space for "-1"

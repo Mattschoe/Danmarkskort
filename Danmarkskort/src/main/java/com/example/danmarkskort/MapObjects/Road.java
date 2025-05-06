@@ -23,6 +23,7 @@ public class Road implements Serializable, MapObject {
     private final boolean foot;
     private final boolean bicycle;
     private final boolean isDriveable;
+    private final boolean isOneway;
     private int maxSpeed;
     private String roadType;
     private final String roadName;
@@ -44,11 +45,12 @@ public class Road implements Serializable, MapObject {
      *  @param maxSpeed the max speed on the road
      *  @param roadType the type of road
      */
-    public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDriveable, int maxSpeed, String roadType, String roadName) {
+    public Road(List<Node> nodes, boolean foot, boolean bicycle, boolean isDriveable, boolean isOneway, int maxSpeed, String roadType, String roadName) {
         this.nodes = nodes;
         this.foot = foot;
         this.bicycle = bicycle;
         this.isDriveable = isDriveable;
+        this.isOneway = isOneway;
         this.maxSpeed = maxSpeed;
         this.roadType = roadType.intern();
         this.roadName = roadName.intern();
@@ -72,6 +74,7 @@ public class Road implements Serializable, MapObject {
         this.foot = foot;
         this.bicycle = bicycle;
         this.isDriveable = isDriveable;
+        isOneway = false;
         this.roadType = roadType.intern();
         this.roadName = roadName.intern();
 
@@ -190,6 +193,7 @@ public class Road implements Serializable, MapObject {
     public boolean hasMaxSpeed() { return maxSpeed != 0; }
     public boolean isWalkable() { return foot; }
     public boolean isBicycle() { return bicycle; }
+    public boolean isOneway() { return isOneway; }
     public float getWeight() { return weight; }
     public void setPartOfRoute(boolean partOfRoute) { this.partOfRoute = partOfRoute; }
     /**
@@ -201,6 +205,7 @@ public class Road implements Serializable, MapObject {
         if (node.equals(nodes.getLast())) return nodes.getFirst();
         return null;
     }
+    public Node getEndNode() { return nodes.getLast(); }
     @Override public float[] getBoundingBox() { return boundingBox; }
     /// Returns either the start- or endNode. Which one is decided from the given {@code node}'s XY
     public Node getStartOrEndNodeFromRoad(Node node) {
@@ -218,10 +223,6 @@ public class Road implements Serializable, MapObject {
 
         if (distanceToStart < distanceToEnd) return startNode;
         else return endNode;
-    }
-    public void setType(String type) {
-        roadType = type;
-        determineVisuals();
     }
     public void setPalette(String palette) {
         this.palette = palette;

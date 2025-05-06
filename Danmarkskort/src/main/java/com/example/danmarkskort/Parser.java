@@ -330,6 +330,7 @@ public class Parser implements Serializable {
         boolean foot = true;
         boolean bicycle = true;
         boolean drivable = true;
+        boolean oneway = false;
         int maxSpeed = 0;
         String roadType = "";
         String roadName = "";
@@ -350,17 +351,21 @@ public class Parser implements Serializable {
                     maxSpeed = Integer.parseInt(value);
                     hasMaxSpeed = true;
                 }
+                case "junction" -> {
+                    if (value.equals("roundabout")) oneway = true;
+                }
                 case "bicycle" -> bicycle = value.equals("true");
                 case "foot" -> foot = value.equals("yes");
                 case "route" -> roadType = key;
                 case "name" -> roadName = value;
                 case "railway", "power" -> drivable = false;
+                case "oneway" -> oneway = true;
             }
         }
 
         //Instantierer en ny Road en road og tager stilling til om den har en maxSpeed eller ej. || value.equals("steps")
         Road road;
-        if (hasMaxSpeed) road = new Road(nodes, foot, bicycle, drivable, maxSpeed, roadType, roadName);
+        if (hasMaxSpeed) road = new Road(nodes, foot, bicycle, drivable, oneway, maxSpeed, roadType, roadName);
         else road = new Road(nodes, foot, bicycle, drivable, roadType, roadName);
         return road;
     }
@@ -391,7 +396,7 @@ public class Parser implements Serializable {
                 if (node.isIntersection() || i == nodes.size() - 1) {
                     //We hit an intersection, or the end, so we make a road
                     Road newRoad;
-                    if (road.hasMaxSpeed()) newRoad = new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDriveable(), road.getMaxSpeed(), road.getType(), road.getRoadName());
+                    if (road.hasMaxSpeed()) newRoad = new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDriveable(), road.isOneway(), road.getMaxSpeed(), road.getType(), road.getRoadName());
                     else newRoad = new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDriveable(), road.getType(), road.getRoadName());
 
                     for (Node roadNode : newRoad.getNodes()) {

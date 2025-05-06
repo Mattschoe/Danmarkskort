@@ -123,7 +123,7 @@ public class Search {
             to = temp;
         }
         List<Node> newRoadNodes = destinationRoad.getNodes().subList(from, to + 1);
-        Road newRoad = new Road(newRoadNodes, destinationRoad.isWalkable(), destinationRoad.isBicycle(), destinationRoad.isDriveable(), destinationRoad.getMaxSpeed(), destinationRoad.getType(), destinationRoad.getRoadName());
+        Road newRoad = new Road(newRoadNodes, destinationRoad.isWalkable(), destinationRoad.isBicycle(), destinationRoad.isDriveable(), destinationRoad.isOneway(), destinationRoad.getMaxSpeed(), destinationRoad.getType(), destinationRoad.getRoadName());
         newRoad.setPartOfRoute(true);
         route.add(newRoad);
 
