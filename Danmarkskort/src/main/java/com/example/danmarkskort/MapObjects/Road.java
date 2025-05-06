@@ -205,6 +205,7 @@ public class Road implements Serializable, MapObject {
         if (node.equals(nodes.getLast())) return nodes.getFirst();
         return null;
     }
+    ///Returns the last node in the road. Used for going the right of way if the road is oneway in searching
     public Node getEndNode() { return nodes.getLast(); }
     @Override public float[] getBoundingBox() { return boundingBox; }
     /// Returns either the start- or endNode. Which one is decided from the given {@code node}'s XY
