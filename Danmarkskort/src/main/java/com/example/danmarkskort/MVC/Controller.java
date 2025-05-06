@@ -245,11 +245,12 @@ public class Controller {
                 listView.setVisible(false);
                 findRoute.setVisible(true);
                 findRoute.requestFocus();
+                savePOIButton.setVisible(true);
 
                 //When the user presses enter on a searchbar, it gets
                 //updated with the best(first) match from the suggestions
+                autoSuggestResults = autoSuggest(source.getText().toLowerCase());
                 Node selection = autoSuggestResults.getFirst();
-                source.setText(selection.getAddress());
 
                 view.zoomTo(selection.getX(), selection.getY());
             }
@@ -297,6 +298,7 @@ public class Controller {
             listView.setVisible(false);
             findRoute.setVisible(true);
             findRoute.requestFocus();
+            savePOIButton.setVisible(true);
         }
     }
 
@@ -358,6 +360,7 @@ public class Controller {
         listView.setVisible(false);
         findRoute.setVisible(true);
         findRoute.requestFocus();
+        savePOIButton.setVisible(true);
 
         //noinspection StatementWithEmptyBody
         if (event.getClickCount() == 2) {
@@ -382,18 +385,12 @@ public class Controller {
 
             POI poi = null;
             //region > Make new POI if searchSource-text doesn't match last oldPOI
-            if (!searchingSource.getText().equals(oldPOIs.getLast().getNodeAddress())) {
+            if (oldPOIs.isEmpty() || !searchingSource.getText().equals(oldPOIs.getLast().getNodeAddress())) {
                 Node node = model.getStreetsFromPrefix(searchingSource.getText().toLowerCase()).getFirst();
-                view.zoomTo(node.getX(), node.getY());
 
-                try {
-                    Point2D point = view.getTrans().inverseTransform(node.getX(), node.getY());
-                    poi = model.createPOI((float) point.getX(), (float) point.getY(), poiName);
-                } catch (NonInvertibleTransformException exception) {
-                    System.out.println("An error occurred trying to invert mouse-click coordinates!"+ exception.getMessage());
-                }
+                poi = model.createPOI(node.getX(), node.getY(), poiName);
 
-                view.drawMap(); //Makes sure that the POI is shown instantly
+                view.zoomTo(node.getX(), node.getY()); //Zooms to the POI and redraws the map
             }
             //endregion
             //region > Remove POI from oldPOIs if search-source text matches the last oldPOI, so it isn't deleted
@@ -521,6 +518,7 @@ public class Controller {
             //region > Determine which searchbar gets the POI's address
             if (poi != null) {
                 if (!findRoute.isVisible()) findRoute.setVisible(true);
+                if (!savePOIButton.isVisible()) savePOIButton.setVisible(true);
 
                 if (searchBar.getText().trim().isEmpty()) {
                     searchBar.setText(poi.getNodeAddress());
