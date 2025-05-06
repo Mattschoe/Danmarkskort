@@ -49,6 +49,7 @@ public class Model {
 
         file = new File(filePath);
         assert file.exists();
+        loadingBar = LoadingBar.getInstance();
 
         String filename = file.getName().split("\\.")[0];
         File possibleOBJ = new File("data/generated/"+ filename +"/parser.obj");
@@ -96,6 +97,7 @@ public class Model {
 
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
         System.out.println("Finished creating Tilegrid!");
+        loadingBar.setProgress(0.8);
         //endregion
 
         System.out.println("Loading nodes into address and road searching!");
@@ -107,6 +109,7 @@ public class Model {
             }
             else saveParserToOBJ();
         }
+        loadingBar.setProgress(1);
         parser = null; //Fjerner reference til parser så den bliver GC'et
         System.gc();
     }
@@ -197,6 +200,7 @@ public class Model {
             partialResults.clear();
             futures.clear();
             System.out.println("- Finished deserializing nodes!");
+            loadingBar.setProgress(0.2);
             //endregion
         } catch (Exception e) {
             System.out.println("Error reading nodes! " + e.getMessage());
@@ -241,6 +245,7 @@ public class Model {
             futures.clear();
             //endregion
             System.out.println("- Finished deserializing roads!");
+            loadingBar.setProgress(0.4);
         } catch (Exception e) {
             System.out.println("Error reading Roads! " + e.getMessage());
         }
@@ -283,6 +288,7 @@ public class Model {
             futures.clear();
             //endregion
             System.out.println("- Finished deserializing polygons!");
+            loadingBar.setProgress(0.6);
         } catch (Exception e) {
             System.out.println("Error reading Polygons! " + e.getMessage());
         }

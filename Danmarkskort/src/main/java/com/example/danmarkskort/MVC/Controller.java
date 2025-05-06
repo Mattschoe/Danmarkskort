@@ -1,5 +1,6 @@
 package com.example.danmarkskort.MVC;
 
+import com.example.danmarkskort.LoadingBar;
 import com.example.danmarkskort.MapObjects.MapObject;
 import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.POI;
@@ -8,7 +9,11 @@ import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.PDFOutput;
 
+import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -29,6 +34,7 @@ import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -61,6 +67,7 @@ public class Controller implements Initializable {
     private List<POI> deletedPOIs = new ArrayList<>();
     List<Road> latestRoute = new ArrayList<>();
     private List<Node> autoSuggestResults;
+    LoadingBar loadingBar;
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
@@ -89,7 +96,7 @@ public class Controller implements Initializable {
     @FXML private Button POIClose;
     @FXML private TextArea addPOIBox;
     @FXML public Text loadingText;
-    @FXML public ProgressBar loadingBar;
+    @FXML public ProgressBar progressBar;
     //endregion
     //endregion
 
@@ -103,6 +110,9 @@ public class Controller implements Initializable {
 
         listView = new ListView<>();
         autoSuggestResults = new ArrayList<>();
+
+        loadingText = new Text();
+        progressBar = new ProgressBar();
 
         //region AnimationTimer
         AnimationTimer fpsTimer = new AnimationTimer() {
@@ -144,8 +154,35 @@ public class Controller implements Initializable {
      */
     private void loadFile(File mapFile) throws IOException {
         boolean createOBJ = checkBoxOBJ != null && checkBoxOBJ.isSelected();
+        loadingBar = LoadingBar.getInstance();
 
-        Task<Void> Loadingtask = new Task<>() {
+        // 1. Load the loading view *before* doing anything else
+        view = new View(view.getStage(), "loading.fxml");
+
+        // 2. Reference the UI elements *after* view is loaded
+        Text loadingText = (Text) view.getScene().lookup("#loadingText");
+        ProgressBar progressBar = (ProgressBar) view.getScene().lookup("#progressBar");
+
+        // Make sure these elements are found
+        if (loadingText == null || progressBar == null) {
+            throw new IllegalStateException("Could not find loadingText or progressBar in FXML");
+        }
+
+        // 3. Define and start the Timeline for UI updates
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.seconds(0.5), event -> {
+                    loadingText.setText(loadingBar.getLoadingText()); // For testing
+                    progressBar.setProgress(loadingBar.getProgress());
+                    if (loadingBar.isDone()) {
+                        ((Timeline) event.getSource()).stop(); // Stop updates when done
+                    }
+                })
+        );
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
+
+        // 4. Create and start the background task
+        Task<Void> loadingTask = new Task<>() {
             @Override protected Void call() throws Exception {
                 model = Model.getInstance(mapFile.getPath(), canvas, createOBJ);
                 return null;
@@ -159,12 +196,10 @@ public class Controller implements Initializable {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-
             }
         };
-        view = new View(view.getStage(), "loading.fxml");
 
-        new Thread(Loadingtask).start();
+        new Thread(loadingTask).start();
     }
 
     /** Runs right after a Controller is created --

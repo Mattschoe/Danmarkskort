@@ -17,6 +17,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 public class View {
@@ -236,5 +237,9 @@ public class View {
     public void setBgColor(Color bgColor) { this.bgColor = bgColor; }
     public void setScaleColor(Color scaleColor) { this.scaleColor = scaleColor; }
     public boolean isFirstTimeDrawingMap() { return firstTimeDrawingMap; } //for tests
+
+    public Scene getScene() {
+    return scene;
+    }
     //endregion
 }

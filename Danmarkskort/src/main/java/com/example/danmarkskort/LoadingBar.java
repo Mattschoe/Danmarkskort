@@ -1,14 +1,13 @@
 package com.example.danmarkskort;
 
 
-import com.example.danmarkskort.MVC.Model;
-
 public class LoadingBar {
     private static LoadingBar loadingBarInstance;
-    private int progress;
+    private double progress;
+    private boolean isDone;
 
     LoadingBar() {
-        this.progress = 0;
+        this.progress = 0.0;
     }
 
     public static LoadingBar getInstance() {
@@ -18,7 +17,23 @@ public class LoadingBar {
         return loadingBarInstance;
     }
 
-    public int getProgress() { return progress; }
-    public void setProgress(int progress) {this.progress = progress; }
-
+    public String getLoadingText() {
+        if (progress == 0.0) {
+            return "Loading nodes...";
+        } else if (progress == 0.2) {
+            return "Loading roads...";
+        } else if (progress == 0.4) {
+            return "Loading polygons...";
+        } else if (progress == 0.6) {
+            return "Loading tilegrid...";
+        } else if (progress == 0.8) {
+            return "drawing map...";
+        } else if (progress == 1.0) {
+            return "Done!";
+        } return "Loading...";
+    }
+    public double getProgress() { return progress; }
+    public void setProgress(double progress) {this.progress = progress; if (progress == 1.0) setDone();}
+    public boolean isDone() { return isDone; }
+    private void setDone() { isDone = true; }
 }
