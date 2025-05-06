@@ -13,7 +13,6 @@ import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
@@ -48,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Controller implements Initializable {
 
@@ -156,32 +156,29 @@ public class Controller implements Initializable {
         boolean createOBJ = checkBoxOBJ != null && checkBoxOBJ.isSelected();
         loadingBar = LoadingBar.getInstance();
 
-        // 1. Load the loading view *before* doing anything else
         view = new View(view.getStage(), "loading.fxml");
 
-        // 2. Reference the UI elements *after* view is loaded
+        //Reference the UI elements after view is loaded
         Text loadingText = (Text) view.getScene().lookup("#loadingText");
         ProgressBar progressBar = (ProgressBar) view.getScene().lookup("#progressBar");
-
-        // Make sure these elements are found
-        if (loadingText == null || progressBar == null) {
-            throw new IllegalStateException("Could not find loadingText or progressBar in FXML");
-        }
-
-        // 3. Define and start the Timeline for UI updates
+        //Start the Timeline for UI updates
+        short counter = 0;
+        StringBuffer dots = new StringBuffer();
         Timeline timeline = new Timeline(
                 new KeyFrame(Duration.seconds(0.5), event -> {
-                    loadingText.setText(loadingBar.getLoadingText()); // For testing
+
+                    loadingText.setText(loadingBar.getLoadingText() + dots.append(".")); // For testing
                     progressBar.setProgress(loadingBar.getProgress());
-                    if (loadingBar.isDone()) {
-                        ((Timeline) event.getSource()).stop(); // Stop updates when done
+
+                    if (dots.toString().equals("...")) {
+                        dots.delete(0,5);
                     }
                 })
         );
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
 
-        // 4. Create and start the background task
+        //start the background task
         Task<Void> loadingTask = new Task<>() {
             @Override protected Void call() throws Exception {
                 model = Model.getInstance(mapFile.getPath(), canvas, createOBJ);
@@ -190,6 +187,7 @@ public class Controller implements Initializable {
 
             @Override protected void succeeded() {
                 try {
+                    timeline.stop();
                     view = new View(view.getStage(), "mapOverlay.fxml");
                     view.setTilegrid(model.getTilegrid());
                     view.drawMap();

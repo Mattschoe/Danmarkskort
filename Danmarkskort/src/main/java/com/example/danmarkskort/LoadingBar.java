@@ -19,18 +19,18 @@ public class LoadingBar {
 
     public String getLoadingText() {
         if (progress == 0.0) {
-            return "Loading nodes...";
+            return "Loading nodes";
         } else if (progress == 0.2) {
-            return "Loading roads...";
+            return "Loading roads";
         } else if (progress == 0.4) {
-            return "Loading polygons...";
+            return "Loading polygons";
         } else if (progress == 0.6) {
-            return "Loading tilegrid...";
+            return "Loading tilegrid";
         } else if (progress == 0.8) {
-            return "drawing map...";
+            return "Drawing map";
         } else if (progress == 1.0) {
             return "Done!";
-        } return "Loading...";
+        } return "Loading";
     }
     public double getProgress() { return progress; }
     public void setProgress(double progress) {this.progress = progress; if (progress == 1.0) setDone();}
