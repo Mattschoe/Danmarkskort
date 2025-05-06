@@ -175,6 +175,7 @@ public class Parser implements Serializable {
         //The relation's "fields"
         List<Long> members = new ArrayList<>();
         String type = "";
+        String boundary = "";
 
         //Runs through every child of the relation until a relation end-element is encountered
         while (input.hasNext()) {
@@ -193,23 +194,24 @@ public class Parser implements Serializable {
                 else if (input.getLocalName().equals("tag")) {
                     String key = input.getAttributeValue(null, "k");
                     String val = input.getAttributeValue(null, "v");
+                    if (key == null || val == null) continue;
                     if (key.equals("amenity") || key.equals("building") || key.equals("surface")) {
                         type = key;
                     }
                     else if (key.equals("landuse") || key.equals("leisure") || key.equals("natural") || key.equals("route")) {
                         type = val;
                     }
+                    else if (key.equals("boundary")) boundary = val;
                 }
             }
         }
 
         for (long memberID : members) {
             Polygon polygon = id2Polygon.get(memberID);
-            Road road = id2Road.get(memberID);
             if (polygon != null && polygon.getType().isEmpty()) polygon.setType(type);
-            else if (road != null && road.getType().isEmpty()) {
-                road.setType(type);
-            }
+
+            //Remove the roads from further parsing if they are not drivable
+            if (boundary.equals("national_park")) id2Road.remove(memberID);
         }
     }
 
@@ -352,7 +354,7 @@ public class Parser implements Serializable {
                 case "foot" -> foot = value.equals("yes");
                 case "route" -> roadType = key;
                 case "name" -> roadName = value;
-                case "railway" -> drivable = false;
+                case "railway", "power" -> drivable = false;
             }
         }
 
