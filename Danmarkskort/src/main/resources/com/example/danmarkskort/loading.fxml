@@ -11,6 +11,7 @@
    <padding>
       <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
    </padding>
+<<<<<<< Updated upstream
 
    <ImageView fitHeight="150.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true">
       <Image url="@rat.gif" />
@@ -19,4 +20,8 @@
       </effect>
    </ImageView>
    <ProgressBar prefWidth="200.0" />
+=======
+   <Text fx:id="loadingText" strokeType="OUTSIDE" strokeWidth="0.0" />
+   <ProgressBar fx:id="progressBar" prefWidth="200.0" progress="0.0" />
+>>>>>>> Stashed changes
 </VBox>

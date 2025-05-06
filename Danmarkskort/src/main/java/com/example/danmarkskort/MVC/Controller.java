@@ -779,6 +779,26 @@ public class Controller {
 
     public Text getScaleText() { return scaleText; }
     public CheckBox getCheckBoxOBJ() { return checkBoxOBJ; }
+<<<<<<< Updated upstream
     public View getView(){ return view; }
+=======
+    private Timeline getTimeline(Text loadingText, ProgressBar progressBar) {
+        StringBuffer dots = new StringBuffer();
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.seconds(0.5), event -> {
+
+                    loadingText.setText(loadingBar.getLoadingText() + dots.append(".")); // For testing
+                    progressBar.setProgress(loadingBar.getProgress());
+
+                    if (dots.toString().equals("...")) {
+                        dots.delete(0,5);
+                    }
+                })
+        );
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
+        return timeline;
+    }
+>>>>>>> Stashed changes
     //endregion
 }
