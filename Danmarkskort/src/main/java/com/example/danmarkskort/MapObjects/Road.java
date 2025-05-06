@@ -126,6 +126,7 @@ public class Road implements Serializable, MapObject {
             case "track", "path" -> ROAD_TRACK_PATH;
             case "tree_row"  -> ROAD_TREE_ROW;
             case "route"     -> ROAD_ROUTE;
+            case "river" -> POLY_WATERWAY;
             default          -> ROAD_DEFAULT;
         };
     }

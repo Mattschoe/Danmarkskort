@@ -343,9 +343,9 @@ public class Parser implements Serializable {
                 case "access" -> {
                     if (value.equals("private")) drivable = false;
                 }
-                case "highway", "natural", "area:highway" -> {
+                case "highway", "natural", "area:highway", "waterway" -> {
                     roadType = value;
-                    if (value.equals("footway") || value.equals("bridleway") || value.equals("steps") || value.equals("corridor") || value.equals("path") || value.equals("cycleway")) drivable = false;
+                    if (value.equals("footway") || value.equals("bridleway") || value.equals("steps") || value.equals("corridor") || value.equals("path") || value.equals("cycleway") || value.equals("river")) drivable = false;
                 }
                 case "maxspeed" -> {
                     maxSpeed = Integer.parseInt(value);
