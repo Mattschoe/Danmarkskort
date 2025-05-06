@@ -74,7 +74,7 @@ public class ControllerTest extends ApplicationTest{
         assertTrue(file.exists(), "File does not exist: " + file.getAbsolutePath());
         Model model = new Model("data/Bornholm.zip", canvas, false);
         Controller controller = view.getFXMLLoader().getController();
-        
+
         List<Road> route = model.getSearch().getRoute();
 
     }
