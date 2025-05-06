@@ -383,7 +383,7 @@ public class Controller {
             }
             //endregion
 
-            POI poi = null;
+            POI poi;
             //region > Make new POI if searchSource-text doesn't match last oldPOI
             if (oldPOIs.isEmpty() || !searchingSource.getText().equals(oldPOIs.getLast().getNodeAddress())) {
                 Node node = model.getStreetsFromPrefix(searchingSource.getText().toLowerCase()).getFirst();
@@ -422,16 +422,13 @@ public class Controller {
             MenuItem showAddress = new MenuItem("Show Address");
             showAddress.setOnAction(_ -> {
                 POI thisPoi = favoritePOIs.get(poiName);
-                if (thisPoi != null) {
-                    String address = thisPoi.getNodeAddress();
-                    searchingSource.setText(address);
-                }
+                searchingSource.setText(thisPoi.getNodeAddress());
+                view.zoomTo(thisPoi.getX(), thisPoi.getY());
             });
 
             POIMenuItem.getItems().addAll(showAddress, deletePOI);
             //endregion
 
-            //noinspection DataFlowIssue
             System.out.println("Saved POI \""+ poiName +"\" at "+poi.getNodeAddress());
         }
     }
