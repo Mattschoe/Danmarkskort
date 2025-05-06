@@ -827,6 +827,19 @@ public class Model {
     public boolean hasFullAddress(Node node) {
         return node.getCity() != null && node.getHouseNumber() != null && node.getPostcode() != 0 && node.getStreet() != null;
     }
+
+    ///Sets the type of search algorithm that will be used. <br> true = Quickest Route <br> false = Shortest Route
+    public void setSearchType(boolean quickestRoute) {
+        Tile[][] grid = tilegrid.getGrid();
+        for (int x = 0; x < numberOfTilesX; x++) {
+            for (int y = 0; y < numberOfTilesY; y++) {
+                for (Road road : grid[x][y].getRoads()) {
+                    road.changeWeight(quickestRoute);
+                }
+            }
+        }
+        search.changeRouteSettings(quickestRoute);
+    }
     //endregion
 
     //region Getters and setters

@@ -55,7 +55,7 @@ public class Road implements Serializable, MapObject {
         this.roadType = roadType.intern();
         this.roadName = roadName.intern();
 
-        calculateWeight();
+        calculateWeight(true);
         calculateBoundingBox();
 
         assignColorSheetProp();
@@ -78,7 +78,7 @@ public class Road implements Serializable, MapObject {
         this.roadType = roadType.intern();
         this.roadName = roadName.intern();
 
-        calculateWeight();
+        calculateWeight(true);
         calculateBoundingBox();
 
         assignColorSheetProp();
@@ -162,8 +162,11 @@ public class Road implements Serializable, MapObject {
         }
     }
 
-    ///Calculates the weight of the road. {@code Weight} being defined as: The time to cross the road given its length and speedlimit
-    private void calculateWeight() {
+    /**
+     * Calculates the weight of the Road. The {@code weight} being defined by the parameter
+     * @param quickestRoute chooses the method of calculating the weight. <br> True = Quickest <br> False = Shortest <br>
+     */
+    private void calculateWeight(boolean quickestRoute) {
         //Loops through all the nodes in the road calculating the total distance between them all
         double distance = 0;
         Node currentNode = nodes.getFirst();
@@ -173,15 +176,21 @@ public class Road implements Serializable, MapObject {
             currentNode = nextNode;
         }
 
-        //Calculates the time it takes to cross the distance via distance/maxSpeed
-        if (maxSpeed > 0) weight = (float) distance / maxSpeed;
-        else {
-            //Else we see if we can calculate the weight from the roadtype (Motorvej/Motortrafikvej), if not, we set the standard speed as 50
-            if (roadType.equals("motorway")) weight = (float) distance / 130;
-            else if (roadType.equals("trunk")) weight = (float) distance / 80;
-            else weight = (float) distance/ 50;
+        if (quickestRoute) {
+            //Calculates the time it takes to cross the distance via distance/maxSpeed
+            if (maxSpeed > 0) weight = (float) distance / maxSpeed;
+            else {
+                //Else we see if we can calculate the weight from the roadtype (Motorvej/Motortrafikvej), if not, we set the standard speed as 50
+                if (roadType.equals("motorway")) weight = (float) distance / 130;
+                else if (roadType.equals("trunk")) weight = (float) distance / 80;
+                else weight = (float) distance / 50;
+            }
+        } else {
+            //Shortest path
+            weight = (float) distance;
         }
     }
+
     //endregion
 
     //region Getters and setters
@@ -229,6 +238,10 @@ public class Road implements Serializable, MapObject {
     public void setPalette(String palette) {
         this.palette = palette;
         determineVisuals();
+    }
+    ///Sets the type of search algorithm that will be used. <br> true = Quickest Route <br> false = Shortest Route
+    public void changeWeight(boolean quickestRoute) {
+        calculateWeight(quickestRoute);
     }
     //endregion
 }

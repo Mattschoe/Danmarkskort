@@ -301,7 +301,6 @@ public class Controller implements Initializable {
         return Collections.emptyList();
     }
 
-
     private void startSearch() {
         //First removes the last route from the draws i
         if (!latestRoute.isEmpty()) {
@@ -398,10 +397,14 @@ public class Controller implements Initializable {
     }
 
     /// Mangler logic for at finde korteste vej
-    @FXML public void shortestRoute(){}
+    @FXML public void shortestRoute() {
+        model.setSearchType(false);
+    }
 
     ///  Mangler logic for at finde hurtigste vej
-    @FXML public void fastestRoute(){}
+    @FXML public void fastestRoute() {
+        model.setSearchType(true);
+    }
 
     /// Method to export a route as PDF
     @FXML protected void exportAsPDF(){
