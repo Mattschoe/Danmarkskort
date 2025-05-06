@@ -39,7 +39,7 @@ public class ControllerTest extends ApplicationTest{
 
 
     @Test
-    protected void paletteTest(){
+    protected void POITest(){
 
     }
 

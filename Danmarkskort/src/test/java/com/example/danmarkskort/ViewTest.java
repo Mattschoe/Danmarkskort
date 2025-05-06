@@ -34,7 +34,7 @@ public class ViewTest extends ApplicationTest {
     private void setUpView(String fxmlFile) {
         interact(() -> {
             try {
-                view = new View(primaryStage, fxmlFile);
+                this.view = new View(primaryStage, fxmlFile);
             } catch (IOException e) {
                 fail("Failed to load FXML: " + fxmlFile);
             }
@@ -74,6 +74,9 @@ public class ViewTest extends ApplicationTest {
     @Test
     protected void testDrawMap(){
         interact(() -> {
+
+            setUpView("newStart.fxml");
+            setUpView("mapOverlay.fxml");
             view.drawMap();
             assertFalse(view.isFirstTimeDrawingMap());
         });
