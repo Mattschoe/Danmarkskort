@@ -413,9 +413,10 @@ public class Controller implements Initializable {
     }
 
     /// Method to open a textbox with a written guide when "Guide" is pressed
-@FXML protected void guideTextButton(){
+    @FXML protected void guideTextButton(){
         guideText.setVisible(guideButton.isSelected());
     }
+
     /// Method runs upon zooming/scrolling on the Canvas
     @FXML protected void onCanvasScroll(ScrollEvent e) {
         if (model == null) model = Model.getInstance(); //Det her er even mere cooked
