@@ -9,10 +9,7 @@ import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.PDFOutput;
 
 import javafx.animation.AnimationTimer;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
@@ -39,16 +36,13 @@ import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 
-import java.net.URL;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 
-public class Controller implements Initializable {
+public class Controller {
     //region Fields
     private View view;
     private Model model;
@@ -56,14 +50,12 @@ public class Controller implements Initializable {
     private boolean panRequest, zoomRequest; //Used by AnimationTimer
     private ScrollEvent scrollEvent; //Used to zoom
     private MouseEvent mouseEvent; //Used to pan
-    private POI startPOI;
-    private POI endPOI;
-    private Map<String,POI> favoritePOIs = new HashMap<>();
-    private List<POI> oldPOIs = new ArrayList<>();
-    private List<POI> deletedPOIs = new ArrayList<>();
+    private final Map<String,POI> favoritePOIs = new HashMap<>();
+    private final List<POI> oldPOIs = new ArrayList<>();
     List<Road> latestRoute = new ArrayList<>();
     private List<Node> autoSuggestResults;
     private TextField searchingSource;
+    private boolean putTextSwitched;
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
@@ -83,9 +75,7 @@ public class Controller implements Initializable {
     @FXML private TextArea guideText;
     @FXML private Button switchSearch;
     @FXML private Button findRoute;
-    @FXML private Button removePOIButton;
     @FXML private Button savePOIButton;
-    @FXML private MenuItem POIMenuButton;
     @FXML private Menu POIMenu;
     @FXML private TextField addNamePOI;
     @FXML private Button addToPOIsUI;
@@ -101,9 +91,9 @@ public class Controller implements Initializable {
      */
     public Controller() {
         canvas = new Canvas(400, 600);
-
         listView = new ListView<>();
         autoSuggestResults = new ArrayList<>();
+        putTextSwitched = false;
 
         //region AnimationTimer
         AnimationTimer fpsTimer = new AnimationTimer() {
@@ -134,20 +124,6 @@ public class Controller implements Initializable {
     //endregion
 
     //region Methods
-    /**
-     * Runs right after a Controller is created -- configures
-     * something(???) for an object in the mapOverlay.fxml scene
-     */
-    @Override public void initialize(URL url, ResourceBundle resourceBundle) {
-        listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<>() {
-            @Override
-            public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
-                String selected = listView.getSelectionModel().getSelectedItem();
-                searchingSource.setText(selected);
-            }
-        });
-    }
-
     /// MIDLERTIDIG METODE FOR AT GØRE DET NEMT AT ÅBNE COVERAGE-RAPPORTEN.
     @FXML protected void openTestCoverage() { //TODO %% SKAL FJERNES SENERE
         try { Desktop.getDesktop().open(new File("build/reports/jacoco/test/html/index.html")); }
@@ -312,8 +288,13 @@ public class Controller implements Initializable {
     /// When the user presses 'Enter' on the ListView, the ListView is disabled and the Find Route-button is enabled
     @FXML protected void onListViewTyped(KeyEvent event) {
         if (event.getCharacter().equals("\r")) {
+            Node chosenNode = autoSuggestResults.get(listView.getSelectionModel().getSelectedIndex());
+            searchingSource.setText(chosenNode.getAddress());
+            view.zoomTo(chosenNode.getX(), chosenNode.getY());
+
             listView.setVisible(false);
             findRoute.setVisible(true);
+            findRoute.requestFocus();
         }
     }
 
@@ -370,57 +351,94 @@ public class Controller implements Initializable {
     /// When the user chooses a node from the suggestions, overrides the searchbar and zooms onto the Node
     @FXML protected void onAddressPickedFromList(MouseEvent event) {
         Node chosenNode = autoSuggestResults.get(listView.getSelectionModel().getSelectedIndex());
-        searchBar.setText(chosenNode.getAddress());
+        searchingSource.setText(chosenNode.getAddress());
         view.zoomTo(chosenNode.getX(), chosenNode.getY());
+
         listView.setVisible(false);
         findRoute.setVisible(true);
+        findRoute.requestFocus();
 
+        //noinspection StatementWithEmptyBody
         if (event.getClickCount() == 2) {
-            //Method used to be in here but testing on my gf showed it was unintuitive
+            //Method used to be in here but Gertrud-testen showed it was unintuitive
         }
     }
 
-    /**
-     * This method is used to save the current POI to a map and add it as a menuitem to the POI menubar to give it delete and find address as options.
-     * when deleting the POI it removes it from favoritePOI and adds it to a deletedPOI list which is used to clean the map later.
-     */
-    @FXML protected void savePOIToHashMap(){
-        if(startPOI == null){return;}
-        String name = addNamePOI.getText();
-        favoritePOIs.put(name, startPOI);
-        oldPOIs.remove(startPOI);
-        view.addObjectToDraw(startPOI);
-
-        closePOIMenu();
-
-        Menu POIMenuItem = new Menu(name);
-        POIMenu.getItems().add(POIMenuItem);
-
-        MenuItem deletePOI = new MenuItem("Delete");
-        deletePOI.setOnAction(_ -> {
-            view.removeObjectToDraw(startPOI);
-            POI poi = favoritePOIs.get(name);
-            favoritePOIs.remove(name);
-            deletedPOIs.add(poi);
-            POIMenu.getItems().remove(POIMenuItem);
-            view.removeObjectToDraw(poi);
-            model.removePOI(poi);
-            view.drawMap();
-        });
-
-        MenuItem showAddress = new MenuItem("Show Address");
-        showAddress.setOnAction(_ -> {
-            POI poi = favoritePOIs.get(name);
-            if (poi != null) {
-                String address = poi.getNodeAddress();
-                    searchBar.setText(address);
+    /// Saves a POI from the last given input in either search-bar, and adds POI to the 'POIs' Menu in the MenuBar
+    @FXML protected void savePOItoHashMap() {
+        if (searchingSource == null) {
+            System.out.println("Oh no, fishy behaviour!!!! Search source is null");
+        }
+        else {
+            //region > Save the given name of the POI
+            //System.out.println("Text from "+searchingSource.getId()+": "+ searchingSource.getText());
+            String poiName = addNamePOI.getText();
+            if (poiName.trim().isEmpty()) {
+                System.out.println("Cannot save a Point of Interest w/o a name!");
+                return;
             }
-        });
-        POIMenuItem.getItems().addAll(showAddress, deletePOI);
-        System.out.println("Saved POI!: " + startPOI + " with name: " + name);
+            //endregion
+
+            POI poi = null;
+            //region > Make new POI if searchSource-text doesn't match last oldPOI
+            if (!searchingSource.getText().equals(oldPOIs.getLast().getNodeAddress())) {
+                Node node = model.getStreetsFromPrefix(searchingSource.getText().toLowerCase()).getFirst();
+                view.zoomTo(node.getX(), node.getY());
+
+                try {
+                    Point2D point = view.getTrans().inverseTransform(node.getX(), node.getY());
+                    poi = model.createPOI((float) point.getX(), (float) point.getY(), poiName);
+                } catch (NonInvertibleTransformException exception) {
+                    System.out.println("An error occurred trying to invert mouse-click coordinates!"+ exception.getMessage());
+                }
+
+                view.drawMap(); //Makes sure that the POI is shown instantly
+            }
+            //endregion
+            //region > Remove POI from oldPOIs if search-source text matches the last oldPOI, so it isn't deleted
+            else {
+                poi = oldPOIs.getLast();
+                oldPOIs.remove(poi);
+            }
+            //endregion
+            //region > Put the POI in favoritePOIs, add it to draw and close POI-menu
+            favoritePOIs.put(poiName, poi);
+            view.addObjectToDraw(poi);
+            closePOIMenu();
+            //endregion<
+            //region > Make a new Menu for the POI, and add it to the POIs Menu
+            Menu POIMenuItem = new Menu(poiName);
+            POIMenu.getItems().add(POIMenuItem);
+            //endregion
+            //region > Make 'Delete' and 'Show Address'-MenuItems for the POI, and add them to the POI Menu
+            MenuItem deletePOI = new MenuItem("Delete");
+            deletePOI.setOnAction(_ -> {
+                POI thisPoi = favoritePOIs.get(poiName);
+                favoritePOIs.remove(poiName);
+                POIMenu.getItems().remove(POIMenuItem);
+                model.removePOI(thisPoi);
+                view.removeObjectToDraw(thisPoi);
+                view.drawMap();
+            });
+
+            MenuItem showAddress = new MenuItem("Show Address");
+            showAddress.setOnAction(_ -> {
+                POI thisPoi = favoritePOIs.get(poiName);
+                if (thisPoi != null) {
+                    String address = thisPoi.getNodeAddress();
+                    searchingSource.setText(address);
+                }
+            });
+
+            POIMenuItem.getItems().addAll(showAddress, deletePOI);
+            //endregion
+
+            //noinspection DataFlowIssue
+            System.out.println("Saved POI \""+ poiName +"\" at "+poi.getNodeAddress());
+        }
     }
 
-    @FXML protected void openPOIMenu(){
+    @FXML protected void openPOIMenu() {
         poiGroup.setVisible(true);
         addPOIBox.setVisible(true);
         addNamePOI.setVisible(true);
@@ -429,7 +447,7 @@ public class Controller implements Initializable {
         POIClose.setVisible(true);
     }
 
-    @FXML protected void closePOIMenu(){
+    @FXML protected void closePOIMenu() {
         poiGroup.setVisible(false);
         addPOIBox.setVisible(false);
         addNamePOI.setVisible(false);
@@ -438,14 +456,14 @@ public class Controller implements Initializable {
     }
 
     /// Metode til at fjerne den røde markering på kortet for en POI. Virker kun for den POI, der senest er placeret
-    @FXML public void removePOIMarker(POI poi){
+    @FXML public void removePOIMarker(POI poi) {
         //sæt knappen til visible og kald denne metode et sted
         model.removePOI(poi);
         view.drawMap();
     }
 
     /// Method to export a route as PDF
-    @FXML protected void exportAsPDF(){
+    @FXML protected void exportAsPDF() {
         System.out.println("Attempting to export as PDF!");
 
         List<Road> latestRoute = Model.getInstance().getLatestRoute();
@@ -463,7 +481,7 @@ public class Controller implements Initializable {
     }
 
     /// Method to open a textbox with a written guide when "Guide" is pressed
-    @FXML protected void guideTextButton(){
+    @FXML protected void guideTextButton() {
         guideText.setVisible(guideButton.isSelected());
     }
 
@@ -475,53 +493,69 @@ public class Controller implements Initializable {
     }
 
     /// Method runs upon releasing a press on the Canvas
-    //TODO er stadig freaky as shit med UI'et. FIX.
     @FXML protected void onCanvasClick(MouseEvent e) {
-        //region DOUBLE CLICK (Searching)
         if (e.getClickCount() == 2) {
-            //Makes POI
+            //region > Make POI
             POI poi = null;
             try {
-                Point2D POIMark = view.getTrans().inverseTransform(e.getX(), e.getY()); //ændret point til et felt, POIMark
-                poi = model.createPOI((float) POIMark.getX(), (float) POIMark.getY(), "Test");
+                Point2D point = view.getTrans().inverseTransform(e.getX(), e.getY());
+                poi = model.createPOI((float) point.getX(), (float) point.getY(), "Test");
                 savePOIButton.setVisible(true);
             } catch (NonInvertibleTransformException exception) {
-                System.out.println("An error occurred trying to invert mouseclick coords!" + exception.getMessage());
+                System.out.println("An error occurred trying to invert mouse-click coordinates!"+ exception.getMessage());
             }
             view.drawMap(); //Makes sure that the POI is shown instantly
+            //endregion
 
-            //Assigns spot for POI. Sets as start if empty or if "find route" has not been activated, if else, else we set it as the destination
+            //region > Determine which searchbar gets the POI's address
             if (poi != null) {
-                findRoute.setVisible(true);
-                if (searchBar.getText().trim().isEmpty() || !destination.isVisible()) {
-                    startPOI = poi;
-                    oldPOIs.add(poi);
-                } else {
-                    endPOI = poi;
-                    oldPOIs.add(poi);
+                if (!findRoute.isVisible()) findRoute.setVisible(true);
+
+                if (searchBar.getText().trim().isEmpty()) {
+                    searchBar.setText(poi.getNodeAddress());
+                    searchingSource = searchBar;
+                }
+                else if (destination.getText().trim().isEmpty()) {
+                    destination.setText(poi.getNodeAddress());
+                    destination.setVisible(true);
+                    switchSearch.setVisible(true);
+                    searchingSource = destination;
+                }
+                else {
+                    putTextSwitched = !putTextSwitched;
+
+                    if (!putTextSwitched) {
+                        searchBar.setText(poi.getNodeAddress());
+                        searchingSource = searchBar;
+                    }
+                    else {
+                        destination.setText(poi.getNodeAddress());
+                        searchingSource = destination;
+                    }
                 }
 
-                updateSearchText();
+                oldPOIs.add(poi);
             }
-            //Removes old POI from the map if they are not added to the list of favorites so there are no more than 2 active at once.
+            //endregion
 
             if (oldPOIs.size() > 2) {
                 while (oldPOIs.size() > 2) {
-                   // System.out.println(oldPOIs);
                     POI removed = oldPOIs.removeFirst();
 
                     if (!favoritePOIs.containsValue(removed)) {
                         oldPOIs.remove(removed);
                         removePOIMarker(removed);
                     }
-                    //Removes the deleted POI's from the map after they have been deleted via the savePOIToHashMap function
+                    //Removes the deleted POI's from the map after
+                    //they've been deleted via the savePOIToHashMap function
                 }
             }
         }
-        //endregion
     }
 
     @FXML public void findRouteClicked() {
+        if (listView.isVisible()) listView.setVisible(false);
+
         if (!switchSearch.isVisible() && !destination.isVisible()) {
             switchSearch.setVisible(true);
             destination.setVisible(true);
@@ -532,22 +566,26 @@ public class Controller implements Initializable {
             String termin = destination.getText().toLowerCase();
 
             Node from = model.getStreetsFromPrefix(origin).getFirst();
+            POI startPOI = model.createPOI(from.getX(), from.getY(), "Test1");
             //from = getClosestRoadNode(from); IKKE SLET LÆS getClosestRoadNode
-            startPOI = model.createPOI(from.getX(), from.getY(), "Test1");
 
             Node to = model.getStreetsFromPrefix(termin).getFirst();
+            POI endPOI = model.createPOI(to.getX(), to.getY(), "Test2");
             //to = getClosestRoadNode(to); IKKE SLET LÆS getClosestRoadNode
-            endPOI = model.createPOI(to.getX(), to.getY(), "Test2");
 
-            //startSearch(from, to); IKKE SLET LÆS getClosestRoadNode
             startSearch(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
+            //startSearch(from, to); IKKE SLET LÆS getClosestRoadNode
+
+            model.removePOI(startPOI);
+            model.removePOI(endPOI);
+            view.drawMap();
         }
         else {
             System.out.println("Cannot search for a route without both a start- AND an endpoint!");
         }
     }
 
-    /// Returns the closest Node which is in a Road, from the given Node
+    /// ** DO NOT DELETE ** Returns the closest Node which is in a Road, from the given Node
     @Deprecated private Node getClosestRoadNode(Node node) {
         /*
          * Metoden er @Deprecated fordi jeg ikke kunne få ruten til at se ligeså lækker ud,
@@ -582,18 +620,12 @@ public class Controller implements Initializable {
 
     /// Switches the text in the 'From' and 'To' search-bars
     @FXML public void switchDestinationAndStart() {
+        if (listView.isVisible()) listView.setVisible(false);
+        putTextSwitched = !putTextSwitched;
+
         String temp = searchBar.getText();
         searchBar.setText(destination.getText());
         destination.setText(temp);
-    }
-
-    /// Updates the text in the search. Call this after changing the POI responsible for the text
-    private void updateSearchText() {
-        searchBar.clear();
-        destination.clear();
-
-        if (startPOI != null) searchBar.setText(startPOI.getNodeAddress());
-        if (endPOI != null) destination.setText(endPOI.getNodeAddress());
     }
 
     /// Method runs upon pressing down on the Canvas
