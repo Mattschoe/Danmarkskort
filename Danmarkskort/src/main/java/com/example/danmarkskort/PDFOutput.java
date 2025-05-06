@@ -93,7 +93,7 @@ public abstract class PDFOutput {
                 throw new RuntimeException("Cursed vectors -- they do not relate as expected! :(");
             }
 
-            paragraph = new Paragraph(step++ +". Turn "+direction+" at "+roadName);
+            paragraph = new Paragraph(step++ +". "+direction+" at "+roadName);
             document.add(paragraph);
         }
 
@@ -123,9 +123,9 @@ public abstract class PDFOutput {
         float[] vectorB = {p2.getX()-p0.getX(), p2.getY()-p0.getY()};
 
         float dot = vectorA[0] * - vectorB[1] + vectorA[1] * vectorB[0];
-        if (dot > 0) return "RIGHT";
-        else if (dot < 0) return "LEFT";
-        else return "STRAIGHT";
+        if (dot > 0) return "Turn right";
+        else if (dot < 0) return "Turn left";
+        else return "Continue straight";
     }
 
     /**
