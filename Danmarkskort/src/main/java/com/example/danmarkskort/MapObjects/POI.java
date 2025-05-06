@@ -48,6 +48,7 @@ public class POI implements MapObject {
         Node closestNode = null;
         for (Node node : tile.getNodesInTile()) {
             if (!node.hasFullAddress()) continue; //Skips if node doesn't have full address
+
             double nodeX = node.getX();
             double nodeY = node.getY();
             double distance = Math.sqrt(Math.pow((nodeX - (double) x), 2) + Math.pow((nodeY - (double) y), 2)); //Afstandsformlen ser cooked ud i Java wth -MN
@@ -64,6 +65,7 @@ public class POI implements MapObject {
     private Node findClosestNodeWithRoad(Tile tile) {
         double closestDistance = Double.MAX_VALUE;
         Node closestNode = null;
+
         for (Node node : tile.getNodesInTile()) {
             if (!node.hasDrivableEdges()) continue; //Skips if node doesnt have any edges that are drivable.
             double nodeX = node.getX();
