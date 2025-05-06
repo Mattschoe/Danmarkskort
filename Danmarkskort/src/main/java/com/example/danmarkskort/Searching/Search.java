@@ -22,7 +22,7 @@ public class Search {
     ///For A*, fScore = node.distanceTo + heuristic(node)
     private TObjectDoubleHashMap<Node> fScore;
     List<Road> endRoads;
-    /// den sidste vej inden slutnoden i rutesøgningen
+    ///The list of roads that contain endNode. Used for ending the search early to make sure we find the endNode even if it cant be found by .getOppositeNode()
     Road destinationRoad;
 
     public Search(Collection<Node> nodes) {
@@ -36,6 +36,10 @@ public class Search {
         endNode = to;
         endRoads = new ArrayList<>(endNode.getEdges());
         assert startNode != null && endNode != null;
+        if (startNode.equals(endNode)) {
+            System.out.println("Start and End is same!");
+            return;
+        }
 
         startNode.setPartOfRoute(true);
         endNode.setPartOfRoute(true);
@@ -63,7 +67,6 @@ public class Search {
                 break;
             }
             for (Road road : currentNode.getEdges()) {
-                System.out.println(road.getWeight());
                 if (closedNodes.contains(road.getOppositeNode(currentNode))) continue; //If we have already looked at the node and relaxed its edges we skip it (This avoids relooking at nodes)
                 if (road.isDriveable()) relax(road, currentNode); //Relaxes the road if its drivable
             }
@@ -75,16 +78,17 @@ public class Search {
         } else {
             System.out.println("No path found!");
         }
-        System.out.println("Cleaning up:");
         cleanup();
-        System.out.println("Finished cleaning up!");
     }
 
     /// Relaxes the edge. {@code currentNode} HAS to be either the roads start- or endNode, otherwise an error will be thrown.
     private void relax(Road road, Node currentNode) {
        if (endRoads.contains(road)) {
+           //We found a road connected to the endNode so we put it in the PQ with lowest value so its the next we pop and therefore end on
            this.destinationRoad = road;
            cameFrom.put(endNode, currentNode);
+           fScore.put(endNode, 0.0);
+           priorityQueue.add(endNode);
        }
 
        double newDistanceToNextNode = currentNode.getDistanceTo() + road.getWeight();
@@ -105,34 +109,43 @@ public class Search {
         List<Node> path = new ArrayList<>();
 
         //Loops back through the map of nodes until we have a reverse list of route
-        Node currentNode = endNode;
-        while (cameFrom.containsKey(currentNode)) {
-            path.add(currentNode);
-           // System.out.println("Tilføjede currentNode til path: " + currentNode.toString());
-            currentNode = cameFrom.get(currentNode);
-
+        for (Node current = endNode; current != null; current = cameFrom.get(current)) {
+            path.add(current);
         }
-        path.add(currentNode); //Adds the start node since it isn't included in the loop
         Collections.reverse(path);
+
+        //Makes a new road between the endNode and the next in the path, this road is always a subset of "destinationRoad"
+        int from = destinationRoad.getNodes().indexOf(cameFrom.get(endNode));
+        int to = destinationRoad.getNodes().indexOf(endNode);
+        if (from > to) { //Reverses if indexposition is off
+            int temp = from;
+            from = to;
+            to = temp;
+        }
+        List<Node> newRoadNodes = destinationRoad.getNodes().subList(from, to + 1);
+        Road newRoad = new Road(newRoadNodes, destinationRoad.isWalkable(), destinationRoad.isBicycle(), destinationRoad.isDriveable(), destinationRoad.getMaxSpeed(), destinationRoad.getType(), destinationRoad.getRoadName());
+        newRoad.setPartOfRoute(true);
+        route.add(newRoad);
 
         //Runs through the path. If the current node and the next node in line is equal to the start and endNode of a Road, we set it as part of the route
         Node current = path.getFirst();
         for (int i = 1; i < path.size(); i++) {
             Node next = path.get(i);
-            for (Road road : current.getEdges()) {
-                if (road.getNodes().contains(next)) {
-                    if (next.equals(endNode)){
-                        List<Node> nodesInNewRoad= new ArrayList<>();
-                        nodesInNewRoad.add(current);
-                        nodesInNewRoad.add(endNode);
-                       Road finalRoad= new Road(nodesInNewRoad,road.isWalkable(), road.isBicycle(),road.isDriveable(), road.getMaxSpeed(), road.getType(), road.getRoadName());
-                        route.add(finalRoad);
-                        finalRoad.setPartOfRoute(true);
-                    } else{
-                        route.add(road);
-                        road.setPartOfRoute(true);
-                    }
+            List<Road> currentRoads = new ArrayList<>();
+            for (Road road : current.getEdges()) { //Runs through all edges of the path
+                if (road.equals(destinationRoad)) continue; //Skips the last road since we made "newRoad" earlier to represent the last road
+                if (road.getOppositeNode(current).equals(next)) { //Else we add those that are linked by the current node and next node
+                    currentRoads.add(road);
                 }
+            }
+            if (!currentRoads.isEmpty()) {
+                //Goes through all roads that are eligible for being part of the route and chooses the one with the smallest weight
+                Road roadWithSmallestWeight = currentRoads.getFirst();
+                for (int j = 1; j < currentRoads.size(); j++) {
+                    if (currentRoads.get(j).getWeight() < roadWithSmallestWeight.getWeight()) roadWithSmallestWeight = currentRoads.get(j);
+                }
+                roadWithSmallestWeight.setPartOfRoute(true);
+                route.add(roadWithSmallestWeight);
             }
             current = next;
         }
@@ -148,6 +161,7 @@ public class Search {
 
     ///Returns route, returns null if haven't found route
     public List<Road> getRoute() { return route; }
+
 
     ///The heuristic that's added on top of a Node's {@code distanceTo} to implement A*
     private double heuristic(Node a, Node b) {
