@@ -92,7 +92,9 @@ public class Search {
        }
 
        double newDistanceToNextNode = currentNode.getDistanceTo() + road.getWeight();
-       Node nextNode = road.getOppositeNode(currentNode);
+        Node nextNode;
+       if (road.isOneway()) nextNode = road.getEndNode();
+       else nextNode = road.getOppositeNode(currentNode);
 
        if (nextNode.getDistanceTo() > newDistanceToNextNode) {
             nextNode.setDistanceTo(newDistanceToNextNode);
@@ -123,7 +125,7 @@ public class Search {
             to = temp;
         }
         List<Node> newRoadNodes = destinationRoad.getNodes().subList(from, to + 1);
-        Road newRoad = new Road(newRoadNodes, destinationRoad.isWalkable(), destinationRoad.isBicycle(), destinationRoad.isDriveable(), destinationRoad.getMaxSpeed(), destinationRoad.getType(), destinationRoad.getRoadName());
+        Road newRoad = new Road(newRoadNodes, destinationRoad.isWalkable(), destinationRoad.isBicycle(), destinationRoad.isDriveable(), destinationRoad.isOneway(), destinationRoad.getMaxSpeed(), destinationRoad.getType(), destinationRoad.getRoadName());
         newRoad.setPartOfRoute(true);
         route.add(newRoad);
 
@@ -161,7 +163,6 @@ public class Search {
 
     ///Returns route, returns null if haven't found route
     public List<Road> getRoute() { return route; }
-
 
     ///The heuristic that's added on top of a Node's {@code distanceTo} to implement A*
     private double heuristic(Node a, Node b) {

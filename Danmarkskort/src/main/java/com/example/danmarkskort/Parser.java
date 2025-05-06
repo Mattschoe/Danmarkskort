@@ -175,6 +175,7 @@ public class Parser implements Serializable {
         //The relation's "fields"
         List<Long> members = new ArrayList<>();
         String type = "";
+        String boundary = "";
 
         //Runs through every child of the relation until a relation end-element is encountered
         while (input.hasNext()) {
@@ -193,23 +194,24 @@ public class Parser implements Serializable {
                 else if (input.getLocalName().equals("tag")) {
                     String key = input.getAttributeValue(null, "k");
                     String val = input.getAttributeValue(null, "v");
+                    if (key == null || val == null) continue;
                     if (key.equals("amenity") || key.equals("building") || key.equals("surface")) {
                         type = key;
                     }
                     else if (key.equals("landuse") || key.equals("leisure") || key.equals("natural") || key.equals("route")) {
                         type = val;
                     }
+                    else if (key.equals("boundary")) boundary = val;
                 }
             }
         }
 
         for (long memberID : members) {
             Polygon polygon = id2Polygon.get(memberID);
-            Road road = id2Road.get(memberID);
             if (polygon != null && polygon.getType().isEmpty()) polygon.setType(type);
-            else if (road != null && road.getType().isEmpty()) {
-                road.setType(type);
-            }
+
+            //Remove the roads from further parsing if they are not drivable
+            if (boundary.equals("national_park")) id2Road.remove(memberID);
         }
     }
 
@@ -328,6 +330,7 @@ public class Parser implements Serializable {
         boolean foot = true;
         boolean bicycle = true;
         boolean drivable = true;
+        boolean oneway = false;
         int maxSpeed = 0;
         String roadType = "";
         String roadName = "";
@@ -340,25 +343,29 @@ public class Parser implements Serializable {
                 case "access" -> {
                     if (value.equals("private")) drivable = false;
                 }
-                case "highway", "natural", "area:highway" -> {
+                case "highway", "natural", "area:highway", "waterway" -> {
                     roadType = value;
-                    if (value.equals("footway") || value.equals("bridleway") || value.equals("steps") || value.equals("corridor") || value.equals("path") || value.equals("cycleway")) drivable = false;
+                    if (value.equals("footway") || value.equals("bridleway") || value.equals("steps") || value.equals("corridor") || value.equals("path") || value.equals("cycleway") || value.equals("river")) drivable = false;
                 }
                 case "maxspeed" -> {
                     maxSpeed = Integer.parseInt(value);
                     hasMaxSpeed = true;
                 }
+                case "junction" -> {
+                    if (value.equals("roundabout")) oneway = true;
+                }
                 case "bicycle" -> bicycle = value.equals("true");
                 case "foot" -> foot = value.equals("yes");
                 case "route" -> roadType = key;
                 case "name" -> roadName = value;
-                case "railway" -> drivable = false;
+                case "railway", "power" -> drivable = false;
+                case "oneway" -> oneway = true;
             }
         }
 
         //Instantierer en ny Road en road og tager stilling til om den har en maxSpeed eller ej. || value.equals("steps")
         Road road;
-        if (hasMaxSpeed) road = new Road(nodes, foot, bicycle, drivable, maxSpeed, roadType, roadName);
+        if (hasMaxSpeed) road = new Road(nodes, foot, bicycle, drivable, oneway, maxSpeed, roadType, roadName);
         else road = new Road(nodes, foot, bicycle, drivable, roadType, roadName);
         return road;
     }
@@ -389,7 +396,7 @@ public class Parser implements Serializable {
                 if (node.isIntersection() || i == nodes.size() - 1) {
                     //We hit an intersection, or the end, so we make a road
                     Road newRoad;
-                    if (road.hasMaxSpeed()) newRoad = new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDriveable(), road.getMaxSpeed(), road.getType(), road.getRoadName());
+                    if (road.hasMaxSpeed()) newRoad = new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDriveable(), road.isOneway(), road.getMaxSpeed(), road.getType(), road.getRoadName());
                     else newRoad = new Road(new ArrayList<>(currentRoad), road.isWalkable(), road.isBicycle(), road.isDriveable(), road.getType(), road.getRoadName());
 
                     for (Node roadNode : newRoad.getNodes()) {

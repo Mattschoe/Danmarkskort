@@ -65,7 +65,7 @@ public class POI implements MapObject {
         double closestDistance = Double.MAX_VALUE;
         Node closestNode = null;
         for (Node node : tile.getNodesInTile()) {
-            if (node.getEdges().isEmpty()) continue; //Skips if node doesnt have any edges.
+            if (!node.hasDrivableEdges()) continue; //Skips if node doesnt have any edges that are drivable.
             double nodeX = node.getX();
             double nodeY = node.getY();
             double distance = Math.sqrt(Math.pow((nodeX - (double) x), 2) + Math.pow((nodeY - (double) y), 2)); //Afstandsformlen ser cooked ud i Java wth -MN

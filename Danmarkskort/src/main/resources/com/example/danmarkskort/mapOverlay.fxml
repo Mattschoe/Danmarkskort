@@ -47,6 +47,12 @@
         <Menu mnemonicParsing="false" text="Show">
             <CheckMenuItem fx:id="fpsButton" mnemonicParsing="false" text="FPS" />
         </Menu>
+      <Menu fx:id="routeButton" mnemonicParsing="false" text="Route">
+        <items>
+            <MenuItem fx:id="fastRouteButton" mnemonicParsing="false" onAction="#fastestRoute" text="Fastest Route" />
+          <MenuItem fx:id="shortestRouteButton" mnemonicParsing="false" onAction="#shortestRoute" text="Shortest Route" />
+        </items>
+      </Menu>
     </MenuBar>
    <Button fx:id="findRoute" layoutX="172.0" layoutY="35.0" mnemonicParsing="false" onMouseClicked="#onRouteSearchStart" text="Find Route" visible="false" />
    <Button fx:id="switchSearch" layoutX="172.0" layoutY="71.0" mnemonicParsing="false" onMouseClicked="#switchDestinationAndStart" text="Switch" visible="false" />
