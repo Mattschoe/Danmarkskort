@@ -847,5 +847,6 @@ public class Model {
     public Tilegrid getTilegrid() { return tilegrid; }
     public List<Road> getLatestRoute() { return latestRoute; }
     public void setLatestRoute(List<Road> route) { latestRoute = route; }
+    public Search getSearch() { return search; }
     //endregion
 }

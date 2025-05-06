@@ -407,7 +407,7 @@ public class Controller implements Initializable {
     }
 
     /// Method to export a route as PDF
-    @FXML protected void exportAsPDF(){
+    @FXML protected boolean exportAsPDF(){
         System.out.println("Attempting to export as PDF!");
 
         List<Road> latestRoute = Model.getInstance().getLatestRoute();
@@ -416,12 +416,15 @@ public class Controller implements Initializable {
             try {
                 PDFOutput.generateRoute(latestRoute, true);
                 System.out.println("PDF-export successful!");
+                return true;
             }
             catch (Exception e) {
                 System.out.println("PDF-export failed! Error: "+ e.getMessage());
+                return false;
             }
         }
         else System.out.println("PDF-export failed; no route has been successfully set yet!");
+        return false;
     }
 
     /// Method to open a textbox with a written guide when "Guide" is pressed
