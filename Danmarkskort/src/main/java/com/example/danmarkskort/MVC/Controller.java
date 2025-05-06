@@ -644,5 +644,8 @@ public class Controller implements Initializable {
 
     public Text getScaleText() { return scaleText; }
     public CheckBox getCheckBoxOBJ() { return checkBoxOBJ; }
+    public View getView(){
+        return view;
+    }
     //endregion
 }
