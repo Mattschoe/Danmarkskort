@@ -162,7 +162,6 @@ public class Controller implements Initializable {
         Text loadingText = (Text) view.getScene().lookup("#loadingText");
         ProgressBar progressBar = (ProgressBar) view.getScene().lookup("#progressBar");
         //Start the Timeline for UI updates
-        short counter = 0;
         StringBuffer dots = new StringBuffer();
         Timeline timeline = new Timeline(
                 new KeyFrame(Duration.seconds(0.5), event -> {
