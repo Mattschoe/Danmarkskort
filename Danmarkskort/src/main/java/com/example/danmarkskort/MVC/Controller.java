@@ -440,7 +440,6 @@ public class Controller implements Initializable {
             //Makes POI
             Affine transform = view.getTrans();
             POI POI = null;
-            switched = true;
             try {
                 POIMark = transform.inverseTransform(e.getX(), e.getY()); //ændret point til et felt, POIMark
                 POI = model.createPOI((float) POIMark.getX(), (float) POIMark.getY(), "Test");
@@ -506,6 +505,7 @@ public class Controller implements Initializable {
         POI temp = startPOI;
         startPOI = endPOI;
         endPOI = temp;
+        switched = !switched;
 
         updateSearchText();
     }
