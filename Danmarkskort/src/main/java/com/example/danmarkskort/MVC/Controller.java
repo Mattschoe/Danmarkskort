@@ -11,18 +11,12 @@ import com.example.danmarkskort.PDFOutput;
 import javafx.animation.AnimationTimer;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -50,6 +44,8 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
+
+
     //region Fields
     private View view;
     private Model model;
@@ -92,6 +88,8 @@ public class Controller implements Initializable {
     @FXML private Button addToPOIsUI;
     @FXML private Button POIClose;
     @FXML private TextArea addPOIBox;
+    @FXML public Text loadingText;
+    @FXML public ProgressBar loadingBar;
     //endregion
     //endregion
 
@@ -144,17 +142,36 @@ public class Controller implements Initializable {
     /** Passes the given file into a Model class that starts parsing it
      *  @param mapFile the file which the map is contained. Given by user when choosing file
      */
-    private void loadFile(File mapFile) {
+    private void loadFile(File mapFile) throws IOException {
         boolean createOBJ = checkBoxOBJ != null && checkBoxOBJ.isSelected();
-        model = Model.getInstance(mapFile.getPath(), canvas, createOBJ);
 
-        view.setTilegrid(model.getTilegrid());
+        Task<Void> Loadingtask = new Task<>() {
+            @Override protected Void call() throws Exception {
+                model = Model.getInstance(mapFile.getPath(), canvas, createOBJ);
+                return null;
+            }
+
+            @Override protected void succeeded() {
+                try {
+                    view = new View(view.getStage(), "mapOverlay.fxml");
+                    view.setTilegrid(model.getTilegrid());
+                    view.drawMap();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+        };
+        view = new View(view.getStage(), "loading.fxml");
+
+        new Thread(Loadingtask).start();
     }
 
     /** Runs right after a Controller is created --
      *  configures something(???) for an object in the mapOverlay.fxml scene
      */
     @Override public void initialize(URL url, ResourceBundle resourceBundle) {
+        System.out.println("Controller initialized!");
         listView.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<>() {
             @Override
             public void changed(ObservableValue<? extends String> observableValue, String s, String t1) {
@@ -208,10 +225,7 @@ public class Controller implements Initializable {
         File standardMapFile = new File("data/StandardMap/parser.obj"); //TODO skal ændres senere
         assert standardMapFile.exists();
 
-        view = new View(view.getStage(), "mapOverlay.fxml");
         loadFile(standardMapFile);
-
-        view.drawMap();
     }
 
     @FXML protected void toggleCreateOBJ() {

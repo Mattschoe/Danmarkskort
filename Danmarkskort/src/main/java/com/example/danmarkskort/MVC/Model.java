@@ -2,6 +2,7 @@ package com.example.danmarkskort.MVC;
 
 import com.example.danmarkskort.AddressSearch.TrieST;
 import com.example.danmarkskort.Exceptions.ParserSavingException;
+import com.example.danmarkskort.LoadingBar;
 import com.example.danmarkskort.MapObjects.*;
 import com.example.danmarkskort.Parser;
 import com.example.danmarkskort.Searching.Search;
@@ -21,6 +22,7 @@ import java.util.concurrent.*;
  * It also stores the parser which parses the .osm data.
  * Call {@link #getInstance()} to get the Model
  */
+
 public class Model {
     //region Fields
     private static Model modelInstance;
@@ -34,6 +36,7 @@ public class Model {
     private TrieST trieStreet;
     private Map<String, Node> citiesToNode;
     private int numberOfChunks;
+    private LoadingBar loadingBar;
     //endregion
 
     //region Constructor(s)
