@@ -24,9 +24,12 @@ public class Search {
     List<Road> endRoads;
     ///The list of roads that contain endNode. Used for ending the search early to make sure we find the endNode even if it cant be found by .getOppositeNode()
     Road destinationRoad;
+    ///True = QuickestRoute <br> False = ShortestRoute <br> True as default
+    boolean quickestRoute;
 
     public Search(Collection<Node> nodes) {
         assert !nodes.isEmpty();
+        quickestRoute = true; 
     }
 
     /// Start a route from the Node {@code from} to the Node {@code to}.
@@ -166,6 +169,15 @@ public class Search {
 
     ///The heuristic that's added on top of a Node's {@code distanceTo} to implement A*
     private double heuristic(Node a, Node b) {
-        return Math.hypot((a.getX() - b.getX()), (a.getY() - b.getY())) / 130; //Distance formula divided by speedlimit in DK
+        if (quickestRoute) return Math.hypot((a.getX() - b.getX()), (a.getY() - b.getY())) / 130; //Distance formula divided by speedlimit in DK
+        else return Math.hypot((a.getX() - b.getX()), (a.getY() - b.getY())); //Just pure distance if doing shortest path
+    }
+
+    /**
+     * Changes the settings on the route
+     * @param quickestRoute <br> </be>- True = Quickest <br> - False = Shortest
+     */
+    public void changeRouteSettings(boolean quickestRoute) {
+        this.quickestRoute = quickestRoute;
     }
 }
