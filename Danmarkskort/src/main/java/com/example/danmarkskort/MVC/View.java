@@ -241,5 +241,9 @@ public class View {
     public boolean isFirstTimeDrawingMap() { return firstTimeDrawingMap; } //for tests
     public double getZoomLevel(){ return zoomLevel; } //used for tests
     public FXMLLoader getFXMLLoader(){return root;}
+
+    public Scene getScene() {
+    return scene;
+    }
     //endregion
 }
