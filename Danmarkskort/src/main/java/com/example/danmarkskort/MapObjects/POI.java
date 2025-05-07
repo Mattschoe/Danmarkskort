@@ -1,13 +1,9 @@
 package com.example.danmarkskort.MapObjects;
 
-import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
-import javafx.scene.transform.Affine;
-import javafx.scene.transform.NonInvertibleTransformException;
 
-///A Point Of Interest (POI) is a specific point made by the user. It contains the node that's closest to that POI, a coordinate, and a name
+/// A Point Of Interest (POI) is a specific point made by the user. It contains the node that's closest to that POI, a coordinate, and a name
 public class POI implements MapObject {
     Node closestNodeToPOI;
     Node closestNodeWithRoad;
@@ -16,7 +12,7 @@ public class POI implements MapObject {
 
     @SuppressWarnings("DataFlowIssue")
     private static final Image pinImage = new Image(
-            POI.class.getResource("/com/example/danmarkskort/pin.png").toExternalForm()
+        POI.class.getResource("/com/example/danmarkskort/pin.png").toExternalForm()
     );
 
     /**

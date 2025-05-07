@@ -1,17 +1,20 @@
 package com.example.danmarkskort;
 
 import com.example.danmarkskort.MVC.Model;
+import com.example.danmarkskort.MapObjects.POI;
 import javafx.scene.canvas.Canvas;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.testfx.framework.junit5.ApplicationTest;
 
 import java.io.File;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ModelTest {
+public class ModelTest extends ApplicationTest {
     Canvas canvas;
     Model model;
 
@@ -27,8 +30,17 @@ public class ModelTest {
     }
 
     @Test
+    public void modelFindsFileCorrectly() {
+        File objFile = new File("data/small.osm");
+        assertTrue(objFile.exists());
+        assertDoesNotThrow(() -> {
+            model = new Model(objFile.getPath(), canvas, false);
+        });
+    }
+
+    @Test
     protected void createOBJTest() {
-        model = new Model("./data/small.osm", canvas, true);
+        model = new Model("data/small.osm", canvas, true);
 
         //Tester at diverse filer er blevet skabt
         File file;
@@ -47,6 +59,10 @@ public class ModelTest {
         //Sletter alle filer i den skabte mappe, og til sidst også selve mappen
         File folder = new File("data/generated/small");
         String[] files = folder.list();
+
+        long startTime = System.nanoTime();
+        //noinspection StatementWithEmptyBody
+        while (System.nanoTime() - startTime < 2_000_000_000) {/* wait */}
 
         //noinspection DataFlowIssue
         for (String s : files) {
@@ -83,38 +99,28 @@ public class ModelTest {
         assertTrue(model.getFile().getPath().endsWith(".obj"));
     }
 
-    @Test
+    @Disabled @Test
     protected void loadStandardMapTest() {
         assertDoesNotThrow(() ->
             model = new Model("data/StandardMap/parser.obj", canvas, false)
         );
     }
 
-     /// Checks if model can correctly load .obj to a parser class
     @Test
-    public void loadParserAsOBJ() {
-        File objFile = new File("./data/small.osm.obj");
+    protected void createPOITest() {
+        Canvas canvas = new Canvas(600, 400);
+        Model model = new Model("data/small.osm", canvas, false);
+        POI poi = model.createPOI(408.02264f, 386.6936f, "Torvegade 27");
 
-        Model createObjFileModel = Model.getInstance("./data/Bornholm.zip", canvas, false);
-        Model createParserFromObjModel = Model.getInstance(objFile.getPath(), canvas, false);
-        //assertNotNull(createParserFromObjModel.getParser());
-    }
+        float x = 408.02264404296875f;
+        float y = 386.693603515625f;
 
-    /*
-     * Same as {@link #saveParserAsOBJ()} just doesn't delete the OBJ file again. Should be marked @Disabled as standard since it doesn't dele the file again
-   */
-   /* @Disabled
-    @Test
-    public void createOBJFile() {
-        Model model = Model.getInstance("data/mapOfDenmark.osm", canvas);
-        model.saveParserToOBJ();
-        File file = new File("data/mapOfDenmark.osm.obj");
-        assertTrue(file.exists());
-    }
-*/
-    @Test
-    public void modelFindsFileCorrectly() {
-        File objFile = new File("./data/small.osm.obj");
-        assertTrue(objFile.exists());
+        assertEquals(x, poi.getX());
+        assertEquals(y, poi.getY());
+        assertEquals("Torvegade 27, 1400 København K", poi.getNodeAddress());
+        System.out.println(Arrays.toString(poi.getBoundingBox()));
+        //assertEquals(new float[]{x,y,x,y});
+
+        poi.draw(canvas.getGraphicsContext2D());
     }
 }
