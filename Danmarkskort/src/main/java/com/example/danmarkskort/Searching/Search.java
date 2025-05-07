@@ -180,6 +180,4 @@ public class Search {
     public void changeRouteSettings(boolean quickestRoute) {
         this.quickestRoute = quickestRoute;
     }
-
-    public boolean isQuickestRoute() { return quickestRoute; }// for testing
 }

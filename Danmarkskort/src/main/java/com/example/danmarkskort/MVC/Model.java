@@ -2,7 +2,6 @@ package com.example.danmarkskort.MVC;
 
 import com.example.danmarkskort.AddressSearch.TrieST;
 import com.example.danmarkskort.Exceptions.ParserSavingException;
-import com.example.danmarkskort.LoadingBar;
 import com.example.danmarkskort.MapObjects.*;
 import com.example.danmarkskort.Parser;
 import com.example.danmarkskort.Searching.Search;
@@ -22,7 +21,6 @@ import java.util.concurrent.*;
  * It also stores the parser which parses the .osm data.
  * Call {@link #getInstance()} to get the Model
  */
-
 public class Model {
     //region Fields
     private static Model modelInstance;
@@ -36,7 +34,6 @@ public class Model {
     private TrieST trieStreet;
     private Map<String, Node> citiesToNode;
     private int numberOfChunks;
-    private LoadingBar loadingBar;
     //endregion
 
     //region Constructor(s)
@@ -49,7 +46,6 @@ public class Model {
 
         file = new File(filePath);
         assert file.exists();
-        loadingBar = LoadingBar.getInstance();
 
         String filename = file.getName().split("\\.")[0];
         File possibleOBJ = new File("data/generated/"+ filename +"/parser.obj");
@@ -97,7 +93,6 @@ public class Model {
 
         tilegrid = new Tilegrid(tileGrid, tileGridBounds, tileSize, numberOfTilesX, numberOfTilesY);
         System.out.println("Finished creating Tilegrid!");
-        loadingBar.setProgress(0.8);
         //endregion
 
         System.out.println("Loading nodes into address and road searching!");
@@ -109,7 +104,6 @@ public class Model {
             }
             else saveParserToOBJ();
         }
-        loadingBar.setProgress(1);
         parser = null; //Fjerner reference til parser så den bliver GC'et
         System.gc();
     }
@@ -200,7 +194,6 @@ public class Model {
             partialResults.clear();
             futures.clear();
             System.out.println("- Finished deserializing nodes!");
-            loadingBar.setProgress(0.2);
             //endregion
         } catch (Exception e) {
             System.out.println("Error reading nodes! " + e.getMessage());
@@ -245,7 +238,6 @@ public class Model {
             futures.clear();
             //endregion
             System.out.println("- Finished deserializing roads!");
-            loadingBar.setProgress(0.4);
         } catch (Exception e) {
             System.out.println("Error reading Roads! " + e.getMessage());
         }
@@ -288,7 +280,6 @@ public class Model {
             futures.clear();
             //endregion
             System.out.println("- Finished deserializing polygons!");
-            loadingBar.setProgress(0.6);
         } catch (Exception e) {
             System.out.println("Error reading Polygons! " + e.getMessage());
         }
@@ -856,6 +847,5 @@ public class Model {
     public Tilegrid getTilegrid() { return tilegrid; }
     public List<Road> getLatestRoute() { return latestRoute; }
     public void setLatestRoute(List<Road> route) { latestRoute = route; }
-    public Search getSearch() { return search; }
     //endregion
 }

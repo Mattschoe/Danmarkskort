@@ -1,6 +1,5 @@
 package com.example.danmarkskort.MVC;
 
-import com.example.danmarkskort.LoadingBar;
 import com.example.danmarkskort.MapObjects.MapObject;
 import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.POI;
@@ -9,18 +8,18 @@ import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.PDFOutput;
 
-import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -32,7 +31,6 @@ import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.awt.Desktop;
 import java.io.File;
@@ -43,7 +41,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 public class Controller {
     //region Fields
@@ -59,7 +56,6 @@ public class Controller {
     private List<Node> autoSuggestResults;
     private TextField searchingSource;
     private boolean putTextSwitched;
-    private LoadingBar loadingBar;
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
@@ -87,8 +83,6 @@ public class Controller {
     @FXML private Button addToPOIsUI;
     @FXML private Button POIClose;
     @FXML private TextArea addPOIBox;
-    @FXML public Text loadingText;
-    @FXML public ProgressBar progressBar;
     //endregion
     //endregion
 
@@ -102,9 +96,6 @@ public class Controller {
         listView = new ListView<>();
         autoSuggestResults = new ArrayList<>();
         putTextSwitched = false;
-
-        loadingText = new Text();
-        progressBar = new ProgressBar();
 
         //region AnimationTimer
         AnimationTimer fpsTimer = new AnimationTimer() {
@@ -145,51 +136,11 @@ public class Controller {
      * Passes the given file into a Model class that starts parsing it
      * @param mapFile the file which the map is contained. Given by user when choosing file
      */
-    private void loadFile(File mapFile) throws IOException {
+    private void loadFile(File mapFile) {
         boolean createOBJ = checkBoxOBJ != null && checkBoxOBJ.isSelected();
-        loadingBar = LoadingBar.getInstance();
+        model = Model.getInstance(mapFile.getPath(), canvas, createOBJ);
 
-        view = new View(view.getStage(), "loading.fxml");
-
-        //Reference the UI elements after view is loaded
-        Text loadingText = (Text) view.getScene().lookup("#loadingText");
-        ProgressBar progressBar = (ProgressBar) view.getScene().lookup("#progressBar");
-        //Start the Timeline for UI updates
-        StringBuffer dots = new StringBuffer();
-        Timeline timeline = new Timeline(
-                new KeyFrame(Duration.seconds(0.5), event -> {
-
-                    loadingText.setText(loadingBar.getLoadingText() + dots.append(".")); // For testing
-                    progressBar.setProgress(loadingBar.getProgress());
-
-                    if (dots.toString().equals("...")) {
-                        dots.delete(0,5);
-                    }
-                })
-        );
-        timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.play();
-
-        //start the background task
-        Task<Void> loadingTask = new Task<>() {
-            @Override protected Void call() throws Exception {
-                model = Model.getInstance(mapFile.getPath(), canvas, createOBJ);
-                return null;
-            }
-
-            @Override protected void succeeded() {
-                try {
-                    timeline.stop();
-                    view = new View(view.getStage(), "mapOverlay.fxml");
-                    view.setTilegrid(model.getTilegrid());
-                    view.drawMap();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        };
-
-        new Thread(loadingTask).start();
+        view.setTilegrid(model.getTilegrid());
     }
 
     //region Start-up scene methods
@@ -236,7 +187,10 @@ public class Controller {
         File standardMapFile = new File("data/StandardMap/parser.obj"); //TODO skal ændres senere
         assert standardMapFile.exists();
 
+        view = new View(view.getStage(), "mapOverlay.fxml");
         loadFile(standardMapFile);
+
+        view.drawMap();
     }
 
     @FXML protected void toggleCreateOBJ() {
@@ -514,7 +468,7 @@ public class Controller {
     }
 
     /// Method to export a route as PDF
-    @FXML protected boolean exportAsPDF(){
+    @FXML protected void exportAsPDF() {
         System.out.println("Attempting to export as PDF!");
 
         List<Road> latestRoute = Model.getInstance().getLatestRoute();
@@ -523,15 +477,12 @@ public class Controller {
             try {
                 PDFOutput.generateRoute(latestRoute, true);
                 System.out.println("PDF-export successful!");
-                return true;
             }
             catch (Exception e) {
-                System.out.println("PDF-export failed! Error: "+ e.getMessage());
-                return false;
+                System.out.println("PDF-export failed; "+ e.getMessage());
             }
         }
         else System.out.println("PDF-export failed; no route has been successfully set yet!");
-        return false;
     }
 
     /// Method to open a textbox with a written guide when "Guide" is pressed
@@ -548,7 +499,6 @@ public class Controller {
 
     /// Method runs upon releasing a press on the Canvas
     @FXML protected void onCanvasClick(MouseEvent e) {
-        //region DOUBLE CLICK (Searching)
         if (e.getClickCount() == 2) {
             //region > Make POI
             POI poi = null;
@@ -822,22 +772,5 @@ public class Controller {
     public Text getScaleText() { return scaleText; }
     public CheckBox getCheckBoxOBJ() { return checkBoxOBJ; }
     public View getView(){ return view; }
-    private Timeline getTimeline(Text loadingText, ProgressBar progressBar) {
-        StringBuffer dots = new StringBuffer();
-        Timeline timeline = new Timeline(
-                new KeyFrame(Duration.seconds(0.5), event -> {
-
-                    loadingText.setText(loadingBar.getLoadingText() + dots.append(".")); // For testing
-                    progressBar.setProgress(loadingBar.getProgress());
-
-                    if (dots.toString().equals("...")) {
-                        dots.delete(0,5);
-                    }
-                })
-        );
-        timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.play();
-        return timeline;
-    }
     //endregion
 }
