@@ -230,20 +230,17 @@ public class View {
     //region Getters and setters
     public Stage getStage() { return stage; }
     public Affine getTrans() { return trans; }
-    public float[] getViewport() throws NonInvertibleTransformException {
-        Point2D minXY = trans.inverseTransform(0, 0);
-        Point2D maxXY = trans.inverseTransform(canvas.getWidth(), canvas.getHeight());
-        return new float[]{(float) minXY.getX(), (float) minXY.getY(), (float) maxXY.getX(), (float) maxXY.getY()};
-    }
     public void setTilegrid(Tilegrid tilegrid) { this.tilegrid = tilegrid; }
     public void setBgColor(Color bgColor) { this.bgColor = bgColor; }
     public void setScaleColor(Color scaleColor) { this.scaleColor = scaleColor; }
     public boolean isFirstTimeDrawingMap() { return firstTimeDrawingMap; } //for tests
     public double getZoomLevel(){ return zoomLevel; } //used for tests
     public FXMLLoader getFXMLLoader(){return root;}
-
-    public Scene getScene() {
-    return scene;
+    public Scene getScene() { return scene; }
+    public float[] getViewport() throws NonInvertibleTransformException {
+        Point2D minXY = trans.inverseTransform(0, 0);
+        Point2D maxXY = trans.inverseTransform(canvas.getWidth(), canvas.getHeight());
+        return new float[]{(float) minXY.getX(), (float) minXY.getY(), (float) maxXY.getX(), (float) maxXY.getY()};
     }
     //endregion
 }

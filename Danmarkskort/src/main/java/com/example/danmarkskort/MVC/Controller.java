@@ -63,6 +63,7 @@ public class Controller {
 
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
+    //endregion
 
     //region FXML fields
     @FXML private Canvas canvas;
@@ -89,7 +90,6 @@ public class Controller {
     @FXML private TextArea addPOIBox;
     @FXML public Text loadingText;
     @FXML public ProgressBar progressBar;
-    //endregion
     //endregion
 
     //region Constructor(s)
