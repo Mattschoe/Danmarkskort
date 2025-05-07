@@ -666,7 +666,6 @@ public class Model {
     public void removePOI(POI poi){
         Tile tile = tilegrid.getTileFromXY(poi.getX(), poi.getY());
         tile.getPOIs().remove(poi);
-
     }
 
     /**

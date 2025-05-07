@@ -8,6 +8,7 @@ module com.example.danmarkskort {
     requires jdk.jdi;
     requires trove4j;
     requires java.sql;
+    requires org.junit.jupiter.api;
 
     opens com.example.danmarkskort to javafx.fxml;
     exports com.example.danmarkskort;

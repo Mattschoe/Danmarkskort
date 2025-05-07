@@ -330,6 +330,7 @@ public class Polygon implements Serializable, MapObject{
 
     //region Getters and setters
     public String getType() { return type; }
+    public Color getColor() { return color; }
     @Override public float[] getBoundingBox() { return boundingBox; }
     public float[] getXPoints() { return xPoints; }
     public float[] getYPoints() { return yPoints; }

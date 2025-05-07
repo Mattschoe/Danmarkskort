@@ -61,7 +61,7 @@ public class TrieST {
         current.addValue(node);
     }
 
-    ///Returns all the nodes that are associated with this exact address. Returns an empty list if no address is found
+    /*//Returns all the nodes that are associated with this exact address. Returns an empty list if no address is found
     public List<Node> get(String address) {
         String remaining = address;
         TrieNode current = root;
@@ -83,7 +83,7 @@ public class TrieST {
             if (!matched) { return Collections.emptyList(); }
         }
         return current.getValues();
-    }
+    }*/
 
     ///Returns a list of nodes that all start with the given {@code prefix}
     public List<Node> keysWithPrefix(String prefix) {

@@ -13,11 +13,8 @@ import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
@@ -43,7 +40,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 
 public class Controller {
     //region Fields
@@ -55,12 +51,11 @@ public class Controller {
     private MouseEvent mouseEvent; //Used to pan
     private final Map<String,POI> favoritePOIs = new HashMap<>();
     private final List<POI> oldPOIs = new ArrayList<>();
-    List<Road> latestRoute = new ArrayList<>();
+    private List<Road> latestRoute = new ArrayList<>();
     private List<Node> autoSuggestResults;
     private TextField searchingSource;
     private boolean putTextSwitched;
     private LoadingBar loadingBar;
-
     private long lastSystemTime; //Used to calculate FPS
     private int framesThisSec;   //Used to calculate FPS
     //endregion
@@ -81,15 +76,11 @@ public class Controller {
     @FXML private Button switchSearch;
     @FXML private Button findRoute;
     @FXML private Button savePOIButton;
-    @FXML private MenuItem fastestRoute;
-    @FXML private MenuItem shortestRoute;
     @FXML private Menu POIMenu;
     @FXML private TextField addNamePOI;
     @FXML private Button addToPOIsUI;
     @FXML private Button POIClose;
     @FXML private TextArea addPOIBox;
-    @FXML public Text loadingText;
-    @FXML public ProgressBar progressBar;
     //endregion
 
     //region Constructor(s)
@@ -102,9 +93,6 @@ public class Controller {
         listView = new ListView<>();
         autoSuggestResults = new ArrayList<>();
         putTextSwitched = false;
-
-        loadingText = new Text();
-        progressBar = new ProgressBar();
 
         //region AnimationTimer
         AnimationTimer fpsTimer = new AnimationTimer() {
@@ -134,13 +122,6 @@ public class Controller {
     }
     //endregion
 
-    //region Methods
-    /// MIDLERTIDIG METODE FOR AT GØRE DET NEMT AT ÅBNE COVERAGE-RAPPORTEN.
-    @FXML protected void openTestCoverage() { //TODO %% SKAL FJERNES SENERE
-        try { Desktop.getDesktop().open(new File("build/reports/jacoco/test/html/index.html")); }
-        catch (Exception e) { System.out.println("No test coverage report exists! Try building the app"); }
-    }
-
     /**
      * Passes the given file into a Model class that starts parsing it
      * @param mapFile the file which the map is contained. Given by user when choosing file
@@ -157,7 +138,7 @@ public class Controller {
         //Start the Timeline for UI updates
         StringBuffer dots = new StringBuffer();
         Timeline timeline = new Timeline(
-                new KeyFrame(Duration.seconds(0.5), event -> {
+                new KeyFrame(Duration.seconds(0.5), _ -> {
 
                     loadingText.setText(loadingBar.getLoadingText() + dots.append(".")); // For testing
                     progressBar.setProgress(loadingBar.getProgress());
@@ -172,7 +153,7 @@ public class Controller {
 
         //start the background task
         Task<Void> loadingTask = new Task<>() {
-            @Override protected Void call() throws Exception {
+            @Override protected Void call() {
                 model = Model.getInstance(mapFile.getPath(), canvas, createOBJ);
                 return null;
             }
@@ -198,7 +179,7 @@ public class Controller {
      * Lets the user pick a file and tries to parse it as a map. If successful,
      * switches the scene to a canvas with the map drawn.
      */
-    @FXML protected void uploadInputButton() throws IOException {
+    @FXML public void uploadInputButton() throws IOException {
         //Laver en FileChooser til at åbne en stifinder når brugeren klikker 'Upload fil'
         FileChooser fileChooser = new FileChooser();
 
@@ -219,6 +200,7 @@ public class Controller {
 
         //Åbner stifinderen og gemmer filen som brugeren vælger
         File selectedFile = fileChooser.showOpenDialog(new Stage());
+
         if (selectedFile != null) {
             //Loads View and model
             view = new View(view.getStage(), "mapOverlay.fxml");
@@ -232,15 +214,21 @@ public class Controller {
     }
 
     /// Method runs upon clicking the "Run standard"-button in the start-up scene
-    @FXML protected void standardInputButton() throws IOException {
+    @FXML public void standardInputButton() throws IOException {
         File standardMapFile = new File("data/StandardMap/parser.obj"); //TODO skal ændres senere
         assert standardMapFile.exists();
 
         loadFile(standardMapFile);
     }
 
+    /// TODO MIDLERTIDIG METODE FOR AT GØRE DET NEMT AT ÅBNE COVERAGE-RAPPORTEN.
+    @FXML protected void openTestCoverage() {
+        try { Desktop.getDesktop().open(new File("build/reports/jacoco/test/html/index.html")); }
+        catch (Exception e) { System.out.println("No test coverage report exists! Try building the app"); }
+    }
+
     /// Dynamically changes the look of the 'Create OBJ on load'-button
-    @FXML protected void toggleCreateOBJ() {
+    @FXML public void toggleCreateOBJ() {
         if (checkBoxOBJ.getChildrenUnmodifiable().isEmpty()) return;
         StackPane box = (StackPane) checkBoxOBJ.getChildrenUnmodifiable().getLast();
         StackPane mark = (StackPane) box.getChildrenUnmodifiable().getFirst();
@@ -253,11 +241,6 @@ public class Controller {
             box.setStyle("-fx-border-color: darkgrey; -fx-background-color: grey");
             mark.setStyle("-fx-background-color: darkgrey");
         }
-    }
-
-    /// Disables the ListView
-    @FXML protected void mouseExitedListView() {
-        listView.setVisible(false);
     }
     //endregion
 
@@ -276,8 +259,9 @@ public class Controller {
         }
     }
 
-    /// Methods runs upon modifying the {@code searchbar} in the UI.
-    @FXML protected void searchBarsTyped(KeyEvent event) {
+    /// Methods runs upon typing in either of the searchbars in the UI.
+    /// When the user presses 'DOWN' in a searchbar, focus shifts to the ListView if it is visible
+    @FXML public void searchBarsTyped(KeyEvent event) {
         if (model == null) model = Model.getInstance();
 
         TextField source = (TextField) event.getSource();
@@ -287,7 +271,12 @@ public class Controller {
         if (source.getId().equals("searchBar")) listView.setLayoutY(58);
         if (source.getId().equals("destination")) listView.setLayoutY(94);
 
-        if (event.getCharacter().equals("\r")) {
+        if (event.getCode().toString().equals("DOWN")) {
+            if (listView.isVisible()) {
+                listView.requestFocus();
+            }
+        }
+        else if (event.getCode().toString().equals("ENTER") /*event.getCharacter().equals("\r")*/) {
             if (!autoSuggestResults.isEmpty()) {
                 listView.setVisible(false);
                 findRoute.setVisible(true);
@@ -297,6 +286,7 @@ public class Controller {
                 //When the user presses enter on a searchbar, it gets
                 //updated with the best(first) match from the suggestions
                 autoSuggestResults = autoSuggest(source.getText().toLowerCase());
+                if (autoSuggestResults.isEmpty()) return;
                 Node selection = autoSuggestResults.getFirst();
 
                 view.zoomTo(selection.getX(), selection.getY());
@@ -326,15 +316,6 @@ public class Controller {
         }
     }
 
-    /// When the user presses 'DOWN' in a searchbar, focus shifts to the ListView if it is visible
-    @FXML protected void searchBarsPressed(KeyEvent event) {
-        if (event.getCode().toString().equals("DOWN")) {
-            if (listView.isVisible()) {
-                listView.requestFocus();
-            }
-        }
-    }
-
     /// When the user presses 'Enter' on the ListView, the ListView is disabled and the Find Route-button is enabled
     @FXML protected void onListViewTyped(KeyEvent event) {
         if (event.getCharacter().equals("\r")) {
@@ -346,6 +327,28 @@ public class Controller {
             findRoute.setVisible(true);
             findRoute.requestFocus();
             savePOIButton.setVisible(true);
+        }
+    }
+
+    /// Disables the ListView
+    @FXML protected void mouseExitedListView() {
+        listView.setVisible(false);
+    }
+
+    /// When the user chooses a node from the suggestions, overrides the searchbar and zooms onto the Node
+    @FXML protected void addressPickedFromList(MouseEvent event) {
+        Node chosenNode = autoSuggestResults.get(listView.getSelectionModel().getSelectedIndex());
+        searchingSource.setText(chosenNode.getAddress());
+        view.zoomTo(chosenNode.getX(), chosenNode.getY());
+
+        listView.setVisible(false);
+        findRoute.setVisible(true);
+        findRoute.requestFocus();
+        savePOIButton.setVisible(true);
+
+        //noinspection StatementWithEmptyBody
+        if (event.getClickCount() == 2) {
+            //Method used to be in here but Gertrud-testen showed it was unintuitive
         }
     }
 
@@ -398,25 +401,8 @@ public class Controller {
     //endregion
 
     //region Canvas methods
-    /// When the user chooses a node from the suggestions, overrides the searchbar and zooms onto the Node
-    @FXML protected void onAddressPickedFromList(MouseEvent event) {
-        Node chosenNode = autoSuggestResults.get(listView.getSelectionModel().getSelectedIndex());
-        searchingSource.setText(chosenNode.getAddress());
-        view.zoomTo(chosenNode.getX(), chosenNode.getY());
-
-        listView.setVisible(false);
-        findRoute.setVisible(true);
-        findRoute.requestFocus();
-        savePOIButton.setVisible(true);
-
-        //noinspection StatementWithEmptyBody
-        if (event.getClickCount() == 2) {
-            //Method used to be in here but Gertrud-testen showed it was unintuitive
-        }
-    }
-
     /// Saves a POI from the last given input in either search-bar, and adds POI to the 'POIs' Menu in the MenuBar
-    @FXML protected void savePOItoHashMap() {
+    @FXML public void savePOItoHashMap() {
         if (searchingSource == null) {
             System.out.println("Oh no, fishy behaviour!!!! Search source is null");
         }
@@ -502,13 +488,6 @@ public class Controller {
         POIClose.setVisible(false);
     }
 
-    /// Metode til at fjerne den røde markering på kortet for en POI. Virker kun for den POI, der senest er placeret
-    @FXML public void removePOIMarker(POI poi) {
-        //sæt knappen til visible og kald denne metode et sted
-        model.removePOI(poi);
-        view.drawMap();
-    }
-
     /// Mangler logic for at finde korteste vej
     @FXML public void shortestRoute() {
         model.setSearchType(false);
@@ -520,7 +499,7 @@ public class Controller {
     }
 
     /// Method to export a route as PDF
-    @FXML protected boolean exportAsPDF(){
+    @FXML protected boolean exportAsPDF() {
         System.out.println("Attempting to export as PDF!");
 
         List<Road> latestRoute = Model.getInstance().getLatestRoute();
@@ -606,7 +585,8 @@ public class Controller {
 
                     if (!favoritePOIs.containsValue(removed)) {
                         oldPOIs.remove(removed);
-                        removePOIMarker(removed);
+                        model.removePOI(removed);
+                        view.drawMap();
                     }
                     //Removes the deleted POI's from the map after
                     //they've been deleted via the savePOIToHashMap function
@@ -616,6 +596,7 @@ public class Controller {
     }
 
     @FXML public void findRouteClicked() {
+        if (model == null) model = Model.getInstance();
         if (listView.isVisible()) listView.setVisible(false);
 
         if (!switchSearch.isVisible() && !destination.isVisible()) {
@@ -629,14 +610,11 @@ public class Controller {
 
             Node from = model.getStreetsFromPrefix(origin).getFirst();
             POI startPOI = model.createPOI(from.getX(), from.getY(), "Test1");
-            //from = getClosestRoadNode(from); IKKE SLET LÆS getClosestRoadNode
 
             Node to = model.getStreetsFromPrefix(termin).getFirst();
             POI endPOI = model.createPOI(to.getX(), to.getY(), "Test2");
-            //to = getClosestRoadNode(to); IKKE SLET LÆS getClosestRoadNode
 
             startSearch(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
-            //startSearch(from, to); IKKE SLET LÆS getClosestRoadNode
 
             model.removePOI(startPOI);
             model.removePOI(endPOI);
@@ -645,39 +623,6 @@ public class Controller {
         else {
             System.out.println("Cannot search for a route without both a start- AND an endpoint!");
         }
-    }
-
-    /// ** DO NOT DELETE ** Returns the closest Node which is in a Road, from the given Node
-    @Deprecated private Node getClosestRoadNode(Node node) {
-        /*
-         * Metoden er @Deprecated fordi jeg ikke kunne få ruten til at se ligeså lækker ud,
-         * uden at bruge POIs, som med. Samme begrundelse for den udkommenterede -men ikke
-         * slettede!- kode i findRouteButton-metoden. Var varsom med at bruge POIs til rute-
-         * søgningen fordi de virkede til at drille Joakim's POIs, når man havde andre/lav-
-         * ede flere POIs idet/efter man lavede en rutesøgning...
-         * SLET IKKE METODEN IN CASE VI PRØVER AT LAVE RUTESØGNINGEN IGEN UDEN POIs!!!!!!!
-         */
-
-        Point2D localPoint;
-        try { localPoint = view.getTrans().inverseTransform(node.getX(), node.getY()); }
-        catch (NonInvertibleTransformException e) { throw new RuntimeException(e); }
-        double localX = localPoint.getX();
-        double localY = localPoint.getY();
-
-        Tile tile = model.getTilegrid().getTileFromXY((float) localX, (float) localY);
-        Road closestRoad = getClosestRoad(tile, localX, localY);
-        double closestDistance = Double.POSITIVE_INFINITY;
-
-        for (Node n : closestRoad.getNodes()) {
-            double nodeX = n.getX();
-            double nodeY = n.getY();
-            double distance = Math.sqrt(Math.pow((nodeX - node.getX()), 2) + Math.pow((nodeY - node.getY()), 2)); //Jeg har stjålet MN's afstandsformel 3:) -OFS. a^2 + b^2 = c^2 type shit
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                node = n;
-            }
-        }
-        return node;
     }
 
     /// Switches the text in the 'From' and 'To' search-bars
@@ -728,7 +673,7 @@ public class Controller {
      * Method determines the closest Road, given a Tile and a set of coordinates in the Tile
      * @return {@code null} if there are no nodes in the Tile
      */
-    private Road getClosestRoad(Tile tile, double x, double y) {
+    private static Road getClosestRoad(Tile tile, double x, double y) {
         double closestDistance = Double.MAX_VALUE;
         Road closestRoad = null;
 
@@ -757,7 +702,7 @@ public class Controller {
 
     //region Palette methods
     /// Switches to the default palette
-    @FXML private void paletteDefault() {
+    @FXML public void paletteDefault() {
         if (model == null) model = Model.getInstance();
 
         view.setBgColor(Color.LIGHTBLUE);
@@ -772,7 +717,7 @@ public class Controller {
     }
 
     /// Switches to the Midnight palette
-    @FXML private void paletteMidnight() {
+    @FXML public void paletteMidnight() {
         if (model == null) model = Model.getInstance();
 
         view.setBgColor(Color.rgb(23, 3, 63));
@@ -787,7 +732,7 @@ public class Controller {
     }
 
     /// Switches to the Basic palette
-    @FXML private void paletteBasic() {
+    @FXML public void paletteBasic() {
         if (model == null) model = Model.getInstance();
 
         view.setBgColor(Color.GHOSTWHITE);
@@ -824,14 +769,12 @@ public class Controller {
      * @return Controllerens canvas-felt
      */
     public Canvas getCanvas() { return canvas; }
-
     public Text getScaleText() { return scaleText; }
     public CheckBox getCheckBoxOBJ() { return checkBoxOBJ; }
-    public View getView(){ return view; }
-    private Timeline getTimeline(Text loadingText, ProgressBar progressBar) {
+    public Timeline getTimeline(Text loadingText, ProgressBar progressBar) {
         StringBuffer dots = new StringBuffer();
         Timeline timeline = new Timeline(
-                new KeyFrame(Duration.seconds(0.5), event -> {
+                new KeyFrame(Duration.seconds(0.5), _ -> {
 
                     loadingText.setText(loadingBar.getLoadingText() + dots.append(".")); // For testing
                     progressBar.setProgress(loadingBar.getProgress());
@@ -845,5 +788,12 @@ public class Controller {
         timeline.play();
         return timeline;
     }
+
+    //Getters og setters til tests
+    public void setSearchingSource(TextField source) { searchingSource = source; }
+    public TextField getSearchBar() { return searchBar; }
+    public TextField getDestination() { return destination; }
+    public TextField getAddNamePOI() { return addNamePOI; }
+    public CheckMenuItem getFPSButton() { return fpsButton; }
     //endregion
 }

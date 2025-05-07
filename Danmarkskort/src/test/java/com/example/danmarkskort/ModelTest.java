@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.testfx.framework.junit5.ApplicationTest;
 
 import java.io.File;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,7 +18,7 @@ public class ModelTest extends ApplicationTest {
     Model model;
 
     @BeforeEach
-    protected void setup() {
+    protected void beforeEach() {
         canvas = new Canvas(600, 400);
     }
 
@@ -107,20 +106,27 @@ public class ModelTest extends ApplicationTest {
     }
 
     @Test
-    protected void createPOITest() {
+    protected void POITest() {
         Canvas canvas = new Canvas(600, 400);
         Model model = new Model("data/small.osm", canvas, false);
         POI poi = model.createPOI(408.02264f, 386.6936f, "Torvegade 27");
 
         float x = 408.02264404296875f;
         float y = 386.693603515625f;
-
         assertEquals(x, poi.getX());
         assertEquals(y, poi.getY());
-        assertEquals("Torvegade 27, 1400 København K", poi.getNodeAddress());
-        System.out.println(Arrays.toString(poi.getBoundingBox()));
-        //assertEquals(new float[]{x,y,x,y});
 
-        poi.draw(canvas.getGraphicsContext2D());
+        float[] boundingBox = poi.getBoundingBox();
+        assertEquals(x, boundingBox[0]);
+        assertEquals(y, boundingBox[1]);
+        assertEquals(x, boundingBox[2]);
+        assertEquals(y, boundingBox[3]);
+
+        assertEquals("Torvegade 27, 1400 København K", poi.getNodeAddress());
+        assertEquals("Torvegade 27", poi.getName());
+
+        assertDoesNotThrow(() ->
+            poi.draw(canvas.getGraphicsContext2D())
+        );
     }
 }
