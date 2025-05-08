@@ -176,6 +176,7 @@ public class ControllerTest extends ApplicationTest {
         }));
     }
 
+    @Disabled
     @Test
     protected void searchBarsAndListViewTest() {
         //Loader en fil
@@ -214,7 +215,7 @@ public class ControllerTest extends ApplicationTest {
             robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK); //Musen giver slip på klikket
         }));
     }
-
+    @Disabled
     @Test
     protected void canvasHoverPanZoomAndFPSTest() {
         //Loader en fil

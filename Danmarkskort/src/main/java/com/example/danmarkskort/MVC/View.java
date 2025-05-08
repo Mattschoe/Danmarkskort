@@ -67,8 +67,17 @@ public class View {
             height = 400;
         } else {
             Scene prevScene = stage.getScene();
+            if (prevScene != null) {
+                width = prevScene.getWidth();
+                height = prevScene.getHeight();
+            } else {
+                // Default values if no previous scene exists (like during tests)
+                width = 800;
+                height = 600;
+            }
+            /*Scene prevScene = stage.getScene();
             width = prevScene.getWidth();
-            height = prevScene.getHeight();
+            height = prevScene.getHeight();*/
         }
         scene = new Scene(root.load(), width, height);
 
@@ -234,7 +243,6 @@ public class View {
     public void setBgColor(Color bgColor) { this.bgColor = bgColor; }
     public void setScaleColor(Color scaleColor) { this.scaleColor = scaleColor; }
     public boolean isFirstTimeDrawingMap() { return firstTimeDrawingMap; } //for tests
-    public double getZoomLevel(){ return zoomLevel; } //used for tests
     public FXMLLoader getFXMLLoader(){return root;}
     public Scene getScene() { return scene; }
     public Controller getController() { return controller; }
@@ -243,5 +251,6 @@ public class View {
         Point2D maxXY = trans.inverseTransform(canvas.getWidth(), canvas.getHeight());
         return new float[]{(float) minXY.getX(), (float) minXY.getY(), (float) maxXY.getX(), (float) maxXY.getY()};
     }
+    public Set<MapObject> getExtraDrawObjects() { return extraDrawObjects; } //use for tests
     //endregion
 }
