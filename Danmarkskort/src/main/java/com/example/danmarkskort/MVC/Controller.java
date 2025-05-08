@@ -31,7 +31,6 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 
@@ -218,12 +217,6 @@ public class Controller {
         loadFile(standardMapFile);
     }
 
-    /// TODO MIDLERTIDIG METODE FOR AT GØRE DET NEMT AT ÅBNE COVERAGE-RAPPORTEN.
-    @FXML protected void openTestCoverage() {
-        try { Desktop.getDesktop().open(new File("build/reports/jacoco/test/html/index.html")); }
-        catch (Exception e) { System.out.println("No test coverage report exists! Try building the app"); }
-    }
-
     /// Dynamically changes the look of the 'Create OBJ on load'-button
     @FXML public void toggleCreateOBJ() {
         if (checkBoxOBJ.getChildrenUnmodifiable().isEmpty()) return;
@@ -333,7 +326,7 @@ public class Controller {
     }
 
     /// When the user chooses a node from the suggestions, overrides the searchbar and zooms onto the Node
-    @FXML protected void addressPickedFromList(MouseEvent event) {
+    @FXML protected void addressPickedFromList() {
         Node chosenNode = autoSuggestResults.get(listView.getSelectionModel().getSelectedIndex());
         searchingSource.setText(chosenNode.getAddress());
         view.zoomTo(chosenNode.getX(), chosenNode.getY());
@@ -342,11 +335,6 @@ public class Controller {
         findRoute.setVisible(true);
         findRoute.requestFocus();
         savePOIButton.setVisible(true);
-
-        //noinspection StatementWithEmptyBody
-        if (event.getClickCount() == 2) {
-            //Method used to be in here but Gertrud-testen showed it was unintuitive
-        }
     }
 
     /**
