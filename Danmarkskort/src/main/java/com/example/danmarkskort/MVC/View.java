@@ -233,8 +233,6 @@ public class View {
     public void setTilegrid(Tilegrid tilegrid) { this.tilegrid = tilegrid; }
     public void setBgColor(Color bgColor) { this.bgColor = bgColor; }
     public void setScaleColor(Color scaleColor) { this.scaleColor = scaleColor; }
-    public boolean isFirstTimeDrawingMap() { return firstTimeDrawingMap; } //For tests
-    public double getZoomLevel(){ return zoomLevel; } //Used for tests
     public Scene getScene() { return scene; }
     public Controller getController() { return controller; }
     public float[] getViewport() throws NonInvertibleTransformException {
@@ -242,5 +240,8 @@ public class View {
         Point2D maxXY = trans.inverseTransform(canvas.getWidth(), canvas.getHeight());
         return new float[]{(float) minXY.getX(), (float) minXY.getY(), (float) maxXY.getX(), (float) maxXY.getY()};
     }
+
+    public boolean isFirstTimeDrawingMap() { return firstTimeDrawingMap; } //For tests
+    public double getZoomLevel(){ return zoomLevel; } //Used for tests
     //endregion
 }

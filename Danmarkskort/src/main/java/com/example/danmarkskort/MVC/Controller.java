@@ -8,6 +8,7 @@ import com.example.danmarkskort.MapObjects.Polygon;
 import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.PDFOutput;
+
 import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
@@ -40,6 +41,7 @@ import javafx.util.Duration;
 
 import java.io.File;
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,7 +67,6 @@ public class Controller {
     private TextField searchingSource;
     private boolean putTextSwitched;
     private LoadingBar loadingBar;
-
     ///Used to calculate FPS
     private long lastSystemTime;
     ///Used to calculate FPS
@@ -107,7 +108,7 @@ public class Controller {
         putTextSwitched = false;
 
         //region AnimationTimer
-        //Locks the pan- and zoomrequests by user into each frame so we avoid multiple redrawings between frames
+        //Locks the pan- and zoom-requests by user into each frame so we avoid multiple redraws per frame
         AnimationTimer fpsTimer = new AnimationTimer() {
             @Override public void handle(long now) {
                 if (fpsText != null) {
@@ -156,17 +157,17 @@ public class Controller {
         //Start the Timeline for UI updates
         StringBuffer dots = new StringBuffer();
         Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.5), _ -> {
-                    loadingText.setText(loadingBar.getLoadingText() + dots.append("."));
-                    progressBar.setProgress(loadingBar.getProgress());
+            loadingText.setText(loadingBar.getLoadingText() + dots.append("."));
+            progressBar.setProgress(loadingBar.getProgress());
 
-                    if (dots.toString().equals("...")) {
-                        dots.delete(0,5);
-                    }})
-        );
+            if (dots.toString().equals("...")) {
+                dots.delete(0,5);
+            }
+        }));
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
 
-        //Start the background task of loading in the model
+        //Start the background task of loading in the Model
         Task<Void> loadingTask = new Task<>() {
             //Loads model
             @Override protected Void call() {
@@ -174,7 +175,7 @@ public class Controller {
                 return null;
             }
 
-            //When succeed we stop the timeline and load the view in
+            //Upon succeeding we stop the timeline and load the View in
             @Override protected void succeeded() {
                 try {
                     timeline.stop();
@@ -186,6 +187,7 @@ public class Controller {
                 }
             }
         };
+
         new Thread(loadingTask).start(); //Starts the task
     }
 
@@ -264,8 +266,10 @@ public class Controller {
         }
     }
 
-    /// Methods runs upon typing in either of the searchbars in the UI.
-    /// When the user presses 'DOWN' in a searchbar, focus shifts to the ListView if it is visible
+    /**
+     * Methods runs upon typing in either of the searchbars in the UI.
+     * When the user presses 'DOWN' in a searchbar, focus shifts to the ListView if it is visible
+     */
     @FXML public void searchBarsTyped(KeyEvent event) {
         if (model == null) model = Model.getInstance();
 
@@ -543,9 +547,8 @@ public class Controller {
 
     /// Method runs upon releasing a press on the Canvas
     @FXML protected void onCanvasClick(MouseEvent e) {
-        //region DOUBLE CLICK (Searching)
         if (e.getClickCount() == 2) {
-            //region Make POI
+            //region > Make POI
             POI poi = null;
             try {
                 Point2D point = view.getTrans().inverseTransform(e.getX(), e.getY());
@@ -553,42 +556,42 @@ public class Controller {
                 savePOIButton.setVisible(true);
             } catch (NonInvertibleTransformException exception) {
                 System.out.println("An error occurred trying to invert mouse-click coordinates!"+ exception.getMessage());
+                return;
             }
             view.drawMap(); //Makes sure that the POI is shown instantly
             //endregion
 
             //region > Determine which searchbar gets the POI's address
-            if (poi != null) {
-                if (!findRoute.isVisible()) findRoute.setVisible(true);
-                if (!savePOIButton.isVisible()) savePOIButton.setVisible(true);
+            if (!findRoute.isVisible()) findRoute.setVisible(true);
+            if (!savePOIButton.isVisible()) savePOIButton.setVisible(true);
 
-                if (searchBar.getText().trim().isEmpty()) {
+            if (searchBar.getText().trim().isEmpty()) {
+                searchBar.setText(poi.getNodeAddress());
+                searchingSource = searchBar;
+            }
+            else if (destination.getText().trim().isEmpty()) {
+                destination.setText(poi.getNodeAddress());
+                destination.setVisible(true);
+                switchSearch.setVisible(true);
+                searchingSource = destination;
+            }
+            else {
+                putTextSwitched = !putTextSwitched;
+
+                if (!putTextSwitched) {
                     searchBar.setText(poi.getNodeAddress());
                     searchingSource = searchBar;
                 }
-                else if (destination.getText().trim().isEmpty()) {
+                else {
                     destination.setText(poi.getNodeAddress());
-                    destination.setVisible(true);
-                    switchSearch.setVisible(true);
                     searchingSource = destination;
                 }
-                else {
-                    putTextSwitched = !putTextSwitched;
-
-                    if (!putTextSwitched) {
-                        searchBar.setText(poi.getNodeAddress());
-                        searchingSource = searchBar;
-                    }
-                    else {
-                        destination.setText(poi.getNodeAddress());
-                        searchingSource = destination;
-                    }
-                }
-
-                oldPOIs.add(poi);
             }
+
+            oldPOIs.add(poi);
             //endregion
 
+            //region > Remove old POIs if there are more than two at once
             if (oldPOIs.size() > 2) {
                 while (oldPOIs.size() > 2) {
                     POI removed = oldPOIs.removeFirst();
@@ -602,6 +605,7 @@ public class Controller {
                     //they've been deleted via the savePOIToHashMap function
                 }
             }
+            //endregion
         }
     }
 
@@ -790,8 +794,10 @@ public class Controller {
     public Canvas getCanvas() { return canvas; }
     public Text getScaleText() { return scaleText; }
     public CheckBox getCheckBoxOBJ() { return checkBoxOBJ; }
+
     //Getters og setters til tests
     public void setSearchingSource(TextField source) { searchingSource = source; }
+    public boolean getPutTextSwitched() { return putTextSwitched; }
     public TextField getSearchBar() { return searchBar; }
     public TextField getDestination() { return destination; }
     public TextField getAddNamePOI() { return addNamePOI; }

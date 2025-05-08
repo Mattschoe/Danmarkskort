@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<osm version='0.6' generator='CGImap 0.5.8 (8284 thorn-01.openstreetmap.org)' copyright="OpenStreetMap and contributors" attribution="http://www.openstreetmap.org/copyright" license="http://opendatacommons.org/licenses/odbl/1-0/">
+<bounds minlat="55.6631000" minlon="12.5730000" maxlat="55.6804000" maxlon="12.6031000"/>
+
+<node id="268694131" visible="true" version="12" changeset="10404218" timestamp="2012-01-15T22:59:24Z" user="Ernst Poulsen" uid="35273" lat="55.6787155" lon="12.5780805"/>
+<node id="314658577" visible="true" version="6" changeset="10368072" timestamp="2012-01-12T10:09:51Z" user="hedda" uid="532380" lat="55.6787683" lon="12.5780561"/>
+
+<way id="1794682" visible="true" version="16" changeset="32388569" timestamp="2015-07-03T14:10:22Z" user="Aleksander Hugo" uid="3016300">
+  <nd ref="268694131"/>
+  <nd ref="314658577"/>
+  <tag k="highway" v="pedestrian"/>
+  <tag k="lit" v="yes"/>
+  <tag k="name" v="Niels Hemmingsens Gade"/>
+  <tag k="wikipedia" v="da:Niels Hemmingsens Gade"/>
+ </way>
+
+</osm>
