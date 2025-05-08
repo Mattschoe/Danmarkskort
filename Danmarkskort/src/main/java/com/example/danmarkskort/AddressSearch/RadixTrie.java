@@ -8,14 +8,15 @@ import java.util.List;
 import java.util.Map;
 
 
-public class TrieST {
+public class RadixTrie {
     private final TrieNode root;
 
-    public TrieST() {
+    ///A radix tree holds all {@link Node}'s with addresses.
+    public RadixTrie() {
         root = new TrieNode("");
     }
 
-    ///Puts a Node (its address) into the tree
+    ///Puts a Node into the tree
     public void put(Node node) {
         TrieNode current = root;
         String remaining = node.getAddress().toLowerCase();

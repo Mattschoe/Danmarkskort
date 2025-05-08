@@ -58,7 +58,7 @@ public class Road implements Serializable, MapObject {
         calculateWeight(true);
         calculateBoundingBox();
 
-        assignColorSheetProp();
+        assignColorSheet();
         this.palette = "default";
         determineVisuals();
     }
@@ -74,14 +74,14 @@ public class Road implements Serializable, MapObject {
         this.foot = foot;
         this.bicycle = bicycle;
         this.isDriveable = isDriveable;
-        isOneway = false;
+        this.isOneway = false;
         this.roadType = roadType.intern();
         this.roadName = roadName.intern();
 
         calculateWeight(true);
         calculateBoundingBox();
 
-        assignColorSheetProp();
+        assignColorSheet();
         this.palette = "default";
         determineVisuals();
     }
@@ -94,7 +94,7 @@ public class Road implements Serializable, MapObject {
      */
     @Override
     public void draw(GraphicsContext gc) {
-        if (!isDriveable) return; //Skipper lige ikke-bil veje for nu
+        if (!isDriveable) return; //Skips if non-drivable road
 
         if (partOfRoute) {
             gc.setStroke(Color.RED);
@@ -106,17 +106,14 @@ public class Road implements Serializable, MapObject {
 
         //Loops through the nodes drawing the lines between them
         Node startNode = nodes.getFirst();
-        //if (startNode.partOfRoute) System.out.println("Route from startNode: " + startNode.getAddress() + " to endNode: " + nodes.getLast().getAddress() + " drawn!");
-
         for (int i = 1; i < nodes.size(); i++) {
             Node endNode = nodes.get(i);
             gc.strokeLine(startNode.getX(), startNode.getY(), endNode.getX(), endNode.getY());
-            //if (startNode.partOfRoute || endNode.partOfRoute) System.out.println("Part of route drawn!");
             startNode = endNode;
         }
     }
 
-    private void assignColorSheetProp() {
+    private void assignColorSheet() {
         cs = switch(roadType) {
             case "coastline" -> ROAD_COASTLINE;
             case "primary"   -> ROAD_PRIMARY;
@@ -180,7 +177,7 @@ public class Road implements Serializable, MapObject {
             //Calculates the time it takes to cross the distance via distance/maxSpeed
             if (maxSpeed > 0) weight = (float) distance / maxSpeed;
             else {
-                //Else we see if we can calculate the weight from the roadtype (Motorvej/Motortrafikvej), if not, we set the standard speed as 50
+                //Else we see if we can calculate the weight from the road-type (Motorvej/Motortrafikvej), if not, we set the standard speed as 50
                 if (roadType.equals("motorway")) weight = (float) distance / 130;
                 else if (roadType.equals("trunk")) weight = (float) distance / 80;
                 else weight = (float) distance / 50;

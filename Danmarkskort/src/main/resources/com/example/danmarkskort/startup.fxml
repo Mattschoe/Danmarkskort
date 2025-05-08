@@ -18,7 +18,7 @@
     <Button onAction="#uploadInputButton" text="Upload file" textAlignment="CENTER" />
     <Button onAction="#standardInputButton" text="Run standard" textAlignment="CENTER" />
    <Button disable="true" mnemonicParsing="false" opacity="0.0" text="Button" />
-   <Button mnemonicParsing="false" onAction="#openTestCoverage" text="Open Test coverage" textFill="#d22d2d">
+   <Button mnemonicParsing="false" text="Open Test coverage" textFill="#d22d2d">
       <font>
          <Font name="System Bold" size="12.0" />
       </font>

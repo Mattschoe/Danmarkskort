@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class Tile implements Serializable {
     List<MapObject> objectsInTile;
-    ///\[0] = minX <br> \[1] = minY <br> \[2] = maxX <br> \[3] = maxY <br>
+    ///\[0] = minX <br> \[1] = minY <br> \[2] = maxX <br> \[3] = maxY
     float[] bounds;
     int tileSize;
     Set<MapObject> predefinedRelations, motorway, trunk, primary, secondary, tertiary, unclassified, residential, defaultRoad, buildings, area, coastline;

@@ -22,7 +22,7 @@
       </Label>
       <Button mnemonicParsing="false" onAction="#uploadInputButton" text="Upload file" />
       <Button mnemonicParsing="false" onAction="#standardInputButton" text="Run standard" />
-      <Button mnemonicParsing="false" onAction="#openTestCoverage" text="test coverage" textFill="#eb0000">
+      <Button mnemonicParsing="false" text="test coverage" textFill="#eb0000">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>

@@ -3,7 +3,6 @@ package com.example.danmarkskort.MapObjects;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
-/// A Point Of Interest (POI) is a specific point made by the user. It contains the node that's closest to that POI, a coordinate, and a name
 public class POI implements MapObject {
     Node closestNodeToPOI;
     Node closestNodeWithRoad;
@@ -15,7 +14,7 @@ public class POI implements MapObject {
         POI.class.getResource("/com/example/danmarkskort/pin.png").toExternalForm()
     );
 
-    /**
+    /** A Point Of Interest (POI) is a specific point made by the user. It contains the address node that's closest to that POI, a node that has a road closest to the POI, a coordinate, and a name
      * @param name the name of the POI, given by the user
      * @param tile the tile that the POI is located in
      */
@@ -45,9 +44,7 @@ public class POI implements MapObject {
         for (Node node : tile.getNodesInTile()) {
             if (!node.hasFullAddress()) continue; //Skips if node doesn't have full address
 
-            double nodeX = node.getX();
-            double nodeY = node.getY();
-            double distance = Math.sqrt(Math.pow((nodeX - (double) x), 2) + Math.pow((nodeY - (double) y), 2)); //Afstandsformlen ser cooked ud i Java wth -MN
+            double distance = Math.hypot(node.getX(), node.getY());
             if (distance < closestDistance) {
                 closestDistance = distance;
                 closestNode = node;
@@ -64,9 +61,8 @@ public class POI implements MapObject {
 
         for (Node node : tile.getNodesInTile()) {
             if (!node.hasDrivableEdges()) continue; //Skips if node doesn't have any edges that are drivable.
-            double nodeX = node.getX();
-            double nodeY = node.getY();
-            double distance = Math.sqrt(Math.pow((nodeX - (double) x), 2) + Math.pow((nodeY - (double) y), 2)); //Afstandsformlen ser cooked ud i Java wth -MN
+
+            double distance = Math.hypot(node.getX(), node.getY());
             if (distance < closestDistance) {
                 closestDistance = distance;
                 closestNode = node;
@@ -76,20 +72,13 @@ public class POI implements MapObject {
         return closestNode;
     }
 
-    @Override
-    public String toString() { return "placeholder name"; }
-
     //region Getters and setters
     /// Returns the name of this POI
     public String getName() { return name;}
-
-    /// Returns the POIs closest Node
-    public Node getClosestNodeToPOI() { return closestNodeToPOI; }
     public Node getClosestNodeWithRoad() { return closestNodeWithRoad; }
 
     /// Returns the Node's address as a full string. Used for showing to user on UI. If the Node doesn't have a full address, we return the XY
     public String getNodeAddress() { return closestNodeToPOI.getAddress(); }
-
     public float getX() { return x; }
     public float getY() { return y; }
     //endregion

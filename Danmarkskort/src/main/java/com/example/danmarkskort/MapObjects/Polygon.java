@@ -16,7 +16,8 @@ public class Polygon implements Serializable, MapObject{
     //region Fields
     private float[] xPoints;
     private float[] yPoints;
-    private String type; //The type of polygon, fx: "Building", "Coastline", etc.
+    ///The type of polygon, fx: "Building", "Coastline", etc.
+    private String type;
     private String palette;
     private ColorSheet cs;
     private transient Color color;
@@ -93,7 +94,7 @@ public class Polygon implements Serializable, MapObject{
         }
     }
     
-    public void assertColorSheetProp() {
+    private void assertColorSheet() {
         cs = switch(type) {
             //region land-use: developed-land
             case "commercial"    -> POLY_COMMERCIAL;
@@ -301,8 +302,9 @@ public class Polygon implements Serializable, MapObject{
         };
     }
 
+    ///Determines the color of this polygon
     public void determineColor() {
-        assertColorSheetProp();
+        assertColorSheet();
         color = cs.handlePalette(palette);
     }
 
@@ -332,10 +334,12 @@ public class Polygon implements Serializable, MapObject{
     @Override public float[] getBoundingBox() { return boundingBox; }
     public float[] getXPoints() { return xPoints; }
     public float[] getYPoints() { return yPoints; }
+    ///Sets the type of this polygon and updates its colors
     public void setType(String type) {
         this.type = type;
         determineColor();
     }
+    ///Sets the palette of this polygon and updates its colors
     public void setPalette(String palette) {
         this.palette = palette;
         determineColor();

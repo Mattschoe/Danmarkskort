@@ -16,16 +16,21 @@ public class TrieNode {
     ///All the nodes associated with the full path of the trieNodes
     private final List<Node> nodes;
 
+    ///A {@code TrieNode} is a node in a trie that contains the prefix (f.ex: "December...") followed by a list of {@code Node}'s that are associated with that prefix and a list of TrieNode children that extends the prefix
     TrieNode(String prefix) {
         this.prefix = prefix;
         children = new HashMap<>();
         nodes = new LinkedList<>();
     }
 
+    //region Getters and Setters
+    ///Returns the prefix of this node
     public String getPrefix() { return prefix;}
+
     ///Updates the nodes prefix to be the value of the given {@code newPrefix}
     public void updatePrefix(String newPrefix) { this.prefix = newPrefix; }
 
+    ///Returns the children of this node
     public Map<String, TrieNode> getChildren() { return children; }
 
     ///Returns all the nodes associated with this prefix
@@ -33,4 +38,5 @@ public class TrieNode {
 
     ///Adds a node to the list of values associated with this nodes prefix
     public void addValue(Node value) { nodes.add(value); }
+    //endregion
 }

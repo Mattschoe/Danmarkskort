@@ -1,6 +1,6 @@
 package com.example.danmarkskort.MVC;
 
-import com.example.danmarkskort.AddressSearch.TrieST;
+import com.example.danmarkskort.AddressSearch.RadixTrie;
 import com.example.danmarkskort.Exceptions.ParserSavingException;
 import com.example.danmarkskort.LoadingBar;
 import com.example.danmarkskort.MapObjects.Node;
@@ -54,8 +54,8 @@ public class Model {
     private final Tilegrid tilegrid;
     private final Search search;
     private List<Road> latestRoute;
-    private TrieST trieCity;
-    private TrieST trieStreet;
+    private RadixTrie trieCity;
+    private RadixTrie trieStreet;
     private final int numberOfChunks;
     private final LoadingBar loadingBar;
     //endregion
@@ -824,8 +824,8 @@ public class Model {
 
     /// Inserts all streets and cities of the complex nodes to Tries
     private void loadAddressNodes() {
-        trieCity = new TrieST();
-        trieStreet = new TrieST();
+        trieCity = new RadixTrie();
+        trieStreet = new RadixTrie();
         Map<String, Node> citiesToNode = new HashMap<>();
         for (Node node : parser.getAddressNodes()) { //gennemgår alle address nodes
             String street = node.getStreet();

@@ -20,6 +20,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     private double distanceTo;
     private int edges;
     private final transient List<Road> roadEdges;
+    boolean partOfRoute;
     //endregion
 
     //region Constructor(s)
@@ -132,7 +133,6 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     public float[] getBoundingBox() {
         return new float[]{x, y, x, y};
     }
-    boolean partOfRoute;
     public void setPartOfRoute(boolean value) { partOfRoute = value; }
     //endregion
 }

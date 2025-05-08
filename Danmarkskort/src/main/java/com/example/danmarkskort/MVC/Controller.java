@@ -1,8 +1,12 @@
 package com.example.danmarkskort.MVC;
 
 import com.example.danmarkskort.LoadingBar;
+import com.example.danmarkskort.MapObjects.MapObject;
+import com.example.danmarkskort.MapObjects.Node;
+import com.example.danmarkskort.MapObjects.POI;
 import com.example.danmarkskort.MapObjects.Polygon;
-import com.example.danmarkskort.MapObjects.*;
+import com.example.danmarkskort.MapObjects.Road;
+import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.PDFOutput;
 import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
@@ -13,11 +17,14 @@ import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.CheckMenuItem;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
@@ -31,20 +38,27 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
 
 public class Controller {
     //region Fields
     private View view;
     private Model model;
-    private double lastX, lastY; //Used to pan
-    private boolean panRequest, zoomRequest; //Used by AnimationTimer
-    private ScrollEvent scrollEvent; //Used to zoom
-    private MouseEvent mouseEvent; //Used to pan
+    ///Used to pan
+    private double lastX, lastY;
+    ///Used by AnimationTimer
+    private boolean panRequest, zoomRequest;
+    ///Used to zoom
+    private ScrollEvent scrollEvent;
+    ///Used to pan
+    private MouseEvent mouseEvent;
     private final Map<String,POI> favoritePOIs = new HashMap<>();
     private final List<POI> oldPOIs = new ArrayList<>();
     List<Road> latestRoute = new ArrayList<>();
@@ -53,8 +67,10 @@ public class Controller {
     private boolean putTextSwitched;
     private LoadingBar loadingBar;
 
-    private long lastSystemTime; //Used to calculate FPS
-    private int framesThisSec;   //Used to calculate FPS
+    ///Used to calculate FPS
+    private long lastSystemTime;
+    ///Used to calculate FPS
+    private int framesThisSec;
 
     //region FXML fields
     @FXML private Canvas canvas;
@@ -97,6 +113,7 @@ public class Controller {
         progressBar = new ProgressBar();
 
         //region AnimationTimer
+        //Locks the pan- and zoomrequests by user into each frame so we avoid multiple redrawings between frames
         AnimationTimer fpsTimer = new AnimationTimer() {
             @Override public void handle(long now) {
                 if (fpsText != null) {
@@ -125,12 +142,6 @@ public class Controller {
     //endregion
 
     //region Methods
-    /// MIDLERTIDIG METODE FOR AT GØRE DET NEMT AT ÅBNE COVERAGE-RAPPORTEN.
-    @FXML protected void openTestCoverage() { //TODO %% SKAL FJERNES SENERE
-        try { Desktop.getDesktop().open(new File("build/reports/jacoco/test/html/index.html")); }
-        catch (Exception e) { System.out.println("No test coverage report exists! Try building the app"); }
-    }
-
     /**
      * Loads a map file and processes its content asynchronously.
      * Updates the UI with a loading screen until the process is completed.
@@ -150,26 +161,26 @@ public class Controller {
         ProgressBar progressBar = (ProgressBar) view.getScene().lookup("#progressBar");
         //Start the Timeline for UI updates
         StringBuffer dots = new StringBuffer();
-        Timeline timeline = new Timeline(
-                new KeyFrame(Duration.seconds(0.5), _ -> {
+        Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(0.5), _ -> {
                     loadingText.setText(loadingBar.getLoadingText() + dots.append("."));
                     progressBar.setProgress(loadingBar.getProgress());
 
                     if (dots.toString().equals("...")) {
                         dots.delete(0,5);
-                    }
-                })
+                    }})
         );
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
 
-        //start the background task
+        //Start the background task of loading in the model
         Task<Void> loadingTask = new Task<>() {
+            //Loads model
             @Override protected Void call() {
                 model = Model.getInstance(mapFile.getPath(), canvas, createOBJ);
                 return null;
             }
 
+            //When succeed we stop the timeline and load the view in
             @Override protected void succeeded() {
                 try {
                     timeline.stop();
@@ -181,8 +192,7 @@ public class Controller {
                 }
             }
         };
-
-        new Thread(loadingTask).start();
+        new Thread(loadingTask).start(); //Starts the task
     }
 
     //region Start-up scene methods
@@ -198,10 +208,8 @@ public class Controller {
         //Sætter et par stilistiske elementer
         fileChooser.setTitle("Choose your file");
         fileChooser.getExtensionFilters().addAll(
-                new ExtensionFilter("All readable files", "*.osm", "*.obj",/* "*.txt",*/ "*.zip"),
+                new ExtensionFilter("All readable files", "*.osm", "*.zip"),
                 new ExtensionFilter("OpenStreetMap-files", "*.osm"),
-                new ExtensionFilter("Parser-class objects", "*.obj"),
-                //new ExtensionFilter("Text-files", "*.txt"),
                 new ExtensionFilter("Zip-files", "*.zip"),
                 new ExtensionFilter("All files", "*.*"));
         String routeDesktop = switch(System.getProperty("os.name").split(" ")[0]) {
@@ -215,7 +223,7 @@ public class Controller {
         if (selectedFile != null) {
             //Loads View and model
             view = new View(view.getStage(), "mapOverlay.fxml");
-            view.getStage().setTitle("Rats' Map of Denmark - "+ selectedFile.getName());
+            view.getStage().setTitle("Map of Denmark - "+ selectedFile.getName());
             loadFile(selectedFile);
             assert view != null;
 
@@ -226,7 +234,7 @@ public class Controller {
 
     /// Method runs upon clicking the "Run standard"-button in the start-up scene
     @FXML protected void standardInputButton() throws IOException {
-        File standardMapFile = new File("data/StandardMap/parser.obj"); //TODO skal ændres senere
+        File standardMapFile = new File("data/StandardMap/parser.obj");
         assert standardMapFile.exists();
 
         loadFile(standardMapFile);
@@ -258,7 +266,7 @@ public class Controller {
     /// Calculates FPS and adjusts the display-text
     private void calculateFPS(long systemTime) {
         long deltaSystemTime = systemTime - lastSystemTime;
-        ++framesThisSec;
+        framesThisSec++;
 
         if (deltaSystemTime >= 1_000_000_000) {
             double fps = framesThisSec / (deltaSystemTime / 1_000_000_000.0);

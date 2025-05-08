@@ -49,9 +49,6 @@ public class Tilegrid implements Serializable {
 
             //Then we go through each tile and draw their different roads/buildings given the levelOfDetail
             for (Tile tile : visibleTiles) {
-                for(Node node : tile.getNodesInTile()){
-                    node.draw(graphicsContext); //ÆNDRET HER!!!!
-                }
                 if (tile.isEmpty()) continue;
                 drawLOD1(tile, graphicsContext);
                 if (levelOfDetail > 1) {
@@ -98,7 +95,6 @@ public class Tilegrid implements Serializable {
         tile.drawPOIs(graphicsContext);
         tile.drawNodes(graphicsContext);
     }
-
     //endregion
 
     ///Adds the given mapObject to the tile that fits the given x, y coordinate. x, y should be the coordinate of the mapObject

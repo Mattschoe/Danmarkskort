@@ -4,6 +4,7 @@ import javafx.scene.canvas.GraphicsContext;
 
 /// A MapObject is object that is represented and drawn on the map
 public interface MapObject {
+    ///Draws the mapObject
     void draw(GraphicsContext graphicsContext);
 
     /**
