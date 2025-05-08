@@ -192,11 +192,8 @@ public class Controller {
                 //new ExtensionFilter("Text-files", "*.txt"),
                 new ExtensionFilter("Zip-files", "*.zip"),
                 new ExtensionFilter("All files", "*.*"));
-        String routeDesktop = switch(System.getProperty("os.name").split(" ")[0]) {
-            case "Windows" -> System.getProperty("user.home") + "\\Desktop";
-            case "MAC"     -> System.getProperty("user.home") + "/Desktop";
-            default        -> System.getProperty("user.home");};
-        fileChooser.setInitialDirectory(new File(routeDesktop));
+        File desktop = new File(System.getProperty("user.home"), "Desktop");
+        fileChooser.setInitialDirectory(desktop);
 
         //Åbner stifinderen og gemmer filen som brugeren vælger
         File selectedFile = fileChooser.showOpenDialog(new Stage());

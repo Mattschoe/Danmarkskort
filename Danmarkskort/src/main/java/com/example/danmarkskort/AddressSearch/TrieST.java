@@ -61,30 +61,6 @@ public class TrieST {
         current.addValue(node);
     }
 
-    /*//Returns all the nodes that are associated with this exact address. Returns an empty list if no address is found
-    public List<Node> get(String address) {
-        String remaining = address;
-        TrieNode current = root;
-
-        while (!remaining.isEmpty()) {
-            boolean matched = false;
-            for (String child : current.getChildren().keySet()) {
-                TrieNode childNode = current.getChildren().get(child);
-                int sharedPrefix = commonPrefixLength(child, remaining);
-
-                //Full match so we go into that node
-                if (sharedPrefix == child.length()) {
-                    current = childNode;
-                    remaining = remaining.substring(sharedPrefix); //Consumes sharedPrefix so we can keep descending into tree
-                    matched = true;
-                    break;
-                }
-            }
-            if (!matched) { return Collections.emptyList(); }
-        }
-        return current.getValues();
-    }*/
-
     ///Returns a list of nodes that all start with the given {@code prefix}
     public List<Node> keysWithPrefix(String prefix) {
         return collectWithPrefix(root, prefix);
