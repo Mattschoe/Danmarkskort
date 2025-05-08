@@ -3,14 +3,12 @@ package com.example.danmarkskort;
 import com.example.danmarkskort.MVC.Controller;
 import com.example.danmarkskort.MVC.Model;
 import com.example.danmarkskort.MapObjects.Polygon;
-import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.MapObjects.Tilegrid;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.CheckBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import org.junit.jupiter.api.Disabled;
 import org.testfx.framework.junit5.ApplicationTest;
 import com.example.danmarkskort.MVC.View;
 import javafx.stage.Stage;
@@ -20,9 +18,7 @@ import java.awt.AWTException;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.Robot;
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -46,7 +42,7 @@ public class ControllerTest extends ApplicationTest {
             throw new RuntimeException(e);
         }
     }
-    
+
     @Test
     protected void standardInputTest() {
         assertDoesNotThrow(() -> interact(() -> {
@@ -128,16 +124,16 @@ public class ControllerTest extends ApplicationTest {
     @Test
     protected void makeRouteAndSavePOITest() {
         //Loader en fil
-        model = Model.getInstance("data/bornholm.zip", canvas, false);
+        model = Model.getInstance("data/small.zip", canvas, false);
 
         interact(() -> assertDoesNotThrow(() -> {
             view = new View(stage, "mapOverlay.fxml"); //Skifter View
             controller = view.getController();
 
-            controller.getSearchBar().setText("Svanekevej 12, 3700 Rønne");
+            controller.getSearchBar().setText("Norgesgade 29, 2300 København S");
             controller.findRouteClicked();
 
-            controller.getDestination().setText("Svanekevej 12, 3751 Østermarie");
+            controller.getDestination().setText("Løngangstræde 20, 1468 København K");
             controller.switchDestinationAndStart();
             controller.findRouteClicked();
 
@@ -161,12 +157,12 @@ public class ControllerTest extends ApplicationTest {
             Robot robot = new Robot();
             robot.setAutoDelay(10);
 
-            //Snupper app-vinduets x/y-koordinater og tiløjer hhv. 100/47.5
+            //Snupper app-vinduets x/y-koordinater og tiløjer hhv. 100/48
             int x = (int) stage.getScene().getWindow().getX() + 100;
             int y = (int) stage.getScene().getWindow().getY() + 48;
             robot.mouseMove(x, y); //Musen navigerer til søgebaren
 
-            clickMouseBtn(robot, InputEvent.BUTTON1_DOWN_MASK);
+            clickMouse(robot);
             clickKey(robot, KeyEvent.VK_T);
             clickKey(robot, KeyEvent.VK_I);
             clickKey(robot, KeyEvent.VK_N);
@@ -201,11 +197,11 @@ public class ControllerTest extends ApplicationTest {
             Robot robot = new Robot();
             robot.setAutoDelay(10);
 
-            //Snupper app-vinduets x/y-koordinater og tiløjer hhv. 100/47.5
+            //Snupper app-vinduets x/y-koordinater og tiløjer hhv. 100/48
             int x = (int) stage.getScene().getWindow().getX() + 100;
             int y = (int) stage.getScene().getWindow().getY() + 48;
             robot.mouseMove( x, y); //Musen navigerer til søgebaren
-            clickMouseBtn(robot, InputEvent.BUTTON1_DOWN_MASK);
+            clickMouse(robot);
 
             //Den her næste lange serie af knap-klik sikrer at søgebarerne ikke kaster nogle errors,
             //når de bliver interageret med på forskellige måder.
@@ -219,26 +215,93 @@ public class ControllerTest extends ApplicationTest {
             clickKey(robot, KeyEvent.VK_N);
             clickKey(robot, KeyEvent.VK_DOWN);
             clickKey(robot, KeyEvent.VK_ENTER);
-            clickMouseBtn(robot, InputEvent.BUTTON1_DOWN_MASK);
+            clickMouse(robot);
             clickKey(robot, KeyEvent.VK_ENTER);
-            clickMouseBtn(robot, InputEvent.BUTTON1_DOWN_MASK);
+            clickMouse(robot);
             clickKey(robot, KeyEvent.VK_DOWN);
             clickKey(robot, KeyEvent.VK_BACK_SPACE);
 
             x = (int) stage.getScene().getWindow().getX() + 100;
             y = (int) stage.getScene().getWindow().getY() + 73;
             robot.mouseMove( x, y); //Musen navigerer ned til ListView'en og vælger den første entry
-            clickMouseBtn(robot, InputEvent.BUTTON1_DOWN_MASK);
+            clickMouse(robot);
         }));
     }
 
+    @Test
+    protected void canvasClickTest() {
+        //Loader en fil
+        model = Model.getInstance("data/small.zip", controller.getCanvas(), false);
+
+        interact(() -> assertDoesNotThrow(() -> {
+            view = new View(stage, "mapOverlay.fxml"); //Skifter View
+            controller = view.getController();
+
+            Robot robot = new Robot();
+            robot.setAutoDelay(10);
+
+            //Snupper app-vinduets x/y-koordinater og tiløjer hhv. 100/48
+            int x = (int) stage.getScene().getWindow().getX() + 100;
+            int y = (int) stage.getScene().getWindow().getY() + 48;
+            robot.mouseMove( x, y); //Musen navigerer til søgebaren
+            clickMouse(robot);
+            clickKey(robot, KeyEvent.VK_T);
+            clickKey(robot, KeyEvent.VK_I);
+            clickKey(robot, KeyEvent.VK_N);
+            clickKey(robot, KeyEvent.VK_ENTER);
+            // ^ Zoomer ind på "Tinghuset 44G, 1440 København K", så vi er sikre på der er noget på kortet
+            clickMouse(robot);
+            clickKey(robot, KeyEvent.VK_BACK_SPACE);
+
+            x = (int) stage.getScene().getWindow().getX() + 300;
+            y = (int) stage.getScene().getWindow().getY() + 200;
+            robot.mouseMove( x, y); //Musen navigerer til midt på Canvas'et
+
+            //Dobbeltklikker så en adresse dukker op i søgebaren
+            clickMouse(robot);
+            clickMouse(robot);
+
+            x = (int) stage.getScene().getWindow().getX() + 400;
+            y = (int) stage.getScene().getWindow().getY() + 200;
+            robot.mouseMove( x, y); //Musen navigerer videre, så mouse-click-tælleren nulstiller
+
+            //Dobbeltklikker igen, så en adresse dukker op i destinations-baren
+            clickMouse(robot);
+            clickMouse(robot);
+
+            x = (int) stage.getScene().getWindow().getX() + 400;
+            y = (int) stage.getScene().getWindow().getY() + 150;
+            robot.mouseMove( x, y); //Musen navigerer videre igen
+
+            //Dobbeltklikker igen, så en ny adresse overskriver destinations-baren
+            // (Dermed skifter Controllerens 'putTextSwitched'-felt fra 'false' til 'true')
+            clickMouse(robot);
+            clickMouse(robot);
+        }));
+
+        //Venter, så testen lige når at registrere at søgebar-teksterne har ændret sig
+        waitASec();
+
+        assertNotEquals("", controller.getSearchBar().getText());
+        assertNotEquals("", controller.getDestination().getText());
+        assertTrue(controller.getPutTextSwitched());
+    }
+
+    //region Helper-functions
     private static void clickKey(Robot robot, int key) {
         robot.keyPress(key);
         robot.keyRelease(key);
     }
 
-    private static void clickMouseBtn(Robot robot, int button) {
-        robot.mousePress(button);
-        robot.mouseRelease(button);
+    private static void clickMouse(Robot robot) {
+        robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+        robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
     }
+
+    private static void waitASec() {
+        long start = System.currentTimeMillis();
+        //noinspection StatementWithEmptyBody
+        while (System.currentTimeMillis() - start < 1_000) {/* wait */}
+    }
+    //endregion
 }

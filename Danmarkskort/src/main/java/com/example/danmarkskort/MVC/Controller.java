@@ -518,52 +518,51 @@ public class Controller {
 
     /// Method runs upon releasing a press on the Canvas
     @FXML protected void onCanvasClick(MouseEvent e) {
-        //region DOUBLE CLICK (Searching)
         if (e.getClickCount() == 2) {
             //region > Make POI
-            POI poi = null;
+            POI poi;
             try {
                 Point2D point = view.getTrans().inverseTransform(e.getX(), e.getY());
                 poi = model.createPOI((float) point.getX(), (float) point.getY(), "Test");
                 savePOIButton.setVisible(true);
             } catch (NonInvertibleTransformException exception) {
                 System.out.println("An error occurred trying to invert mouse-click coordinates!"+ exception.getMessage());
+                return;
             }
             view.drawMap(); //Makes sure that the POI is shown instantly
             //endregion
 
             //region > Determine which searchbar gets the POI's address
-            if (poi != null) {
-                if (!findRoute.isVisible()) findRoute.setVisible(true);
-                if (!savePOIButton.isVisible()) savePOIButton.setVisible(true);
+            if (!findRoute.isVisible()) findRoute.setVisible(true);
+            if (!savePOIButton.isVisible()) savePOIButton.setVisible(true);
 
-                if (searchBar.getText().trim().isEmpty()) {
+            if (searchBar.getText().trim().isEmpty()) {
+                searchBar.setText(poi.getNodeAddress());
+                searchingSource = searchBar;
+            }
+            else if (destination.getText().trim().isEmpty()) {
+                destination.setText(poi.getNodeAddress());
+                destination.setVisible(true);
+                switchSearch.setVisible(true);
+                searchingSource = destination;
+            }
+            else {
+                putTextSwitched = !putTextSwitched;
+
+                if (!putTextSwitched) {
                     searchBar.setText(poi.getNodeAddress());
                     searchingSource = searchBar;
                 }
-                else if (destination.getText().trim().isEmpty()) {
+                else {
                     destination.setText(poi.getNodeAddress());
-                    destination.setVisible(true);
-                    switchSearch.setVisible(true);
                     searchingSource = destination;
                 }
-                else {
-                    putTextSwitched = !putTextSwitched;
-
-                    if (!putTextSwitched) {
-                        searchBar.setText(poi.getNodeAddress());
-                        searchingSource = searchBar;
-                    }
-                    else {
-                        destination.setText(poi.getNodeAddress());
-                        searchingSource = destination;
-                    }
-                }
-
-                oldPOIs.add(poi);
             }
+
+            oldPOIs.add(poi);
             //endregion
 
+            //region > Remove old POIs if there are more than two at once
             if (oldPOIs.size() > 2) {
                 while (oldPOIs.size() > 2) {
                     POI removed = oldPOIs.removeFirst();
@@ -577,6 +576,7 @@ public class Controller {
                     //they've been deleted via the savePOIToHashMap function
                 }
             }
+            //endregion
         }
     }
 
@@ -776,6 +776,7 @@ public class Controller {
 
     //Getters og setters til tests
     public void setSearchingSource(TextField source) { searchingSource = source; }
+    public boolean getPutTextSwitched() { return putTextSwitched; }
     public TextField getSearchBar() { return searchBar; }
     public TextField getDestination() { return destination; }
     public TextField getAddNamePOI() { return addNamePOI; }
