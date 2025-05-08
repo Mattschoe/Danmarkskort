@@ -42,7 +42,7 @@ public class View {
     /**
      * The View-constructor switches the scene from a given stage and a filepath to an FXML-file
      * @param stage the given stage -- usually coming from the window we're in, as to not open a new window
-     * @param filename the given filepath -- fx. "startup.fxml" for the start-up scene
+     * @param filename the given filepath -- fx. "newStart.fxml" for the start-up scene
      * @throws IOException thrown if the program fails to load the FXML-file
      */
     public View(Stage stage, String filename) throws IOException {
