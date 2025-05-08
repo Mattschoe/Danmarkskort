@@ -67,13 +67,13 @@ public class ViewTest extends ApplicationTest {
     @Disabled @Test
     public void testViewWithAnotherScene() throws IOException {
         try {
-                setUpView("mapOverlay.fxml");
-                assertFalse(view.isFirstTimeDrawingMap()); //make sure the map is drawn when mapOverlay is the stage
-                assertNotNull(view);
-                assertTrue(view.getStage().isShowing());
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
+            setUpView("mapOverlay.fxml");
+            assertFalse(view.isFirstTimeDrawingMap()); //make sure the map is drawn when mapOverlay is the stage
+            assertNotNull(view);
+            assertTrue(view.getStage().isShowing());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
 
@@ -90,7 +90,7 @@ public class ViewTest extends ApplicationTest {
     @Test
     protected void removeObjectsFromMapTest() throws XMLStreamException, IOException {
         setUpView("mapOverlay.fxml");
-        File file = new File("data/testing/viewTestDoc.osm");
+        File file = new File("data/small.osm");
         Parser parser = new Parser(file);
 
         Set<Road> roads = parser.getRoads();

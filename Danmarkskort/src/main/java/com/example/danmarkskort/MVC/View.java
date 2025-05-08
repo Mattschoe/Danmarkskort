@@ -62,11 +62,12 @@ public class View {
 
         //Hvis det er start-scenen, får vinduet en forudbestemt størrelse, ellers sættes den dynamisk
         double width, height;
-        if (filename.equals("newStart.fxml")) {
+        Scene prevScene = stage.getScene();
+        if (prevScene == null) {
             width = 600;
             height = 400;
         } else {
-            Scene prevScene = stage.getScene();
+            prevScene = stage.getScene();
             width = prevScene.getWidth();
             height = prevScene.getHeight();
         }
