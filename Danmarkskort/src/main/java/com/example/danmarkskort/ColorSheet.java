@@ -375,7 +375,7 @@ public enum ColorSheet {
             case POLY_AREAHIGHWAY   -> Color.rgb(50, 50, 50, 0.2);
             case POLY_ATTRACTION     -> Color.rgb(239, 213, 179, 0.2);
             case POLY_BARRIER        -> Color.rgb(111, 111, 111, 0.2);
-            case POLY_BOUNDARY       -> Color.TRANSPARENT; /*Color.rgb(207, 155, 203, 0.2);*/
+            case POLY_BOUNDARY       -> Color.TRANSPARENT;
             case POLY_BRIDGESUPPORT -> Color.rgb(111, 111, 111, 0.2);
             case POLY_BUILDING       -> Color.rgb(217, 208, 201);
             case POLY_CAIRN          -> Color.TAN;
@@ -440,7 +440,7 @@ public enum ColorSheet {
             case ROAD_ROUTE      -> Color.rgb(255, 255, 255, 0.2);
             case ROAD_DEFAULT    -> Color.DIMGREY;
             case POLY_BOUNDARY   -> Color.TRANSPARENT;
-            default -> Color.rgb(175, 175, 175, 0.3); /*Color.rgb(206, 169, 128, 0.4);*/
+            default -> Color.rgb(175, 175, 175, 0.3);
         };
     }
     //endregion

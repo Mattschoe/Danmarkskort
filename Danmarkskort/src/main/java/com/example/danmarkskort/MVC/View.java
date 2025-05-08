@@ -35,7 +35,7 @@ public class View {
     /// Extra objects outside the grid that are included in draw method. Objects are added in {@link #addObjectToDraw(MapObject)}
     private final Set<MapObject> extraDrawObjects;
     private double zoomLevel;
-    private FXMLLoader root;
+    private final FXMLLoader root;
     //endregion
 
     //region Constructor(s)
@@ -233,8 +233,8 @@ public class View {
     public void setTilegrid(Tilegrid tilegrid) { this.tilegrid = tilegrid; }
     public void setBgColor(Color bgColor) { this.bgColor = bgColor; }
     public void setScaleColor(Color scaleColor) { this.scaleColor = scaleColor; }
-    public boolean isFirstTimeDrawingMap() { return firstTimeDrawingMap; } //for tests
-    public double getZoomLevel(){ return zoomLevel; } //used for tests
+    public boolean isFirstTimeDrawingMap() { return firstTimeDrawingMap; } //For tests
+    public double getZoomLevel(){ return zoomLevel; } //Used for tests
     public FXMLLoader getFXMLLoader(){return root;}
     public Scene getScene() { return scene; }
     public float[] getViewport() throws NonInvertibleTransformException {

@@ -3,19 +3,41 @@ package com.example.danmarkskort.MVC;
 import com.example.danmarkskort.AddressSearch.TrieST;
 import com.example.danmarkskort.Exceptions.ParserSavingException;
 import com.example.danmarkskort.LoadingBar;
-import com.example.danmarkskort.MapObjects.*;
+import com.example.danmarkskort.MapObjects.Node;
+import com.example.danmarkskort.MapObjects.POI;
+import com.example.danmarkskort.MapObjects.Polygon;
+import com.example.danmarkskort.MapObjects.Road;
+import com.example.danmarkskort.MapObjects.SimpleNode;
+import com.example.danmarkskort.MapObjects.Tile;
+import com.example.danmarkskort.MapObjects.Tilegrid;
 import com.example.danmarkskort.Parser;
-import com.example.danmarkskort.Searching.Search;
+import com.example.danmarkskort.Search;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import javafx.scene.canvas.Canvas;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.RandomAccessFile;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * A Model is a Singleton class that stores the map in a tile-grid.
@@ -34,9 +56,8 @@ public class Model {
     private List<Road> latestRoute;
     private TrieST trieCity;
     private TrieST trieStreet;
-    private Map<String, Node> citiesToNode;
-    private int numberOfChunks;
-    private LoadingBar loadingBar;
+    private final int numberOfChunks;
+    private final LoadingBar loadingBar;
     //endregion
 
     //region Constructor(s)
@@ -404,7 +425,7 @@ public class Model {
 
         //Reverse HashMap needed to store node ID in roads. reverses the map so we can store the ID correctly
         TLongObjectHashMap<Node> ID2Node = parser.getNodes();
-        TObjectLongHashMap<Node> node2ID = new TObjectLongHashMap(ID2Node.size());
+        TObjectLongHashMap<Node> node2ID = new TObjectLongHashMap<>(ID2Node.size());
         for (long ID : ID2Node.keys()) {
             node2ID.put(ID2Node.get(ID), ID);
         }
@@ -627,7 +648,7 @@ public class Model {
         long size = 0;
         for (Road road : roads) {
             size += Integer.BYTES; //Length of road.getNodes
-            size += road.getNodes().size() * Long.BYTES; size += 4; //foot, bicycle, isDriveable, oneway
+            size += (long) road.getNodes().size() * Long.BYTES; size += 4; //foot, bicycle, isDriveable, oneway
             size += Integer.BYTES; //MaxSpeed
             if (road.getType() != null) size += Integer.BYTES + road.getType().getBytes(StandardCharsets.UTF_8).length; //RoadType
             else size += Integer.BYTES; //Space for "-1"
@@ -642,10 +663,10 @@ public class Model {
         long size = 0;
         for (Polygon polygon : polygons) {
             size += Integer.BYTES; //Amount of xPoint floats
-            size += Float.BYTES*polygon.getXPoints().length; //Makes space for all x points
+            size += (long) Float.BYTES *polygon.getXPoints().length; //Makes space for all x points
 
             size += Integer.BYTES; //Amount of yPoint floats
-            size += Float.BYTES*polygon.getYPoints().length; //Makes space for all y points
+            size += (long) Float.BYTES *polygon.getYPoints().length; //Makes space for all y points
 
             if (polygon.getType() != null) size += Integer.BYTES + polygon.getType().getBytes(StandardCharsets.UTF_8).length;
             else size += Integer.BYTES; //space for "-1"
@@ -805,7 +826,7 @@ public class Model {
     private void loadAddressNodes() {
         trieCity = new TrieST();
         trieStreet = new TrieST();
-        citiesToNode = new HashMap<>();
+        Map<String, Node> citiesToNode = new HashMap<>();
         for (Node node : parser.getAddressNodes()) { //gennemgår alle address nodes
             String street = node.getStreet();
             String city = node.getCity();

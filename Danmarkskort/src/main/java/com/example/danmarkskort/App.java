@@ -1,9 +1,9 @@
 package com.example.danmarkskort;
 
+import com.example.danmarkskort.MVC.View;
 import javafx.application.Application;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import com.example.danmarkskort.MVC.View;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -12,7 +12,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        stage.setTitle("Rats' Map of Denmark");
+        stage.setTitle("Map of Denmark");
         stage.setMinWidth(428);
         stage.setMinHeight(312);
 

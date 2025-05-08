@@ -4,15 +4,20 @@ import com.example.danmarkskort.Exceptions.MapObjectOutOfBoundsException;
 import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.Polygon;
 import com.example.danmarkskort.MapObjects.Road;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Serial;
 import java.io.Serializable;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -22,21 +27,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipInputStream;
 
-import gnu.trove.map.hash.TLongObjectHashMap;
-
-import javax.xml.stream.FactoryConfigurationError;
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-
 public class Parser implements Serializable {
     @Serial private static final long serialVersionUID = 8838055424703291984L;
 
     //region Fields
     private transient TLongObjectHashMap<Node> id2Node; //map for storing a Node and the id used to refer to it
-    private transient TLongObjectHashMap<Road> id2Road;
-    private transient TLongObjectHashMap<Polygon> id2Polygon;
+    private final transient TLongObjectHashMap<Road> id2Road;
+    private final transient TLongObjectHashMap<Polygon> id2Polygon;
     private transient Set<Road> roads; //Used when loading standard file
     private transient Set<Polygon> polygons; //Used when loading standard file
     private final File file; //The file that's loaded in
@@ -96,17 +93,29 @@ public class Parser implements Serializable {
                 String tagName = input.getLocalName();
 
                 //End of OSM
-                if (tagName.equals("node")) {
-                    try { parseNode(input); } catch (MapObjectOutOfBoundsException e) {
-                        outOfBoundsNodes++;
-                    } catch (Exception e) {
-                        failedNodes++;
+                switch (tagName) {
+                    case "node" -> {
+                        try {
+                            parseNode(input);
+                        } catch (MapObjectOutOfBoundsException e) {
+                            outOfBoundsNodes++;
+                        } catch (Exception e) {
+                            failedNodes++;
+                        }
                     }
-                } else if (tagName.equals("way")) {
-                    try { parseWay(input); } catch (Exception e) {failedWays++;}
-                } else if (tagName.equals("relation")) {
-                    try { parseRelation(input); } catch (Exception e) {
-                        failedRelations++;
+                    case "way" -> {
+                        try {
+                            parseWay(input);
+                        } catch (Exception e) {
+                            failedWays++;
+                        }
+                    }
+                    case "relation" -> {
+                        try {
+                            parseRelation(input);
+                        } catch (Exception e) {
+                            failedRelations++;
+                        }
                     }
                 }
             }
@@ -149,14 +158,11 @@ public class Parser implements Serializable {
                 String key = input.getAttributeValue(null, "k");
                 String value = input.getAttributeValue(null, "v");
                 if (key == null || value == null) continue;
-                if (key.equals("addr:city")) {
-                    city = value;
-                } else if (key.equals("addr:housenumber")) {
-                    houseNumber = value;
-                } else if (key.equals("addr:postcode")) {
-                    postcode = Short.parseShort(value);
-                } else if (key.equals("addr:street")) {
-                    street = value;
+                switch (key) {
+                    case "addr:city" -> city = value;
+                    case "addr:housenumber" -> houseNumber = value;
+                    case "addr:postcode" -> postcode = Short.parseShort(value);
+                    case "addr:street" -> street = value;
                 }
             }
             nextInput = input.next();
@@ -195,13 +201,11 @@ public class Parser implements Serializable {
                     String key = input.getAttributeValue(null, "k");
                     String val = input.getAttributeValue(null, "v");
                     if (key == null || val == null) continue;
-                    if (key.equals("amenity") || key.equals("building") || key.equals("surface")) {
-                        type = key;
+                    switch (key) {
+                        case "amenity", "building", "surface" -> type = key;
+                        case "landuse", "leisure", "natural", "route" -> type = val;
+                        case "boundary" -> boundary = val;
                     }
-                    else if (key.equals("landuse") || key.equals("leisure") || key.equals("natural") || key.equals("route")) {
-                        type = val;
-                    }
-                    else if (key.equals("boundary")) boundary = val;
                 }
             }
         }
@@ -435,10 +439,7 @@ public class Parser implements Serializable {
     public Set<Node> getAddressNodes() {
         Set<Node> addressNodes = new HashSet<>();
         for (Node node : id2Node.valueCollection()) {
-            if (node.getCity() == null) continue;
-            if (node.getHouseNumber() == null) continue;
-            if (node.getStreet() == null) continue;
-            else if (node.getPostcode() != 0) addressNodes.add(node);
+            if (node.getCity() != null || node.getHouseNumber() != null || node.getStreet() != null || node.getPostcode() != 0) addressNodes.add(node);
         }
         return addressNodes;
     }

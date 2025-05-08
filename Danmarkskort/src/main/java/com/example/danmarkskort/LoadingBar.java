@@ -4,7 +4,6 @@ package com.example.danmarkskort;
 public class LoadingBar {
     private static LoadingBar loadingBarInstance;
     private double progress;
-    private boolean isDone;
 
     LoadingBar() {
         this.progress = 0.0;
@@ -44,7 +43,5 @@ public class LoadingBar {
         } return "Loading";
     }
     public double getProgress() { return progress; }
-    public void setProgress(double progress) {this.progress = progress; if (progress == 1.0) setDone();}
-    public boolean isDone() { return isDone; }
-    private void setDone() { isDone = true; }
+    public void setProgress(double progress) {this.progress = progress;}
 }

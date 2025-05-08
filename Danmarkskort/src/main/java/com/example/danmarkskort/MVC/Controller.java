@@ -400,7 +400,7 @@ public class Controller {
 
     //region Canvas methods
     /// When the user chooses a node from the suggestions, overrides the searchbar and zooms onto the Node
-    @FXML protected void onAddressPickedFromList(MouseEvent event) {
+    @FXML protected void onAddressPickedFromList() {
         Node chosenNode = autoSuggestResults.get(listView.getSelectionModel().getSelectedIndex());
         searchingSource.setText(chosenNode.getAddress());
         view.zoomTo(chosenNode.getX(), chosenNode.getY());
@@ -409,11 +409,6 @@ public class Controller {
         findRoute.setVisible(true);
         findRoute.requestFocus();
         savePOIButton.setVisible(true);
-
-        //noinspection StatementWithEmptyBody
-        if (event.getClickCount() == 2) {
-            //Method used to be in here but Gertrud-testen showed it was unintuitive
-        }
     }
 
     /// Saves a POI from the last given input in either search-bar, and adds POI to the 'POIs' Menu in the MenuBar
