@@ -6,7 +6,6 @@ import com.example.danmarkskort.MapObjects.Polygon;
 import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.MapObjects.Tilegrid;
-import com.itextpdf.text.DocumentException;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.CheckBox;
 import javafx.scene.layout.StackPane;
@@ -46,34 +45,6 @@ public class ControllerTest extends ApplicationTest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Test
-    protected void createControllerTest() {
-       try{ assertNotNull(view.getFXMLLoader().getController());}
-       catch (Exception e){fail("Failed to create controller: " + e.getMessage());}
-    }
-
-    @Disabled @Test
-    protected void setSearchTypeTest() {
-        Canvas canvas = new Canvas(600, 400);
-        File file = new File("data/Bornholm.zip");
-        assertTrue(file.exists(), "File does not exist: " + file.getAbsolutePath());
-        Model model = new Model("data/Bornholm.zip", canvas, false);
-        Controller controller = view.getFXMLLoader().getController();
-        controller.shortestRoute();
-
-        assertFalse(model.getSearch().isQuickestRoute());
-    }
-
-    @Test
-    protected void exportAsPDFTest() {
-        File file = new File("data/Bornholm.zip");
-        assertTrue(file.exists(), "File does not exist: " + file.getAbsolutePath());
-        Model model = new Model("data/Bornholm.zip", canvas, false);
-        Controller controller = view.getFXMLLoader().getController();
-
-        List<Road> route = model.getSearch().getRoute();
     }
 
     @Test
@@ -176,54 +147,9 @@ public class ControllerTest extends ApplicationTest {
         }));
     }
 
-    @Disabled
     @Test
-    protected void searchBarsAndListViewTest() {
-        //Loader en fil
+    protected void hoverPanZoomAndFPSTest() {
         model = Model.getInstance("data/small.zip", canvas, false);
-
-        interact(() -> assertDoesNotThrow(() -> {
-            view = new View(stage, "mapOverlay.fxml"); //Skifter View
-            controller = view.getController();
-
-            Robot robot = new Robot();
-            robot.setAutoDelay(200); //200 millisekunder mellem hver action, så risikerer vi ikke at det går for stærkt
-
-            robot.mouseMove(450, 135); //Navigerer til søgebaren
-            robot.mousePress(InputEvent.BUTTON1_DOWN_MASK); //Klikker ned med musen, så søgebaren får fokus
-            robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK); //Musen giver slip på klikket
-
-            robot.keyPress(KeyEvent.VK_T); //Klikker 't'
-            robot.keyPress(KeyEvent.VK_I); //Klikker 'i'
-            robot.keyPress(KeyEvent.VK_N); //Klikker 'n'
-            robot.keyPress(KeyEvent.VK_DOWN); //Klikker pil ned, ListView åbner og får fokus
-            robot.keyPress(KeyEvent.VK_ENTER); //Klikker enter; adressen "Tinghuset 44G, 1440 København K" kommer i søgebaren
-
-            robot.mousePress(InputEvent.BUTTON1_DOWN_MASK); //Klikker ned med musen igen, søgebaren får fokus
-            robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK); //Musen giver slip på klikket
-
-            robot.keyPress(KeyEvent.VK_ENTER); //Klikker 'Enter', 'Find Route'-knappen får fokus
-
-            robot.mousePress(InputEvent.BUTTON1_DOWN_MASK); //Klikker ned med musen igen, søgebaren får fokus
-            robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK); //Musen giver slip på klikket
-
-            robot.keyPress(KeyEvent.VK_DOWN); //Klikker pil ned, rykker forrest i teksten i søgebaren
-            robot.keyPress(KeyEvent.VK_BACK_SPACE); //Sletter et bogstav så ListView åbner igen og får fokus
-
-            robot.mouseMove(450, 160); //Flytter musen ned på ListView'en
-            robot.mousePress(InputEvent.BUTTON1_DOWN_MASK); //Klikker ned med musen, vælger en adresse fra ListView'en
-            robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK); //Musen giver slip på klikket
-        }));
-    }
-    @Disabled
-    @Test
-    protected void canvasHoverPanZoomAndFPSTest() {
-        //Loader en fil
-        model = Model.getInstance("data/small.zip", canvas, false);
-
-        //long start = System.currentTimeMillis();
-        //noinspection StatementWithEmptyBody
-        //while (System.currentTimeMillis() - start < 5_000) {/* wait */}
 
         interact(() -> assertDoesNotThrow(() -> {
             view = new View(stage, "mapOverlay.fxml"); //Skifter View
@@ -235,32 +161,84 @@ public class ControllerTest extends ApplicationTest {
             Robot robot = new Robot();
             robot.setAutoDelay(10);
 
-            robot.mouseMove(450, 135); //Navigerer til søgebaren
-            robot.mousePress(InputEvent.BUTTON1_DOWN_MASK); //Klikker ned med musen, så søgebaren får fokus
-            robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK); //Musen giver slip på klikket
-            robot.keyPress(KeyEvent.VK_T); //Klikker 't'
-            robot.keyPress(KeyEvent.VK_I); //Klikker 'i'
-            robot.keyPress(KeyEvent.VK_N); //Klikker 'n'
-            robot.keyPress(KeyEvent.VK_ENTER); //Klikker 'Enter'
-            robot.keyRelease(KeyEvent.VK_ENTER); //Giver slip på 'Enter'
+            //Snupper app-vinduets x/y-koordinater og tiløjer hhv. 100/47.5
+            int x = (int) stage.getScene().getWindow().getX() + 100;
+            int y = (int) stage.getScene().getWindow().getY() + 48;
+            robot.mouseMove(x, y); //Musen navigerer til søgebaren
 
-            robot.mouseMove(730, 470); //Dragger musen
-            robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-            for (int i = 0; i < 100; ++i) {
-                int x = 730 - (2*i);
-                int y = 470 - (2*i);
-                robot.mouseMove(x, y);
-            }
-            robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+            clickMouseBtn(robot, InputEvent.BUTTON1_DOWN_MASK);
+            clickKey(robot, KeyEvent.VK_T);
+            clickKey(robot, KeyEvent.VK_I);
+            clickKey(robot, KeyEvent.VK_N);
+            clickKey(robot, KeyEvent.VK_ENTER);
+
+            x = (int) stage.getScene().getWindow().getX() + 300;
+            y = (int) stage.getScene().getWindow().getY() + 200;
+            robot.mouseMove(x, y); //Rykker ind midt i programmet
+
             robot.mouseWheel(-1); //Zoomer ind én gang
 
-            for (int i = 0; i < 50; ++i) {
-                int y = 470 - (2*i);
-                robot.mouseMove(730, y);
-            }
+            robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+            x = (int) stage.getScene().getWindow().getX() + 275;
+            y = (int) stage.getScene().getWindow().getY() + 175;
+            robot.mouseMove(x, y); //Rykker ind midt i programmet
+            robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
 
             //FPS-teksten skulle gerne være opdateret fra 0 (der er gået mere end et sekund)
             assertNotEquals("FPS: 0", controller.getFPSButton().getText());
         }));
+    }
+
+    @Test
+    protected void searchBarsAndListViewTest() {
+        //Loader en fil
+        model = Model.getInstance("data/small.zip", canvas, false);
+
+        interact(() -> assertDoesNotThrow(() -> {
+            view = new View(stage, "mapOverlay.fxml"); //Skifter View
+            controller = view.getController();
+
+            Robot robot = new Robot();
+            robot.setAutoDelay(10);
+
+            //Snupper app-vinduets x/y-koordinater og tiløjer hhv. 100/47.5
+            int x = (int) stage.getScene().getWindow().getX() + 100;
+            int y = (int) stage.getScene().getWindow().getY() + 48;
+            robot.mouseMove( x, y); //Musen navigerer til søgebaren
+            clickMouseBtn(robot, InputEvent.BUTTON1_DOWN_MASK);
+
+            //Den her næste lange serie af knap-klik sikrer at søgebarerne ikke kaster nogle errors,
+            //når de bliver interageret med på forskellige måder.
+            controller.getSearchBar().setText("Kø");
+            clickKey(robot, KeyEvent.VK_B);
+            clickKey(robot, KeyEvent.VK_BACK_SPACE);
+            clickKey(robot, KeyEvent.VK_BACK_SPACE);
+            clickKey(robot, KeyEvent.VK_BACK_SPACE);
+            clickKey(robot, KeyEvent.VK_T);
+            clickKey(robot, KeyEvent.VK_I);
+            clickKey(robot, KeyEvent.VK_N);
+            clickKey(robot, KeyEvent.VK_DOWN);
+            clickKey(robot, KeyEvent.VK_ENTER);
+            clickMouseBtn(robot, InputEvent.BUTTON1_DOWN_MASK);
+            clickKey(robot, KeyEvent.VK_ENTER);
+            clickMouseBtn(robot, InputEvent.BUTTON1_DOWN_MASK);
+            clickKey(robot, KeyEvent.VK_DOWN);
+            clickKey(robot, KeyEvent.VK_BACK_SPACE);
+
+            x = (int) stage.getScene().getWindow().getX() + 100;
+            y = (int) stage.getScene().getWindow().getY() + 73;
+            robot.mouseMove( x, y); //Musen navigerer ned til ListView'en og vælger den første entry
+            clickMouseBtn(robot, InputEvent.BUTTON1_DOWN_MASK);
+        }));
+    }
+
+    private static void clickKey(Robot robot, int key) {
+        robot.keyPress(key);
+        robot.keyRelease(key);
+    }
+
+    private static void clickMouseBtn(Robot robot, int button) {
+        robot.mousePress(button);
+        robot.mouseRelease(button);
     }
 }
