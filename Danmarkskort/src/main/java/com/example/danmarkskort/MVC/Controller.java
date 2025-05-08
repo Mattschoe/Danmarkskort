@@ -38,7 +38,6 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -61,7 +60,7 @@ public class Controller {
     private MouseEvent mouseEvent;
     private final Map<String,POI> favoritePOIs = new HashMap<>();
     private final List<POI> oldPOIs = new ArrayList<>();
-    List<Road> latestRoute = new ArrayList<>();
+    private List<Road> latestRoute = new ArrayList<>();
     private List<Node> autoSuggestResults;
     private TextField searchingSource;
     private boolean putTextSwitched;
@@ -93,8 +92,6 @@ public class Controller {
     @FXML private Button addToPOIsUI;
     @FXML private Button POIClose;
     @FXML private TextArea addPOIBox;
-    @FXML public Text loadingText;
-    @FXML public ProgressBar progressBar;
     //endregion
     //endregion
 
@@ -108,9 +105,6 @@ public class Controller {
         listView = new ListView<>();
         autoSuggestResults = new ArrayList<>();
         putTextSwitched = false;
-
-        loadingText = new Text();
-        progressBar = new ProgressBar();
 
         //region AnimationTimer
         //Locks the pan- and zoomrequests by user into each frame so we avoid multiple redrawings between frames
@@ -201,7 +195,7 @@ public class Controller {
      * Lets the user pick a file and tries to parse it as a map. If successful,
      * switches the scene to a canvas with the map drawn.
      */
-    @FXML protected void uploadInputButton() throws IOException {
+    @FXML public void uploadInputButton() throws IOException {
         //Laver en FileChooser til at åbne en stifinder når brugeren klikker 'Upload fil'
         FileChooser fileChooser = new FileChooser();
 
@@ -212,14 +206,12 @@ public class Controller {
                 new ExtensionFilter("OpenStreetMap-files", "*.osm"),
                 new ExtensionFilter("Zip-files", "*.zip"),
                 new ExtensionFilter("All files", "*.*"));
-        String routeDesktop = switch(System.getProperty("os.name").split(" ")[0]) {
-            case "Windows" -> System.getProperty("user.home") + "\\Desktop";
-            case "MAC"     -> System.getProperty("user.home") + "/Desktop";
-            default        -> System.getProperty("user.home");};
-        fileChooser.setInitialDirectory(new File(routeDesktop));
+        File desktop = new File(System.getProperty("user.home"), "Desktop");
+        fileChooser.setInitialDirectory(desktop);
 
         //Åbner stifinderen og gemmer filen som brugeren vælger
         File selectedFile = fileChooser.showOpenDialog(new Stage());
+
         if (selectedFile != null) {
             //Loads View and model
             view = new View(view.getStage(), "mapOverlay.fxml");
@@ -233,7 +225,7 @@ public class Controller {
     }
 
     /// Method runs upon clicking the "Run standard"-button in the start-up scene
-    @FXML protected void standardInputButton() throws IOException {
+    @FXML public void standardInputButton() throws IOException {
         File standardMapFile = new File("data/StandardMap/parser.obj");
         assert standardMapFile.exists();
 
@@ -241,7 +233,7 @@ public class Controller {
     }
 
     /// Dynamically changes the look of the 'Create OBJ on load'-button
-    @FXML protected void toggleCreateOBJ() {
+    @FXML public void toggleCreateOBJ() {
         if (checkBoxOBJ.getChildrenUnmodifiable().isEmpty()) return;
         StackPane box = (StackPane) checkBoxOBJ.getChildrenUnmodifiable().getLast();
         StackPane mark = (StackPane) box.getChildrenUnmodifiable().getFirst();
@@ -254,11 +246,6 @@ public class Controller {
             box.setStyle("-fx-border-color: darkgrey; -fx-background-color: grey");
             mark.setStyle("-fx-background-color: darkgrey");
         }
-    }
-
-    /// Disables the ListView
-    @FXML protected void mouseExitedListView() {
-        listView.setVisible(false);
     }
     //endregion
 
@@ -277,8 +264,9 @@ public class Controller {
         }
     }
 
-    /// Methods runs upon modifying the {@code searchbar} in the UI.
-    @FXML protected void searchBarsTyped(KeyEvent event) {
+    /// Methods runs upon typing in either of the searchbars in the UI.
+    /// When the user presses 'DOWN' in a searchbar, focus shifts to the ListView if it is visible
+    @FXML public void searchBarsTyped(KeyEvent event) {
         if (model == null) model = Model.getInstance();
 
         TextField source = (TextField) event.getSource();
@@ -288,7 +276,12 @@ public class Controller {
         if (source.getId().equals("searchBar")) listView.setLayoutY(58);
         if (source.getId().equals("destination")) listView.setLayoutY(94);
 
-        if (event.getCharacter().equals("\r")) {
+        if (event.getCode().toString().equals("DOWN")) {
+            if (listView.isVisible()) {
+                listView.requestFocus();
+            }
+        }
+        else if (event.getCode().toString().equals("ENTER") /*event.getCharacter().equals("\r")*/) {
             if (!autoSuggestResults.isEmpty()) {
                 listView.setVisible(false);
                 findRoute.setVisible(true);
@@ -298,6 +291,7 @@ public class Controller {
                 //When the user presses enter on a searchbar, it gets
                 //updated with the best(first) match from the suggestions
                 autoSuggestResults = autoSuggest(source.getText().toLowerCase());
+                if (autoSuggestResults.isEmpty()) return;
                 Node selection = autoSuggestResults.getFirst();
 
                 view.zoomTo(selection.getX(), selection.getY());
@@ -327,15 +321,6 @@ public class Controller {
         }
     }
 
-    /// When the user presses 'DOWN' in a searchbar, focus shifts to the ListView if it is visible
-    @FXML protected void searchBarsPressed(KeyEvent event) {
-        if (event.getCode().toString().equals("DOWN")) {
-            if (listView.isVisible()) {
-                listView.requestFocus();
-            }
-        }
-    }
-
     /// When the user presses 'Enter' on the ListView, the ListView is disabled and the Find Route-button is enabled
     @FXML protected void onListViewTyped(KeyEvent event) {
         if (event.getCharacter().equals("\r")) {
@@ -348,6 +333,23 @@ public class Controller {
             findRoute.requestFocus();
             savePOIButton.setVisible(true);
         }
+    }
+
+    /// Disables the ListView
+    @FXML protected void mouseExitedListView() {
+        listView.setVisible(false);
+    }
+
+    /// When the user chooses a node from the suggestions, overrides the searchbar and zooms onto the Node
+    @FXML protected void addressPickedFromList() {
+        Node chosenNode = autoSuggestResults.get(listView.getSelectionModel().getSelectedIndex());
+        searchingSource.setText(chosenNode.getAddress());
+        view.zoomTo(chosenNode.getX(), chosenNode.getY());
+
+        listView.setVisible(false);
+        findRoute.setVisible(true);
+        findRoute.requestFocus();
+        savePOIButton.setVisible(true);
     }
 
     /**
@@ -420,7 +422,7 @@ public class Controller {
     }
 
     /// Saves a POI from the last given input in either search-bar, and adds POI to the 'POIs' Menu in the MenuBar
-    @FXML protected void savePOItoHashMap() {
+    @FXML public void savePOItoHashMap() {
         if (searchingSource == null) {
             System.out.println("Oh no, fishy behaviour!!!! Search source is null");
         }
@@ -516,13 +518,6 @@ public class Controller {
         POIClose.setVisible(false);
     }
 
-    /// Metode til at fjerne den røde markering på kortet for en POI. Virker kun for den POI, der senest er placeret
-    @FXML public void removePOIMarker(POI poi) {
-        //sæt knappen til visible og kald denne metode et sted
-        model.removePOI(poi);
-        view.drawMap();
-    }
-
     /// Mangler logic for at finde korteste vej
     @FXML public void shortestRoute() {
         model.setSearchType(false);
@@ -534,7 +529,7 @@ public class Controller {
     }
 
     /// Method to export a route as PDF
-    @FXML protected boolean exportAsPDF(){
+    @FXML protected boolean exportAsPDF() {
         System.out.println("Attempting to export as PDF!");
 
         List<Road> latestRoute = Model.getInstance().getLatestRoute();
@@ -620,7 +615,8 @@ public class Controller {
 
                     if (!favoritePOIs.containsValue(removed)) {
                         oldPOIs.remove(removed);
-                        removePOIMarker(removed);
+                        model.removePOI(removed);
+                        view.drawMap();
                     }
                     //Removes the deleted POI's from the map after
                     //they've been deleted via the savePOIToHashMap function
@@ -639,6 +635,7 @@ public class Controller {
      * to the console, and the route search is not performed.
      */
     @FXML public void findRouteClicked() {
+        if (model == null) model = Model.getInstance();
         if (listView.isVisible()) listView.setVisible(false);
 
         if (!switchSearch.isVisible() && !destination.isVisible()) {
@@ -652,14 +649,11 @@ public class Controller {
 
             Node from = model.getStreetsFromPrefix(origin).getFirst();
             POI startPOI = model.createPOI(from.getX(), from.getY(), "Test1");
-            //from = getClosestRoadNode(from); IKKE SLET LÆS getClosestRoadNode
 
             Node to = model.getStreetsFromPrefix(termin).getFirst();
             POI endPOI = model.createPOI(to.getX(), to.getY(), "Test2");
-            //to = getClosestRoadNode(to); IKKE SLET LÆS getClosestRoadNode
 
             startSearch(startPOI.getClosestNodeWithRoad(), endPOI.getClosestNodeWithRoad());
-            //startSearch(from, to); IKKE SLET LÆS getClosestRoadNode
 
             model.removePOI(startPOI);
             model.removePOI(endPOI);
@@ -747,7 +741,7 @@ public class Controller {
 
     //region Palette methods
     /// Switches to the default palette
-    @FXML private void paletteDefault() {
+    @FXML public void paletteDefault() {
         if (model == null) model = Model.getInstance();
 
         view.setBgColor(Color.LIGHTBLUE);
@@ -762,7 +756,7 @@ public class Controller {
     }
 
     /// Switches to the Midnight palette
-    @FXML private void paletteMidnight() {
+    @FXML public void paletteMidnight() {
         if (model == null) model = Model.getInstance();
 
         view.setBgColor(Color.rgb(23, 3, 63));
@@ -777,7 +771,7 @@ public class Controller {
     }
 
     /// Switches to the Basic palette
-    @FXML private void paletteBasic() {
+    @FXML public void paletteBasic() {
         if (model == null) model = Model.getInstance();
 
         view.setBgColor(Color.GHOSTWHITE);
@@ -814,9 +808,31 @@ public class Controller {
      * @return Controllerens canvas-felt
      */
     public Canvas getCanvas() { return canvas; }
-
     public Text getScaleText() { return scaleText; }
     public CheckBox getCheckBoxOBJ() { return checkBoxOBJ; }
+    public Timeline getTimeline(Text loadingText, ProgressBar progressBar) {
+        StringBuffer dots = new StringBuffer();
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.seconds(0.5), _ -> {
 
+                    loadingText.setText(loadingBar.getLoadingText() + dots.append(".")); // For testing
+                    progressBar.setProgress(loadingBar.getProgress());
+
+                    if (dots.toString().equals("...")) {
+                        dots.delete(0,5);
+                    }
+                })
+        );
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
+        return timeline;
+    }
+
+    //Getters og setters til tests
+    public void setSearchingSource(TextField source) { searchingSource = source; }
+    public TextField getSearchBar() { return searchBar; }
+    public TextField getDestination() { return destination; }
+    public TextField getAddNamePOI() { return addNamePOI; }
+    public CheckMenuItem getFPSButton() { return fpsButton; }
     //endregion
 }

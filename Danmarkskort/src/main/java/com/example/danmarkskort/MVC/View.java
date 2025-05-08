@@ -237,6 +237,7 @@ public class View {
     public double getZoomLevel(){ return zoomLevel; } //Used for tests
     public FXMLLoader getFXMLLoader(){return root;}
     public Scene getScene() { return scene; }
+    public Controller getController() { return controller; }
     public float[] getViewport() throws NonInvertibleTransformException {
         Point2D minXY = trans.inverseTransform(0, 0);
         Point2D maxXY = trans.inverseTransform(canvas.getWidth(), canvas.getHeight());

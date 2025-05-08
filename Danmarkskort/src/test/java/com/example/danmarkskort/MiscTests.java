@@ -2,7 +2,6 @@ package com.example.danmarkskort;
 
 import com.example.danmarkskort.MVC.Model;
 import com.example.danmarkskort.MapObjects.*;
-import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import org.junit.jupiter.api.BeforeEach;

@@ -29,11 +29,11 @@
          <Font name="System Bold" size="12.0" />
       </font></Text>
 
-    <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onKeyPressed="#searchBarsPressed" onKeyTyped="#searchBarsTyped" promptText="Search..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
+    <TextField fx:id="searchBar" layoutX="14.0" layoutY="35.0" onKeyPressed="#searchBarsTyped" promptText="Search..." AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="35.0" />
    <Button fx:id="findRoute" layoutX="172.0" layoutY="35.0" mnemonicParsing="false" onAction="#findRouteClicked" text="Find Route" visible="false" />
-    <TextField fx:id="destination" layoutX="15.0" layoutY="71.0" onKeyPressed="#searchBarsPressed" onKeyTyped="#searchBarsTyped" promptText="Choose Destination..." visible="false" />
+    <TextField fx:id="destination" layoutX="15.0" layoutY="71.0" onKeyPressed="#searchBarsTyped" promptText="Choose Destination..." visible="false" />
    
-    <ListView fx:id="listView" layoutX="15.0" layoutY="61.0" onKeyTyped="#onListViewTyped" onMouseClicked="#onAddressPickedFromList" onMouseExited="#mouseExitedListView" prefHeight="72.0" prefWidth="150.0" visible="false" />
+    <ListView fx:id="listView" layoutX="15.0" layoutY="61.0" onKeyTyped="#onListViewTyped" onMouseClicked="#addressPickedFromList" onMouseExited="#mouseExitedListView" prefHeight="72.0" prefWidth="150.0" visible="false" />
     <MenuBar AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
         <Menu mnemonicParsing="false" text="File">
             <MenuItem mnemonicParsing="false" onAction="#standardInputButton" text="Load Standard" />
