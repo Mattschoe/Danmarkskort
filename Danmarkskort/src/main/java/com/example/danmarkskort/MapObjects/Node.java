@@ -18,7 +18,7 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
     private String street;
     private double distanceTo;
     private int edges;
-    private transient List<Road> roadEdges;
+    private final transient List<Road> roadEdges;
     //endregion
 
     //region Constructor(s)
@@ -33,12 +33,6 @@ public class Node implements Serializable, MapObject, Comparable<Node> {
 
     /**
      * A Node that contains an address
-     * @param latitude
-     * @param longitude
-     * @param city
-     * @param houseNumber
-     * @param postcode
-     * @param street
      */
     public Node(double latitude, double longitude, String city, String houseNumber, short postcode, String street) {
         distanceTo = Double.MAX_VALUE;

@@ -1,12 +1,15 @@
 package com.example.danmarkskort.AddressSearch;
-import com.example.danmarkskort.MapObjects.Node;
-import gnu.trove.map.hash.TCharObjectHashMap;
 
-import java.util.*;
+import com.example.danmarkskort.MapObjects.Node;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 
 public class TrieST {
-    private TrieNode root;
+    private final TrieNode root;
 
     public TrieST() {
         root = new TrieNode("");
@@ -28,11 +31,10 @@ public class TrieST {
                     if (sharedPrefix == child.length()) {
                         //Full match prefix so we add to the prefix
                         current = childNode;
-                        remaining = remaining.substring(sharedPrefix); //Rest of string is original string minus shared prefix (Fx: Same street but different house number)
                     } else {
-                        //Partial match (Some of the string is shared (Fx: "Nyv.." and "Nyb..")
+                        //Partial match (Some of the string is shared (Fx: "Nyv..." and "Nyb...")
                         //Intermediate splitNode for the shared-prefix
-                        TrieNode splitNode = new TrieNode(child.substring(0, sharedPrefix)); //Node's prefix is until we hit the part where the two nodes dont share prefix anymore. From here we add the nodes to the new split
+                        TrieNode splitNode = new TrieNode(child.substring(0, sharedPrefix)); //Node's prefix is until we hit the part where the two nodes don't share prefix anymore. From here we add the nodes to the new split
                         childrenOfCurrent.remove(child); //Removes old "dominant" node
                         childrenOfCurrent.put(splitNode.getPrefix(), splitNode); //Adds the splitNode so we can split from here
 
@@ -41,8 +43,8 @@ public class TrieST {
                         splitNode.getChildren().put(childNode.getPrefix(), childNode); //Adds node back in at new split
 
                         current = splitNode;
-                        remaining = remaining.substring(sharedPrefix);
                     }
+                    remaining = remaining.substring(sharedPrefix); //Rest of string is original string minus shared prefix (Fx: Same street but different house number)
                     matched = true;
                     break;
                 }
@@ -101,7 +103,7 @@ public class TrieST {
             if (sharedPrefix == 0) continue; //No shared prefix so we don't look at this child
 
             if (sharedPrefix == remaining.length()) {
-                //Full match so we return everything (Fx: "København" returns everything under the node "København .."
+                //Full match so we return everything (Fx: "København" returns everything under the node "København ..."
                 result.addAll(collectAll(childNode));
             } else if (sharedPrefix == child.length() && remaining.length() > child.length()) {
                 //Full match but the user input has more (Fx: "København S", gets all under "København S" and not "København")

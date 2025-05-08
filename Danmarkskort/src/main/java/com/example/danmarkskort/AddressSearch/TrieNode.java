@@ -1,6 +1,6 @@
 package com.example.danmarkskort.AddressSearch;
+
 import com.example.danmarkskort.MapObjects.Node;
-import gnu.trove.map.hash.TCharObjectHashMap;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -12,9 +12,9 @@ public class TrieNode {
     ///The prefix of this node
     private String prefix;
     ///All the following children of this node
-    private Map<String, TrieNode> children;
+    private final Map<String, TrieNode> children;
     ///All the nodes associated with the full path of the trieNodes
-    private List<Node> nodes;
+    private final List<Node> nodes;
 
     TrieNode(String prefix) {
         this.prefix = prefix;
@@ -33,6 +33,4 @@ public class TrieNode {
 
     ///Adds a node to the list of values associated with this nodes prefix
     public void addValue(Node value) { nodes.add(value); }
-
-
 }
