@@ -667,39 +667,6 @@ public class Controller {
         }
     }
 
-    /// ** DO NOT DELETE ** Returns the closest Node which is in a Road, from the given Node
-    @Deprecated private Node getClosestRoadNode(Node node) {
-        /*
-         * Metoden er @Deprecated fordi jeg ikke kunne få ruten til at se ligeså lækker ud,
-         * uden at bruge POIs, som med. Samme begrundelse for den udkommenterede -men ikke
-         * slettede!- kode i findRouteButton-metoden. Var varsom med at bruge POIs til rute-
-         * søgningen fordi de virkede til at drille Joakim's POIs, når man havde andre/lav-
-         * ede flere POIs idet/efter man lavede en rutesøgning...
-         * SLET IKKE METODEN IN CASE VI PRØVER AT LAVE RUTESØGNINGEN IGEN UDEN POIs!!!!!!!
-         */
-
-        Point2D localPoint;
-        try { localPoint = view.getTrans().inverseTransform(node.getX(), node.getY()); }
-        catch (NonInvertibleTransformException e) { throw new RuntimeException(e); }
-        double localX = localPoint.getX();
-        double localY = localPoint.getY();
-
-        Tile tile = model.getTilegrid().getTileFromXY((float) localX, (float) localY);
-        Road closestRoad = getClosestRoad(tile, localX, localY);
-        double closestDistance = Double.POSITIVE_INFINITY;
-
-        for (Node n : closestRoad.getNodes()) {
-            double nodeX = n.getX();
-            double nodeY = n.getY();
-            double distance = Math.sqrt(Math.pow((nodeX - node.getX()), 2) + Math.pow((nodeY - node.getY()), 2)); //Jeg har stjålet MN's afstandsformel 3:) -OFS. a^2 + b^2 = c^2 type shit
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                node = n;
-            }
-        }
-        return node;
-    }
-
     /// Switches the text in the 'From' and 'To' search-bars
     @FXML public void switchDestinationAndStart() {
         if (listView.isVisible()) listView.setVisible(false);
