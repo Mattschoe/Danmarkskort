@@ -1,25 +1,22 @@
 package com.example.danmarkskort.MVC;
 
 import com.example.danmarkskort.LoadingBar;
-import com.example.danmarkskort.MapObjects.MapObject;
-import com.example.danmarkskort.MapObjects.Node;
-import com.example.danmarkskort.MapObjects.POI;
 import com.example.danmarkskort.MapObjects.Polygon;
-import com.example.danmarkskort.MapObjects.Road;
-import com.example.danmarkskort.MapObjects.Tile;
+import com.example.danmarkskort.MapObjects.*;
 import com.example.danmarkskort.PDFOutput;
-
 import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Button;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
@@ -34,16 +31,11 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.awt.Desktop;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class Controller {
     //region Fields
@@ -142,8 +134,12 @@ public class Controller {
     }
 
     /**
-     * Passes the given file into a Model class that starts parsing it
-     * @param mapFile the file which the map is contained. Given by user when choosing file
+     * Loads a map file and processes its content asynchronously.
+     * Updates the UI with a loading screen until the process is completed.
+     * If successful, switches the scene to display the generated map.
+     *
+     * @param mapFile the file object representing the map file to be loaded.
+     * @throws IOException if an error occurs while loading the map file or switching views.
      */
     private void loadFile(File mapFile) throws IOException {
         boolean createOBJ = checkBoxOBJ != null && checkBoxOBJ.isSelected();
@@ -238,6 +234,7 @@ public class Controller {
 
         loadFile(standardMapFile);
     }
+
 
     @FXML protected void toggleCreateOBJ() {
         if (checkBoxOBJ.getChildrenUnmodifiable().isEmpty()) return;
@@ -375,6 +372,14 @@ public class Controller {
         return Collections.emptyList();
     }
 
+    /**
+     * Initiates a search for a route between two nodes and updates the view accordingly.
+     * The method first clears any previously drawn route, performs the search,
+     * and then visualizes the new route on the map.
+     *
+     * @param from the starting node of the route.
+     * @param to the destination node of the route.
+     */
     private void startSearch(Node from, Node to) {
         //First removes the last route from the draws
         if (!latestRoute.isEmpty()) {
@@ -482,6 +487,11 @@ public class Controller {
         }
     }
 
+    /**
+     * Opens the Point of Interest (POI) menu in the user interface.
+     * This method makes several UI components related to adding and managing POIs visible,
+     * ensuring that users can interact with the POI functionality.
+     */
     @FXML protected void openPOIMenu() {
         poiGroup.setVisible(true);
         addPOIBox.setVisible(true);
@@ -491,6 +501,12 @@ public class Controller {
         POIClose.setVisible(true);
     }
 
+    /**
+     * Closes the Point of Interest (POI) menu in the user interface.
+     *
+     * This method hides UI components related to the POI functionality
+     * ensuring the POI menu is no longer visible to the user.
+     */
     @FXML protected void closePOIMenu() {
         poiGroup.setVisible(false);
         addPOIBox.setVisible(false);
@@ -612,6 +628,15 @@ public class Controller {
         }
     }
 
+    /**
+     * This method controls the visibility of UI components such as the destination
+     * search bar and switch search button. It validates that both origin and
+     * destination input fields contain data before proceeding. Once validated,
+     * it retrieves the starting and ending nodes based on the provided inputs and
+     * initiates a route search between these nodes.
+     * If either the origin or destination inputs are empty, an error message is printed
+     * to the console, and the route search is not performed.
+     */
     @FXML public void findRouteClicked() {
         if (listView.isVisible()) listView.setVisible(false);
 
@@ -824,23 +849,6 @@ public class Controller {
 
     public Text getScaleText() { return scaleText; }
     public CheckBox getCheckBoxOBJ() { return checkBoxOBJ; }
-    public View getView(){ return view; }
-    private Timeline getTimeline(Text loadingText, ProgressBar progressBar) {
-        StringBuffer dots = new StringBuffer();
-        Timeline timeline = new Timeline(
-                new KeyFrame(Duration.seconds(0.5), event -> {
 
-                    loadingText.setText(loadingBar.getLoadingText() + dots.append(".")); // For testing
-                    progressBar.setProgress(loadingBar.getProgress());
-
-                    if (dots.toString().equals("...")) {
-                        dots.delete(0,5);
-                    }
-                })
-        );
-        timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.play();
-        return timeline;
-    }
     //endregion
 }

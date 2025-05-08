@@ -10,6 +10,10 @@ public class LoadingBar {
         this.progress = 0.0;
     }
 
+    /**
+     * Method to get the singleton LoadingBar
+     * @return LoadingBar (Singleton)
+     */
     public static LoadingBar getInstance() {
         if (loadingBarInstance == null) {
             loadingBarInstance = new LoadingBar();
@@ -17,6 +21,13 @@ public class LoadingBar {
         return loadingBarInstance;
     }
 
+    /**
+     * Returns a status message based on the current progress of the loading process.
+     * The progress value is checked against specific predefined milestones to determine
+     * the appropriate message to return.
+     *
+     * @return A String representing the loading status.
+     */
     public String getLoadingText() {
         if (progress == 0.0) {
             return "Loading nodes";
