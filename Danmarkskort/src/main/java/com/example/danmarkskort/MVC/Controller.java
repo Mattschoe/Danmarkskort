@@ -409,18 +409,6 @@ public class Controller {
     //endregion
 
     //region Canvas methods
-    /// When the user chooses a node from the suggestions, overrides the searchbar and zooms onto the Node
-    @FXML protected void onAddressPickedFromList() {
-        Node chosenNode = autoSuggestResults.get(listView.getSelectionModel().getSelectedIndex());
-        searchingSource.setText(chosenNode.getAddress());
-        view.zoomTo(chosenNode.getX(), chosenNode.getY());
-
-        listView.setVisible(false);
-        findRoute.setVisible(true);
-        findRoute.requestFocus();
-        savePOIButton.setVisible(true);
-    }
-
     /// Saves a POI from the last given input in either search-bar, and adds POI to the 'POIs' Menu in the MenuBar
     @FXML public void savePOItoHashMap() {
         if (searchingSource == null) {
@@ -565,7 +553,7 @@ public class Controller {
     @FXML protected void onCanvasClick(MouseEvent e) {
         //region DOUBLE CLICK (Searching)
         if (e.getClickCount() == 2) {
-            //region > Make POI
+            //region Make POI
             POI poi = null;
             try {
                 Point2D point = view.getTrans().inverseTransform(e.getX(), e.getY());
@@ -810,24 +798,6 @@ public class Controller {
     public Canvas getCanvas() { return canvas; }
     public Text getScaleText() { return scaleText; }
     public CheckBox getCheckBoxOBJ() { return checkBoxOBJ; }
-    public Timeline getTimeline(Text loadingText, ProgressBar progressBar) {
-        StringBuffer dots = new StringBuffer();
-        Timeline timeline = new Timeline(
-                new KeyFrame(Duration.seconds(0.5), _ -> {
-
-                    loadingText.setText(loadingBar.getLoadingText() + dots.append(".")); // For testing
-                    progressBar.setProgress(loadingBar.getProgress());
-
-                    if (dots.toString().equals("...")) {
-                        dots.delete(0,5);
-                    }
-                })
-        );
-        timeline.setCycleCount(Animation.INDEFINITE);
-        timeline.play();
-        return timeline;
-    }
-
     //Getters og setters til tests
     public void setSearchingSource(TextField source) { searchingSource = source; }
     public TextField getSearchBar() { return searchBar; }

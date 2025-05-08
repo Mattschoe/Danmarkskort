@@ -44,7 +44,7 @@ public class POI implements MapObject {
         for (Node node : tile.getNodesInTile()) {
             if (!node.hasFullAddress()) continue; //Skips if node doesn't have full address
 
-            double distance = Math.hypot(node.getX(), node.getY());
+            double distance = Math.hypot((node.getX() - x), (node.getY() - y));
             if (distance < closestDistance) {
                 closestDistance = distance;
                 closestNode = node;
@@ -62,7 +62,7 @@ public class POI implements MapObject {
         for (Node node : tile.getNodesInTile()) {
             if (!node.hasDrivableEdges()) continue; //Skips if node doesn't have any edges that are drivable.
 
-            double distance = Math.hypot(node.getX(), node.getY());
+            double distance = Math.hypot((node.getX() - x), (node.getY() - y));
             if (distance < closestDistance) {
                 closestDistance = distance;
                 closestNode = node;
