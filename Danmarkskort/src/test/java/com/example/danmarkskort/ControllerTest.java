@@ -214,9 +214,8 @@ public class ControllerTest extends ApplicationTest {
         }));
     }
 
-    @Disabled @Test
-    protected void canvasHoverPanZoomAndFPSTest() {
-        //Loader en fil
+    @Test
+    protected void hoverPanZoomAndFPSTest() {
         model = Model.getInstance("data/small.zip", canvas, false);
 
         interact(() -> assertDoesNotThrow(() -> {
@@ -229,58 +228,45 @@ public class ControllerTest extends ApplicationTest {
             Robot robot = new Robot();
             robot.setAutoDelay(10);
 
-            robot.mouseMove(450, 135); //Navigerer til søgebaren
-            robot.mousePress(InputEvent.BUTTON1_DOWN_MASK); //Klikker ned med musen, så søgebaren får fokus
-            robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK); //Musen giver slip på klikket
-            robot.keyPress(KeyEvent.VK_T); //Klikker 't'
-            robot.keyPress(KeyEvent.VK_I); //Klikker 'i'
-            robot.keyPress(KeyEvent.VK_N); //Klikker 'n'
-            robot.keyPress(KeyEvent.VK_ENTER); //Klikker 'Enter'
-            robot.keyRelease(KeyEvent.VK_ENTER); //Giver slip på 'Enter'
+            //Snupper app-vinduets x/y-koordinater og tiløjer hhv. 100/47.5
+            int x = (int) stage.getScene().getWindow().getX() + 100;
+            int y = (int) stage.getScene().getWindow().getY() + 48;
+            robot.mouseMove((int) x, (int) y); //Musen navigerer til søgebaren
 
-            robot.mouseMove(730, 470); //Dragger musen
-            robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-            for (int i = 0; i < 100; ++i) {
-                int x = 730 - (2*i);
-                int y = 470 - (2*i);
-                robot.mouseMove(x, y);
-            }
-            robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+            clickMouseBtn(robot, InputEvent.BUTTON1_DOWN_MASK);
+            clickKey(robot, KeyEvent.VK_T);
+            clickKey(robot, KeyEvent.VK_I);
+            clickKey(robot, KeyEvent.VK_N);
+            clickKey(robot, KeyEvent.VK_ENTER);
+
+            x = (int) stage.getScene().getWindow().getX() + 300;
+            y = (int) stage.getScene().getWindow().getY() + 200;
+            robot.mouseMove(x, y); //Rykker ind midt i programmet
+
             robot.mouseWheel(-1); //Zoomer ind én gang
 
-            for (int i = 0; i < 50; ++i) {
-                int y = 470 - (2*i);
-                robot.mouseMove(730, y);
-            }
+            robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+            x = (int) stage.getScene().getWindow().getX() + 275;
+            y = (int) stage.getScene().getWindow().getY() + 175;
+            robot.mouseMove(x, y); //Rykker ind midt i programmet
+            robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
 
             //FPS-teksten skulle gerne være opdateret fra 0 (der er gået mere end et sekund)
             assertNotEquals("FPS: 0", controller.getFPSButton().getText());
         }));
     }
 
-    @Test
-    protected void testestest() {
-        model = Model.getInstance("data/small.zip", canvas, false);
+    private static void clickKey(Robot robot, int key) {
+        robot.keyPress(key);
+        robot.keyRelease(key);
+    }
 
-        interact(() -> assertDoesNotThrow(() -> {
-            view = new View(stage, "mapOverlay.fxml"); //Skifter View
-            controller = view.getController();
+    private static void clickMouseBtn(Robot robot, int button) {
+        robot.mousePress(button);
+        robot.mouseRelease(button);
+    }
 
-            controller.getFPSButton().setSelected(true);
-            assertNotEquals("", controller.getFPSButton().getText()); //FPS-teksten skulle gerne være opdateret fra blank
-
-            double x = stage.getScene().getWindow().getX(); //Snupper appens vindue's x-koordinat
-            double y = stage.getScene().getWindow().getY(); //Snupper appens vindue's y-koordinat
-
-            x += 100;
-            y += 47.5;
-
-            Robot robot = new Robot();
-            robot.setAutoDelay(10);
-
-            robot.mouseMove((int) x, (int) y);
-        }));
-
+    private static void waiter(int millis) {
         long start = System.currentTimeMillis();
         //noinspection StatementWithEmptyBody
         while (System.currentTimeMillis() - start < 4_000) {/* wait */}
