@@ -45,8 +45,6 @@ public class ViewTest extends ApplicationTest {
                 this.view = new View(primaryStage, fxmlFile);
             } catch (IOException e) {
                 fail("Failed to load FXML: " + fxmlFile);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
             }
         });
     }

@@ -2,10 +2,13 @@ package com.example.danmarkskort;
 
 import com.example.danmarkskort.MVC.Model;
 import com.example.danmarkskort.MapObjects.*;
+
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MiscTests {
@@ -38,7 +41,7 @@ public class MiscTests {
 
     @Test
     protected void drawNodesTest() {
-        Model model = Model.getInstance("data/Bornholm.zip", canvas, false);
+        Model model = Model.getInstance("data/bornholm.zip", canvas, false);
         assertNotNull(model);
 
         GraphicsContext gc = canvas.getGraphicsContext2D();

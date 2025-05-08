@@ -241,7 +241,8 @@ public class View {
         return new float[]{(float) minXY.getX(), (float) minXY.getY(), (float) maxXY.getX(), (float) maxXY.getY()};
     }
 
-    public boolean isFirstTimeDrawingMap() { return firstTimeDrawingMap; } //For tests
-    public double getZoomLevel(){ return zoomLevel; } //Used for tests
+    //Getters and setters for tests
+    public boolean isFirstTimeDrawingMap() { return firstTimeDrawingMap; }
+    public Set<MapObject> getExtraDrawObjects() { return extraDrawObjects; }
     //endregion
 }

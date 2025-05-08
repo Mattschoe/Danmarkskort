@@ -1,29 +1,30 @@
 package com.example.danmarkskort;
 
-import com.example.danmarkskort.MVC.Controller;
-import com.example.danmarkskort.MVC.Model;
+import com.example.danmarkskort.MapObjects.MapObject;
 import com.example.danmarkskort.MapObjects.Polygon;
-import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.MapObjects.Tilegrid;
+import com.example.danmarkskort.MVC.Controller;
+import com.example.danmarkskort.MVC.Model;
+import com.example.danmarkskort.MVC.View;
+
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.CheckBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import org.testfx.framework.junit5.ApplicationTest;
-import com.example.danmarkskort.MVC.View;
 import javafx.stage.Stage;
-import org.junit.jupiter.api.Test;
 
 import java.awt.AWTException;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.Robot;
-import java.io.File;
+
 import java.io.IOException;
 
+import org.junit.jupiter.api.Test;
+import org.testfx.framework.junit5.ApplicationTest;
+
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 public class ControllerTest extends ApplicationTest {
     View view;
@@ -85,8 +86,14 @@ public class ControllerTest extends ApplicationTest {
         Tilegrid tilegrid = model.getTilegrid();
         Tile tile = tilegrid.getTileFromXY(408.02264404296875f, 386.693603515625f);
 
-        //Snupper en konkret bygning
-        Polygon polygon = (Polygon) tile.getObjectsInTile().getLast();
+        //Gemmer en polygon (af typen 'building')
+        Polygon polygon = null;
+        for (MapObject mo : tile.getObjectsInTile()) {
+            if (mo instanceof Polygon p && p.getType().equals("building")) {
+                polygon = p;
+                break;
+            }
+        }
 
         //Tjekker at bygningens farve skifter rigtigt når palette-knapperne klikkes
         assertEquals(Color.rgb(217, 208, 201), polygon.getColor());

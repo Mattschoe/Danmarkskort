@@ -372,11 +372,11 @@ public enum ColorSheet {
 
             //region other
             case POLY_AMENITY        -> Color.rgb(196, 182, 171);
-            case POLY_AREAHIGHWAY   -> Color.rgb(50, 50, 50, 0.2);
+            case POLY_AREAHIGHWAY    -> Color.rgb(50, 50, 50, 0.2);
             case POLY_ATTRACTION     -> Color.rgb(239, 213, 179, 0.2);
             case POLY_BARRIER        -> Color.rgb(111, 111, 111, 0.2);
             case POLY_BOUNDARY       -> Color.TRANSPARENT;
-            case POLY_BRIDGESUPPORT -> Color.rgb(111, 111, 111, 0.2);
+            case POLY_BRIDGESUPPORT  -> Color.rgb(111, 111, 111, 0.2);
             case POLY_BUILDING       -> Color.rgb(217, 208, 201);
             case POLY_CAIRN          -> Color.TAN;
             case POLY_COASTLINE      -> Color.rgb(242, 239, 233);
