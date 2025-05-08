@@ -85,7 +85,6 @@ public class Polygon implements Serializable, MapObject{
         gc.setFill(color);
         gc.fillPolygon(tempXPoints, tempYPoints, pointSize);
 
-        //TODO %% FARVER KANTEN RUNDT OM COAST-POLYGONER PÅ SAMME MÅDE SOM COAST-ROAD; might be labour intensive??
         if (type.equals("coastline")) {
             gc.setStroke(Color.BLACK);
             gc.setLineWidth(1.5/Math.sqrt(gc.getTransform().determinant()));
@@ -96,7 +95,7 @@ public class Polygon implements Serializable, MapObject{
     
     public void assertColorSheetProp() {
         cs = switch(type) {
-            //region landuse: developed-land
+            //region land-use: developed-land
             case "commercial"    -> POLY_COMMERCIAL;
             case "construction"  -> POLY_CONSTRUCTION;
             case "education"     -> POLY_EDUCATION;
@@ -106,7 +105,7 @@ public class Polygon implements Serializable, MapObject{
             case "retail"        -> POLY_RETAIL;
             case "institutional" -> POLY_INSTITUTIONAL;
             //endregion
-            //region landuse: rural-and-agricultural
+            //region land-use: rural-and-agricultural
             case "aquaculture"    -> POLY_AQUACULTURE;
             case "allotments"     -> POLY_ALLOTMENTS;
             case "farmland"       -> POLY_FARMLAND;
@@ -122,11 +121,11 @@ public class Polygon implements Serializable, MapObject{
             case "plant_nursery"  -> POLY_PLANT_NURSERY;
             case "vineyard"       -> POLY_VINEYARD;
             //endregion
-            //region landuse: water
+            //region land-use: water
             case "basin"     -> POLY_BASIN;
             case "salt_pond" -> POLY_SALT_POND;
             //endregion
-            //region landuse: other
+            //region land-use: other
             case "brownfield"        -> POLY_BROWNFIELD;
             case "cemetery"          -> POLY_CEMETERY;
             case "depot"             -> POLY_DEPOT;

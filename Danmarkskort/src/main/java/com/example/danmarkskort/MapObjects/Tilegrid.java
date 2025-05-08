@@ -1,6 +1,5 @@
 package com.example.danmarkskort.MapObjects;
 
-import com.example.danmarkskort.Exceptions.MapObjectOutOfBoundsException;
 import javafx.scene.canvas.GraphicsContext;
 
 import java.io.Serializable;

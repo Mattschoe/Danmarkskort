@@ -3,9 +3,12 @@ package com.example.danmarkskort.MapObjects;
 import javafx.scene.canvas.GraphicsContext;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-public class Tile implements MapObject, Serializable {
+public class Tile implements Serializable {
     List<MapObject> objectsInTile;
     ///\[0] = minX <br> \[1] = minY <br> \[2] = maxX <br> \[3] = maxY <br>
     float[] bounds;
@@ -51,7 +54,6 @@ public class Tile implements MapObject, Serializable {
     public void addPOI(POI POI) { POIs.add(POI); }
 
     ///Draws everything in the tile
-    @Override
     public void draw(GraphicsContext graphicsContext) {
         for (MapObject object : motorway ) {
             object.draw(graphicsContext);
@@ -220,7 +222,6 @@ public class Tile implements MapObject, Serializable {
     public Set<MapObject> getCoastline() { return coastline; }
     public Set<Road> getRoads() { return roads; }
     public Set<POI> getPOIs() { return POIs; }
-    @Override public float[] getBoundingBox() { return bounds; }
     public boolean isEmpty() { return objectsInTile.isEmpty(); }
     public void setMotorway(Set<MapObject> motorway) { this.motorway = motorway; }
     public void setTrunk(Set<MapObject> trunk) { this.trunk = trunk; }

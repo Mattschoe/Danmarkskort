@@ -72,8 +72,6 @@ public class Controller {
     @FXML private Button switchSearch;
     @FXML private Button findRoute;
     @FXML private Button savePOIButton;
-    @FXML private MenuItem fastestRoute;
-    @FXML private MenuItem shortestRoute;
     @FXML private Menu POIMenu;
     @FXML private TextField addNamePOI;
     @FXML private Button addToPOIsUI;
@@ -153,9 +151,8 @@ public class Controller {
         //Start the Timeline for UI updates
         StringBuffer dots = new StringBuffer();
         Timeline timeline = new Timeline(
-                new KeyFrame(Duration.seconds(0.5), event -> {
-
-                    loadingText.setText(loadingBar.getLoadingText() + dots.append(".")); // For testing
+                new KeyFrame(Duration.seconds(0.5), _ -> {
+                    loadingText.setText(loadingBar.getLoadingText() + dots.append("."));
                     progressBar.setProgress(loadingBar.getProgress());
 
                     if (dots.toString().equals("...")) {
@@ -168,7 +165,7 @@ public class Controller {
 
         //start the background task
         Task<Void> loadingTask = new Task<>() {
-            @Override protected Void call() throws Exception {
+            @Override protected Void call() {
                 model = Model.getInstance(mapFile.getPath(), canvas, createOBJ);
                 return null;
             }
@@ -505,7 +502,6 @@ public class Controller {
 
     /**
      * Closes the Point of Interest (POI) menu in the user interface.
-     *
      * This method hides UI components related to the POI functionality
      * ensuring the POI menu is no longer visible to the user.
      */

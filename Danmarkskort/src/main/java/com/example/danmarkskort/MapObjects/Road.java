@@ -25,7 +25,7 @@ public class Road implements Serializable, MapObject {
     private final boolean isDriveable;
     private final boolean isOneway;
     private int maxSpeed;
-    private String roadType;
+    private final String roadType;
     private final String roadName;
     private float[] boundingBox;
 

@@ -818,7 +818,7 @@ public class Model {
         }
         //Adds nodes to the city trie
         for (Node node : citiesToNode.values()) {
-            trieCity.put(new SimpleNode(node.getCity(), node));
+            trieCity.put(new SimpleNode(node.getCity()));
         }
     }
 
