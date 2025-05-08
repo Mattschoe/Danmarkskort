@@ -1,28 +1,26 @@
 package com.example.danmarkskort;
 
-import com.example.danmarkskort.MVC.Controller;
-import com.example.danmarkskort.MVC.Model;
 import com.example.danmarkskort.MapObjects.Polygon;
-import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.MapObjects.Tilegrid;
+import com.example.danmarkskort.MVC.Controller;
+import com.example.danmarkskort.MVC.Model;
+import com.example.danmarkskort.MVC.View;
+
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.CheckBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import org.junit.jupiter.api.Disabled;
-import org.testfx.framework.junit5.ApplicationTest;
-import com.example.danmarkskort.MVC.View;
 import javafx.stage.Stage;
-import org.junit.jupiter.api.Test;
 
 import java.awt.AWTException;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.Robot;
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.testfx.framework.junit5.ApplicationTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
