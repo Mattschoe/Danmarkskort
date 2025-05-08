@@ -235,7 +235,7 @@ public class Controller {
         loadFile(standardMapFile);
     }
 
-
+    /// Dynamically changes the look of the 'Create OBJ on load'-button
     @FXML protected void toggleCreateOBJ() {
         if (checkBoxOBJ.getChildrenUnmodifiable().isEmpty()) return;
         StackPane box = (StackPane) checkBoxOBJ.getChildrenUnmodifiable().getLast();
@@ -251,7 +251,7 @@ public class Controller {
         }
     }
 
-    /// Disables the list view if we have picked one and then moves the mouse out of the listview
+    /// Disables the ListView
     @FXML protected void mouseExitedListView() {
         listView.setVisible(false);
     }
@@ -434,10 +434,15 @@ public class Controller {
             }
             //endregion
 
-            POI poi = null;
+            POI poi;
             //region > Make new POI if searchSource-text doesn't match last oldPOI
             if (oldPOIs.isEmpty() || !searchingSource.getText().equals(oldPOIs.getLast().getNodeAddress())) {
-                Node node = model.getStreetsFromPrefix(searchingSource.getText().toLowerCase()).getFirst();
+                List<Node> nodes = model.getStreetsFromPrefix(searchingSource.getText().toLowerCase());
+                if (nodes.isEmpty()) {
+                    System.out.println("Cannot save POI; invalid address!");
+                    return;
+                }
+                Node node = nodes.getFirst();
 
                 poi = model.createPOI(node.getX(), node.getY(), poiName);
 
@@ -473,16 +478,13 @@ public class Controller {
             MenuItem showAddress = new MenuItem("Show Address");
             showAddress.setOnAction(_ -> {
                 POI thisPoi = favoritePOIs.get(poiName);
-                if (thisPoi != null) {
-                    String address = thisPoi.getNodeAddress();
-                    searchingSource.setText(address);
-                }
+                searchingSource.setText(thisPoi.getNodeAddress());
+                view.zoomTo(thisPoi.getX(), thisPoi.getY());
             });
 
             POIMenuItem.getItems().addAll(showAddress, deletePOI);
             //endregion
 
-            //noinspection DataFlowIssue
             System.out.println("Saved POI \""+ poiName +"\" at "+poi.getNodeAddress());
         }
     }

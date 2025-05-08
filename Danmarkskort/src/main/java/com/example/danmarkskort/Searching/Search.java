@@ -3,12 +3,8 @@ package com.example.danmarkskort.Searching;
 import com.example.danmarkskort.MVC.Model;
 import com.example.danmarkskort.MapObjects.Node;
 import com.example.danmarkskort.MapObjects.Road;
-import com.example.danmarkskort.MapObjects.Tile;
-import gnu.trove.map.hash.TDoubleObjectHashMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import gnu.trove.map.hash.TObjectLongHashMap;
 
-import java.sql.SQLOutput;
 import java.util.*;
 import java.util.PriorityQueue;
 
@@ -74,7 +70,7 @@ public class Search {
                 if (road.isDriveable()) relax(road, currentNode); //Relaxes the road if its drivable
             }
         }
-        System.out.println("Amount of nodes looked at: " + count);
+        System.out.println("Amount of nodes looked at: "+ formatIntegerNicely(count));
         if (foundRoute) {
             drawPath(); //Only draws path if we actually found a path.
             Model.getInstance().setLatestRoute(route);
@@ -182,4 +178,13 @@ public class Search {
     }
 
     public boolean isQuickestRoute() { return quickestRoute; }// for testing
+
+    /// Returns the given number with commas separating every three digits
+    public static String formatIntegerNicely(int number) {
+        String N = String.valueOf(number);
+        int len = N.length();
+
+        if (len < 4) return N;
+        else return formatIntegerNicely(Integer.parseInt(N.substring(0, len - 3))) +","+ N.substring(len-3);
+    }
 }

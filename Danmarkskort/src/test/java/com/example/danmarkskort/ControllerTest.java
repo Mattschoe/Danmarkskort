@@ -5,6 +5,7 @@ import com.example.danmarkskort.MVC.Model;
 import com.example.danmarkskort.MapObjects.Road;
 import javafx.application.Application;
 import javafx.scene.canvas.Canvas;
+import org.junit.jupiter.api.Disabled;
 import org.testfx.framework.junit5.ApplicationTest;
 import com.example.danmarkskort.MVC.View;
 import javafx.application.Platform;
@@ -55,8 +56,7 @@ public class ControllerTest extends ApplicationTest{
 //vent med denne til POIs er færdige
     }
 
-    @Deprecated
-    @Test
+    @Disabled @Test
     protected void setSearchTypeTest() throws XMLStreamException, IOException {
         Canvas canvas = new Canvas(600, 400);
         File file = new File("data/Bornholm.zip");

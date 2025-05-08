@@ -16,14 +16,26 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 
 public abstract class PDFOutput {
     /**
      * Generates and opens a PDF describing a given route
-     * @param roads the list Roads in the route
+     * @param roadsUnmodifiable the unmodifiable list of Roads in the route
+     * @return the last turning direction given in the PDF, either {@code Turn left}, {@code Turn right} or {@code Continue straight}
      */
-    public static void generateRoute(List<Road> roads, boolean openPDF) throws FileNotFoundException, DocumentException {
+    public static String generateRoute(List<Road> roadsUnmodifiable, boolean openPDF) throws FileNotFoundException, DocumentException {
+        /*
+         * Kommer den første Road -i listen af Roads i ruten- bagerst,
+         * fordi den sidste Road i ruten somehow er placeret først i listen...
+         */
+        List<Road> roads = new LinkedList<>(roadsUnmodifiable);
+
+        Road finalRoad = roads.getFirst();
+        roads.removeFirst();
+        roads.add(finalRoad);
+
         Document document = new Document();
 
         String path = createFilePath(roads);
@@ -47,6 +59,7 @@ public abstract class PDFOutput {
         paragraph = new Paragraph("1. Start along "+originRoad, normalFont);
         document.add(paragraph);
 
+        String direction = "";
         int step = 2; //Tilføjer alle andre veje med højre/venstre-angivelser
         for (int i=1; i < roads.size(); ++i) {
             Road road = roads.get(i);
@@ -70,7 +83,6 @@ public abstract class PDFOutput {
              * større og vigtigere problem end jeg har forudset. Thank you for coming to my TED talk
              */
 
-            String direction;
             if (prevFirst.equals(crntFirst)) {
                 direction = determineDirection(prevFirst, prevLast, crntLast);
             }
@@ -81,16 +93,11 @@ public abstract class PDFOutput {
                 direction = determineDirection(prevLast, prevFirst, crntFirst);
             }
             else if (prevLast.equals(crntFirst)) {
-                //direction = determineDirection(prevLast, prevFirst, crntLast);
-                direction = determineDirection(prevLast, crntLast, prevFirst);
+                direction = determineDirection(prevLast, prevFirst, crntLast);
             }
             else {
-                //System.out.println("prevFirst: "+prevFirst+" -- ("+prevFirst.getX()+", "+prevFirst.getY()+")");
-                //System.out.println("prevLast:  "+prevLast +" -- ("+prevLast.getX() +", "+prevLast.getY() +")");
-                //System.out.println("crntFirst: "+crntFirst+" -- ("+crntFirst.getX()+", "+crntFirst.getY()+")");
-                //System.out.println("crntLast:  "+crntLast +" -- ("+crntLast.getX() +", "+crntLast.getY() +")");
                 document.close();
-                throw new RuntimeException("Cursed vectors -- they do not relate as expected! :(");
+                throw new RuntimeException("Fishy vectors aren't relating as expected!");
             }
 
             paragraph = new Paragraph(step++ +". "+direction+" at "+roadName);
@@ -107,6 +114,7 @@ public abstract class PDFOutput {
             try { Desktop.getDesktop().open(new File("./output/"+ path +".pdf")); } //Forsøger at åbne dokumentet
             catch (IOException e) { System.out.println("Couldn't open file! Error: "+ e.getMessage()); }
         }
+        return direction;
     }
 
     /**
@@ -134,8 +142,8 @@ public abstract class PDFOutput {
      * @return the file-name for the route, w/o dots, and with dashes instead of spaces
      */
     private static String createFilePath(List<Road> roads) {
-        String originRoad = roads.getFirst().getRoadName().isEmpty()? "Nameless-place" : roads.getFirst().getRoadName();
-        String endingRoad = roads.getLast().getRoadName().isEmpty()?  "nameless-place" : roads.getLast().getRoadName();
+        String originRoad = roads.getFirst().getRoadName().trim().isEmpty()? "Nameless-place" : roads.getFirst().getRoadName();
+        String endingRoad = roads.getLast().getRoadName().trim().isEmpty()?  "nameless-place" : roads.getLast().getRoadName();
 
         String path = originRoad +"-to-"+ endingRoad;        //Skaber pdf-filens filsti
         path = path.replaceAll("\\.", ""); //Fjerner alle punktummer fra filstien
