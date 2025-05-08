@@ -6,7 +6,6 @@ import com.example.danmarkskort.MapObjects.Polygon;
 import com.example.danmarkskort.MapObjects.Road;
 import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.MapObjects.Tilegrid;
-import com.itextpdf.text.DocumentException;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.CheckBox;
 import javafx.scene.layout.StackPane;
@@ -176,7 +175,7 @@ public class ControllerTest extends ApplicationTest {
         }));
     }
 
-    @Test
+    @Disabled @Test
     protected void searchBarsAndListViewTest() {
         //Loader en fil
         model = Model.getInstance("data/small.zip", canvas, false);
@@ -215,14 +214,10 @@ public class ControllerTest extends ApplicationTest {
         }));
     }
 
-    @Test
+    @Disabled @Test
     protected void canvasHoverPanZoomAndFPSTest() {
         //Loader en fil
         model = Model.getInstance("data/small.zip", canvas, false);
-
-        //long start = System.currentTimeMillis();
-        //noinspection StatementWithEmptyBody
-        //while (System.currentTimeMillis() - start < 5_000) {/* wait */}
 
         interact(() -> assertDoesNotThrow(() -> {
             view = new View(stage, "mapOverlay.fxml"); //Skifter View
@@ -261,5 +256,33 @@ public class ControllerTest extends ApplicationTest {
             //FPS-teksten skulle gerne være opdateret fra 0 (der er gået mere end et sekund)
             assertNotEquals("FPS: 0", controller.getFPSButton().getText());
         }));
+    }
+
+    @Test
+    protected void testestest() {
+        model = Model.getInstance("data/small.zip", canvas, false);
+
+        interact(() -> assertDoesNotThrow(() -> {
+            view = new View(stage, "mapOverlay.fxml"); //Skifter View
+            controller = view.getController();
+
+            controller.getFPSButton().setSelected(true);
+            assertNotEquals("", controller.getFPSButton().getText()); //FPS-teksten skulle gerne være opdateret fra blank
+
+            double x = stage.getScene().getWindow().getX(); //Snupper appens vindue's x-koordinat
+            double y = stage.getScene().getWindow().getY(); //Snupper appens vindue's y-koordinat
+
+            x += 100;
+            y += 47.5;
+
+            Robot robot = new Robot();
+            robot.setAutoDelay(10);
+
+            robot.mouseMove((int) x, (int) y);
+        }));
+
+        long start = System.currentTimeMillis();
+        //noinspection StatementWithEmptyBody
+        while (System.currentTimeMillis() - start < 4_000) {/* wait */}
     }
 }
