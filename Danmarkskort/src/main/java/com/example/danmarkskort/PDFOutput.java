@@ -69,19 +69,10 @@ public abstract class PDFOutput {
             String previousRoadName = previousRoad.getRoadName().isEmpty()? "NAMELESS ROAD" : previousRoad.getRoadName();
             if (roadName.equals(previousRoadName)) continue; //Skipper vejen hvis den har samme navn -- sker ofte fordi én vej kan være opdelt i mange mindre bidder
 
-            //Node prevFirst = previousRoad.getNodes().get(previousRoad.getNodes().size() - 2);
             Node prevFirst = previousRoad.getNodes().getFirst();
             Node prevLast = previousRoad.getNodes().getLast();
             Node crntFirst = road.getNodes().getFirst();
             Node crntLast = road.getNodes().getLast();
-            /*
-             * NB! Det *kan* være at højre/venstre bliver angivet forkert. I det tilfælde vil mit
-             * (OFS) gæt være, at det har at gøre med at funktionen her ikke tager højde for Roads
-             * der er opdelt i mere end to dele. Det burde være et yderst sjældent edge-case og
-             * jeg er helt rundtosset af at arbejde med højre/venstre-sving at the moment, så det
-             * kommer jeg simpelthen ikke til at implementere med mindre det viser sig at være et
-             * større og vigtigere problem end jeg har forudset. Thank you for coming to my TED talk
-             */
 
             if (prevFirst.equals(crntFirst)) {
                 direction = determineDirection(prevFirst, prevLast, crntLast);

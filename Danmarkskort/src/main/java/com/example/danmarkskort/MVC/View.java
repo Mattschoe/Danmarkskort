@@ -235,7 +235,6 @@ public class View {
     public void setScaleColor(Color scaleColor) { this.scaleColor = scaleColor; }
     public boolean isFirstTimeDrawingMap() { return firstTimeDrawingMap; } //For tests
     public double getZoomLevel(){ return zoomLevel; } //Used for tests
-    public FXMLLoader getFXMLLoader(){return root;}
     public Scene getScene() { return scene; }
     public Controller getController() { return controller; }
     public float[] getViewport() throws NonInvertibleTransformException {

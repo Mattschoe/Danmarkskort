@@ -39,12 +39,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-/**
- * A Model is a Singleton class that stores the map in a tile-grid.
- * It also stores the parser which parses the .osm data.
- * Call {@link #getInstance()} to get the Model
- */
-
 public class Model {
     //region Fields
     private static Model modelInstance;
@@ -61,7 +55,9 @@ public class Model {
     //endregion
 
     //region Constructor(s)
-    /**
+    /** A Model is a Singleton class that stores the map in a tile-grid.
+     * It also stores the parser which parses the .osm data.
+     * Call {@link #getInstance()} to get the Model
      * Checks what filetype the filepath parameter is.
      * Calls {@link #parseOBJToParser()} if it's an OBJ-file, if not, creates a new {@link Parser} class and propagates the responsibility
      */
@@ -90,18 +86,14 @@ public class Model {
                 System.out.println("Finished deserializing parser!");
             } catch (Exception e) {
                 System.out.println("Error loading .obj!: " + e.getMessage());
-                System.out.println("Stacktrace:");
-                e.getStackTrace();
             }
         } else {
-            //If anything else, creates a new parser and tries to save it as .obj
+            //If anything else, creates a new parser.
             try {
                 if (file.getPath().endsWith(".osm")) System.out.println("Detected OSM-file! Attempting to parse...");
                 if (file.getPath().endsWith(".zip")) System.out.println("Detected ZIP-file! Attempting to parse...");
 
                 parser = new Parser(file);
-            } catch (ParserSavingException e) {
-                System.out.println(e.getMessage());
             } catch (Exception e) {
                 System.out.println("Error loading the parser: "+ e.getClass() +": "+ e.getMessage());
             }
@@ -130,7 +122,7 @@ public class Model {
             }
             else saveParserToOBJ();
         }
-        loadingBar.setProgress(1);
+        loadingBar.setProgress(1.0);
         parser = null; //Fjerner reference til parser så den bliver GC'et
         System.gc();
     }
@@ -166,10 +158,9 @@ public class Model {
     /// Parses a .obj file. This method is called in the Parser constructor if the given filepath ends with .obj
     private void parseOBJToParser() {
         TLongObjectHashMap<Node> ID2Node = new TLongObjectHashMap<>(); //Avoids resizing
-        String[] filePath = new String[0];
+        String[] filePath;
         if (System.getProperty("os.name").startsWith("Windows")) filePath = file.getPath().split("\\\\");
-        else if (System.getProperty("os.name").startsWith("MAC")) filePath = file.getPath().split("/");
-        else throw new RuntimeException("UNSUPPORTED OPERATING SYSTEM");
+        else filePath = file.getPath().split("/");
         String folder = filePath[filePath.length - 2];
 
         System.out.println("Deserializing binary files...");
@@ -227,8 +218,6 @@ public class Model {
             System.out.println("Error reading nodes! " + e.getMessage());
         }
         //endregion
-
-        float[] minMax = getMinMaxCoords(ID2Node.valueCollection());
 
         Set<Road> roads = new HashSet<>();
         //region Roads
@@ -433,8 +422,7 @@ public class Model {
         //region Saves parser
         try {
             File folder = new File("data/generated/"+ filename);
-            if (!folder.exists()) //noinspection ResultOfMethodCallIgnored
-                folder.mkdir();
+            if (!folder.exists()) folder.mkdir();
             ObjectOutputStream outputStream = new ObjectOutputStream(new FileOutputStream("data/generated/"+filename+"/parser.obj"));
             System.out.println("Saving parser...");
             outputStream.writeObject(parser);
@@ -449,7 +437,6 @@ public class Model {
         //region Nodes
         try {
             System.out.println("Saving nodes...");
-            //List<Node> nodes = new ArrayList<>(parser.getNodes().valueCollection());
             long[] nodeIDs = ID2Node.keySet().toArray();
             int amountOfNodes = ID2Node.size();
             int chunkSize = (int) Math.ceil((double) amountOfNodes / numberOfChunks); //Splits all nodes into chunks
@@ -876,6 +863,5 @@ public class Model {
     public Tilegrid getTilegrid() { return tilegrid; }
     public List<Road> getLatestRoute() { return latestRoute; }
     public void setLatestRoute(List<Road> route) { latestRoute = route; }
-    public Search getSearch() { return search; }
     //endregion
 }

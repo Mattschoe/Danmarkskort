@@ -28,17 +28,17 @@ public class LoadingBar {
      * @return A String representing the loading status.
      */
     public String getLoadingText() {
-        if (progress == 0.0) {
+        if (progress <= 0.0) {
             return "Loading nodes";
-        } else if (progress == 0.2) {
+        } else if (progress <= 0.2) {
             return "Loading roads";
-        } else if (progress == 0.4) {
+        } else if (progress <= 0.4) {
             return "Loading polygons";
-        } else if (progress == 0.6) {
+        } else if (progress <= 0.6) {
             return "Loading tilegrid";
-        } else if (progress == 0.8) {
+        } else if (progress <= 0.8) {
             return "Drawing map";
-        } else if (progress == 1.0) {
+        } else if (progress <= 1.0) {
             return "Done!";
         } return "Loading";
     }

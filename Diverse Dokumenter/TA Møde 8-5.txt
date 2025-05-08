@@ -1,0 +1,18 @@
+TA Møde 8-5
+- Jacoco er godt at nævne i rapporten
+- Følg "4.2 Form of report"
+- Struktur i hvornår de dukker op giver god mening
+- "Background of ..." "Visualization of ..."
+- Runtime performance er godt at inkludere
+- Fortæl om beslutning og reflekter over den 
+- Beskriv kronologisk de beslutninger vi har taget "first we had arraylist then we split it into tilegrid which gave us this running time"
+- Snak om de ting vi ikke nåede (kd-træer) hvordan vi ville implementere det og hvad det ville give os. 
+- hyperref, asMath, pdfPages, textPictures
+- Introducer et emne før du snakker om det. Husk at følge advice i project-description
+
+
+
+
+- Appendix:
+	- Hele logbog ind i rapport
+	- Tilføj releases 

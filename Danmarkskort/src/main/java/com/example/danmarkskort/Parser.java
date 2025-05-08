@@ -31,7 +31,8 @@ public class Parser implements Serializable {
     @Serial private static final long serialVersionUID = 8838055424703291984L;
 
     //region Fields
-    private transient TLongObjectHashMap<Node> id2Node; //map for storing a Node and the id used to refer to it
+    ///Stores a Node and the ID used to refer to it
+    private transient TLongObjectHashMap<Node> id2Node;
     private final transient TLongObjectHashMap<Road> id2Road;
     private final transient TLongObjectHashMap<Polygon> id2Polygon;
     private transient Set<Road> roads; //Used when loading standard file
@@ -53,9 +54,13 @@ public class Parser implements Serializable {
      */
     public Parser(File file) throws NullPointerException, IOException, XMLStreamException, FactoryConfigurationError {
         this.file = file;
-        id2Node = new TLongObjectHashMap<>(66_289_558);
-        id2Road = new TLongObjectHashMap<>(2_214_235);
-        id2Polygon = new TLongObjectHashMap<>(6_168_995);
+        id2Node = new TLongObjectHashMap<>();
+        id2Road = new TLongObjectHashMap<>();
+        id2Polygon = new TLongObjectHashMap<>();
+        id2Node.ensureCapacity(49_717_098);
+        id2Road.ensureCapacity(2_900_000);
+        id2Polygon.ensureCapacity(4_601_709);
+
         bounds = new double[4];
 
         failedWays = 0; failedNodes = 0; failedRelations = 0; outOfBoundsNodes = 0;
@@ -318,7 +323,7 @@ public class Parser implements Serializable {
                      "surface", "tourism", "waterway":
                     return new Polygon(nodesInPolygon, key);
             }
-            if (value.equals("Cityringen")) return new Polygon(nodesInPolygon, value); //TODO %% Find en bedre måde at IKKE tegne Cityringen
+            if (value.equals("Cityringen")) return new Polygon(nodesInPolygon, value);
         }
         return new Polygon(nodesInPolygon, ""); //No type
     }

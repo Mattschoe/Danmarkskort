@@ -411,72 +411,64 @@ public class Controller {
     //region Canvas methods
     /// Saves a POI from the last given input in either search-bar, and adds POI to the 'POIs' Menu in the MenuBar
     @FXML public void savePOItoHashMap() {
-        if (searchingSource == null) {
-            System.out.println("Oh no, fishy behaviour!!!! Search source is null");
+        if (searchingSource == null) return; //edge case if no searching has been inputtet
+
+        //Save the given name of the POI
+        String poiName = addNamePOI.getText();
+        if (poiName.trim().isEmpty()) {
+            System.out.println("Cannot save a Point of Interest w/o a name!");
+            return;
         }
-        else {
-            //region > Save the given name of the POI
-            //System.out.println("Text from "+searchingSource.getId()+": "+ searchingSource.getText());
-            String poiName = addNamePOI.getText();
-            if (poiName.trim().isEmpty()) {
-                System.out.println("Cannot save a Point of Interest w/o a name!");
+
+        POI poi;
+        //Make new POI if searchSource-text doesn't match last oldPOI
+        if (oldPOIs.isEmpty() || !searchingSource.getText().equals(oldPOIs.getLast().getNodeAddress())) {
+            List<Node> nodes = model.getStreetsFromPrefix(searchingSource.getText().toLowerCase());
+            if (nodes.isEmpty()) {
+                System.out.println("Cannot save POI; invalid address!");
                 return;
             }
-            //endregion
-
-            POI poi;
-            //region > Make new POI if searchSource-text doesn't match last oldPOI
-            if (oldPOIs.isEmpty() || !searchingSource.getText().equals(oldPOIs.getLast().getNodeAddress())) {
-                List<Node> nodes = model.getStreetsFromPrefix(searchingSource.getText().toLowerCase());
-                if (nodes.isEmpty()) {
-                    System.out.println("Cannot save POI; invalid address!");
-                    return;
-                }
-                Node node = nodes.getFirst();
-
-                poi = model.createPOI(node.getX(), node.getY(), poiName);
-
-                view.zoomTo(node.getX(), node.getY()); //Zooms to the POI and redraws the map
-            }
-            //endregion
-            //region > Remove POI from oldPOIs if search-source text matches the last oldPOI, so it isn't deleted
-            else {
-                poi = oldPOIs.getLast();
-                oldPOIs.remove(poi);
-            }
-            //endregion
-            //region > Put the POI in favoritePOIs, add it to draw and close POI-menu
-            favoritePOIs.put(poiName, poi);
-            view.addObjectToDraw(poi);
-            closePOIMenu();
-            //endregion<
-            //region > Make a new Menu for the POI, and add it to the POIs Menu
-            Menu POIMenuItem = new Menu(poiName);
-            POIMenu.getItems().add(POIMenuItem);
-            //endregion
-            //region > Make 'Delete' and 'Show Address'-MenuItems for the POI, and add them to the POI Menu
-            MenuItem deletePOI = new MenuItem("Delete");
-            deletePOI.setOnAction(_ -> {
-                POI thisPoi = favoritePOIs.get(poiName);
-                favoritePOIs.remove(poiName);
-                POIMenu.getItems().remove(POIMenuItem);
-                model.removePOI(thisPoi);
-                view.removeObjectFromDraw(thisPoi);
-                view.drawMap();
-            });
-
-            MenuItem showAddress = new MenuItem("Show Address");
-            showAddress.setOnAction(_ -> {
-                POI thisPoi = favoritePOIs.get(poiName);
-                searchingSource.setText(thisPoi.getNodeAddress());
-                view.zoomTo(thisPoi.getX(), thisPoi.getY());
-            });
-
-            POIMenuItem.getItems().addAll(showAddress, deletePOI);
-            //endregion
-
-            System.out.println("Saved POI \""+ poiName +"\" at "+poi.getNodeAddress());
+            Node node = nodes.getFirst();
+            poi = model.createPOI(node.getX(), node.getY(), poiName);
+            view.zoomTo(node.getX(), node.getY()); //Zooms to the POI and redraws the map
+        } else {
+            //Remove POI from oldPOIs if search-source text matches the last oldPOI, so it isn't deleted
+            poi = oldPOIs.getLast();
+            oldPOIs.remove(poi);
         }
+
+        //Put the POI in favoritePOIs, add it to draw and close POI-menu
+        favoritePOIs.put(poiName, poi);
+        view.addObjectToDraw(poi);
+        closePOIMenu();
+
+        //Make a new Menu for the POI, and add it to the POIs Menu
+        Menu POIMenuItem = new Menu(poiName);
+        POIMenu.getItems().add(POIMenuItem);
+
+
+        //Make 'Delete' and 'Show Address'-MenuItems for the POI, and add them to the POI Menu
+        MenuItem deletePOI = new MenuItem("Delete");
+        deletePOI.setOnAction(_ -> {
+            POI thisPoi = favoritePOIs.get(poiName);
+            favoritePOIs.remove(poiName);
+            POIMenu.getItems().remove(POIMenuItem);
+            model.removePOI(thisPoi);
+            view.removeObjectFromDraw(thisPoi);
+            view.drawMap();
+        });
+
+        MenuItem showAddress = new MenuItem("Show Address");
+        showAddress.setOnAction(_ -> {
+            POI thisPoi = favoritePOIs.get(poiName);
+            searchingSource.setText(thisPoi.getNodeAddress());
+            view.zoomTo(thisPoi.getX(), thisPoi.getY());
+        });
+
+        POIMenuItem.getItems().addAll(showAddress, deletePOI);
+        //endregion
+
+        System.out.println("Saved POI \""+ poiName +"\" at "+poi.getNodeAddress());
     }
 
     /**
@@ -544,7 +536,7 @@ public class Controller {
 
     /// Method runs upon zooming/scrolling on the Canvas
     @FXML protected void onCanvasScroll(ScrollEvent e) {
-        if (model == null) model = Model.getInstance(); //Det her er even mere cooked
+        if (model == null) model = Model.getInstance();
         scrollEvent = e;
         zoomRequest = true;
     }
@@ -709,7 +701,7 @@ public class Controller {
             for (Node node : road.getNodes()) {
                 double nodeX = node.getX();
                 double nodeY = node.getY();
-                double distance = Math.sqrt(Math.pow((nodeX - x), 2) + Math.pow((nodeY - y), 2)); //Jeg har stjålet MN's afstandsformel 3:) -OFS. a^2 + b^2 = c^2 type shit
+                double distance = Math.hypot(nodeX - x, nodeY - y);
                 if (distance < closestDistance) {
                     closestDistance = distance;
                     closestRoad = road;
