@@ -7,7 +7,7 @@ plugins {
     id 'jacoco'
 }
 
-group = 'rats.map'
+group = 'com.example'
 version = '1.0-RELEASE'
 
 repositories {
