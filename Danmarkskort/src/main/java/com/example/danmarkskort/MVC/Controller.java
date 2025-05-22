@@ -571,7 +571,7 @@ public class Controller {
     @FXML protected void onCanvasClick(MouseEvent e) {
         if (e.getClickCount() == 2) {
             //region > Make POI
-            POI poi = null;
+            POI poi;
             try {
                 Point2D point = view.getTrans().inverseTransform(e.getX(), e.getY());
                 poi = model.createPOI((float) point.getX(), (float) point.getY(), "Test");
