@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class Tile implements Serializable {
+public class Tile {
     List<MapObject> objectsInTile;
     ///\[0] = minX <br> \[1] = minY <br> \[2] = maxX <br> \[3] = maxY
     float[] bounds;

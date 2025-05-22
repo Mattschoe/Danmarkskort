@@ -15,9 +15,7 @@ import static com.example.danmarkskort.ColorSheet.*;
  * Formally a Road consists of a list of Nodes that represent this Roads place in XY space.
  * A Road is also used as an edge in a graph, where the list of nodes are condensed into a start- and endNode
  */
-public class Road implements Serializable, MapObject {
-    @Serial private static final long serialVersionUID = 2430026592275563830L;
-
+public class Road implements MapObject {
     //region Fields
     private final List<Node> nodes;
     private final boolean foot;

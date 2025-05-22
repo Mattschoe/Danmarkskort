@@ -8,9 +8,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Node implements Serializable, MapObject, Comparable<Node> {
-    @Serial private static final long serialVersionUID = 1444149606229887777L;
-
+public class Node implements MapObject, Comparable<Node> {
     //region Fields
     private float x, y;
     private String city;

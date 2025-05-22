@@ -10,8 +10,7 @@ import java.util.List;
 
 import static com.example.danmarkskort.ColorSheet.*;
 
-public class Polygon implements Serializable, MapObject{
-    @Serial private static final long serialVersionUID = 1444149606229887777L;
+public class Polygon implements MapObject{
 
     //region Fields
     private float[] xPoints;
