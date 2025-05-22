@@ -12,8 +12,10 @@ import com.example.danmarkskort.MapObjects.Tile;
 import com.example.danmarkskort.MapObjects.Tilegrid;
 import com.example.danmarkskort.Parser;
 import com.example.danmarkskort.Search;
+import gnu.trove.map.TShortObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import gnu.trove.map.hash.TObjectLongHashMap;
+import gnu.trove.map.hash.TShortObjectHashMap;
 import javafx.scene.canvas.Canvas;
 
 import java.io.BufferedInputStream;
@@ -812,19 +814,22 @@ public class Model {
     private void loadAddressNodes() {
         trieCity = new RadixTrie();
         trieStreet = new RadixTrie();
-        Map<String, Node> citiesToNode = new HashMap<>();
+        TShortObjectMap<Node> postcodeToNode = new TShortObjectHashMap<>();
         for (Node node : parser.getAddressNodes()) { //gennemgår alle address nodes
             String street = node.getStreet();
             String city = node.getCity();
+            short postcode = node.getPostcode();
 
             //Inserts a representative node of a city.
-            if (city != null) citiesToNode.put(city, node);
+            if (postcode != 0 && city != null) {
+                postcodeToNode.put(postcode, node);
+            }
 
             //Insert node into streets if it has an address
             if (street != null) trieStreet.put(node);
         }
         //Adds nodes to the city trie
-        for (Node node : citiesToNode.values()) {
+        for (Node node : postcodeToNode.valueCollection()) {
             trieCity.put(new SimpleNode(node.getX(), node.getY(), node.getCity()));
         }
     }

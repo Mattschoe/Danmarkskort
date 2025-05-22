@@ -6,9 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="3b243825-0cfb-4507-820d-78cff2c5d7e8" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/danmarkskort/MVC/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/danmarkskort/MVC/Controller.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/danmarkskort/MVC/Model.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/danmarkskort/MVC/Model.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/danmarkskort/MapObjects/SimpleNode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/danmarkskort/MapObjects/SimpleNode.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -182,7 +180,17 @@
           <line>294</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/example/danmarkskort/MVC/Controller.java</url>
+          <line>371</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+    <watches-manager>
+      <configuration name="GradleRunConfiguration">
+        <watch expression="trieCity.root.children" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>
