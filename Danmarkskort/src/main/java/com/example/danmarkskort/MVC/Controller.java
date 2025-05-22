@@ -71,6 +71,7 @@ public class Controller {
     private long lastSystemTime;
     ///Used to calculate FPS
     private int framesThisSec;
+    private boolean firstSearch;
 
     //region FXML fields
     @FXML private Canvas canvas;
@@ -93,6 +94,8 @@ public class Controller {
     @FXML private Button addToPOIsUI;
     @FXML private Button POIClose;
     @FXML private TextArea addPOIBox;
+    @FXML private CheckMenuItem shortestRouteButton;
+    @FXML private CheckMenuItem fastestRouteButton;
     //endregion
     //endregion
 
@@ -106,6 +109,8 @@ public class Controller {
         listView = new ListView<>();
         autoSuggestResults = new ArrayList<>();
         putTextSwitched = false;
+        firstSearch = true;
+
 
         //region AnimationTimer
         //Locks the pan- and zoom-requests by user into each frame so we avoid multiple redraws per frame
@@ -181,6 +186,7 @@ public class Controller {
                     timeline.stop();
                     view = new View(view.getStage(), "mapOverlay.fxml");
                     view.setTilegrid(model.getTilegrid());
+
                     view.drawMap();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -403,6 +409,14 @@ public class Controller {
         System.out.println("Starting search...");
         latestRoute = model.search(from, to);
 
+
+        if(firstSearch){
+            fastestRouteButton.setSelected(true);
+            shortestRouteButton.setSelected(false);
+            model.setSearchType(true);
+            firstSearch = false;
+        }
+
         //Adds route to the view so it gets drawn
         for (Road road : latestRoute) {
             view.addObjectToDraw(road);
@@ -504,11 +518,19 @@ public class Controller {
 
     /// Mangler logic for at finde korteste vej
     @FXML public void shortestRoute() {
+        shortestRouteButton.setSelected(true);
+        if(shortestRouteButton.isSelected()){
+            fastestRouteButton.setSelected(false);
+        }
         model.setSearchType(false);
     }
 
     ///  Mangler logic for at finde hurtigste vej
     @FXML public void fastestRoute() {
+        fastestRouteButton.setSelected(true);
+        if(fastestRouteButton.isSelected()){
+            shortestRouteButton.setSelected(false);
+        }
         model.setSearchType(true);
     }
 
