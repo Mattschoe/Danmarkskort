@@ -518,7 +518,7 @@ public class Controller {
 
     /// Mangler logic for at finde korteste vej
     @FXML public void shortestRoute() {
-        shortestRouteButton.setSelected(true);
+        if (model == null) Model.getInstance();        shortestRouteButton.setSelected(true);
         if(shortestRouteButton.isSelected()){
             fastestRouteButton.setSelected(false);
         }
@@ -527,6 +527,7 @@ public class Controller {
 
     ///  Mangler logic for at finde hurtigste vej
     @FXML public void fastestRoute() {
+        if (model == null) Model.getInstance();
         fastestRouteButton.setSelected(true);
         if(fastestRouteButton.isSelected()){
             shortestRouteButton.setSelected(false);
